@@ -1,0 +1,22 @@
+
+# Gradle
+.gradle
+gradle/*
+!gradle/libs.version.toml
+gradlew
+gradlew.bat
+
+# App
+app/.cxx
+app/build
+app/schemas
+app/proguard-rules.pro
+
+# IDE
+.idea
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+
+
+libgit2-android

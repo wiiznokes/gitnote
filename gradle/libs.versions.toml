@@ -1,0 +1,80 @@
+[versions]
+agp = "8.2.2"
+# https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
+kotlin = "1.9.22"
+compose-compiler = "1.5.8"
+fuzzywuzzy = "1.4.0"
+kotlinx-coroutines-test = "1.8.0"
+ktx = "1.12.0"
+runner = "1.5.2"
+viewmodel-lifecycle = "2.7.0"
+splash-screen = "1.0.1"
+compose-activity = "1.8.2"
+paging = "3.2.1"
+datastore-preferences = "1.0.0"
+work-runtime = "2.9.0"
+compose-bom = "2024.02.01"
+accompanist = "0.34.0"
+reimagined-navigation = "1.5.0"
+about-libraries = "10.10.0"
+markdown = "0.6.1"
+document-file = "1.0.1"
+junit-ktx = "1.1.5"
+constraintlayout = "1.0.1"
+ui-tooling = "1.6.2"
+room = "2.6.1"
+ksp = "1.9.22-1.0.17"
+
+[libraries]
+# AndroidX Core
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
+runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "viewmodel-lifecycle" }
+runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "viewmodel-lifecycle" }
+splash-screen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splash-screen" }
+compose-activity = { group = "androidx.activity", name = "activity-compose", version.ref = "compose-activity" }
+paging-common-ktx = { group = "androidx.paging", name = "paging-common-ktx", version.ref = "paging" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
+androidx-document-file = { group = "androidx.documentfile", name = "documentfile", version.ref = "document-file" }
+
+# Compose
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-ui = { group = "androidx.compose.ui", name = "ui" }
+compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "ui-tooling" }
+compose-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-material = { group = "androidx.compose.material", name = "material" }
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayout" }
+
+# Accompanist
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+
+# Room
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# Compose Navigation
+reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version.ref = "reimagined-navigation" }
+
+# about-libraries
+about-libraries = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "about-libraries" }
+
+# Markdown
+markdown = { group = "org.jetbrains", name = "markdown", version.ref = "markdown" }
+
+# Fuzzy
+fuzzywuzzy = { module = "me.xdrop:fuzzywuzzy", version.ref = "fuzzywuzzy" }
+
+# Test
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junit-ktx" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "about-libraries" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -1,0 +1,40 @@
+name: Build-Git
+
+on:
+  workflow_dispatch:
+    inputs:
+      ARCH:
+        description: "arch"
+        type: choice
+        required: false
+        default: "arm64-v8a"
+        options:
+          - arm64-v8a
+          - x86_64
+          - armeabi-v7a
+          - x86
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone submodule
+        run: |
+            git submodule update --init --recursive
+      - run: |
+          cd libgit2-android
+          source build.sh
+          export ANDROID_ABI=$INPUT_ARCH
+          install_ndk > /dev/null 2>&1
+          build_openssl
+          build_libssh2
+          build_libgit2
+          copy_libs artifacts
+ 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libs-${{ env.INPUT_ARCH }}
+          path: |
+            artifacts/

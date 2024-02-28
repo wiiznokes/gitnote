@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.GitNote" parent="android:Theme.Material.NoActionBar">
+        <!-- impossible to integrate rn because of Android doc
+        blocking: contrast between android icon and the status bar
+
+        For the padding, use .statusBarsPadding() on a Modifier
+
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:enforceStatusBarContrast">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        -->
+    </style>
+</resources>

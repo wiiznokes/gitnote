@@ -1,0 +1,398 @@
+package com.example.gitnote.ui.screen.app.grid
+
+import android.annotation.SuppressLint
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gitnote.data.room.Note
+import com.example.gitnote.ui.component.CustomDropDown
+import com.example.gitnote.ui.component.CustomDropDownModel
+import com.example.gitnote.ui.model.EditType
+import com.example.gitnote.ui.screen.app.DrawerScreen
+import com.example.gitnote.ui.viewmodel.GridViewModel
+
+
+private const val TAG = "GridScreen"
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun GridScreen(
+    onSettingsClick: () -> Unit,
+    onEditClick: (Note, EditType) -> Unit,
+    onStorageFailure: () -> Unit,
+) {
+
+    val vm: GridViewModel = viewModel()
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                DrawerScreen(
+                    vm = vm,
+                    drawerState = drawerState
+                )
+            }
+        }
+    ) {
+
+
+        val currentNoteFolderRelativePath by vm.currentNoteFolderRelativePath.collectAsState()
+
+
+        val maxOffset = remember { mutableFloatStateOf(0f) }
+        val offset = remember { mutableFloatStateOf(0f) }
+
+
+        val topBarHeight = 80.dp
+
+        val selectedNotes by vm.selectedNotes.collectAsState()
+
+        if (selectedNotes.isNotEmpty()) {
+            BackHandler {
+                vm.unselectAllNotes()
+            }
+        }
+
+        val searchFocusRequester = remember { FocusRequester() }
+
+        val fabExpanded = remember {
+            mutableStateOf(false)
+        }
+
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            topBar = {
+                GridViewTop(
+                    vm = vm,
+                    offset = offset,
+                    selectedNotes = selectedNotes,
+                    maxOffset = maxOffset,
+                    drawerState = drawerState,
+                    onSettingsClick = onSettingsClick,
+                    topBarHeight = topBarHeight,
+                    searchFocusRequester = searchFocusRequester,
+                )
+
+            },
+            floatingActionButton = {
+
+                if (selectedNotes.isEmpty()) {
+                    FloatingActionButtons(
+                        vm = vm,
+                        offset = offset,
+                        currentNoteFolderRelativePath = currentNoteFolderRelativePath,
+                        onEditClick = onEditClick,
+                        searchFocusRequester = searchFocusRequester,
+                        expanded = fabExpanded,
+                    )
+                }
+
+            }
+        ) {
+
+            GridView(
+                vm = vm,
+                topBarHeight = topBarHeight,
+                onEditClick = onEditClick,
+                maxOffset = maxOffset.floatValue,
+                offset = offset,
+                selectedNotes = selectedNotes,
+                fabExpanded = fabExpanded,
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@Composable
+private fun GridView(
+    topBarHeight: Dp,
+    vm: GridViewModel,
+    maxOffset: Float,
+    offset: MutableFloatState,
+    onEditClick: (Note, EditType) -> Unit,
+    selectedNotes: List<String>,
+    fabExpanded: MutableState<Boolean>,
+) {
+    val notes by vm.filteredNotes.collectAsState()
+
+    val gridState = rememberLazyStaggeredGridState()
+
+    LaunchedEffect(key1 = notes) {
+        gridState.scrollToItem(index = 0)
+    }
+
+    val nestedScrollConnection = rememberNestedScrollConnection(
+        collapsingTopHeight = maxOffset,
+        offset = offset,
+        fabExpanded = fabExpanded,
+    )
+
+    val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
+    val pullRefreshState = rememberPullRefreshState(isRefreshing, {
+        Log.d(TAG, "pull refresh")
+        vm.refresh()
+    })
+
+    Box {
+
+        // todo: scroll even when there is nothing to scroll
+        // todo: add scroll bar
+        LazyVerticalStaggeredGrid(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
+                .nestedScroll(nestedScrollConnection),
+            contentPadding = PaddingValues(
+                horizontal = 3.dp
+            ),
+            columns = StaggeredGridCells.Adaptive(200.dp),
+            state = gridState
+
+        ) {
+
+            item(
+                span = StaggeredGridItemSpan.FullLine
+            ) {
+                Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+            }
+
+            items(
+                items = notes,
+                key = { it.id }
+            ) { note ->
+
+                val isSelected = selectedNotes.contains(note.relativePath)
+
+                val dropDownExpanded = remember {
+                    mutableStateOf(false)
+                }
+
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    border = if (dropDownExpanded.value) {
+                        BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else if (isSelected) {
+                        BorderStroke(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1000.dp)
+                        )
+                    },
+                    modifier = Modifier
+                        .sizeIn(
+                            minWidth = 0.dp,
+                            minHeight = 0.dp,
+                            maxWidth = 0.dp, // controlled by column
+                            maxHeight = 500.dp
+                        )
+                        .padding(3.dp)
+                        .combinedClickable(
+                            onLongClick = {
+                                dropDownExpanded.value = true
+                            },
+                            onClick = {
+                                if (selectedNotes.isEmpty()) {
+                                    onEditClick(
+                                        note,
+                                        EditType.Update
+                                    )
+                                } else {
+                                    vm.selectNote(note.relativePath, add = !isSelected)
+                                }
+                            }
+                        ),
+                ) {
+                    Box {
+                        CustomDropDown(
+                            expanded = dropDownExpanded,
+                            shape = MaterialTheme.shapes.medium,
+                            options = listOf(
+                                CustomDropDownModel(
+                                    text = "Delete this note",
+                                    onClick = {
+                                        vm.deleteNote(note)
+                                    }
+                                ),
+                                if (selectedNotes.isEmpty()) CustomDropDownModel(
+                                    text = "Select multiple notes",
+                                    onClick = {
+                                        vm.selectNote(note.relativePath, true)
+                                    }
+                                ) else null,
+                            )
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .padding(10.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.Start,
+                        ) {
+                            Text(
+                                text = note.nameWithoutExtension(),
+                                modifier = Modifier
+                                    .padding(bottom = 6.dp),
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                ),
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+
+                            Text(
+                                text = note.content,
+                                modifier = Modifier,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            item(
+                span = StaggeredGridItemSpan.FullLine
+            ) {
+                Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+            }
+        }
+
+        // fix me: https://stackoverflow.com/questions/74594418/pullrefreshindicator-overlaps-with-scrollabletabrow
+        PullRefreshIndicator(
+            refreshing = isRefreshing,
+            state = pullRefreshState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = topBarHeight),
+            backgroundColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            scale = true
+        )
+    }
+
+}
+
+
+// https://stackoverflow.com/questions/73079388/android-jetpack-compose-keyboard-not-close
+// https://medium.com/@debdut.saha.1/top-app-bar-animation-using-nestedscrollconnection-like-facebook-jetpack-compose-b446c109ee52
+// todo: fix scroll is blocked when the full size of the grid is the screen,
+//  the stretching will cause tbe offset to not change
+@Composable
+private fun rememberNestedScrollConnection(
+    collapsingTopHeight: Float,
+    offset: MutableFloatState,
+    fabExpanded: MutableState<Boolean>,
+): NestedScrollConnection {
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    return remember {
+        var shouldBlock = false
+
+        object : NestedScrollConnection {
+            fun calculateOffset(delta: Float): Offset {
+                offset.floatValue = (offset.floatValue + delta).coerceIn(-collapsingTopHeight, 0f)
+                //Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, collapsingTopHeight: $collapsingTopHeight)")
+                return Offset.Zero
+            }
+
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                //Log.d(TAG, "onPreScroll(available: ${available.y})")
+                if (!shouldBlock)
+                    keyboardController?.hide()
+
+                fabExpanded.value = false
+
+                return calculateOffset(available.y)
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                //Log.d(TAG, "onPostScroll(consumed: ${consumed.y}, available: ${available.y})")
+                return calculateOffset(available.y)
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                shouldBlock = true
+                return super.onPreFling(available)
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                shouldBlock = false
+                return super.onPostFling(consumed, available)
+            }
+
+        }
+    }
+}

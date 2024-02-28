@@ -1,0 +1,57 @@
+name: Nightly Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CARGO_TERM_COLOR: always
+
+  
+jobs:
+  upload-artifacts:
+    uses: ./.github/workflows/upload_artifacts.yml
+
+  publish:
+    needs: upload-artifacts
+    runs-on: ubuntu-latest
+
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # https://github.com/actions/checkout/issues/1471
+          fetch-tags: false
+
+      # must be after checkout because it will remove artifacts
+      - uses: actions/download-artifact@v4
+
+      - name: Prepare release on Github
+        run: |
+
+          # delete previous nightly release
+          gh release delete nightly --yes || true
+          git push --delete origin nightly || true
+
+      - name: Publish release
+        run: |
+          git tag nightly
+          git push origin --tags
+
+          # https://cli.github.com/manual/gh_release_create
+          gh release create nightly --title nightly \
+            --verify-tag --prerelease --generate-notes --target $GITHUB_SHA \
+            ./gitnote-release/*
