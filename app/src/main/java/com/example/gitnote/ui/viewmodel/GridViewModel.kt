@@ -231,7 +231,7 @@ class GridViewModel : ViewModel() {
                     relativePath = folder.relativePath,
                     fullName = folder.fullName(),
                     noteCount = notes.count {
-                        it.parentPath() == folder.relativePath
+                        it.parentPath().startsWith(folder.relativePath)
                     },
                     id = folder.id
                 )
