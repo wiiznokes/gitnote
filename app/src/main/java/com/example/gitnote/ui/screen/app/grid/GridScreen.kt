@@ -93,9 +93,6 @@ fun GridScreen(
     ) {
 
 
-        val currentNoteFolderRelativePath by vm.currentNoteFolderRelativePath.collectAsState()
-
-
         val maxOffset = remember { mutableFloatStateOf(0f) }
         val offset = remember { mutableFloatStateOf(0f) }
 
@@ -137,7 +134,6 @@ fun GridScreen(
                     FloatingActionButtons(
                         vm = vm,
                         offset = offset,
-                        currentNoteFolderRelativePath = currentNoteFolderRelativePath,
                         onEditClick = onEditClick,
                         searchFocusRequester = searchFocusRequester,
                         expanded = fabExpanded,
@@ -262,7 +258,7 @@ private fun GridView(
                             onClick = {
                                 if (selectedNotes.isEmpty()) {
                                     onEditClick(
-                                        note,
+                                        note.copy(),
                                         EditType.Update
                                     )
                                 } else {

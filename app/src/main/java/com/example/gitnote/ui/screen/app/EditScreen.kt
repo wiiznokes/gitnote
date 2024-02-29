@@ -1,6 +1,5 @@
 package com.example.gitnote.ui.screen.app
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,8 +91,6 @@ fun EditScreen(
     val textFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(null) {
-        Log.d(TAG, "focus")
-
         when (editType) {
             EditType.Create -> nameFocusRequester.requestFocus()
             EditType.Update -> textFocusRequester.requestFocus()

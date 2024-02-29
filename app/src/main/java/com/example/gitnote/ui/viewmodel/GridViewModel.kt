@@ -12,6 +12,7 @@ import com.example.gitnote.data.room.NoteFolder
 import com.example.gitnote.data.room.RepoDatabase
 import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.manager.StorageManager
+import com.example.gitnote.ui.model.FileExtension
 import com.example.gitnote.ui.screen.app.DrawerFolderModel
 import com.example.gitnote.ui.util.fuzzySort
 import com.example.gitnote.util.contains
@@ -222,4 +223,20 @@ class GridViewModel : ViewModel() {
             CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
         )
 
+    fun defaultNote(): Note {
+
+        val defaultName = query.value.let {
+            if (NameValidation.check(it)) {
+                it
+            } else ""
+        }
+
+        val defaultExtension = FileExtension.match(prefs.defaultExtension.getBlocking())
+        val defaultFullName = "$defaultName.${defaultExtension.text}"
+
+        return Note.new(
+            relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
+            content = "",
+        )
+    }
 }

@@ -52,7 +52,6 @@ private const val TAG = "GridViewBottom"
 fun FloatingActionButtons(
     vm: GridViewModel,
     offset: MutableFloatState,
-    currentNoteFolderRelativePath: String,
     onEditClick: (Note, EditType) -> Unit,
     searchFocusRequester: FocusRequester,
     expanded: MutableState<Boolean>,
@@ -80,17 +79,8 @@ fun FloatingActionButtons(
 
             when (it.type) {
                 FABItemType.CREATE -> {
-                    val query = vm.query.value
-                    val defaultName = if (NameValidation.check(query)) {
-                        query
-                    } else ""
-                    val defaultFullName = "$defaultName.${FileExtension.Md().text}"
-                    val defaultNote = Note.new(
-                        relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
-                        content = "",
-                    )
                     onEditClick(
-                        defaultNote,
+                        vm.defaultNote(),
                         EditType.Create
                     )
                 }
