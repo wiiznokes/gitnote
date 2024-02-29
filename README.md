@@ -18,7 +18,7 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] private repo with https
 - [x] remote sync
 - [x] edit/rename/create/update note/file
-- [ ] time based sort
+- [x] time based sort
 - [ ] rename/create/delete noteFolder/directory
 - [ ] available on f-droid
 - [ ] easy login (without copy pasting token, like GitJournal)
