@@ -128,7 +128,8 @@ fun MainSettingsScreen(
 
             val showFullPathOfNotes by vm.prefs.showFullPathOfNotes.getAsState()
             ToggleableSettings(
-                title = "Show the full path of notes",
+                title = "Always show the full path of notes",
+                subtitle = "Note that the default behavior will only print the path if more than two notes share the same name",
                 checked = showFullPathOfNotes,
                 onCheckedChange = {
                     vm.update { vm.prefs.showFullPathOfNotes.update(it) }
@@ -175,17 +176,25 @@ fun MainSettingsScreen(
                 stringValue = userName,
                 onChange = {
                     vm.update { vm.prefs.userName.update(it) }
-                }
+                },
+                showFullText = false,
             )
 
             val password by vm.prefs.password.getAsState()
+
             StringSettings(
                 title = "Password",
-                subtitle = password.ifEmpty { stringResource(id = R.string.none) },
+                subtitle = password.let {
+                    if (it.isEmpty())
+                        stringResource(id = R.string.none)
+                    else
+                        "*".repeat(it.length)
+                },
                 stringValue = password,
                 onChange = {
                     vm.update { vm.prefs.password.update(it) }
-                }
+                },
+                showFullText = false,
             )
 
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
@@ -212,7 +221,8 @@ fun MainSettingsScreen(
                         )
 
                     }
-                }
+                },
+                showFullText = false,
             )
 
             val expanded = remember {
