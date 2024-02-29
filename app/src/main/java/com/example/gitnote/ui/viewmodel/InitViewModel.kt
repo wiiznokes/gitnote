@@ -31,6 +31,7 @@ class InitViewModel : ViewModel() {
     }
 
 
+
     fun createRepo(repoPath: String, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -45,9 +46,7 @@ class InitViewModel : ViewModel() {
                 return@launch
             }
 
-
-            prefs.repoPath.update(repoPath)
-            prefs.isRepoInitialize.update(true)
+            prefs.initRepo(repoPath)
 
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.updateDatabase()
@@ -78,8 +77,6 @@ class InitViewModel : ViewModel() {
             return failure(it)
         }
 
-        prefs.repoPath.update(repoPath)
-        prefs.isRepoInitialize.update(true)
 
         // yes, there can be pending file not committed
         // but they will be committed in the updateDatabaseAndRepo function
@@ -95,6 +92,7 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             openRepoSuspend(repoPath).onSuccess {
+                prefs.initRepo(repoPath)
                 onSuccess()
             }
         }
@@ -134,9 +132,9 @@ class InitViewModel : ViewModel() {
 
             _cloneState.emit(CloneState.Cloned)
 
-            prefs.repoPath.update(repoPath)
+            prefs.initRepo(repoPath)
             prefs.remoteUrl.update(repoUrl)
-            prefs.isRepoInitialize.update(true)
+
             gitCreed?.let {
                 prefs.userName.update(it.userName)
                 prefs.password.update(it.password)

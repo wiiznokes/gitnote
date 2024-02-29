@@ -37,6 +37,7 @@ class AppPreferences(
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
 
     val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", false)
+    val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
 
@@ -49,7 +50,13 @@ class AppPreferences(
         )
     )
 
-    suspend fun onCloseRepo() {
+    suspend fun initRepo(repoPath: String) {
+        isRepoInitialize.update(true)
+        this.repoPath.update(repoPath)
+        lastOpenedFolder.update("")
+    }
+
+    suspend fun closeRepo() {
         isRepoInitialize.update(false)
         databaseCommit.update("")
     }

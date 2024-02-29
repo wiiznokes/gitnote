@@ -47,7 +47,17 @@ class GridViewModel : ViewModel() {
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
 
-    private val _currentNoteFolderRelativePath = MutableStateFlow("")
+    private val _currentNoteFolderRelativePath = MutableStateFlow(
+        if (prefs.rememberLastOpenedFolder.getBlocking()) {
+            prefs.lastOpenedFolder.getBlocking()
+        } else {
+            Log.d(TAG, "init value: inside else")
+            ""
+        }.let {
+            Log.d(TAG, "init value: $it")
+            it
+        }
+    )
     val currentNoteFolderRelativePath: StateFlow<String>
         get() = _currentNoteFolderRelativePath.asStateFlow()
 
@@ -99,6 +109,8 @@ class GridViewModel : ViewModel() {
     fun openFolder(relativePath: String) {
         viewModelScope.launch {
             _currentNoteFolderRelativePath.emit(relativePath)
+            Log.d(TAG, "update lastOpenedFolder = $relativePath")
+            prefs.lastOpenedFolder.update(relativePath)
         }
     }
 
