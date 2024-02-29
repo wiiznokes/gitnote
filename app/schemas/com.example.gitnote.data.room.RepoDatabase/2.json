@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "fe8e7f5104ac0aee857ec1d34cd0615a",
+    "identityHash": "85c1463b3e3ed4a4041eb30fd3619d71",
     "entities": [
       {
         "tableName": "NoteFolders",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "Notes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `content` TEXT NOT NULL, `lastModifiedTimeMillis` INTEGER NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `content` TEXT NOT NULL, `lastModifiedTimeMillis` INTEGER NOT NULL, `creationTimeMillis` INTEGER NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
         "fields": [
           {
             "fieldPath": "relativePath",
@@ -49,6 +49,12 @@
           {
             "fieldPath": "lastModifiedTimeMillis",
             "columnName": "lastModifiedTimeMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "creationTimeMillis",
+            "columnName": "creationTimeMillis",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -72,7 +78,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fe8e7f5104ac0aee857ec1d34cd0615a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '85c1463b3e3ed4a4041eb30fd3619d71')"
     ]
   }
 }

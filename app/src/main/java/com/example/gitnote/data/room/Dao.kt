@@ -1,5 +1,6 @@
 package com.example.gitnote.data.room
 
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.room.Dao
 import androidx.room.Delete
@@ -8,12 +9,14 @@ import androidx.room.Upsert
 import com.example.gitnote.data.platform.NodeFs
 import kotlinx.coroutines.flow.Flow
 
+private const val TAG = "Dao"
 @Dao
 interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
     suspend fun clearAndInit(rootPath: String) {
+        Log.d(TAG, "clearAndInit")
         clearDatabase()
 
         val rootFs = NodeFs.Folder.fromPath(rootPath)

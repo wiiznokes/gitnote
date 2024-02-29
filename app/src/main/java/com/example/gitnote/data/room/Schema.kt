@@ -2,6 +2,7 @@ package com.example.gitnote.data.room
 
 import android.os.Parcelable
 import androidx.room.Entity
+import com.example.gitnote.BuildConfig
 import com.example.gitnote.data.removeFirstAndLastSlash
 import com.example.gitnote.data.requireNotEndOrStartWithSlash
 import com.example.gitnote.ui.model.FileExtension
@@ -34,8 +35,10 @@ data class NoteFolder(
     }
 
     init {
-        requireNotEndOrStartWithSlash(relativePath)
-        requireNotEndOrStartWithSlash(fullName())
+        if (BuildConfig.DEBUG) {
+            requireNotEndOrStartWithSlash(relativePath)
+            requireNotEndOrStartWithSlash(fullName())
+        }
     }
 
     fun fullName(): String {
@@ -56,7 +59,8 @@ data class NoteFolder(
 data class Note(
     val relativePath: String,
     val content: String,
-    val lastModifiedTimeMillis: Long,
+    val lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
+    val creationTimeMillis: Long = Instant.now().toEpochMilli(),
     val id: Int = RepoDatabase.generateUid()
 ) : Parcelable {
 
@@ -101,10 +105,12 @@ data class Note(
     }
 
     init {
-        require(relativePath.isNotEmpty())
-        requireNotEndOrStartWithSlash(relativePath)
-        requireNotEndOrStartWithSlash(parentPath())
-        requireNotEndOrStartWithSlash(fullName())
-        requireNotEndOrStartWithSlash(nameWithoutExtension())
+        if (BuildConfig.DEBUG) {
+            require(relativePath.isNotEmpty())
+            requireNotEndOrStartWithSlash(relativePath)
+            requireNotEndOrStartWithSlash(parentPath())
+            requireNotEndOrStartWithSlash(fullName())
+            requireNotEndOrStartWithSlash(nameWithoutExtension())
+        }
     }
 }
