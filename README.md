@@ -1,6 +1,6 @@
 # GitNote WIP
 
-*Supported Android version: 12-14*
+*Supported Android versions: 12 to 14*
 
 Android note which integrate Git. You can use this app with other desktop editors.
 
@@ -38,12 +38,4 @@ You can either download from the release page, or use [Obtainium](https://github
 
 # Build
 
-This app uses the [libgit2](https://github.com/libgit2/libgit2) library.
-You can compile it from source or use the binaries already in place in the jniLibs folder.
-
-You will necessarily have to clone `libgit2` for the headers:
-
-```
-git submodule init
-git submodule update
-```
+[See](./BUILD.md).
