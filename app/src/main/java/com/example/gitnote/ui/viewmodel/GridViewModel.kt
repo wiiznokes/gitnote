@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gitnote.MyApp
 import com.example.gitnote.R
 import com.example.gitnote.data.AppPreferences
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.data.room.Note
 import com.example.gitnote.data.room.NoteFolder
 import com.example.gitnote.data.room.RepoDatabase
@@ -119,7 +119,7 @@ class GridViewModel : ViewModel() {
         val relativePath = "$relativeParentPath/$name"
 
         prefs.repoPath.getBlocking().let { rootPath ->
-            if (FolderFs.fromPath(rootPath, relativePath).exist()) {
+            if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
                 uiHelper.makeToast(uiHelper.getString(R.string.folder_already_exist))
                 return false
             }

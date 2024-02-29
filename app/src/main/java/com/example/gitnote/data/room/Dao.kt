@@ -5,8 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.example.gitnote.data.platform.FileFs
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,7 +16,7 @@ interface RepoDatabaseDao {
     suspend fun clearAndInit(rootPath: String) {
         clearDatabase()
 
-        val rootFs = FolderFs.fromPath(rootPath)
+        val rootFs = NodeFs.Folder.fromPath(rootPath)
         val rootFolder = NoteFolder(
             relativePath = "",
         )
@@ -25,12 +24,12 @@ interface RepoDatabaseDao {
 
         val rootLength = rootFs.path.length + 1
 
-        suspend fun initRec(folderFs: FolderFs) {
+        suspend fun initRec(folder: NodeFs.Folder) {
 
-            folderFs.forEachNodeFs { nodeFs ->
+            folder.forEachNodeFs { nodeFs ->
 
                 when (nodeFs) {
-                    is FileFs -> {
+                    is NodeFs.File -> {
                         val mimeType = MimeTypeMap.getSingleton()
                             .getMimeTypeFromExtension(nodeFs.extension.text)
                         if (mimeType == null || !mimeType.startsWith("text")) {
@@ -46,7 +45,7 @@ interface RepoDatabaseDao {
                         //Log.d(TAG, "add note: $note")
                     }
 
-                    is FolderFs -> {
+                    is NodeFs.Folder -> {
                         if (nodeFs.isHidden() || nodeFs.isSym()) {
                             return@forEachNodeFs
                         }

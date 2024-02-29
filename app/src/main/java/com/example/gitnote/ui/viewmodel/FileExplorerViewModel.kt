@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.example.gitnote.MyApp
 import com.example.gitnote.data.AppPreferences
 import com.example.gitnote.data.platform.FileSystem
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.helper.UiHelper
 
 
@@ -21,14 +21,14 @@ class FileExplorerViewModel(val path: String?) : ViewModel() {
     val prefs: AppPreferences = MyApp.appModule.appPreferences
 
 
-    var currentDir: FolderFs = path?.let { path ->
+    var currentDir: NodeFs.Folder = path?.let { path ->
         // todo: check if exist
-        FolderFs.fromPath(path).let {
+        NodeFs.Folder.fromPath(path).let {
             if (it.exist()) it else null
         }
     } ?: FileSystem.defaultDir
 
-    val folders: SnapshotStateList<FolderFs> = mutableStateListOf()
+    val folders: SnapshotStateList<NodeFs.Folder> = mutableStateListOf()
 
     init {
         folders.addAll(currentDir.listFolder())

@@ -4,7 +4,7 @@ package com.example.gitnote.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import com.example.gitnote.MyApp
 import com.example.gitnote.data.AppPreferences
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.helper.UiHelper
 import com.example.gitnote.manager.GitException
 import com.example.gitnote.manager.GitExceptionType
@@ -35,7 +35,7 @@ class InitViewModel : ViewModel() {
     fun createRepo(repoPath: String, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            FolderFs.fromPath(repoPath).isEmptyDirectory().onFailure {
+            NodeFs.Folder.fromPath(repoPath).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
@@ -58,7 +58,7 @@ class InitViewModel : ViewModel() {
     }
 
     fun checkPathForClone(repoPath: String): Result<Unit> {
-        val result = FolderFs.fromPath(repoPath).isEmptyDirectory()
+        val result = NodeFs.Folder.fromPath(repoPath).isEmptyDirectory()
         result.onFailure {
             uiHelper.makeToast(it.message)
         }
@@ -67,7 +67,7 @@ class InitViewModel : ViewModel() {
 
     private suspend fun openRepoSuspend(repoPath: String): Result<Unit> {
 
-        if (!FolderFs.fromPath(repoPath).exist()) {
+        if (!NodeFs.Folder.fromPath(repoPath).exist()) {
             uiHelper.makeToast("Path is not a directory")
             return failure(GitException(GitExceptionType.WrongPath))
         }

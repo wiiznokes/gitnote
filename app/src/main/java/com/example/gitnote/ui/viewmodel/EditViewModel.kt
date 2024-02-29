@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.gitnote.MyApp
 import com.example.gitnote.R
-import com.example.gitnote.data.platform.FileFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.data.room.Note
 import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.helper.UiHelper
@@ -65,13 +65,13 @@ class EditViewModel : ViewModel() {
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
         prefs.repoPath.getBlocking().let { rootPath ->
-            val previousFile = FileFs.fromPath(rootPath, previousNote.relativePath)
+            val previousFile = NodeFs.File.fromPath(rootPath, previousNote.relativePath)
 
             if (!previousFile.exist()) {
                 Log.w(TAG, "previous file ${previousFile.path} does not exist")
             }
 
-            val newFile = FileFs.fromPath(rootPath, relativePath)
+            val newFile = NodeFs.File.fromPath(rootPath, relativePath)
 
             if (newFile.path != previousFile.path) {
                 if (newFile.exist()) {
@@ -127,7 +127,7 @@ class EditViewModel : ViewModel() {
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
         prefs.repoPath.getBlocking().let { rootPath ->
-            if (FileFs.fromPath(rootPath, relativePath).exist()) {
+            if (NodeFs.File.fromPath(rootPath, relativePath).exist()) {
                 uiHelper.makeToast("New note already exist")
                 return failure(EditException(EditExceptionType.NoteAlreadyExist))
             }

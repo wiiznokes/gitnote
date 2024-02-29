@@ -3,8 +3,7 @@ package com.example.gitnote.manager
 import android.util.Log
 import com.example.gitnote.MyApp
 import com.example.gitnote.data.AppPreferences
-import com.example.gitnote.data.platform.FileFs
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.data.room.Note
 import com.example.gitnote.data.room.NoteFolder
 import com.example.gitnote.data.room.RepoDatabase
@@ -106,7 +105,7 @@ class StorageManager {
             dao.insertNote(new)
 
             val rootPath = prefs.repoPath.get()
-            val previousFile = FileFs.fromPath(rootPath, previous.relativePath)
+            val previousFile = NodeFs.File.fromPath(rootPath, previous.relativePath)
 
             previousFile.delete().onFailure {
                 val message = "Can't delete previous note: ${it.message}"
@@ -114,7 +113,7 @@ class StorageManager {
                 uiHelper.makeToast(message)
             }
 
-            val newFile = FileFs.fromPath(rootPath, new.relativePath)
+            val newFile = NodeFs.File.fromPath(rootPath, new.relativePath)
 
             newFile.create().onFailure {
                 val message = "Can't create new file: ${it.message}"
@@ -143,7 +142,7 @@ class StorageManager {
             dao.insertNote(note)
 
             val rootPath = prefs.repoPath.get()
-            val file = FileFs.fromPath(rootPath, note.relativePath)
+            val file = NodeFs.File.fromPath(rootPath, note.relativePath)
 
             file.create().onFailure {
                 val message = "Can't create new file: ${it.message}"
@@ -168,7 +167,7 @@ class StorageManager {
             dao.removeNote(note)
 
             val rootPath = prefs.repoPath.get()
-            val file = FileFs.fromPath(rootPath, note.relativePath)
+            val file = NodeFs.File.fromPath(rootPath, note.relativePath)
             file.delete().onFailure {
                 val message = "Can't delete file ${file.path}: ${it.message}"
                 Log.e(TAG, message)
@@ -196,7 +195,7 @@ class StorageManager {
             noteRelativePaths.forEach { noteRelativePath ->
 
                 Log.d(TAG, "deleting $noteRelativePath")
-                val file = FileFs.fromPath(rootPath, noteRelativePath)
+                val file = NodeFs.File.fromPath(rootPath, noteRelativePath)
 
                 file.delete().onFailure {
                     val message = "Can't delete file ${file.path}: ${it.message}"
@@ -216,7 +215,7 @@ class StorageManager {
             dao.insertNoteFolder(noteFolder)
 
             val rootPath = prefs.repoPath.get()
-            val folder = FolderFs.fromPath(rootPath, noteFolder.relativePath)
+            val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
 
             folder.create().onFailure {
                 val message = "Can't create new folder: ${it.message}"
