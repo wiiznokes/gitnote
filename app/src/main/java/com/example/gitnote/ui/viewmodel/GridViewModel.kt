@@ -186,36 +186,53 @@ class GridViewModel : ViewModel() {
     }
 
 
-    private val notes = combine(
-        allNotes,
-        currentNoteFolderRelativePath,
-        query,
-        prefs.sortType.getFlow(),
-        prefs.sortOrder.getFlow()
-    ) { allNotes, currentNoteFolderRelativePath, query, sortType, sortOrder ->
+    fun defaultNewNote(): Note {
 
+        val defaultName = query.value.let {
+            if (NameValidation.check(it)) {
+                it
+            } else ""
+        }
+
+        val defaultExtension = FileExtension.match(prefs.defaultExtension.getBlocking())
+        val defaultFullName = "$defaultName.${defaultExtension.text}"
+
+        return Note.new(
+            relativePath = "${currentNoteFolderRelativePath.value}/$defaultFullName",
+        )
+    }
+
+
+
+    private val notes = allNotes.combine(currentNoteFolderRelativePath) { allNotes, path ->
         allNotes.filter {
-            it.relativePath.startsWith(currentNoteFolderRelativePath)
-        }.let { allNotesInCurrentPath ->
-            if (query.isNotEmpty()) {
-                fuzzySort(query, allNotesInCurrentPath)
-            } else {
-                when (sortType) {
-                    Modification -> when (sortOrder) {
-                        Ascending -> allNotesInCurrentPath.sortedByDescending { it.lastModifiedTimeMillis }
-                        Descending -> allNotesInCurrentPath.sortedBy { it.lastModifiedTimeMillis }
-                    }
-                    AlphaNumeric -> when (sortOrder) {
-                        Ascending -> allNotesInCurrentPath.sortedBy { it.fullName() }
-                        Descending -> allNotesInCurrentPath.sortedByDescending { it.fullName() }
-                    }
+            it.relativePath.startsWith(path)
+        }
+    }.combine(query) { allNotesInCurrentPath, query ->
+        if (query.isNotEmpty()) {
+            fuzzySort(query, allNotesInCurrentPath)
+        } else {
+            allNotesInCurrentPath
+        }
+    }.let { filteredNotesFlow ->
+        combine(filteredNotesFlow, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()) { filteredNotes, sortType, sortOrder ->
+
+            when (sortType) {
+                Modification -> when (sortOrder) {
+                    Ascending -> filteredNotes.sortedByDescending { it.lastModifiedTimeMillis }
+                    Descending -> filteredNotes.sortedBy { it.lastModifiedTimeMillis }
+                }
+                AlphaNumeric -> when (sortOrder) {
+                    Ascending -> filteredNotes.sortedBy { it.fullName() }
+                    Descending -> filteredNotes.sortedByDescending { it.fullName() }
                 }
             }
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
-    
+
+
 
     val gridNotes = combine(
         notes,
@@ -268,20 +285,6 @@ class GridViewModel : ViewModel() {
 
 
 
-    fun defaultNewNote(): Note {
 
-        val defaultName = query.value.let {
-            if (NameValidation.check(it)) {
-                it
-            } else ""
-        }
-
-        val defaultExtension = FileExtension.match(prefs.defaultExtension.getBlocking())
-        val defaultFullName = "$defaultName.${defaultExtension.text}"
-
-        return Note.new(
-            relativePath = "${currentNoteFolderRelativePath.value}/$defaultFullName",
-        )
-    }
 
 }
