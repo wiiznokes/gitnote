@@ -53,6 +53,10 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          echo $KEY_ALIAS
+          echo $KEY_PASSWORD
+          echo $STORE_PASSWORD
+          cat app/key.jks
           ./gradlew assembleRelease
 
       # todo should sign
