@@ -24,7 +24,7 @@ import com.example.gitnote.ui.component.AppPage
 import com.example.gitnote.ui.component.RequestConfirmationDialog
 import com.example.gitnote.ui.component.SimpleIcon
 import com.example.gitnote.ui.destination.SettingsDestination
-import com.example.gitnote.ui.model.ColumnCount
+import com.example.gitnote.ui.model.NoteMinWidth
 import com.example.gitnote.ui.model.FileExtension
 import com.example.gitnote.ui.model.SortOrder
 import com.example.gitnote.ui.model.SortType
@@ -98,13 +98,22 @@ fun MainSettingsScreen(
                 }
             )
 
-            val columnCount by vm.prefs.columnCount.getAsState()
+            val noteMinWidth by vm.prefs.noteMinWidth.getAsState()
             MultipleChoiceSettings(
-                title = "Number of columns",
-                subtitle = columnCount.toString(),
-                options = ColumnCount.entries,
+                title = "Minimal width of a note",
+                subtitle = noteMinWidth.toString(),
+                options = NoteMinWidth.entries,
                 onOptionClick = {
-                    vm.update { vm.prefs.columnCount.update(it) }
+                    vm.update { vm.prefs.noteMinWidth.update(it) }
+                }
+            )
+
+            val showFullNoteHeight by vm.prefs.showFullNoteHeight.getAsState()
+            ToggleableSettings(
+                title = "Show long notes entirely",
+                checked = showFullNoteHeight,
+                onCheckedChange = {
+                    vm.update { vm.prefs.showFullNoteHeight.update(it) }
                 }
             )
 

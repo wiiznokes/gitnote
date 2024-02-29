@@ -6,12 +6,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.gitnote.MyApp
 import com.example.gitnote.R
 import com.example.gitnote.data.AppPreferences
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.data.room.Note
 import com.example.gitnote.data.room.NoteFolder
 import com.example.gitnote.data.room.RepoDatabase
 import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.manager.StorageManager
+import com.example.gitnote.ui.model.FileExtension
+import com.example.gitnote.ui.model.SortOrder
+import com.example.gitnote.ui.model.SortOrder.*
+import com.example.gitnote.ui.model.SortType
+import com.example.gitnote.ui.model.SortType.*
 import com.example.gitnote.ui.screen.app.DrawerFolderModel
 import com.example.gitnote.ui.util.fuzzySort
 import com.example.gitnote.util.contains
@@ -47,13 +52,25 @@ class GridViewModel : ViewModel() {
     val isRefreshing: StateFlow<Boolean>
         get() = _isRefreshing.asStateFlow()
 
-    private val _currentNoteFolderRelativePath = MutableStateFlow("")
+    private val _currentNoteFolderRelativePath = MutableStateFlow(
+        if (prefs.rememberLastOpenedFolder.getBlocking()) {
+            prefs.lastOpenedFolder.getBlocking()
+        } else {
+            ""
+        }
+    )
     val currentNoteFolderRelativePath: StateFlow<String>
         get() = _currentNoteFolderRelativePath.asStateFlow()
 
 
+
+    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val selectedNotes: StateFlow<List<String>>
+        get() = _selectedNotes.asStateFlow()
+
+
     private val allNotes = dao.allNotes()
-    private val allNoteFolders = dao.allNoteFolders()
+
 
     init {
         Log.d(TAG, "init")
@@ -99,6 +116,7 @@ class GridViewModel : ViewModel() {
     fun openFolder(relativePath: String) {
         viewModelScope.launch {
             _currentNoteFolderRelativePath.emit(relativePath)
+            prefs.lastOpenedFolder.update(relativePath)
         }
     }
 
@@ -111,7 +129,7 @@ class GridViewModel : ViewModel() {
         val relativePath = "$relativeParentPath/$name"
 
         prefs.repoPath.getBlocking().let { rootPath ->
-            if (FolderFs.fromPath(rootPath, relativePath).exist()) {
+            if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
                 uiHelper.makeToast(uiHelper.getString(R.string.folder_already_exist))
                 return false
             }
@@ -128,10 +146,6 @@ class GridViewModel : ViewModel() {
         return true
     }
 
-
-    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
-    val selectedNotes: StateFlow<List<String>>
-        get() = _selectedNotes.asStateFlow()
 
 
     /**
@@ -173,34 +187,45 @@ class GridViewModel : ViewModel() {
     }
 
 
-    private val allNotesInCurrentPath =
-        allNotes.combine(currentNoteFolderRelativePath) { allNotes, path ->
-            //Log.d(TAG, "filter all notes in path, depend on AllNotes and current path")
-            allNotes.filter {
-                it.relativePath.startsWith(path)
-            }
-        }.stateIn(
-            CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
-        )
+    val gridNotes = combine(
+        allNotes,
+        currentNoteFolderRelativePath,
+        query,
+        prefs.sortType.getFlow(),
+        prefs.sortOrder.getFlow()
+    ) { allNotes, currentNoteFolderRelativePath, query, sortType, sortOrder ->
 
-    val filteredNotes = allNotesInCurrentPath.combine(query) { notes, query ->
-        //Log.d(TAG, "filter all notes in query, depend on allNotesInCurrentPath and query")
-        if (query.isNotEmpty()) {
-            fuzzySort(query, notes)
-        } else {
-            notes
+        allNotes.filter {
+            it.relativePath.startsWith(currentNoteFolderRelativePath)
+        }.let { allNotesInCurrentPath ->
+            if (query.isNotEmpty()) {
+                fuzzySort(query, allNotesInCurrentPath)
+            } else {
+                when (sortType) {
+                    Modification -> when (sortOrder) {
+                        Ascending -> allNotesInCurrentPath.sortedByDescending { it.lastModifiedTimeMillis }
+                        Descending -> allNotesInCurrentPath.sortedBy { it.lastModifiedTimeMillis }
+                    }
+                    AlphaNumeric -> when (sortOrder) {
+                        Ascending -> allNotesInCurrentPath.sortedBy { it.fullName() }
+                        Descending -> allNotesInCurrentPath.sortedByDescending { it.fullName() }
+                    }
+                }
+            }
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
 
+    private val allNoteFolders = dao.allNoteFolders()
+
     val drawerFolders =
         allNoteFolders.combine(currentNoteFolderRelativePath) { notesFolders, path ->
             notesFolders.filter {
                 it.parentPath() == path
             }
-        }.combine(filteredNotes) { folders, notes ->
+        }.combine(gridNotes) { folders, notes ->
             folders.map { folder ->
                 DrawerFolderModel(
                     relativePath = folder.relativePath,
@@ -215,4 +240,19 @@ class GridViewModel : ViewModel() {
             CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
         )
 
+    fun defaultNewNote(): Note {
+
+        val defaultName = query.value.let {
+            if (NameValidation.check(it)) {
+                it
+            } else ""
+        }
+
+        val defaultExtension = FileExtension.match(prefs.defaultExtension.getBlocking())
+        val defaultFullName = "$defaultName.${defaultExtension.text}"
+
+        return Note.new(
+            relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
+        )
+    }
 }

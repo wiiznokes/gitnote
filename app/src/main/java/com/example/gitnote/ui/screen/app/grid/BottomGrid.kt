@@ -39,9 +39,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
 import com.example.gitnote.data.room.Note
-import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.ui.model.EditType
-import com.example.gitnote.ui.model.FileExtension
 import com.example.gitnote.ui.viewmodel.GridViewModel
 import kotlin.math.roundToInt
 
@@ -52,7 +50,6 @@ private const val TAG = "GridViewBottom"
 fun FloatingActionButtons(
     vm: GridViewModel,
     offset: MutableFloatState,
-    currentNoteFolderRelativePath: String,
     onEditClick: (Note, EditType) -> Unit,
     searchFocusRequester: FocusRequester,
     expanded: MutableState<Boolean>,
@@ -80,17 +77,8 @@ fun FloatingActionButtons(
 
             when (it.type) {
                 FABItemType.CREATE -> {
-                    val query = vm.query.value
-                    val defaultName = if (NameValidation.check(query)) {
-                        query
-                    } else ""
-                    val defaultFullName = "$defaultName.${FileExtension.Md().text}"
-                    val defaultNote = Note.new(
-                        relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
-                        content = "",
-                    )
                     onEditClick(
-                        defaultNote,
+                        vm.defaultNewNote(),
                         EditType.Create
                     )
                 }

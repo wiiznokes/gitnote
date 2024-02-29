@@ -30,27 +30,13 @@ enum class SortOrder {
     }
 }
 
-enum class ColumnCount {
-    Automatic,
-    One,
-    Two,
-    Tree,
-    Four,
-    Five,
-    Six;
-
-    override fun toString(): String {
-        return when (this) {
-            Automatic -> MyApp.appModule.uiHelper.getString(
-                R.string.automatic
-            )
-
-            One -> "1"
-            Two -> "2"
-            Tree -> "3"
-            Four -> "4"
-            Five -> "5"
-            Six -> "6"
-        }
-    }
+enum class NoteMinWidth(val size: Int) {
+    Default(200),
+    C250(250),
+    C300(300),
+    C350(350),
+    C400(400),
+    C500(500),
+    C600(600);
+    override fun toString(): String = this.size.toString()
 }

@@ -2,6 +2,7 @@ package com.example.gitnote
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.example.gitnote.data.AppPreferences
 import com.example.gitnote.data.room.RepoDatabase
 import com.example.gitnote.helper.UiHelper
@@ -23,13 +24,7 @@ class AppModuleImpl(
 ) : AppModule {
 
     override val repoDatabase: RepoDatabase by lazy {
-        Room
-            .databaseBuilder(
-                context = appContext,
-                klass = RepoDatabase::class.java,
-                name = "appDatabase"
-            )
-            .build()
+        RepoDatabase.buildDatabase(appContext)
     }
 
     override val uiHelper: UiHelper by lazy {

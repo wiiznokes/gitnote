@@ -30,5 +30,10 @@ enum class Provider : ProviderLink {
 data class GitCreed(
     val userName: String,
     val password: String,
-) : Parcelable
+) : Parcelable {
+
+    override fun toString(): String =
+        "GitCreed(userName=${userName}, password=${"*".repeat(password.length)})"
+
+}
 

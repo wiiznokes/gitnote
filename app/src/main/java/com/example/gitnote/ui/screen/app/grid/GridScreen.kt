@@ -93,9 +93,6 @@ fun GridScreen(
     ) {
 
 
-        val currentNoteFolderRelativePath by vm.currentNoteFolderRelativePath.collectAsState()
-
-
         val maxOffset = remember { mutableFloatStateOf(0f) }
         val offset = remember { mutableFloatStateOf(0f) }
 
@@ -137,7 +134,6 @@ fun GridScreen(
                     FloatingActionButtons(
                         vm = vm,
                         offset = offset,
-                        currentNoteFolderRelativePath = currentNoteFolderRelativePath,
                         onEditClick = onEditClick,
                         searchFocusRequester = searchFocusRequester,
                         expanded = fabExpanded,
@@ -172,7 +168,7 @@ private fun GridView(
     selectedNotes: List<String>,
     fabExpanded: MutableState<Boolean>,
 ) {
-    val notes by vm.filteredNotes.collectAsState()
+    val notes by vm.gridNotes.collectAsState()
 
     val gridState = rememberLazyStaggeredGridState()
 
@@ -196,6 +192,9 @@ private fun GridView(
 
         // todo: scroll even when there is nothing to scroll
         // todo: add scroll bar
+
+        val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
+
         LazyVerticalStaggeredGrid(
             modifier = Modifier
                 .fillMaxSize()
@@ -204,7 +203,7 @@ private fun GridView(
             contentPadding = PaddingValues(
                 horizontal = 3.dp
             ),
-            columns = StaggeredGridCells.Adaptive(200.dp),
+            columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
             state = gridState
 
         ) {
@@ -248,10 +247,8 @@ private fun GridView(
                     },
                     modifier = Modifier
                         .sizeIn(
-                            minWidth = 0.dp,
-                            minHeight = 0.dp,
-                            maxWidth = 0.dp, // controlled by column
-                            maxHeight = 500.dp
+                            maxHeight = if (vm.prefs.showFullNoteHeight.getAsState().value)
+                                Dp.Unspecified else 500.dp
                         )
                         .padding(3.dp)
                         .combinedClickable(
@@ -261,7 +258,7 @@ private fun GridView(
                             onClick = {
                                 if (selectedNotes.isEmpty()) {
                                     onEditClick(
-                                        note,
+                                        note.copy(),
                                         EditType.Update
                                     )
                                 } else {

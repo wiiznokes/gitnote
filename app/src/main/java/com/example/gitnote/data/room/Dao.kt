@@ -1,23 +1,25 @@
 package com.example.gitnote.data.room
 
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.example.gitnote.data.platform.FileFs
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import kotlinx.coroutines.flow.Flow
 
+private const val TAG = "Dao"
 @Dao
 interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
     suspend fun clearAndInit(rootPath: String) {
+        Log.d(TAG, "clearAndInit")
         clearDatabase()
 
-        val rootFs = FolderFs.fromPath(rootPath)
+        val rootFs = NodeFs.Folder.fromPath(rootPath)
         val rootFolder = NoteFolder(
             relativePath = "",
         )
@@ -25,12 +27,12 @@ interface RepoDatabaseDao {
 
         val rootLength = rootFs.path.length + 1
 
-        suspend fun initRec(folderFs: FolderFs) {
+        suspend fun initRec(folder: NodeFs.Folder) {
 
-            folderFs.forEachNodeFs { nodeFs ->
+            folder.forEachNodeFs { nodeFs ->
 
                 when (nodeFs) {
-                    is FileFs -> {
+                    is NodeFs.File -> {
                         val mimeType = MimeTypeMap.getSingleton()
                             .getMimeTypeFromExtension(nodeFs.extension.text)
                         if (mimeType == null || !mimeType.startsWith("text")) {
@@ -38,15 +40,16 @@ interface RepoDatabaseDao {
                             return@forEachNodeFs
                         }
 
-                        val note = Note(
+                        val note = Note.new(
                             relativePath = nodeFs.path.substring(startIndex = rootLength),
+                            lastModifiedTimeMillis = nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
                         insertNote(note)
                         //Log.d(TAG, "add note: $note")
                     }
 
-                    is FolderFs -> {
+                    is NodeFs.Folder -> {
                         if (nodeFs.isHidden() || nodeFs.isSym()) {
                             return@forEachNodeFs
                         }
@@ -83,13 +86,6 @@ interface RepoDatabaseDao {
     // todo
     // suspend fun removeNoteFolder(noteFolder: NoteFolder)
 
-    // todo: maybe remove all @Insert function because
-    //  they are not safe to use. Imagine you want to create
-    //  a new note. The note could exist on remote, get pulled
-    //  and then loaded into the database (this is the logic of
-    //  create note), so this function would fail, while an upsert
-    //  would have been acceptable.
-    //  The project should stabilize before doing this tho
     @Upsert
     suspend fun insertNote(note: Note)
 

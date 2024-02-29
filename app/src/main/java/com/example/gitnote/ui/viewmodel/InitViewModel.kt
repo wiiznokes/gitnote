@@ -4,7 +4,7 @@ package com.example.gitnote.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import com.example.gitnote.MyApp
 import com.example.gitnote.data.AppPreferences
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.helper.UiHelper
 import com.example.gitnote.manager.GitException
 import com.example.gitnote.manager.GitExceptionType
@@ -31,10 +31,11 @@ class InitViewModel : ViewModel() {
     }
 
 
+
     fun createRepo(repoPath: String, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            FolderFs.fromPath(repoPath).isEmptyDirectory().onFailure {
+            NodeFs.Folder.fromPath(repoPath).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
@@ -45,9 +46,7 @@ class InitViewModel : ViewModel() {
                 return@launch
             }
 
-
-            prefs.repoPath.update(repoPath)
-            prefs.isRepoInitialize.update(true)
+            prefs.initRepo(repoPath)
 
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.updateDatabase()
@@ -59,7 +58,7 @@ class InitViewModel : ViewModel() {
     }
 
     fun checkPathForClone(repoPath: String): Result<Unit> {
-        val result = FolderFs.fromPath(repoPath).isEmptyDirectory()
+        val result = NodeFs.Folder.fromPath(repoPath).isEmptyDirectory()
         result.onFailure {
             uiHelper.makeToast(it.message)
         }
@@ -68,7 +67,7 @@ class InitViewModel : ViewModel() {
 
     private suspend fun openRepoSuspend(repoPath: String): Result<Unit> {
 
-        if (!FolderFs.fromPath(repoPath).exist()) {
+        if (!NodeFs.Folder.fromPath(repoPath).exist()) {
             uiHelper.makeToast("Path is not a directory")
             return failure(GitException(GitExceptionType.WrongPath))
         }
@@ -78,8 +77,6 @@ class InitViewModel : ViewModel() {
             return failure(it)
         }
 
-        prefs.repoPath.update(repoPath)
-        prefs.isRepoInitialize.update(true)
 
         // yes, there can be pending file not committed
         // but they will be committed in the updateDatabaseAndRepo function
@@ -95,6 +92,7 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             openRepoSuspend(repoPath).onSuccess {
+                prefs.initRepo(repoPath)
                 onSuccess()
             }
         }
@@ -134,9 +132,9 @@ class InitViewModel : ViewModel() {
 
             _cloneState.emit(CloneState.Cloned)
 
-            prefs.repoPath.update(repoPath)
+            prefs.initRepo(repoPath)
             prefs.remoteUrl.update(repoUrl)
-            prefs.isRepoInitialize.update(true)
+
             gitCreed?.let {
                 prefs.userName.update(it.userName)
                 prefs.password.update(it.password)

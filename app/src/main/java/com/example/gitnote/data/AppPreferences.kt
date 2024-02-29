@@ -2,7 +2,7 @@ package com.example.gitnote.data
 
 import android.content.Context
 import com.example.gitnote.manager.PreferencesManager
-import com.example.gitnote.ui.model.ColumnCount
+import com.example.gitnote.ui.model.NoteMinWidth
 import com.example.gitnote.ui.model.GitCreed
 import com.example.gitnote.ui.model.Provider
 import com.example.gitnote.ui.model.SortOrder
@@ -33,9 +33,11 @@ class AppPreferences(
 
     val sortOrder = enumPreference("sortOrder", SortOrder.Ascending)
 
-    val columnCount = enumPreference("columnCount", ColumnCount.Automatic)
+    val noteMinWidth = enumPreference("noteMinWidth", NoteMinWidth.Default)
+    val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
 
     val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", false)
+    val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
 
@@ -48,7 +50,13 @@ class AppPreferences(
         )
     )
 
-    suspend fun onCloseRepo() {
+    suspend fun initRepo(repoPath: String) {
+        isRepoInitialize.update(true)
+        this.repoPath.update(repoPath)
+        lastOpenedFolder.update("")
+    }
+
+    suspend fun closeRepo() {
         isRepoInitialize.update(false)
         databaseCommit.update("")
     }

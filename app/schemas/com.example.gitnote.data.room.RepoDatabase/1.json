@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f6314c8341599075529e8d7f87086f12",
+    "identityHash": "fe8e7f5104ac0aee857ec1d34cd0615a",
     "entities": [
       {
         "tableName": "NoteFolders",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "Notes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `content` TEXT NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `content` TEXT NOT NULL, `lastModifiedTimeMillis` INTEGER NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
         "fields": [
           {
             "fieldPath": "relativePath",
@@ -44,6 +44,12 @@
             "fieldPath": "content",
             "columnName": "content",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedTimeMillis",
+            "columnName": "lastModifiedTimeMillis",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -66,7 +72,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6314c8341599075529e8d7f87086f12')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fe8e7f5104ac0aee857ec1d34cd0615a')"
     ]
   }
 }

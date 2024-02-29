@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gitnote.R
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.ui.component.AppPage
 import com.example.gitnote.ui.component.GetStringDialog
 import com.example.gitnote.ui.component.SimpleIcon
@@ -78,7 +78,7 @@ fun FileExplorerScreen(
                 actionText = stringResource(R.string.create_new_folder)
             ) {
                 if (vm.createDir(it)) {
-                    onDirectoryClick(FolderFs.fromPath(vm.currentDir.path, it).path)
+                    onDirectoryClick(NodeFs.Folder.fromPath(vm.currentDir.path, it).path)
                 }
             }
         },

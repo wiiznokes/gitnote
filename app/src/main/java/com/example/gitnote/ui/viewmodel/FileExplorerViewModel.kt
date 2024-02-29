@@ -7,8 +7,9 @@ import androidx.lifecycle.ViewModel
 import com.example.gitnote.MyApp
 import com.example.gitnote.data.AppPreferences
 import com.example.gitnote.data.platform.FileSystem
-import com.example.gitnote.data.platform.FolderFs
+import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.helper.UiHelper
+import kotlinx.coroutines.runBlocking
 
 
 class FileExplorerViewModel(val path: String?) : ViewModel() {
@@ -21,17 +22,26 @@ class FileExplorerViewModel(val path: String?) : ViewModel() {
     val prefs: AppPreferences = MyApp.appModule.appPreferences
 
 
-    var currentDir: FolderFs = path?.let { path ->
+    var currentDir: NodeFs.Folder = path?.let { path ->
         // todo: check if exist
-        FolderFs.fromPath(path).let {
+        NodeFs.Folder.fromPath(path).let {
             if (it.exist()) it else null
         }
     } ?: FileSystem.defaultDir
 
-    val folders: SnapshotStateList<FolderFs> = mutableStateListOf()
+    // todo: maybe use flow here
+    val folders: SnapshotStateList<NodeFs.Folder> = mutableStateListOf()
 
     init {
-        folders.addAll(currentDir.listFolder())
+
+        val foldersList = runBlocking {
+            currentDir.filterMapNodeFs {
+                if (it is NodeFs.Folder) it else null
+            }
+        }
+
+
+        folders.addAll(foldersList)
     }
 
     fun createDir(name: String): Boolean {

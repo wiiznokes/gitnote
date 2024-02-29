@@ -72,6 +72,8 @@ abstract class Preference<T>(
 
     private val flow = dataStore.data.map { with(it) { read() } ?: default }.distinctUntilChanged()
 
+    fun getFlow() = flow
+
     suspend fun get() = flow.first()
     fun getBlocking() = runBlocking { get() }
 
