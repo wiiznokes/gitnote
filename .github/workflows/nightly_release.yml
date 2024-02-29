@@ -18,6 +18,7 @@ env:
 jobs:
   upload-artifacts:
     uses: ./.github/workflows/upload_artifacts.yml
+    secrets: inherit
 
   publish:
     needs: upload-artifacts
