@@ -9,6 +9,7 @@ import com.example.gitnote.data.AppPreferences
 import com.example.gitnote.data.platform.FileSystem
 import com.example.gitnote.data.platform.NodeFs
 import com.example.gitnote.helper.UiHelper
+import kotlinx.coroutines.runBlocking
 
 
 class FileExplorerViewModel(val path: String?) : ViewModel() {
@@ -28,10 +29,19 @@ class FileExplorerViewModel(val path: String?) : ViewModel() {
         }
     } ?: FileSystem.defaultDir
 
+    // todo: maybe use flow here
     val folders: SnapshotStateList<NodeFs.Folder> = mutableStateListOf()
 
     init {
-        folders.addAll(currentDir.listFolder())
+
+        val foldersList = runBlocking {
+            currentDir.filterMapNodeFs {
+                if (it is NodeFs.Folder) it else null
+            }
+        }
+
+
+        folders.addAll(foldersList)
     }
 
     fun createDir(name: String): Boolean {

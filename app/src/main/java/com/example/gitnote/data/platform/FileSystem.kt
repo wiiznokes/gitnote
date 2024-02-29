@@ -111,26 +111,24 @@ sealed class NodeFs(
 
         }
 
-        fun listFolder(glob: String = "*"): List<Folder> {
-            val folders = mutableListOf<Folder>()
-
-            val entries = try {
-                pathFs.listDirectoryEntries(glob)
+        suspend fun <T>filterMapNodeFs(fn: suspend (NodeFs) -> T?): List<T> {
+            val output = mutableListOf<T>()
+            try {
+                pathFs.forEachDirectoryEntry { path ->
+                    fn(path.toNodeFs())?.let {
+                        output.add(it)
+                    }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
-                return folders
             }
-            entries.filter { it.isDirectory() }.forEach {
-                folders.add(it.toFolderFs())
-            }
-
-            return folders
+            return output
         }
 
-
-
-        /// return success if the folder is
-        /// and existing empty directory
+        /**
+         * Returns success if the folder is
+         * and existing empty directory
+         */
         fun isEmptyDirectory(): Result<Unit> {
 
             try {
@@ -146,23 +144,6 @@ sealed class NodeFs(
                 return failure(e)
             }
             return success(Unit)
-        }
-
-        fun listFile(glob: String = "*"): List<File> {
-            val files = mutableListOf<File>()
-
-            val entries = try {
-                pathFs.listDirectoryEntries(glob)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return files
-            }
-            entries.filter { !it.isDirectory() }.forEach {
-                files.add(it.toFileFs())
-            }
-
-
-            return files
         }
 
         suspend fun forEachNodeFs(fn: suspend (NodeFs) -> Unit) {
@@ -204,9 +185,6 @@ sealed class NodeFs(
 
     }
 }
-
-
-
 
 
 
