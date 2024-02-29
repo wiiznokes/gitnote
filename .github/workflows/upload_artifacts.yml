@@ -34,11 +34,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Clone submodule
-        run: |
-          git submodule init
-          git submodule update
       
       - name: Retrieve the secret and decode it to a file
         env:
@@ -46,24 +41,14 @@ jobs:
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
 
-
       - name: Build apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo $KEY_ALIAS
-          echo $KEY_PASSWORD
-          echo $STORE_PASSWORD
-          cat app/key.jks
-          ls app/
           ./gradlew assembleRelease
-
-      # todo should sign
-      # https://github.com/libre-tube/LibreTube/blob/master/.github/workflows/ci.yml
-
-      - run: echo "DEB_NAME=$(basename ./packages/fan-control*.deb)" >> $GITHUB_ENV
+   
       - uses: actions/upload-artifact@v4
         with:
           name: gitnote
