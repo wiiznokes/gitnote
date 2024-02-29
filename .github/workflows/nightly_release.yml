@@ -1,10 +1,10 @@
 name: Nightly Release
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}
@@ -54,4 +54,4 @@ jobs:
           # https://cli.github.com/manual/gh_release_create
           gh release create nightly --title nightly \
             --verify-tag --prerelease --generate-notes --target $GITHUB_SHA \
-            ./gitnote-release/*
+            ./gitnote/*

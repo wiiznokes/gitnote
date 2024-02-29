@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   #pull_request:
     #paths-ignore:
-  #²     - "README*.md"
+  #     - "README*.md"
   #  types: [opened, synchronize, reopened, ready_for_review]
 
 concurrency:
