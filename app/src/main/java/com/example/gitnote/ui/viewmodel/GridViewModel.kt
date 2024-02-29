@@ -12,7 +12,9 @@ import com.example.gitnote.data.room.NoteFolder
 import com.example.gitnote.data.room.RepoDatabase
 import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.manager.StorageManager
+import com.example.gitnote.ui.model.EditType
 import com.example.gitnote.ui.model.FileExtension
+import com.example.gitnote.ui.model.GridNote
 import com.example.gitnote.ui.model.SortOrder
 import com.example.gitnote.ui.model.SortOrder.*
 import com.example.gitnote.ui.model.SortType
@@ -22,11 +24,15 @@ import com.example.gitnote.ui.util.fuzzySort
 import com.example.gitnote.util.contains
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -217,6 +223,60 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
+    /*
+    val gridNotes2 = combine(
+        gridNotes,
+        selectedNotes
+    ) { notesList, selectedNotes ->
+
+
+        val groupBy = notesList.groupBy {
+            it.nameWithoutExtension()
+        }
+
+        notesList.map { note ->
+
+            val name = note.nameWithoutExtension()
+
+            val group = groupBy[name]
+
+            val title = if (group!!.size > 1) {
+                note.relativePath
+            } else {
+                name
+            }
+
+            GridNote(
+                title = title,
+                selected = selectedNotes.contains(note.relativePath),
+                note = note
+            )
+        }
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+     */
+
+    val gridNotes2 = combine(
+        gridNotes,
+        selectedNotes
+    ) { notesList, selectedNotes ->
+
+        notesList.map { note ->
+
+            GridNote(
+                title = note.nameWithoutExtension(),
+                selected = selectedNotes.contains(note.relativePath),
+                note = note
+            )
+        }
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+
+
 
     private val allNoteFolders = dao.allNoteFolders()
 
@@ -252,7 +312,8 @@ class GridViewModel : ViewModel() {
         val defaultFullName = "$defaultName.${defaultExtension.text}"
 
         return Note.new(
-            relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
+            relativePath = "${currentNoteFolderRelativePath.value}/$defaultFullName",
         )
     }
+
 }

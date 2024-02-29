@@ -2,6 +2,7 @@ package com.example.gitnote.ui.model
 
 import com.example.gitnote.MyApp
 import com.example.gitnote.R
+import com.example.gitnote.data.room.Note
 
 
 enum class SortType {
@@ -40,3 +41,9 @@ enum class NoteMinWidth(val size: Int) {
     C600(600);
     override fun toString(): String = this.size.toString()
 }
+
+data class GridNote(
+    val note: Note,
+    val title: String,
+    val selected: Boolean,
+)
