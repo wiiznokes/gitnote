@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gitnote.ui.destination.InitDestination
 import com.example.gitnote.ui.destination.NewRepoSource
-import com.example.gitnote.ui.util.crossfade
+import com.example.gitnote.ui.util.crossFade
 import com.example.gitnote.ui.util.slide
 import com.example.gitnote.ui.viewmodel.InitViewModel
 import com.example.gitnote.ui.viewmodel.viewModelFactory
@@ -131,21 +131,21 @@ private object InitNavTransitionSpec : NavTransitionSpec<InitDestination> {
                 when (to) {
                     is InitDestination.FileExplorer -> {
                         //val toParent = (from.path?.length ?: 0) > (to.path?.length ?: 0)
-                        crossfade()
+                        crossFade()
                     }
 
-                    InitDestination.LocalStoragePermission -> crossfade()
+                    InitDestination.LocalStoragePermission -> crossFade()
                     InitDestination.Main -> slide(backWard = true)
                     is InitDestination.Remote -> slide()
                 }
             }
 
-            InitDestination.LocalStoragePermission -> crossfade()
+            InitDestination.LocalStoragePermission -> crossFade()
             InitDestination.Main -> {
                 when (to) {
                     is InitDestination.FileExplorer -> slide()
-                    InitDestination.LocalStoragePermission -> crossfade()
-                    InitDestination.Main -> crossfade()
+                    InitDestination.LocalStoragePermission -> crossFade()
+                    InitDestination.Main -> crossFade()
                     is InitDestination.Remote -> slide()
                 }
             }
@@ -153,9 +153,9 @@ private object InitNavTransitionSpec : NavTransitionSpec<InitDestination> {
             is InitDestination.Remote -> {
                 when (to) {
                     is InitDestination.FileExplorer -> slide(backWard = true)
-                    InitDestination.LocalStoragePermission -> crossfade()
+                    InitDestination.LocalStoragePermission -> crossFade()
                     InitDestination.Main -> slide(backWard = true)
-                    is InitDestination.Remote -> crossfade()
+                    is InitDestination.Remote -> crossFade()
                 }
             }
         }
