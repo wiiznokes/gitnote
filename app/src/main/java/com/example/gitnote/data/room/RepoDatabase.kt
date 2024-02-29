@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 @Database(
     entities = [NoteFolder::class, Note::class],
-    version = 1
+    version = 2
 )
 abstract class RepoDatabase : RoomDatabase() {
     abstract val repoDatabaseDao: RepoDatabaseDao

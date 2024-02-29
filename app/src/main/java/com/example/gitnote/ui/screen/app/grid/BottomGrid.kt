@@ -78,7 +78,7 @@ fun FloatingActionButtons(
             when (it.type) {
                 FABItemType.CREATE -> {
                     onEditClick(
-                        vm.defaultNote(),
+                        vm.defaultNewNote(),
                         EditType.Create
                     )
                 }

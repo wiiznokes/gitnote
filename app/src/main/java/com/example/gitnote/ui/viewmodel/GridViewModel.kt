@@ -223,7 +223,7 @@ class GridViewModel : ViewModel() {
             CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
         )
 
-    fun defaultNote(): Note {
+    fun defaultNewNote(): Note {
 
         val defaultName = query.value.let {
             if (NameValidation.check(it)) {
@@ -236,7 +236,6 @@ class GridViewModel : ViewModel() {
 
         return Note.new(
             relativePath = "$currentNoteFolderRelativePath/$defaultFullName",
-            content = "",
         )
     }
 }

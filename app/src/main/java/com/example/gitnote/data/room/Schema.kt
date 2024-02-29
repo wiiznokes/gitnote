@@ -6,6 +6,7 @@ import com.example.gitnote.data.removeFirstAndLastSlash
 import com.example.gitnote.data.requireNotEndOrStartWithSlash
 import com.example.gitnote.ui.model.FileExtension
 import kotlinx.parcelize.Parcelize
+import java.time.Instant
 
 
 private const val TAG = "DatabaseSchema"
@@ -55,24 +56,25 @@ data class NoteFolder(
 data class Note(
     val relativePath: String,
     val content: String,
+    val lastModifiedTimeMillis: Long,
     val id: Int = RepoDatabase.generateUid()
 ) : Parcelable {
 
-    override fun toString(): String {
-
-        return "Note(relativePath=$relativePath, id=$id)"
-    }
+    override fun toString(): String =
+        "Note(relativePath=$relativePath, id=$id)"
 
     companion object {
         fun new(
             relativePath: String,
-            content: String,
+            content: String = "",
+            lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
             id: Int = RepoDatabase.generateUid()
         ): Note {
             return Note(
                 relativePath = removeFirstAndLastSlash(relativePath),
                 content = content,
-                id = id
+                lastModifiedTimeMillis = lastModifiedTimeMillis,
+                id = id,
             )
         }
     }

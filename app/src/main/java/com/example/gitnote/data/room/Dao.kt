@@ -37,8 +37,9 @@ interface RepoDatabaseDao {
                             return@forEachNodeFs
                         }
 
-                        val note = Note(
+                        val note = Note.new(
                             relativePath = nodeFs.path.substring(startIndex = rootLength),
+                            lastModifiedTimeMillis = nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
                         insertNote(note)
