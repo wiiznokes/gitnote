@@ -39,9 +39,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
 import com.example.gitnote.data.room.Note
-import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.ui.model.EditType
-import com.example.gitnote.ui.model.FileExtension
 import com.example.gitnote.ui.viewmodel.GridViewModel
 import kotlin.math.roundToInt
 
