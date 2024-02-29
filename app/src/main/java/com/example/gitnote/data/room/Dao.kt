@@ -86,13 +86,6 @@ interface RepoDatabaseDao {
     // todo
     // suspend fun removeNoteFolder(noteFolder: NoteFolder)
 
-    // todo: maybe remove all @Insert function because
-    //  they are not safe to use. Imagine you want to create
-    //  a new note. The note could exist on remote, get pulled
-    //  and then loaded into the database (this is the logic of
-    //  create note), so this function would fail, while an upsert
-    //  would have been acceptable.
-    //  The project should stabilize before doing this tho
     @Upsert
     suspend fun insertNote(note: Note)
 
