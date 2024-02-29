@@ -13,6 +13,10 @@ import com.example.gitnote.data.room.RepoDatabase
 import com.example.gitnote.helper.NameValidation
 import com.example.gitnote.manager.StorageManager
 import com.example.gitnote.ui.model.FileExtension
+import com.example.gitnote.ui.model.SortOrder
+import com.example.gitnote.ui.model.SortOrder.*
+import com.example.gitnote.ui.model.SortType
+import com.example.gitnote.ui.model.SortType.*
 import com.example.gitnote.ui.screen.app.DrawerFolderModel
 import com.example.gitnote.ui.util.fuzzySort
 import com.example.gitnote.util.contains
@@ -59,8 +63,14 @@ class GridViewModel : ViewModel() {
         get() = _currentNoteFolderRelativePath.asStateFlow()
 
 
+
+    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    val selectedNotes: StateFlow<List<String>>
+        get() = _selectedNotes.asStateFlow()
+
+
     private val allNotes = dao.allNotes()
-    private val allNoteFolders = dao.allNoteFolders()
+
 
     init {
         Log.d(TAG, "init")
@@ -137,10 +147,6 @@ class GridViewModel : ViewModel() {
     }
 
 
-    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
-    val selectedNotes: StateFlow<List<String>>
-        get() = _selectedNotes.asStateFlow()
-
 
     /**
      * @param add true if the note must be selected, false otherwise
@@ -181,34 +187,45 @@ class GridViewModel : ViewModel() {
     }
 
 
-    private val allNotesInCurrentPath =
-        allNotes.combine(currentNoteFolderRelativePath) { allNotes, path ->
-            //Log.d(TAG, "filter all notes in path, depend on AllNotes and current path")
-            allNotes.filter {
-                it.relativePath.startsWith(path)
-            }
-        }.stateIn(
-            CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
-        )
+    val gridNotes = combine(
+        allNotes,
+        currentNoteFolderRelativePath,
+        query,
+        prefs.sortType.getFlow(),
+        prefs.sortOrder.getFlow()
+    ) { allNotes, currentNoteFolderRelativePath, query, sortType, sortOrder ->
 
-    val filteredNotes = allNotesInCurrentPath.combine(query) { notes, query ->
-        //Log.d(TAG, "filter all notes in query, depend on allNotesInCurrentPath and query")
-        if (query.isNotEmpty()) {
-            fuzzySort(query, notes)
-        } else {
-            notes
+        allNotes.filter {
+            it.relativePath.startsWith(currentNoteFolderRelativePath)
+        }.let { allNotesInCurrentPath ->
+            if (query.isNotEmpty()) {
+                fuzzySort(query, allNotesInCurrentPath)
+            } else {
+                when (sortType) {
+                    Modification -> when (sortOrder) {
+                        Ascending -> allNotesInCurrentPath.sortedByDescending { it.lastModifiedTimeMillis }
+                        Descending -> allNotesInCurrentPath.sortedBy { it.lastModifiedTimeMillis }
+                    }
+                    AlphaNumeric -> when (sortOrder) {
+                        Ascending -> allNotesInCurrentPath.sortedBy { it.fullName() }
+                        Descending -> allNotesInCurrentPath.sortedByDescending { it.fullName() }
+                    }
+                }
+            }
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
 
+    private val allNoteFolders = dao.allNoteFolders()
+
     val drawerFolders =
         allNoteFolders.combine(currentNoteFolderRelativePath) { notesFolders, path ->
             notesFolders.filter {
                 it.parentPath() == path
             }
-        }.combine(filteredNotes) { folders, notes ->
+        }.combine(gridNotes) { folders, notes ->
             folders.map { folder ->
                 DrawerFolderModel(
                     relativePath = folder.relativePath,

@@ -168,7 +168,7 @@ private fun GridView(
     selectedNotes: List<String>,
     fabExpanded: MutableState<Boolean>,
 ) {
-    val notes by vm.filteredNotes.collectAsState()
+    val notes by vm.gridNotes.collectAsState()
 
     val gridState = rememberLazyStaggeredGridState()
 
