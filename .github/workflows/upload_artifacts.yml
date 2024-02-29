@@ -57,6 +57,7 @@ jobs:
           echo $KEY_PASSWORD
           echo $STORE_PASSWORD
           cat app/key.jks
+          ls app/
           ./gradlew assembleRelease
 
       # todo should sign
