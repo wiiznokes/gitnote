@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - run: |
+          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
+
       - name: Clone submodule
         run: |
             git submodule update --init --recursive
