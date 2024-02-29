@@ -60,7 +60,6 @@ data class Note(
     val relativePath: String,
     val content: String,
     val lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
-    val creationTimeMillis: Long = Instant.now().toEpochMilli(),
     val id: Int = RepoDatabase.generateUid()
 ) : Parcelable {
 
