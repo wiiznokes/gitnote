@@ -2,7 +2,7 @@
 #define GITNOTE_LOGGING_H
 
 #include <android/log.h>
-#include "git2/errors.h"
+#include <git2/errors.h>
 
 #define LOG_TAG "GitnoteCPP"
 

@@ -15,6 +15,9 @@ jobs:
         with:
             lfs: true
 
+      - run: |
+          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
