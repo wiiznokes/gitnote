@@ -8,6 +8,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.transform
 
 @Composable
 fun Modifier.conditional(
@@ -21,7 +23,7 @@ fun Modifier.conditional(
     }
 }
 
-fun crossfade() = fadeIn(tween()) togetherWith fadeOut(tween())
+fun crossFade() = fadeIn(tween()) togetherWith fadeOut(tween())
 
 fun slide(backWard: Boolean = false) = slideInHorizontally(
     initialOffsetX = {
@@ -32,3 +34,13 @@ fun slide(backWard: Boolean = false) = slideInHorizontally(
         if (backWard) it else -it
     }
 )
+
+/**
+ * This is similar to the map function, but the flow that was
+ * mapped is also included in the result:
+ *  flow1.mapAndCombine(f(flow1) -> flow3)
+ *  will return: flow(1, 3)
+ */
+inline fun <T, R> Flow<T>.mapAndCombine(crossinline transform: suspend (value: T) -> R): Flow<Pair<T, R>> = transform { value ->
+    return@transform emit(Pair(value, transform(value)))
+}

@@ -6,7 +6,7 @@ import com.example.gitnote.ui.destination.AppDestination
 import com.example.gitnote.ui.destination.SettingsDestination
 import com.example.gitnote.ui.screen.app.grid.GridScreen
 import com.example.gitnote.ui.screen.settings.SettingsScreen
-import com.example.gitnote.ui.util.crossfade
+import com.example.gitnote.ui.util.crossFade
 import com.example.gitnote.ui.util.slide
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
@@ -80,12 +80,12 @@ private object AppNavTransitionSpec : NavTransitionSpec<AppDestination> {
     ): ContentTransform {
 
         return when (from) {
-            is AppDestination.Edit -> crossfade()
+            is AppDestination.Edit -> crossFade()
             AppDestination.Grid -> {
                 if (to is AppDestination.Settings) {
                     slide()
                 } else {
-                    crossfade()
+                    crossFade()
                 }
             }
 

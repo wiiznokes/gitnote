@@ -194,6 +194,8 @@ private fun GridView(
         // todo: add scroll bar
 
         val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
+        val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
+        val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
 
         LazyVerticalStaggeredGrid(
             modifier = Modifier
@@ -216,10 +218,9 @@ private fun GridView(
 
             items(
                 items = notes,
-                key = { it.id }
-            ) { note ->
+                key = { it.note.id }
+            ) { gridNote ->
 
-                val isSelected = selectedNotes.contains(note.relativePath)
 
                 val dropDownExpanded = remember {
                     mutableStateOf(false)
@@ -234,7 +235,7 @@ private fun GridView(
                             width = 2.dp,
                             color = MaterialTheme.colorScheme.primary
                         )
-                    } else if (isSelected) {
+                    } else if (gridNote.selected) {
                         BorderStroke(
                             width = 2.dp,
                             color = MaterialTheme.colorScheme.onSurface
@@ -247,8 +248,7 @@ private fun GridView(
                     },
                     modifier = Modifier
                         .sizeIn(
-                            maxHeight = if (vm.prefs.showFullNoteHeight.getAsState().value)
-                                Dp.Unspecified else 500.dp
+                            maxHeight = if (showFullNoteHeight.value) Dp.Unspecified else 500.dp
                         )
                         .padding(3.dp)
                         .combinedClickable(
@@ -258,11 +258,14 @@ private fun GridView(
                             onClick = {
                                 if (selectedNotes.isEmpty()) {
                                     onEditClick(
-                                        note.copy(),
+                                        gridNote.note,
                                         EditType.Update
                                     )
                                 } else {
-                                    vm.selectNote(note.relativePath, add = !isSelected)
+                                    vm.selectNote(
+                                        gridNote.note.relativePath,
+                                        add = !gridNote.selected
+                                    )
                                 }
                             }
                         ),
@@ -275,13 +278,13 @@ private fun GridView(
                                 CustomDropDownModel(
                                     text = "Delete this note",
                                     onClick = {
-                                        vm.deleteNote(note)
+                                        vm.deleteNote(gridNote.note)
                                     }
                                 ),
                                 if (selectedNotes.isEmpty()) CustomDropDownModel(
                                     text = "Select multiple notes",
                                     onClick = {
-                                        vm.selectNote(note.relativePath, true)
+                                        vm.selectNote(gridNote.note.relativePath, true)
                                     }
                                 ) else null,
                             )
@@ -294,7 +297,8 @@ private fun GridView(
                             horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
-                                text = note.nameWithoutExtension(),
+                                text = if (showFullPathOfNotes.value)
+                                    gridNote.note.relativePath else gridNote.title,
                                 modifier = Modifier
                                     .padding(bottom = 6.dp),
                                 overflow = TextOverflow.Ellipsis,
@@ -305,7 +309,7 @@ private fun GridView(
                             )
 
                             Text(
-                                text = note.content,
+                                text = gridNote.note.content,
                                 modifier = Modifier,
                                 overflow = TextOverflow.Ellipsis,
                                 color = MaterialTheme.colorScheme.onSurface

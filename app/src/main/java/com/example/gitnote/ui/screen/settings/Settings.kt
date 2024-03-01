@@ -1,12 +1,16 @@
 package com.example.gitnote.ui.screen.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -22,12 +26,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.example.gitnote.R
 import com.example.gitnote.ui.component.BaseDialog
+import com.example.gitnote.ui.component.CustomDropDown
+import com.example.gitnote.ui.component.CustomDropDownModel
 import com.example.gitnote.ui.component.GetStringDialog
 import com.example.gitnote.ui.component.SimpleIcon
+import com.example.gitnote.ui.theme.GitNoteTheme
+import com.example.gitnote.ui.theme.Theme
 
 
 private val padding = 12.dp
@@ -70,7 +79,8 @@ fun DefaultSettingsRow(
     subTitle: String? = null,
     startIcon: ImageVector? = null,
     endContent: (@Composable () -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    showFullText: Boolean = true,
+    onClick: (() -> Unit)? = null,
 ) {
     val modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
 
@@ -113,10 +123,11 @@ fun DefaultSettingsRow(
                         subTitle?.let {
                             if (it.isNotEmpty()) {
                                 Text(
-                                    modifier = Modifier,
+                                    modifier = Modifier
+                                        .padding(top = 3.dp),
                                     text = it,
                                     overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
+                                    maxLines = if (showFullText) Int.MAX_VALUE else 1,
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
                             }
@@ -200,6 +211,7 @@ fun StringSettings(
     startIcon: ImageVector? = null,
     endContent: (@Composable () -> Unit)? = null,
     stringValue: String,
+    showFullText: Boolean = true,
     onChange: (String) -> Unit,
 ) {
 
@@ -212,6 +224,7 @@ fun StringSettings(
         subTitle = subtitle,
         startIcon = startIcon,
         endContent = endContent,
+        showFullText = showFullText,
         onClick = {
             expanded.value = true
         }
@@ -224,5 +237,44 @@ fun StringSettings(
         defaultString = stringValue,
         onValidation = onChange
     )
+
+}
+
+
+@Preview
+@Composable
+private fun SettingsPreview() {
+
+    GitNoteTheme(
+        darkTheme = false,
+        dynamicColor = true
+    ) {
+        SettingsSection(
+            title = "Grid"
+        ) {
+            ToggleableSettings(
+                title = "Always show the full path of notes",
+                subtitle = "Note that the default behavior will only print the path if more than two note share the same name",
+                checked = true,
+                onCheckedChange = {
+                }
+            )
+            ToggleableSettings(
+                title = "Show long notes entirely",
+                checked = true,
+                onCheckedChange = {
+                }
+            )
+
+            ToggleableSettings(
+                title = "Show long notes entirely",
+                subtitle = "Note that the default behavior will only print the path if more than two note share the same name",
+                checked = true,
+                onCheckedChange = {
+                },
+                icon = Icons.Default.Edit
+            )
+        }
+    }
 
 }

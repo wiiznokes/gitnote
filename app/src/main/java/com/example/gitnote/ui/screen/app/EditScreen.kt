@@ -1,5 +1,6 @@
 package com.example.gitnote.ui.screen.app
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +66,7 @@ fun EditScreen(
     onFinished: () -> Unit,
 ) {
 
+    Log.d(TAG, "init: $initialNote, $editType")
     val vm = viewModel<EditViewModel>(
         factory = viewModelFactory { EditViewModel() }
     )

@@ -1,6 +1,7 @@
 package com.example.gitnote.data.platform
 
 import android.os.Environment
+import android.util.Log
 import com.example.gitnote.data.removeFirstAndLastSlash
 import com.example.gitnote.ui.model.FileExtension
 import com.example.gitnote.util.toResult

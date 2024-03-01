@@ -32,6 +32,7 @@ fun <T> toResult(fn: () -> T): Result<T> {
     return try {
         success(fn())
     } catch (e: Exception) {
+        e.printStackTrace()
         failure(e)
     }
 }
