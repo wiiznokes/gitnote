@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +36,7 @@ fun GetStringDialog(
     defaultString: String = "",
     singleLine: Boolean = true,
     unExpandedOnValidation: Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text,
     onValidation: (String) -> Unit,
 ) {
 
@@ -71,6 +74,7 @@ fun GetStringDialog(
                 )
             },
             singleLine = singleLine,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             keyboardActions = KeyboardActions(
                 onDone = {
                     onValidation(name.text)
