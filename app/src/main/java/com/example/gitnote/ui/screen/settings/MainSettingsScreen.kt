@@ -1,6 +1,7 @@
 package com.example.gitnote.ui.screen.settings
 
 import android.content.ActivityNotFoundException
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.gitnote.BuildConfig
 import com.example.gitnote.R
 import com.example.gitnote.ui.component.AppPage
@@ -195,6 +197,7 @@ fun MainSettingsScreen(
                     vm.update { vm.prefs.password.update(it) }
                 },
                 showFullText = false,
+                keyboardType = KeyboardType.Password
             )
 
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
@@ -223,6 +226,7 @@ fun MainSettingsScreen(
                     }
                 },
                 showFullText = false,
+                keyboardType = KeyboardType.Uri
             )
 
             val expanded = remember {
