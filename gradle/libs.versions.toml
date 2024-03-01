@@ -23,7 +23,7 @@ junit-ktx = "1.1.5"
 constraintlayout = "1.0.1"
 ui-tooling = "1.6.2"
 room = "2.6.1"
-ksp = "1.9.22-1.0.17"
+ksp = "1.9.22-1.0.18"
 
 [libraries]
 # AndroidX Core
