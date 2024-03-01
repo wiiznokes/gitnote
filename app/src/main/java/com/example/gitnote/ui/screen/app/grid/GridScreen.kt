@@ -194,6 +194,8 @@ private fun GridView(
         // todo: add scroll bar
 
         val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
+        val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
+        val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
 
         LazyVerticalStaggeredGrid(
             modifier = Modifier
@@ -246,8 +248,7 @@ private fun GridView(
                     },
                     modifier = Modifier
                         .sizeIn(
-                            maxHeight = if (vm.prefs.showFullNoteHeight.getAsState().value)
-                                Dp.Unspecified else 500.dp
+                            maxHeight = if (showFullNoteHeight.value) Dp.Unspecified else 500.dp
                         )
                         .padding(3.dp)
                         .combinedClickable(
@@ -261,7 +262,10 @@ private fun GridView(
                                         EditType.Update
                                     )
                                 } else {
-                                    vm.selectNote(gridNote.note.relativePath, add = !gridNote.selected)
+                                    vm.selectNote(
+                                        gridNote.note.relativePath,
+                                        add = !gridNote.selected
+                                    )
                                 }
                             }
                         ),
@@ -293,7 +297,8 @@ private fun GridView(
                             horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
-                                text = gridNote.title,
+                                text = if (showFullPathOfNotes.value)
+                                    gridNote.note.relativePath else gridNote.title,
                                 modifier = Modifier
                                     .padding(bottom = 6.dp),
                                 overflow = TextOverflow.Ellipsis,
