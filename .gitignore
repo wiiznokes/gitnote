@@ -32,3 +32,4 @@ google-services.json
 *.hprof
 
 libgit2-android
+.project
