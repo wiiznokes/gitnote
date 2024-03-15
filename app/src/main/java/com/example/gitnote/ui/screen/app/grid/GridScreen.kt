@@ -43,6 +43,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -172,9 +174,18 @@ private fun GridView(
 
     val gridState = rememberLazyStaggeredGridState()
 
-    LaunchedEffect(key1 = vm.query.collectAsState().value) {
-        gridState.animateScrollToItem(index = 0)
+
+    val query = vm.query.collectAsState()
+
+    var lastQuery: String = rememberSaveable { query.value }
+
+    if (lastQuery != query.value) {
+        lastQuery = query.value
+        LaunchedEffect(null) {
+            gridState.animateScrollToItem(index = 0)
+        }
     }
+
 
     val nestedScrollConnection = rememberNestedScrollConnection(
         collapsingTopHeight = maxOffset,
