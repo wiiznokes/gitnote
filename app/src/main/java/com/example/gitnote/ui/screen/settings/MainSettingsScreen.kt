@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -229,7 +230,7 @@ fun MainSettingsScreen(
                 keyboardType = KeyboardType.Uri
             )
 
-            val expanded = remember {
+            val expanded = rememberSaveable {
                 mutableStateOf(false)
             }
 

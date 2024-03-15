@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -152,7 +153,7 @@ fun <T> MultipleChoiceSettings(
     onOptionClick: (T) -> Unit,
 ) {
 
-    val expanded = remember {
+    val expanded = rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -218,7 +219,7 @@ fun StringSettings(
     onChange: (String) -> Unit,
 ) {
 
-    val expanded = remember {
+    val expanded = rememberSaveable {
         mutableStateOf(false)
     }
 
