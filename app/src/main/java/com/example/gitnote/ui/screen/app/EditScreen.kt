@@ -1,6 +1,5 @@
 package com.example.gitnote.ui.screen.app
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,16 +29,12 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,79 +57,26 @@ private const val TAG = "EditScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
-    _editType: EditType,
-    _initialNote: Note,
+    initialEditType: EditType,
+    initialNote: Note,
     onFinished: () -> Unit,
 ) {
 
-    var editType = _editType
-    var initialNote = _initialNote
 
-    Log.d(TAG, "init: $initialNote, $editType")
     val vm = viewModel<EditViewModel>(
-        factory = viewModelFactory { EditViewModel() }
+        factory = viewModelFactory {
+            EditViewModel(initialEditType, initialNote)
+        }
     )
-
-    val name = remember {
-        val initialName = initialNote.nameWithoutExtension()
-        mutableStateOf(TextFieldValue(initialName, selection = TextRange(initialName.length)))
-    }
-    var content by remember {
-        mutableStateOf(
-            TextFieldValue(
-                initialNote.content,
-                selection = TextRange(0)
-            )
-        )
-    }
-
-    val fileExtension = remember {
-        mutableStateOf(initialNote.fileExtension())
-    }
 
 
     val nameFocusRequester = remember { FocusRequester() }
     val textFocusRequester = remember { FocusRequester() }
 
+
     LaunchedEffect(null) {
-        when (editType) {
-            EditType.Create -> nameFocusRequester.requestFocus()
-            EditType.Update -> { }
-        }
-    }
-
-    fun onValidation(leave: Boolean = true) {
-
-        when (editType) {
-            EditType.Create -> vm.create(
-                parentPath = initialNote.parentPath(),
-                name = name.value.text,
-                fileExtension = fileExtension.value,
-                content = content.text,
-                id = initialNote.id
-            ).onSuccess {
-                if (leave) {
-                    onFinished()
-                } else {
-                    editType = EditType.Update
-                    initialNote = it
-                }
-            }
-
-            EditType.Update -> vm.update(
-                previousNote = initialNote,
-                parentPath = initialNote.parentPath(),
-                name = name.value.text,
-                fileExtension = fileExtension.value,
-                content = content.text,
-                id = initialNote.id
-            ).onSuccess {
-                if (leave)  {
-                    onFinished()
-                } else {
-                    initialNote = it
-                }
-            }
+        if (vm.editType == EditType.Create) {
+            nameFocusRequester.requestFocus()
         }
     }
 
@@ -165,9 +107,9 @@ fun EditScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(nameFocusRequester),
-                        value = name.value,
+                        value = vm.name.value,
                         onValueChange = {
-                            name.value = it
+                            vm.name.value = it
                         },
                         singleLine = true,
                         placeholder = {
@@ -189,7 +131,7 @@ fun EditScreen(
                     )
                 },
                 actions = {
-                    ExtensionChooser(fileExtension)
+                    ExtensionChooser(vm.fileExtension)
                     Spacer(modifier = Modifier.width(10.dp))
                     IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
@@ -197,7 +139,7 @@ fun EditScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            onValidation(leave = false)
+                            vm.onValidation(onSuccess = null)
                         }
                     ) {
                         SimpleIcon(
@@ -211,13 +153,13 @@ fun EditScreen(
 
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (name.value.text.isNotEmpty() && content.text.isNotEmpty()) {
+            if (vm.name.value.text.isNotEmpty() && vm.content.value.text.isNotEmpty()) {
                 FloatingActionButton(
                     modifier = Modifier,
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
-                        onValidation()
+                        vm.onValidation(onSuccess = onFinished)
                     }
                 ) {
                     SimpleIcon(
@@ -233,9 +175,9 @@ fun EditScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
                 .focusRequester(textFocusRequester),
-            value = content,
+            value = vm.content.value,
             onValueChange = {
-                content = it
+                vm.content.value = it
             },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
@@ -247,7 +189,7 @@ fun EditScreen(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    onValidation()
+                    vm.onValidation(onSuccess = onFinished)
                 }
             )
         )
