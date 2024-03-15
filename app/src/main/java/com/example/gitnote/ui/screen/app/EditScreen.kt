@@ -29,8 +29,11 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -73,13 +76,16 @@ fun EditScreen(
     val nameFocusRequester = remember { FocusRequester() }
     val textFocusRequester = remember { FocusRequester() }
 
-
-    LaunchedEffect(null) {
-        if (vm.editType == EditType.Create) {
-            nameFocusRequester.requestFocus()
+    // tricks to request focus only one time
+    var lastId: Boolean by rememberSaveable { mutableStateOf(false) }
+    if (!lastId) {
+        lastId = true
+        LaunchedEffect(null) {
+            if (vm.editType == EditType.Create) {
+                nameFocusRequester.requestFocus()
+            }
         }
     }
-
 
     Scaffold(
         contentColor = MaterialTheme.colorScheme.background,
