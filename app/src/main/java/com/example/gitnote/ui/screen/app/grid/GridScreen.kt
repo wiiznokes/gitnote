@@ -168,12 +168,12 @@ private fun GridView(
     selectedNotes: List<String>,
     fabExpanded: MutableState<Boolean>,
 ) {
-    val notes by vm.gridNotes.collectAsState()
+    val gridNotes by vm.gridNotes.collectAsState()
 
     val gridState = rememberLazyStaggeredGridState()
-
-    LaunchedEffect(key1 = notes) {
-        gridState.scrollToItem(index = 0)
+    
+    LaunchedEffect(key1 = vm.query.collectAsState().value) {
+        gridState.animateScrollToItem(index = 0)
     }
 
     val nestedScrollConnection = rememberNestedScrollConnection(
@@ -217,7 +217,7 @@ private fun GridView(
             }
 
             items(
-                items = notes,
+                items = gridNotes,
                 key = { it.note.id }
             ) { gridNote ->
 
