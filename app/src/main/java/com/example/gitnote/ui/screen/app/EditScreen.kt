@@ -83,7 +83,7 @@ fun EditScreen(
         mutableStateOf(
             TextFieldValue(
                 initialNote.content,
-                selection = TextRange(initialNote.content.length)
+                selection = TextRange(0)
             )
         )
     }
@@ -99,7 +99,7 @@ fun EditScreen(
     LaunchedEffect(null) {
         when (editType) {
             EditType.Create -> nameFocusRequester.requestFocus()
-            EditType.Update -> textFocusRequester.requestFocus()
+            EditType.Update -> { }
         }
     }
 
