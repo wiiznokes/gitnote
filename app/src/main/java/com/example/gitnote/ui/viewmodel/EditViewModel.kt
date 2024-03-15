@@ -51,7 +51,7 @@ class EditViewModel : ViewModel() {
         fileExtension: FileExtension,
         content: String,
         id: Int
-    ): Result<Unit> {
+    ): Result<Note> {
 
         if (!NameValidation.check(name)) {
             uiHelper.makeToast(uiHelper.getString(R.string.invalid_name))
@@ -82,13 +82,13 @@ class EditViewModel : ViewModel() {
             }
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        val newNote = Note.new(
+            relativePath = relativePath,
+            content = content,
+            id = id
+        )
 
-            val newNote = Note.new(
-                relativePath = relativePath,
-                content = content,
-                id = id
-            )
+        CoroutineScope(Dispatchers.IO).launch {
 
             storageManager.updateNote(
                 new = newNote,
@@ -100,7 +100,7 @@ class EditViewModel : ViewModel() {
 
             uiHelper.makeToast("Note successfully updated")
         }
-        return success(Unit)
+        return success(newNote)
     }
 
     /** Return early to note block the ui thread.
@@ -112,7 +112,7 @@ class EditViewModel : ViewModel() {
         fileExtension: FileExtension,
         content: String,
         id: Int
-    ): Result<Unit> {
+    ): Result<Note> {
 
 
         if (!NameValidation.check(name)) {
@@ -148,7 +148,7 @@ class EditViewModel : ViewModel() {
             uiHelper.makeToast("Note successfully created")
         }
 
-        return success(Unit)
+        return success(note)
     }
 
 }

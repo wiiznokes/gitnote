@@ -171,7 +171,7 @@ private fun GridView(
     val gridNotes by vm.gridNotes.collectAsState()
 
     val gridState = rememberLazyStaggeredGridState()
-    
+
     LaunchedEffect(key1 = vm.query.collectAsState().value) {
         gridState.animateScrollToItem(index = 0)
     }

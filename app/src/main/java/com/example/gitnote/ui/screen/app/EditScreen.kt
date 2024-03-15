@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,10 +62,13 @@ private const val TAG = "EditScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
-    editType: EditType,
-    initialNote: Note,
+    _editType: EditType,
+    _initialNote: Note,
     onFinished: () -> Unit,
 ) {
+
+    var editType = _editType
+    var initialNote = _initialNote
 
     Log.d(TAG, "init: $initialNote, $editType")
     val vm = viewModel<EditViewModel>(
@@ -99,7 +103,8 @@ fun EditScreen(
         }
     }
 
-    val onValidation = {
+    fun onValidation(leave: Boolean = true) {
+
         when (editType) {
             EditType.Create -> vm.create(
                 parentPath = initialNote.parentPath(),
@@ -107,7 +112,14 @@ fun EditScreen(
                 fileExtension = fileExtension.value,
                 content = content.text,
                 id = initialNote.id
-            ).onSuccess { onFinished() }
+            ).onSuccess {
+                if (leave) {
+                    onFinished()
+                } else {
+                    editType = EditType.Update
+                    initialNote = it
+                }
+            }
 
             EditType.Update -> vm.update(
                 previousNote = initialNote,
@@ -116,9 +128,16 @@ fun EditScreen(
                 fileExtension = fileExtension.value,
                 content = content.text,
                 id = initialNote.id
-            ).onSuccess { onFinished() }
+            ).onSuccess {
+                if (leave)  {
+                    onFinished()
+                } else {
+                    initialNote = it
+                }
+            }
         }
     }
+
 
     Scaffold(
         contentColor = MaterialTheme.colorScheme.background,
@@ -178,11 +197,11 @@ fun EditScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            onValidation()
+                            onValidation(leave = false)
                         }
                     ) {
                         SimpleIcon(
-                            imageVector = Icons.Default.Done,
+                            imageVector = Icons.Default.Save,
                         )
                     }
                 }
