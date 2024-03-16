@@ -55,7 +55,7 @@ fun AppScreen(
 
             is AppDestination.Edit -> EditScreen(
                 initialNote = it.note,
-                editType = it.editType,
+                initialEditType = it.editType,
                 onFinished = {
                     navController.pop()
                 }

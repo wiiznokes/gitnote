@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,7 +42,7 @@ fun FolderFiltersScreen(
         title = "Ignore list",
         onBackClick = onBackClick,
         actions = {
-            val showCreateFilter = remember {
+            val showCreateFilter = rememberSaveable {
                 mutableStateOf(false)
             }
 
@@ -73,7 +74,7 @@ fun FolderFiltersScreen(
         ) {
             items(folderFilters.value.toList()) {
 
-                val showEditFilter = remember {
+                val showEditFilter = rememberSaveable {
                     mutableStateOf(false)
                 }
 
@@ -109,7 +110,7 @@ fun FolderFiltersScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
 
-                    val showDeleteDialog = remember {
+                    val showDeleteDialog = rememberSaveable {
                         mutableStateOf(false)
                     }
 
