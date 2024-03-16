@@ -44,6 +44,7 @@ class GitManager {
         private const val TAG = "GitManager"
 
         init {
+            Log.d(TAG, "init")
             System.loadLibrary("gitnote")
         }
     }
