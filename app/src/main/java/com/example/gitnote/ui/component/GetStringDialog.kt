@@ -56,7 +56,7 @@ fun GetStringDialog(
             focusRequester.requestFocus()
         }
 
-        var name by remember(expanded) {
+        var name by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(
                 TextFieldValue(
                     defaultString,
