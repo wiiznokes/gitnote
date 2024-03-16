@@ -19,7 +19,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableFloatState
@@ -30,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.IntOffset
@@ -65,12 +68,13 @@ fun FloatingActionButtons(
             FABItem(
                 icon = Icons.Default.Add,
                 label = "create",
-                type = FABItemType.CREATE
+                type = FABItemType.CREATE,
+                containerColor = MaterialTheme.colorScheme.tertiary
             ),
             FABItem(
                 icon = Icons.Default.Search,
                 label = "search",
-                type = FABItemType.SEARCH
+                type = FABItemType.SEARCH,
             ),
         ),
         onItemClicked = {
@@ -126,11 +130,12 @@ private fun FABs(
                         onClick = {
                             expanded.value = false
                             onItemClicked(item)
-                        }
+                        },
+                        containerColor = item.containerColor ?: FloatingActionButtonDefaults.containerColor,
                     ) {
                         Icon(
                             imageVector = item.icon,
-                            contentDescription = item.label
+                            contentDescription = item.label,
                         )
                     }
                 }
@@ -144,13 +149,11 @@ private fun FABs(
             onClick = {
                 expanded.value = !expanded.value
             },
-            containerColor = MaterialTheme.colorScheme.primary,
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
                 contentDescription = null,
                 modifier = Modifier.rotate(rotation),
-                tint = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -159,7 +162,8 @@ private fun FABs(
 private data class FABItem(
     val icon: ImageVector,
     val label: String,
-    val type: FABItemType
+    val type: FABItemType,
+    val containerColor: Color? = null,
 )
 
 private enum class FABItemType {
