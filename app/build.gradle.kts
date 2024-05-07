@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.gitnote"
+    namespace = "io.github.wiiznokes.gitnote"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.gitnote"
+        applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 33
         targetSdk = 34
         versionCode = 1

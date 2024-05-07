@@ -1,29 +1,33 @@
 [versions]
-agp = "8.3.0"
+agp = "8.4.0"
+
 # https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
-kotlin = "1.9.22"
-compose-compiler = "1.5.8"
+kotlin = "1.9.23"
+compose-compiler = "1.5.13"
+
+# https://github.com/google/ksp/releases
+ksp = "1.9.23-1.0.20"
+
 fuzzywuzzy = "1.4.0"
 kotlinx-coroutines-test = "1.8.0"
-ktx = "1.12.0"
+ktx = "1.13.1"
 runner = "1.5.2"
 viewmodel-lifecycle = "2.7.0"
 splash-screen = "1.0.1"
-compose-activity = "1.8.2"
+compose-activity = "1.9.0"
 paging = "3.2.1"
-datastore-preferences = "1.0.0"
+datastore-preferences = "1.1.1"
 work-runtime = "2.9.0"
-compose-bom = "2024.02.02"
+compose-bom = "2024.05.00"
 accompanist = "0.34.0"
 reimagined-navigation = "1.5.0"
-about-libraries = "11.1.0"
+about-libraries = "11.1.4"
 markdown = "0.6.1"
 document-file = "1.0.1"
 junit-ktx = "1.1.5"
 constraintlayout = "1.0.1"
-ui-tooling = "1.6.3"
+ui-tooling = "1.6.7"
 room = "2.6.1"
-ksp = "1.9.22-1.0.17"
 
 [libraries]
 # AndroidX Core
