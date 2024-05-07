@@ -10,14 +10,14 @@ git_repository *repo = NULL;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_initLib(JNIEnv *, jclass) {
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(JNIEnv *, jclass) {
     int err = git_libgit2_init();
     CHECK_LG2_RET(err, "initLibGit2");
 }
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_createRepoLib(JNIEnv *env, jclass,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib(JNIEnv *env, jclass,
                                                             jstring repoPathObj) {
     const char *repo_path = env->GetStringUTFChars(repoPathObj, nullptr);
     int err = git_repository_init(&repo, repo_path, false);
@@ -27,7 +27,7 @@ Java_com_example_gitnote_manager_GitManagerKt_createRepoLib(JNIEnv *env, jclass,
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_openRepoLib(JNIEnv *env, jclass,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib(JNIEnv *env, jclass,
                                                           jstring repoPathObj) {
     const char *repo_path = env->GetStringUTFChars(repoPathObj, nullptr);
     int err = git_repository_open(&repo, repo_path);
@@ -39,7 +39,7 @@ Java_com_example_gitnote_manager_GitManagerKt_openRepoLib(JNIEnv *env, jclass,
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_cloneRepoLib(JNIEnv *env, jclass,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib(JNIEnv *env, jclass,
                                                            jstring repoPathObj,
                                                            jstring remoteUrlObj,
                                                            jstring usernameObj,
@@ -72,7 +72,7 @@ Java_com_example_gitnote_manager_GitManagerKt_cloneRepoLib(JNIEnv *env, jclass,
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env, jclass clazz) {
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env, jclass clazz) {
 
     // https://stackoverflow.com/questions/15717625/how-to-get-the-last-commit-from-head-in-a-git-repository-using-libgit2
     int err;
@@ -96,7 +96,7 @@ Java_com_example_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env, jclass 
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, jclass,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, jclass,
                                                            jstring usernameObj) {
 
     int err;
@@ -187,7 +187,7 @@ Java_com_example_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, jclass,
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_pushLib(JNIEnv *env, jclass clazz,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib(JNIEnv *env, jclass clazz,
                                                       jstring usernameObj,
                                                       jstring passwordObj,
                                                       jobject progressCallback) {
@@ -213,7 +213,7 @@ Java_com_example_gitnote_manager_GitManagerKt_pushLib(JNIEnv *env, jclass clazz,
 }
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_pullLib(JNIEnv *env, jclass clazz,
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib(JNIEnv *env, jclass clazz,
                                                       jstring usernameObj,
                                                       jstring passwordObj,
                                                       jobject progressCallback) {
@@ -239,17 +239,17 @@ Java_com_example_gitnote_manager_GitManagerKt_pullLib(JNIEnv *env, jclass clazz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_freeLib(JNIEnv *env, jclass clazz) {
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_freeLib(JNIEnv *env, jclass clazz) {
     git_libgit2_shutdown();
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_closeRepoLib(JNIEnv *env, jclass clazz) {
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_closeRepoLib(JNIEnv *env, jclass clazz) {
     git_repository_free(repo);
 }
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_gitnote_manager_GitManagerKt_isChangeLib(JNIEnv *env, jclass clazz) {
+Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_isChangeLib(JNIEnv *env, jclass clazz) {
 
     git_status_list *status_list = NULL;
     git_status_options options = GIT_STATUS_OPTIONS_INIT;
