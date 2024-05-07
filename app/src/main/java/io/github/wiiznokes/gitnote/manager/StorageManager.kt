@@ -9,6 +9,7 @@ import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
 
@@ -173,9 +174,8 @@ class StorageManager {
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
-
+            success(Unit)
         }
-        return success(Unit)
     }
 
     suspend fun deleteNotes(noteRelativePaths: List<String>): Result<Unit> = locker.withLock {
@@ -203,9 +203,8 @@ class StorageManager {
                     uiHelper.makeToast(message)
                 }
             }
+            success(Unit)
         }
-
-        return success(Unit)
     }
 
     suspend fun createNoteFolder(noteFolder: NoteFolder): Result<Unit> = locker.withLock {
@@ -235,17 +234,43 @@ class StorageManager {
 
 
     private suspend fun <T> update(
-        f: suspend () -> T
-    ): T {
-        gitManager.pull(prefs.gitCreed())
-        gitManager.commitAll(prefs.userName.get())
-        updateDatabaseWithoutLocker()
+        f: suspend () -> Result<T>
+    ): Result<T> {
 
-        val payload = f()
 
-        gitManager.commitAll(prefs.userName.get())
-        gitManager.push(prefs.gitCreed())
+
+        gitManager.commitAll(prefs.userName.get()).onFailure {
+            return failure(it)
+        }
+        updateDatabaseWithoutLocker().onFailure {
+            return failure(it)
+        }
+
+        val payload = f().fold(
+            onFailure = {
+                return failure(it)
+            },
+            onSuccess = {
+                it
+            }
+        )
+
+        gitManager.pull(prefs.gitCreed()).onFailure {
+            it.printStackTrace()
+        }
+
+        updateDatabaseWithoutLocker().onFailure {
+            return failure(it)
+        }
+
+        gitManager.commitAll(prefs.userName.get()).onFailure {
+            return failure(it)
+        }
+        gitManager.push(prefs.gitCreed()).onFailure {
+            it.printStackTrace()
+        }
         prefs.databaseCommit.update(gitManager.lastCommit())
-        return payload
+
+        return success(payload)
     }
 }
