@@ -5,15 +5,15 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
-import io.github.wiiznokes.gitnote.ui.util.slide
-import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavTransitionScope
 import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
+import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 
 
 // https://github.com/ReVanced/revanced-manager-compose/blob/dev/app/src/main/java/app/revanced/manager/ui/screen/settings/AboutSettingsScreen.kt

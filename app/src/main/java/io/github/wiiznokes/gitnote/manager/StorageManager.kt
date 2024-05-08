@@ -238,7 +238,6 @@ class StorageManager {
     ): Result<T> {
 
 
-
         gitManager.commitAll(prefs.userName.get()).onFailure {
             return failure(it)
         }

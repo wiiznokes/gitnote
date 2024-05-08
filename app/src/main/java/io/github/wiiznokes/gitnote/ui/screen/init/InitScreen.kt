@@ -3,12 +3,6 @@ package io.github.wiiznokes.gitnote.ui.screen.init
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.wiiznokes.gitnote.ui.destination.InitDestination
-import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
-import io.github.wiiznokes.gitnote.ui.util.crossFade
-import io.github.wiiznokes.gitnote.ui.util.slide
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -18,6 +12,12 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.ui.destination.InitDestination
+import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.util.crossFade
+import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.runBlocking
 
 private const val TAG = "InitScreen"

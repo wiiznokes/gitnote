@@ -1,8 +1,6 @@
 package io.github.wiiznokes.gitnote
 
 import android.content.Context
-import androidx.room.Room
-import androidx.room.RoomDatabase
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.UiHelper
@@ -16,19 +14,20 @@ interface AppModule {
     val storageManager: StorageManager
     val gitManager: GitManager
     val appPreferences: AppPreferences
+    val context: Context
 
 }
 
 class AppModuleImpl(
-    private val appContext: Context
+    override val context: Context
 ) : AppModule {
 
     override val repoDatabase: RepoDatabase by lazy {
-        RepoDatabase.buildDatabase(appContext)
+        RepoDatabase.buildDatabase(context)
     }
 
     override val uiHelper: UiHelper by lazy {
-        UiHelper(appContext)
+        UiHelper(context)
     }
     override val storageManager: StorageManager by lazy {
         StorageManager()
@@ -37,6 +36,6 @@ class AppModuleImpl(
         GitManager()
     }
     override val appPreferences: AppPreferences by lazy {
-        AppPreferences(appContext)
+        AppPreferences(context)
     }
 }

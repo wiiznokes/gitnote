@@ -1,7 +1,6 @@
 package io.github.wiiznokes.gitnote.data.platform
 
 import android.os.Environment
-import android.util.Log
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.util.toResult
@@ -71,7 +70,7 @@ sealed class NodeFs(
         override val path: String,
         override val fullName: String,
         val extension: FileExtension,
-        ): NodeFs(path, fullName) {
+    ) : NodeFs(path, fullName) {
 
         companion object {
             fun fromPath(path: String): File = Paths.get(path).toFileFs()
@@ -80,7 +79,8 @@ sealed class NodeFs(
             }
         }
 
-        fun nameWithoutExtension() = fullName.substring(0, fullName.lastIndex - extension.text.length)
+        fun nameWithoutExtension() =
+            fullName.substring(0, fullName.lastIndex - extension.text.length)
 
         override fun delete(): Result<Unit> {
 
@@ -106,7 +106,7 @@ sealed class NodeFs(
     class Folder(
         override val path: String,
         override val fullName: String,
-    ): NodeFs(path, fullName) {
+    ) : NodeFs(path, fullName) {
 
         companion object {
             private const val TAG = "FolderFs"
@@ -118,7 +118,7 @@ sealed class NodeFs(
 
         }
 
-        suspend fun <T>filterMapNodeFs(fn: suspend (NodeFs) -> T?): List<T> {
+        suspend fun <T> filterMapNodeFs(fn: suspend (NodeFs) -> T?): List<T> {
             val output = mutableListOf<T>()
             try {
                 pathFs.forEachDirectoryEntry { path ->
@@ -164,7 +164,6 @@ sealed class NodeFs(
         }
 
 
-
         fun createFolder(name: String): Result<Unit> {
             return toResult {
                 pathFs.resolve(name).createDirectory()
@@ -192,8 +191,6 @@ sealed class NodeFs(
 
     }
 }
-
-
 
 
 private fun File.toFolderFs(): NodeFs.Folder {

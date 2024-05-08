@@ -7,6 +7,7 @@ import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.data.requireNotEndOrStartWithSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 import java.time.Instant
 
 
@@ -61,7 +62,7 @@ data class Note(
     val content: String,
     val lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
     val id: Int = RepoDatabase.generateUid()
-) : Parcelable {
+) : Parcelable, Serializable {
 
     override fun toString(): String =
         "Note(relativePath=$relativePath, id=$id)"

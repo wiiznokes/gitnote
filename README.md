@@ -24,7 +24,6 @@ Because all apps which integrate git on Android either separate the note title f
 - [ ] easy login (without copy pasting token, like GitJournal)
 - [ ] Markdown integration
 - [ ] private repo with ssh
-- [ ] encryption
 
 <p  style="text-align: center;">
   <img src="assets/grid.png" width="32%"  alt="grid screen"/>
@@ -44,4 +43,4 @@ You can either download from the release page, or use [Obtainium](https://github
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
 - Rotation change will break ssl state. Workaround: restart the app
-- An error when saving a note will involve data loss. Saving in a temporary directory is planned and prioritized
+- Conflict will make the app crash

@@ -39,6 +39,7 @@ enum class NoteMinWidth(val size: Int) {
     C400(400),
     C500(500),
     C600(600);
+
     override fun toString(): String = this.size.toString()
 }
 

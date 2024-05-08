@@ -8,6 +8,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.olshevski.navigation.reimagined.AnimatedNavHost
+import dev.olshevski.navigation.reimagined.NavBackHandler
+import dev.olshevski.navigation.reimagined.navigate
+import dev.olshevski.navigation.reimagined.popAll
+import dev.olshevski.navigation.reimagined.popUpTo
+import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
@@ -18,13 +24,8 @@ import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.isEditUnsaved
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
-import dev.olshevski.navigation.reimagined.AnimatedNavHost
-import dev.olshevski.navigation.reimagined.NavBackHandler
-import dev.olshevski.navigation.reimagined.navigate
-import dev.olshevski.navigation.reimagined.popAll
-import dev.olshevski.navigation.reimagined.popUpTo
-import dev.olshevski.navigation.reimagined.rememberNavController
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -53,15 +54,24 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = dynamicColor
             ) {
 
+
                 val startDestination: Destination = remember {
                     if (!StoragePermissionHelper.isPermissionGranted()) {
                         Destination.Init(InitDestination.LocalStoragePermission)
                     } else {
-                        if (runBlocking { vm.tryInit() }) Destination.App(
-                            AppDestination.Grid
-                            //AppDestination.Settings(SettingsDestination.Main)
-                        )
-                        else Destination.Init(InitDestination.Main)
+                        if (runBlocking { vm.tryInit() }) {
+                            if (isEditUnsaved()) {
+                                Log.d(TAG, "launch as EDIT_IS_UNSAVED")
+                                Destination.App(
+                                    AppDestination.EditSaved
+                                )
+                            } else {
+                                Destination.App(
+                                    AppDestination.Grid
+                                    //AppDestination.Settings(SettingsDestination.Main)
+                                )
+                            }
+                        } else Destination.Init(InitDestination.Main)
                     }
                 }
 
