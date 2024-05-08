@@ -41,6 +41,7 @@ fun slide(backWard: Boolean = false) = slideInHorizontally(
  *  flow1.mapAndCombine(f(flow1) -> flow3)
  *  will return: flow(1, 3)
  */
-inline fun <T, R> Flow<T>.mapAndCombine(crossinline transform: suspend (value: T) -> R): Flow<Pair<T, R>> = transform { value ->
-    return@transform emit(Pair(value, transform(value)))
-}
+inline fun <T, R> Flow<T>.mapAndCombine(crossinline transform: suspend (value: T) -> R): Flow<Pair<T, R>> =
+    transform { value ->
+        return@transform emit(Pair(value, transform(value)))
+    }

@@ -18,7 +18,7 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(JNIEnv *, jclass) 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib(JNIEnv *env, jclass,
-                                                            jstring repoPathObj) {
+                                                                    jstring repoPathObj) {
     const char *repo_path = env->GetStringUTFChars(repoPathObj, nullptr);
     int err = git_repository_init(&repo, repo_path, false);
     env->ReleaseStringUTFChars(repoPathObj, repo_path);
@@ -28,7 +28,7 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib(JNIEnv *env,
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib(JNIEnv *env, jclass,
-                                                          jstring repoPathObj) {
+                                                                  jstring repoPathObj) {
     const char *repo_path = env->GetStringUTFChars(repoPathObj, nullptr);
     int err = git_repository_open(&repo, repo_path);
     env->ReleaseStringUTFChars(repoPathObj, repo_path);
@@ -40,11 +40,11 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib(JNIEnv *env, j
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib(JNIEnv *env, jclass,
-                                                           jstring repoPathObj,
-                                                           jstring remoteUrlObj,
-                                                           jstring usernameObj,
-                                                           jstring passwordObj,
-                                                           jobject progressCallback) {
+                                                                   jstring repoPathObj,
+                                                                   jstring remoteUrlObj,
+                                                                   jstring usernameObj,
+                                                                   jstring passwordObj,
+                                                                   jobject progressCallback) {
 
     const char *repo_path = env->GetStringUTFChars(repoPathObj, nullptr);
     const char *remote_url = env->GetStringUTFChars(remoteUrlObj, nullptr);
@@ -97,7 +97,7 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env,
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, jclass,
-                                                           jstring usernameObj) {
+                                                                   jstring usernameObj) {
 
     int err;
 
@@ -188,9 +188,9 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, 
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib(JNIEnv *env, jclass clazz,
-                                                      jstring usernameObj,
-                                                      jstring passwordObj,
-                                                      jobject progressCallback) {
+                                                              jstring usernameObj,
+                                                              jstring passwordObj,
+                                                              jobject progressCallback) {
 
     const char *username;
     const char *password;
@@ -214,9 +214,9 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib(JNIEnv *env, jclas
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib(JNIEnv *env, jclass clazz,
-                                                      jstring usernameObj,
-                                                      jstring passwordObj,
-                                                      jobject progressCallback) {
+                                                              jstring usernameObj,
+                                                              jstring passwordObj,
+                                                              jobject progressCallback) {
 
     const char *username;
     const char *password;

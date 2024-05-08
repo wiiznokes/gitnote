@@ -2,8 +2,8 @@ package io.github.wiiznokes.gitnote.data
 
 import android.content.Context
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
-import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.SortType

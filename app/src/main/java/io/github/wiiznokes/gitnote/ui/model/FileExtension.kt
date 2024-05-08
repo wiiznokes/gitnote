@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.ui.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 
 // todo: add more or find another solution
@@ -9,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
-sealed class FileExtension(val text: String) : Parcelable {
+sealed class FileExtension(val text: String) : Parcelable, Serializable {
 
 
     class Md : FileExtension("md")

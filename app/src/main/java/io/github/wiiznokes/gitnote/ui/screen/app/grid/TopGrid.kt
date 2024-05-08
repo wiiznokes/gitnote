@@ -108,10 +108,12 @@ private fun SearchBar(
 
     var queryTextField by remember {
         Log.d(TAG, "")
-        mutableStateOf(TextFieldValue(
-            text = vm.query.value,
-            selection = TextRange(vm.query.value.length)
-        ))
+        mutableStateOf(
+            TextFieldValue(
+                text = vm.query.value,
+                selection = TextRange(vm.query.value.length)
+            )
+        )
     }
 
     val focusManager = LocalFocusManager.current

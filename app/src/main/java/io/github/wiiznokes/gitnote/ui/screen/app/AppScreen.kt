@@ -2,12 +2,6 @@ package io.github.wiiznokes.gitnote.ui.screen.app
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
-import io.github.wiiznokes.gitnote.ui.destination.AppDestination
-import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
-import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
-import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsScreen
-import io.github.wiiznokes.gitnote.ui.util.crossFade
-import io.github.wiiznokes.gitnote.ui.util.slide
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -16,6 +10,12 @@ import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.ui.destination.AppDestination
+import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
+import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
+import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsScreen
+import io.github.wiiznokes.gitnote.ui.util.crossFade
+import io.github.wiiznokes.gitnote.ui.util.slide
 
 
 private const val TAG = "AppScreen"
@@ -67,6 +67,14 @@ fun AppScreen(
                 onStorageFailure = onStorageFailure
             )
 
+            AppDestination.EditSaved -> EditScreen(
+                initialNote = null,
+                initialEditType = null,
+                onFinished = {
+                    navController.pop()
+                    navController.navigate(AppDestination.Grid)
+                }
+            )
         }
     }
 }
@@ -90,6 +98,7 @@ private object AppNavTransitionSpec : NavTransitionSpec<AppDestination> {
             }
 
             is AppDestination.Settings -> slide(backWard = true)
+            AppDestination.EditSaved -> crossFade()
         }
     }
 }

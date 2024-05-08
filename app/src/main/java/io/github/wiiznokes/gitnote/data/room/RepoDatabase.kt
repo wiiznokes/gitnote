@@ -2,17 +2,11 @@ package io.github.wiiznokes.gitnote.data.room
 
 import android.content.Context
 import android.util.Log
-import androidx.room.CoroutinesRoom
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
-import io.github.wiiznokes.gitnote.AppModule
-import io.github.wiiznokes.gitnote.AppModuleImpl
 import io.github.wiiznokes.gitnote.MyApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
@@ -30,7 +24,7 @@ abstract class RepoDatabase : RoomDatabase() {
     companion object {
         fun generateUid() = Random.Default.nextInt()
 
-         fun buildDatabase(context: Context): RepoDatabase {
+        fun buildDatabase(context: Context): RepoDatabase {
             val onMigration = object : Callback() {
                 override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
                     Log.d(TAG, "onDestructiveMigration")

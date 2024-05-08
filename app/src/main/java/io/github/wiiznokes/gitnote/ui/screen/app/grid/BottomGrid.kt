@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableFloatState
@@ -86,6 +85,7 @@ fun FloatingActionButtons(
                         EditType.Create
                     )
                 }
+
                 FABItemType.SEARCH -> {
                     searchFocusRequester.requestFocus()
                     keyboardController?.show()
@@ -122,7 +122,7 @@ private fun FABs(
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(15.dp)
-            ){
+            ) {
                 items(items) { item ->
 
                     FloatingActionButton(
@@ -131,7 +131,8 @@ private fun FABs(
                             expanded.value = false
                             onItemClicked(item)
                         },
-                        containerColor = item.containerColor ?: FloatingActionButtonDefaults.containerColor,
+                        containerColor = item.containerColor
+                            ?: FloatingActionButtonDefaults.containerColor,
                     ) {
                         Icon(
                             imageVector = item.icon,

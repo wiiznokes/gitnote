@@ -31,7 +31,6 @@ class InitViewModel : ViewModel() {
     }
 
 
-
     fun createRepo(repoPath: String, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {

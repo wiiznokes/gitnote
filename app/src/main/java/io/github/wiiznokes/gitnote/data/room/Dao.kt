@@ -10,6 +10,7 @@ import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import kotlinx.coroutines.flow.Flow
 
 private const val TAG = "Dao"
+
 @Dao
 interface RepoDatabaseDao {
 

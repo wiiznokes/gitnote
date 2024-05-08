@@ -40,15 +40,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.viewmodel.EditViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import io.github.wiiznokes.gitnote.ui.viewmodel.delegateEditVM
 
 
 private const val TAG = "EditScreen"
@@ -60,18 +58,13 @@ private const val TAG = "EditScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
-    initialEditType: EditType,
-    initialNote: Note,
+    initialEditType: EditType?,
+    initialNote: Note?,
     onFinished: () -> Unit,
 ) {
 
 
-    val vm = viewModel<EditViewModel>(
-        factory = viewModelFactory {
-            EditViewModel(initialEditType, initialNote)
-        }
-    )
-
+    val vm = delegateEditVM(initialEditType, initialNote)
 
     val nameFocusRequester = remember { FocusRequester() }
     val textFocusRequester = remember { FocusRequester() }
@@ -99,7 +92,10 @@ fun EditScreen(
                 ),
                 navigationIcon = {
                     IconButton(
-                        onClick = onFinished,
+                        onClick = {
+                            vm.onFinish()
+                            onFinished()
+                        },
                     ) {
                         SimpleIcon(
                             imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -165,6 +161,7 @@ fun EditScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
+                        vm.onFinish()
                         vm.onValidation(onSuccess = onFinished)
                     }
                 ) {
@@ -195,6 +192,7 @@ fun EditScreen(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
+                    vm.onFinish()
                     vm.onValidation(onSuccess = onFinished)
                 }
             )

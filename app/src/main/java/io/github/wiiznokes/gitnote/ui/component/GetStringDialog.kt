@@ -94,7 +94,7 @@ fun GetStringDialog(
                     }
                 }
             ),
-            trailingIcon = when(keyboardType){
+            trailingIcon = when (keyboardType) {
                 KeyboardType.Password -> {
                     {
                         val image = if (passwordVisible)
@@ -102,11 +102,12 @@ fun GetStringDialog(
                         else Icons.Filled.VisibilityOff
 
                         val description = if (passwordVisible) "Hide password" else "Show password"
-                        IconButton(onClick = {passwordVisible = !passwordVisible}){
-                            Icon(imageVector  = image, description)
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, description)
                         }
                     }
                 }
+
                 else -> null
             }
         )
