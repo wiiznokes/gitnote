@@ -64,3 +64,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: "packages"
+
+      - run: |
+          ls -l packages/
