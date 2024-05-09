@@ -60,7 +60,7 @@ jobs:
       version: ${{ github.env.VERSION_NAME }}
 
   publish:
-    needs: setup-env
+    needs: upload-artifacts
     runs-on: ubuntu-latest
 
     permissions:
