@@ -1,3 +1,6 @@
+import java.io.BufferedReader
+import java.io.InputStreamReader
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,8 +20,21 @@ android {
         minSdk = 33
         targetSdk = 34
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = File("VERSION").readText()
 
+        fun getGitHash(): String {
+            val command = "git rev-parse HEAD"
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+
+            return reader.readLine()
+        }
+
+        buildConfigField(
+            "String",
+            "GIT_HASH",
+            "\"${getGitHash()}\""
+        )
 
         resourceConfigurations.addAll(
             listOf(
