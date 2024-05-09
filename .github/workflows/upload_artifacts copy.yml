@@ -23,7 +23,7 @@ jobs:
 
       - run: |
          echo "APP_NAME=gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk" >> $GITHUB_ENV
-         
+
       - run: |
           mkdir -p app/build/outputs/apk/release/
           touch app/build/outputs/apk/release/app-release.apk
@@ -32,11 +32,12 @@ jobs:
           mkdir -p packages
           mv app/build/outputs/apk/release/app-release.apk packages/${{ env.APP_NAME }}
           ls -R -l
+          tree
       - uses: actions/upload-artifact@v4
         with:
           # todo: fix input (it is not take into account some how, but there is an input)
           # todo: dynamic arch
-          name: ${{ env.APP_NAME }}
+          name: jesuislename
           path: packages/${{ env.APP_NAME }}
           if-no-files-found: error
       
@@ -46,3 +47,6 @@ jobs:
 
       - run: |
           ls -R -l
+          tree
+
+# with name and path, we got packages2/filename/name
