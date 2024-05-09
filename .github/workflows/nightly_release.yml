@@ -28,12 +28,14 @@ env:
 jobs:
   setup-env:
     runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.set_outputs.outputs.app_version }}
+      tag_name: ${{ steps.set_outputs.outputs.tag_name }}
+      version_name: ${{ steps.set_outputs.outputs.version_name }}
+      prerelease: ${{ steps.set_outputs.outputs.prerelease }}
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          # https://github.com/actions/checkout/issues/1471
-          fetch-tags: false
 
       - name: Get app version
         run: echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
@@ -50,6 +52,14 @@ jobs:
         run: |
           echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
           echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
+      
+      - name: Set up outputs
+        id: set_outputs
+        run: |
+          echo "app_version=${{ env.APP_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${{ env.TAG_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${{ env.VERSION_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${{ env.PRERELEASE }}" >> "$GITHUB_OUTPUT"
     
      
   upload-artifacts:
@@ -57,16 +67,21 @@ jobs:
     uses: ./.github/workflows/upload_artifacts.yml
     secrets: inherit
     with:
-      version: ${{ github.env.VERSION_NAME }}
+      version: ${{ needs.setup-env.outputs.version_name }}
 
   publish:
-    needs: upload-artifacts
+    needs: [upload-artifacts, setup-env]
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          # https://github.com/actions/checkout/issues/1471
+          fetch-tags: false
+
       # must be after checkout because it will remove artifacts
       - uses: actions/download-artifact@v4
 
@@ -77,10 +92,10 @@ jobs:
           gh release delete nightly --yes || true
           git push --delete origin nightly || true
           
-          git tag ${{ env.TAG_NAME }}
+          git tag ${{ needs.setup-env.outputs.tag_name }}
           git push origin --tags
 
           # https://cli.github.com/manual/gh_release_create
-          gh release create ${{ env.TAG_NAME }} --title ${{ env.TAG_NAME }}" \
-            --verify-tag ${{ env.PRERELEASE }} --generate-notes --target $GITHUB_SHA \
+          gh release create ${{ needs.setup-env.outputs.tag_name }} --title ${{ needs.setup-env.outputs.version_name }}" \
+            --verify-tag ${{ needs.setup-env.outputs.prerelease }} --generate-notes --target $GITHUB_SHA \
             ./gitnote/*
