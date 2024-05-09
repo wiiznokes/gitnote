@@ -38,7 +38,7 @@ jobs:
           # todo: fix input (it is not take into account some how, but there is an input)
           # todo: dynamic arch
           name: jesuislename
-          path: packages/${{ env.APP_NAME }}
+          path: packages/*
           if-no-files-found: error
       
       - uses: actions/download-artifact@v4
@@ -49,4 +49,4 @@ jobs:
           ls -R -l
           tree
 
-# with name and path, we got packages2/filename/name
+# with name and path, we got packages2/name/filename
