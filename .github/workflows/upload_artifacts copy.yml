@@ -37,7 +37,6 @@ jobs:
         with:
           # todo: fix input (it is not take into account some how, but there is an input)
           # todo: dynamic arch
-          name: jesuislename
           path: packages/*
           if-no-files-found: error
       
