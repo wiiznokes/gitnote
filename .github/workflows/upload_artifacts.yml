@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        required: true
+        required: false
         type: string
+        default: "nightly"
   workflow_call:
     inputs:
       version:

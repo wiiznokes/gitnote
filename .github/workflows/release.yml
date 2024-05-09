@@ -20,19 +20,14 @@ concurrency:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CARGO_TERM_COLOR: always
 
   
 jobs:
-  publish:
+  setup-env:
     runs-on: ubuntu-latest
-
-    env:
-      GH_REPO: ${{ github.repository }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    permissions:
-      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -55,13 +50,23 @@ jobs:
         run: |
           echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
           echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
-
-      
-      - uses: ./.github/workflows/upload_artifacts.yml
-        secrets: inherit
-        with:
-          version: ${{ env.VERSION_NAME }}
     
+     
+  upload-artifacts:
+    needs: setup-env
+    uses: ./.github/workflows/upload_artifacts.yml
+    secrets: inherit
+    with:
+      version: ${{ github.env.VERSION_NAME }}
+
+  publish:
+    needs: setup-env
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
       # must be after checkout because it will remove artifacts
       - uses: actions/download-artifact@v4
 
