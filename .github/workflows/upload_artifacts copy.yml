@@ -23,9 +23,7 @@ jobs:
     steps:
 
       - run: |
-         mv "app/build/outputs/apk/release/app-release.apk" "packages/gitnote-release2-${{ github.event.inputs.version }}-arm64-v8a.apk"
          echo "APP_NAME=gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk" >> $GITHUB_ENV
-         echo APP_NAME=gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk >> $GITHUB_ENV
 
       - run: |
           mkdir -p app/build/outputs/apk/release/
@@ -33,6 +31,7 @@ jobs:
 
 
           mkdir -p packages
+          mv "app/build/outputs/apk/release/app-release.apk" "packages/gitnote-release2-${{ github.event.inputs.version }}-arm64-v8a.apk"
           mv "app/build/outputs/apk/release/app-release.apk" "packages/${{ env.APP_NAME }}"
           ls -R -l
           tree
