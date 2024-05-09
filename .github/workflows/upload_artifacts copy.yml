@@ -60,3 +60,7 @@ jobs:
           # todo: dynamic arch
           path: packages/*
           if-no-files-found: error
+      
+      - uses: actions/download-artifact@v4
+        with:
+          path: "packages"
