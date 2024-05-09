@@ -61,7 +61,10 @@ jobs:
 
       - run: |
           mkdir -p packages
-          mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ github.event.inputs.version }}.apk
+
+          # warning: do not use github.event syntax here
+          # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
+          mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
       
       # when downloading, this will be: pathdest/name/filename
       - uses: actions/upload-artifact@v4
