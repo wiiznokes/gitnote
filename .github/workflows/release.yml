@@ -1,0 +1,81 @@
+name: Nightly Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      is_nightly:
+        description: "Is nightly"
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "*.md"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CARGO_TERM_COLOR: always
+
+  
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # https://github.com/actions/checkout/issues/1471
+          fetch-tags: false
+
+      - name: Get app version
+        run: echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      
+      - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
+        name: Setup options for nightly
+        run: |
+          echo "TAG_NAME=nightly" >> $GITHUB_ENV
+          echo "VERSION_NAME=${{ env.TAG_NAME }}" >> $GITHUB_ENV
+          echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+
+      - if: ${{ github.event.inputs.is_nightly == 'false' }}
+        name: Setup options for a new release
+        run: |
+          echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
+          echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
+
+      
+      - uses: ./.github/workflows/upload_artifacts.yml
+        secrets: inherit
+        with:
+          version: ${{ env.VERSION_NAME }}
+    
+      # must be after checkout because it will remove artifacts
+      - uses: actions/download-artifact@v4
+
+      - name: Publish release
+        run: |
+
+          # delete previous nightly release
+          gh release delete nightly --yes || true
+          git push --delete origin nightly || true
+          
+          git tag ${{ env.TAG_NAME }}
+          git push origin --tags
+
+          # https://cli.github.com/manual/gh_release_create
+          gh release create ${{ env.TAG_NAME }} --title ${{ env.TAG_NAME }}" \
+            --verify-tag ${{ env.PRERELEASE }} --generate-notes --target $GITHUB_SHA \
+            ./gitnote/*
