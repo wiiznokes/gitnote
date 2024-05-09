@@ -89,9 +89,6 @@ jobs:
 
       - name: Publish release
         run: |
-          tree || true
-          tree ./packages*/ || true
-          ls -l ./packages*/ || true
           # delete previous nightly release
           gh release delete nightly --yes || true
           git push --delete origin nightly || true
@@ -102,4 +99,4 @@ jobs:
           # https://cli.github.com/manual/gh_release_create
           gh release create ${{ needs.setup-env.outputs.tag_name }} --title "${{ needs.setup-env.outputs.version_name }}" \
             --verify-tag ${{ needs.setup-env.outputs.prerelease }} --generate-notes --target $GITHUB_SHA \
-            ./packages/*
+            ./packages/*/*
