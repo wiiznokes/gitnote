@@ -2,7 +2,16 @@ name: Upload Artifacts
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        required: false
+        type: string
+        default: "nightly"
   workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 env:
   CARGO_TERM_COLOR: always
@@ -51,5 +60,6 @@ jobs:
    
       - uses: actions/upload-artifact@v4
         with:
-          name: gitnote
+          # todo: dynamic arch
+          name: gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk
           path: app/build/outputs/apk/release/*.apk

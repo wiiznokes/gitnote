@@ -1,0 +1,101 @@
+name: Nightly Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      is_nightly:
+        description: "Is nightly"
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "*.md"
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CARGO_TERM_COLOR: always
+
+  
+jobs:
+  setup-env:
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.set_outputs.outputs.app_version }}
+      tag_name: ${{ steps.set_outputs.outputs.tag_name }}
+      version_name: ${{ steps.set_outputs.outputs.version_name }}
+      prerelease: ${{ steps.set_outputs.outputs.prerelease }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get app version
+        run: echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      
+      - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
+        name: Setup options for nightly
+        run: |
+          echo "TAG_NAME=nightly" >> $GITHUB_ENV
+          echo "VERSION_NAME=${{ env.TAG_NAME }}" >> $GITHUB_ENV
+          echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+
+      - if: ${{ github.event.inputs.is_nightly == 'false' }}
+        name: Setup options for a new release
+        run: |
+          echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
+          echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
+      
+      - name: Set up outputs
+        id: set_outputs
+        run: |
+          echo "app_version=${{ env.APP_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "tag_name=${{ env.TAG_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${{ env.VERSION_NAME }}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${{ env.PRERELEASE }}" >> "$GITHUB_OUTPUT"
+    
+     
+  upload-artifacts:
+    needs: setup-env
+    uses: ./.github/workflows/upload_artifacts.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.setup-env.outputs.version_name }}
+
+  publish:
+    needs: [upload-artifacts, setup-env]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # https://github.com/actions/checkout/issues/1471
+          fetch-tags: false
+
+      # must be after checkout because it will remove artifacts
+      - uses: actions/download-artifact@v4
+
+      - name: Publish release
+        run: |
+
+          # delete previous nightly release
+          gh release delete nightly --yes || true
+          git push --delete origin nightly || true
+          
+          git tag ${{ needs.setup-env.outputs.tag_name }}
+          git push origin --tags
+
+          # https://cli.github.com/manual/gh_release_create
+          gh release create ${{ needs.setup-env.outputs.tag_name }} --title "${{ needs.setup-env.outputs.version_name }}" \
+            --verify-tag ${{ needs.setup-env.outputs.prerelease }} --generate-notes --target $GITHUB_SHA \
+            ./gitnote/*
