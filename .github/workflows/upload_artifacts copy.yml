@@ -22,10 +22,12 @@ jobs:
     steps:
 
       - run: |
+         echo "APP_NAME=gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk" >> $GITHUB_ENV
+         
+      - run: |
           mkdir -p app/build/outputs/apk/release/
           touch app/build/outputs/apk/release/app-release.apk
 
-          echo "APP_NAME=gitnote-release-${{ github.event.inputs.version }}-arm64-v8a.apk" >> $GITHUB_ENV
 
           mkdir -p packages
           mv app/build/outputs/apk/release/app-release.apk packages/${{ env.APP_NAME }}
