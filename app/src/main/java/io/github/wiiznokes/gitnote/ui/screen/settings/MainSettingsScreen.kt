@@ -76,7 +76,7 @@ fun MainSettingsScreen(
         }
 
         SettingsSection(
-            title = "Grid"
+            title = stringResource(R.string.grid)
         ) {
 
             val sortType by vm.prefs.sortType.getAsState()
@@ -251,7 +251,7 @@ fun MainSettingsScreen(
         }
 
         SettingsSection(
-            title = "About",
+            title = stringResource(R.string.about),
             isLast = true
         ) {
             var version = BuildConfig.VERSION_NAME

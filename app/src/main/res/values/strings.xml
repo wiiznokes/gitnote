@@ -63,5 +63,7 @@
     <string name="error_invalid_name">Name is invalid</string>
     <string name="error_invalid_extension">Extension is invalid</string>
     <string name="error_folder_already_exist">Folder already exist</string>
+    <string name="grid">Grid</string>
+    <string name="about">About</string>
 
 </resources>
