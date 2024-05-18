@@ -123,7 +123,7 @@ class GridViewModel : ViewModel() {
 
     fun createNoteFolder(relativeParentPath: String, name: String): Boolean {
         if (!NameValidation.check(name)) {
-            uiHelper.makeToast(uiHelper.getString(R.string.invalid_name))
+            uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_name))
             return false
         }
 
@@ -131,7 +131,7 @@ class GridViewModel : ViewModel() {
 
         prefs.repoPath.getBlocking().let { rootPath ->
             if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
-                uiHelper.makeToast(uiHelper.getString(R.string.folder_already_exist))
+                uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
                 return false
             }
         }

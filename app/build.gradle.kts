@@ -39,6 +39,7 @@ android {
         resourceConfigurations.addAll(
             listOf(
                 "en",
+                "fr"
             )
         )
 

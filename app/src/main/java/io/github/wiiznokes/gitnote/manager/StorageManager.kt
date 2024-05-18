@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.manager
 
 import android.util.Log
 import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
@@ -109,7 +110,8 @@ class StorageManager {
             val previousFile = NodeFs.File.fromPath(rootPath, previous.relativePath)
 
             previousFile.delete().onFailure {
-                val message = "Can't delete previous note: ${it.message}"
+                val message =
+                    uiHelper.getString(R.string.error_delete_file, previousFile.path, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
@@ -117,13 +119,13 @@ class StorageManager {
             val newFile = NodeFs.File.fromPath(rootPath, new.relativePath)
 
             newFile.create().onFailure {
-                val message = "Can't create new file: ${it.message}"
+                val message = uiHelper.getString(R.string.error_create_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
 
             newFile.write(new.content).onFailure {
-                val message = "Can't write content to new note: ${it.message}"
+                val message = uiHelper.getString(R.string.error_write_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
@@ -146,12 +148,12 @@ class StorageManager {
             val file = NodeFs.File.fromPath(rootPath, note.relativePath)
 
             file.create().onFailure {
-                val message = "Can't create new file: ${it.message}"
+                val message = uiHelper.getString(R.string.error_create_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
             file.write(note.content).onFailure {
-                val message = "Can't write new file: ${it.message}"
+                val message = uiHelper.getString(R.string.error_write_file, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
@@ -170,7 +172,7 @@ class StorageManager {
             val rootPath = prefs.repoPath.get()
             val file = NodeFs.File.fromPath(rootPath, note.relativePath)
             file.delete().onFailure {
-                val message = "Can't delete file ${file.path}: ${it.message}"
+                val message = uiHelper.getString(R.string.error_delete_file, file.path, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }
@@ -198,7 +200,8 @@ class StorageManager {
                 val file = NodeFs.File.fromPath(rootPath, noteRelativePath)
 
                 file.delete().onFailure {
-                    val message = "Can't delete file ${file.path}: ${it.message}"
+                    val message =
+                        uiHelper.getString(R.string.error_delete_file, file.path, it.message)
                     Log.e(TAG, message)
                     uiHelper.makeToast(message)
                 }
@@ -217,7 +220,7 @@ class StorageManager {
             val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
 
             folder.create().onFailure {
-                val message = "Can't create new folder: ${it.message}"
+                val message = uiHelper.getString(R.string.error_create_folder, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
             }

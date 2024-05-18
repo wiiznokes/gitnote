@@ -147,7 +147,7 @@ fun DrawerScreen(
                         shape = MaterialTheme.shapes.medium,
                         options = listOf(
                             CustomDropDownModel(
-                                text = "Delete this folder",
+                                text = stringResource(R.string.delete_this_folder),
                                 onClick = {
                                     vm.deleteFolder(noteFolder.relativePath)
                                 }

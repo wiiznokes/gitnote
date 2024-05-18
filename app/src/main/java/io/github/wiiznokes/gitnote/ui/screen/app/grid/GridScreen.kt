@@ -52,6 +52,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -286,13 +288,13 @@ private fun GridView(
                             shape = MaterialTheme.shapes.medium,
                             options = listOf(
                                 CustomDropDownModel(
-                                    text = "Delete this note",
+                                    text = stringResource(R.string.delete_this_note),
                                     onClick = {
                                         vm.deleteNote(gridNote.note)
                                     }
                                 ),
                                 if (selectedNotes.isEmpty()) CustomDropDownModel(
-                                    text = "Select multiple notes",
+                                    text = stringResource(R.string.select_multiple_notes),
                                     onClick = {
                                         vm.selectNote(gridNote.note.relativePath, true)
                                     }

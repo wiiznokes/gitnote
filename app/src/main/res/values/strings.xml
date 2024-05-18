@@ -1,34 +1,67 @@
 <resources>
-    <string name="app_name">GitNote</string>
-
+    <string name="app_name" translatable="false">GitNote</string>
     <string name="system_theme">System</string>
     <string name="light_theme">Light</string>
     <string name="dark_theme">Dark</string>
-
-
     <string name="modification_sort_type">Modification</string>
-    <string name="alpha_numeric_sort_type">AlphaNumeric</string>
-
+    <string name="alpha_numeric_sort_type">Alpha numeric</string>
     <string name="ascending_sort_order">Ascending</string>
     <string name="descending_sort_order">Descending</string>
-
-
     <string name="automatic">Automatic</string>
-
-
-    <string name="invalid_name">Name is invalid</string>
-    <string name="invalid_extension">Extension is invalid</string>
-
-    <string name="folder_already_exist">Folder already exist</string>
-
     <string name="new_folder_label">New folder name</string>
     <string name="create_new_folder">Create new folder</string>
-
     <string name="yes">Yes</string>
     <string name="no">No</string>
-
     <string name="save">Save</string>
-
     <string name="none">None</string>
+    <string name="settings">Settings</string>
+    <string name="search_in_notes">Search in notes</string>
+    <string name="user_interface">User interface</string>
+    <string name="dynamic_colors">Dynamic colors</string>
+    <string name="sort_type">Sort type</string>
+    <string name="sort_order">Sort Order</string>
+    <string name="minimal_note_width">Minimal width of a note</string>
+    <string name="show_long_notes">Show long notes entirely</string>
+    <string name="remember_last_opened_folder">Remember last opened folder</string>
+    <string name="show_the_full_notes_path">Always show the full path of notes</string>
+    <string name="show_the_full_notes_path_subtitle">Note that the default behavior will only print the path if more than two notes share the same name</string>
+    <string name="folder_filters">Folder filters</string>
+    <string name="folder_filters_subtitle">Define regex to filter folders of the repository</string>
+    <string name="edit">Edit</string>
+    <string name="default_note_extension">Default extension for notes</string>
+    <string name="show_lines_number">Show lines number</string>
+    <string name="repository">Repository</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="remote_url">Remote url</string>
+    <string name="close_repository">Close repository</string>
+    <string name="close_repository_confirmation">Do you really want to close the repo?</string>
+    <string name="version">Version</string>
+    <string name="show_logs">Show logs</string>
+    <string name="report_an_issue">Report an issue</string>
+    <string name="source_code">Source code</string>
+    <string name="libraries">Libraries</string>
+    <string name="copy_all_logs">Copy all logs</string>
+    <string name="note_name">Note name</string>
+    <string name="delete_this_folder">Delete this folder</string>
+    <string name="theme">Theme</string>
+    <string name="delete_this_note">Delete this note</string>
+    <string name="select_multiple_notes">Select multiple notes</string>
+    <string name="error_invalid_link">Invalid link, can\'t open it</string>
+    <string name="error_file_already_exist">File already exist</string>
+    <string name="error_create_file">Can\'t create file: %1$s</string>
+    <string name="error_delete_file">Can\'t delete file %1$s: %2$s</string>
+    <string name="error_create_folder">Can\'t create folder: %1$s</string>
+    <string name="error_pull_repo">Can\'t pull: %1$s</string>
+    <string name="error_push_repo">Can\'t push: %1$s</string>
+    <string name="error_commit_repo">can\'t commit: %1$s</string>
+    <string name="error_commit_file_change">can\'t know if there is files change: %1$s</string>
+    <string name="error_clone_repo">can\'t clone repo: %1$s</string>
+    <string name="error_open_repo">can\'t open repo: %1$s</string>
+    <string name="error_create_repo">Can\'t create repo: %1$s</string>
+    <string name="error_write_file">Can\'t write file: %1$s</string>
+    <string name="error_invalid_name">Name is invalid</string>
+    <string name="error_invalid_extension">Extension is invalid</string>
+    <string name="error_folder_already_exist">Folder already exist</string>
 
 </resources>

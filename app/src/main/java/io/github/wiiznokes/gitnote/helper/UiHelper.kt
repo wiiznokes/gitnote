@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.helper
 
 import android.content.Context
 import android.widget.Toast
+import androidx.annotation.StringRes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,6 +17,10 @@ class UiHelper(
         }
     }
 
-    fun getString(resId: Int): String =
+    fun getString(@StringRes resId: Int): String =
         context.getString(resId)
+
+    fun getString(@StringRes resId: Int, vararg formatArgs: Any?): String {
+        return context.getString(resId, *formatArgs)
+    }
 }

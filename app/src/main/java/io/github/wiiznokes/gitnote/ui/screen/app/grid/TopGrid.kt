@@ -40,11 +40,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
@@ -156,7 +158,7 @@ private fun SearchBar(
         ),
         shape = RoundedCornerShape(100),
         placeholder = {
-            Text(text = "Search")
+            Text(text = stringResource(R.string.search_in_notes))
         },
         singleLine = true,
         leadingIcon = {
@@ -195,7 +197,7 @@ private fun SearchBar(
                         expanded = expanded,
                         options = listOf(
                             CustomDropDownModel(
-                                text = "Settings",
+                                text = stringResource(R.string.settings),
                                 onClick = onSettingsClick
                             ),
                         )

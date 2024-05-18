@@ -43,18 +43,18 @@ fun MainSettingsScreen(
 ) {
 
     AppPage(
-        title = "Settings",
+        title = stringResource(id = R.string.settings),
         onBackClick = onBackClick,
     ) {
 
 
         SettingsSection(
-            title = "User interface"
+            title = stringResource(R.string.user_interface)
         ) {
 
             val theme by vm.prefs.theme.getAsState()
             MultipleChoiceSettings(
-                title = "Theme",
+                title = stringResource(R.string.theme),
                 subtitle = theme.toString(),
                 startIcon = Icons.Default.Palette,
                 options = Theme.entries,
@@ -66,7 +66,7 @@ fun MainSettingsScreen(
 
             val dynamicColor by vm.prefs.dynamicColor.getAsState()
             ToggleableSettings(
-                title = "Dynamic color",
+                title = stringResource(R.string.dynamic_colors),
                 checked = dynamicColor,
                 onCheckedChange = {
                     vm.update { vm.prefs.dynamicColor.update(it) }
@@ -81,7 +81,7 @@ fun MainSettingsScreen(
 
             val sortType by vm.prefs.sortType.getAsState()
             MultipleChoiceSettings(
-                title = "Sort type",
+                title = stringResource(R.string.sort_type),
                 subtitle = sortType.toString(),
                 options = SortType.entries,
                 onOptionClick = {
@@ -91,7 +91,7 @@ fun MainSettingsScreen(
 
             val sortOrder by vm.prefs.sortOrder.getAsState()
             MultipleChoiceSettings(
-                title = "Sort Order",
+                title = stringResource(R.string.sort_order),
                 subtitle = sortOrder.toString(),
                 options = SortOrder.entries,
                 onOptionClick = {
@@ -101,7 +101,7 @@ fun MainSettingsScreen(
 
             val noteMinWidth by vm.prefs.noteMinWidth.getAsState()
             MultipleChoiceSettings(
-                title = "Minimal width of a note",
+                title = stringResource(R.string.minimal_note_width),
                 subtitle = noteMinWidth.toString(),
                 options = NoteMinWidth.entries,
                 onOptionClick = {
@@ -111,7 +111,7 @@ fun MainSettingsScreen(
 
             val showFullNoteHeight by vm.prefs.showFullNoteHeight.getAsState()
             ToggleableSettings(
-                title = "Show long notes entirely",
+                title = stringResource(R.string.show_long_notes),
                 checked = showFullNoteHeight,
                 onCheckedChange = {
                     vm.update { vm.prefs.showFullNoteHeight.update(it) }
@@ -120,7 +120,7 @@ fun MainSettingsScreen(
 
             val rememberLastOpenedFolder by vm.prefs.rememberLastOpenedFolder.getAsState()
             ToggleableSettings(
-                title = "Remember last opened folder",
+                title = stringResource(R.string.remember_last_opened_folder),
                 checked = rememberLastOpenedFolder,
                 onCheckedChange = {
                     vm.update { vm.prefs.rememberLastOpenedFolder.update(it) }
@@ -129,8 +129,8 @@ fun MainSettingsScreen(
 
             val showFullPathOfNotes by vm.prefs.showFullPathOfNotes.getAsState()
             ToggleableSettings(
-                title = "Always show the full path of notes",
-                subtitle = "Note that the default behavior will only print the path if more than two notes share the same name",
+                title = stringResource(R.string.show_the_full_notes_path),
+                subtitle = stringResource(R.string.show_the_full_notes_path_subtitle),
                 checked = showFullPathOfNotes,
                 onCheckedChange = {
                     vm.update { vm.prefs.showFullPathOfNotes.update(it) }
@@ -138,19 +138,19 @@ fun MainSettingsScreen(
             )
 
             DefaultSettingsRow(
-                title = "Folder filters",
-                subTitle = "Define regex to filter folders of the repository"
+                title = stringResource(R.string.folder_filters),
+                subTitle = stringResource(R.string.folder_filters_subtitle)
             ) {
                 navController.navigate(SettingsDestination.FolderFilters)
             }
         }
 
         SettingsSection(
-            title = "Edit"
+            title = stringResource(R.string.edit)
         ) {
             val defaultExtension by vm.prefs.defaultExtension.getAsState()
             MultipleChoiceSettings(
-                title = "Default extension for notes",
+                title = stringResource(R.string.default_note_extension),
                 subtitle = defaultExtension,
                 options = FileExtension.entries,
                 onOptionClick = {
@@ -160,7 +160,7 @@ fun MainSettingsScreen(
 
             val showLinesNumber by vm.prefs.showLinesNumber.getAsState()
             ToggleableSettings(
-                title = "Show lines number",
+                title = stringResource(R.string.show_lines_number),
                 checked = showLinesNumber
             ) {
                 vm.update { vm.prefs.showLinesNumber.update(it) }
@@ -168,11 +168,11 @@ fun MainSettingsScreen(
         }
 
         SettingsSection(
-            title = "Repository"
+            title = stringResource(R.string.repository)
         ) {
             val userName by vm.prefs.userName.getAsState()
             StringSettings(
-                title = "Username",
+                title = stringResource(R.string.username),
                 subtitle = userName.ifEmpty { stringResource(id = R.string.none) },
                 stringValue = userName,
                 onChange = {
@@ -184,7 +184,7 @@ fun MainSettingsScreen(
             val password by vm.prefs.password.getAsState()
 
             StringSettings(
-                title = "Password",
+                title = stringResource(R.string.password),
                 subtitle = password.let {
                     if (it.isEmpty())
                         stringResource(id = R.string.none)
@@ -201,7 +201,7 @@ fun MainSettingsScreen(
 
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
             StringSettings(
-                title = "Remote url",
+                title = stringResource(R.string.remote_url),
                 subtitle = remoteUrl.ifEmpty { stringResource(id = R.string.none) },
                 stringValue = remoteUrl,
                 onChange = {
@@ -214,7 +214,7 @@ fun MainSettingsScreen(
                             try {
                                 uriHandler.openUri(remoteUrl)
                             } catch (e: ActivityNotFoundException) {
-                                vm.uiHelper.makeToast("Invalid link, can't open it")
+                                vm.uiHelper.makeToast(vm.uiHelper.getString(R.string.error_invalid_link))
                             }
                         }
                     ) {
@@ -233,7 +233,7 @@ fun MainSettingsScreen(
             }
 
             DefaultSettingsRow(
-                title = "Close repository",
+                title = stringResource(R.string.close_repository),
                 startIcon = Icons.AutoMirrored.Filled.Logout,
                 onClick = {
                     expanded.value = true
@@ -242,7 +242,7 @@ fun MainSettingsScreen(
 
             RequestConfirmationDialog(
                 expanded = expanded,
-                text = "Do you really want to close the repo?",
+                text = stringResource(R.string.close_repository_confirmation),
                 onConfirmation = {
                     vm.closeRepo()
                     onCloseRepo()
@@ -260,7 +260,7 @@ fun MainSettingsScreen(
             val clipboardManager = LocalClipboardManager.current
 
             DefaultSettingsRow(
-                title = "Version",
+                title = stringResource(R.string.version),
                 subTitle = version,
                 onClick = {
                     clipboardManager.setText(AnnotatedString(version))
@@ -268,7 +268,7 @@ fun MainSettingsScreen(
             )
 
             DefaultSettingsRow(
-                title = "Show logs",
+                title = stringResource(R.string.show_logs),
                 startIcon = Icons.AutoMirrored.Filled.Article,
                 onClick = {
                     navController.navigate(SettingsDestination.Logs)
@@ -277,14 +277,14 @@ fun MainSettingsScreen(
 
             val uriHandler = LocalUriHandler.current
             DefaultSettingsRow(
-                title = "Report an issue",
+                title = stringResource(R.string.report_an_issue),
                 startIcon = Icons.Default.BugReport,
                 onClick = {
                     uriHandler.openUri("https://github.com/wiiznokes/gitnote/issues/new/choose")
                 }
             )
             DefaultSettingsRow(
-                title = "Source code",
+                title = stringResource(R.string.source_code),
                 startIcon = Icons.Default.Code,
                 onClick = {
                     uriHandler.openUri("https://github.com/wiiznokes/gitnote")
@@ -292,7 +292,7 @@ fun MainSettingsScreen(
             )
 
             DefaultSettingsRow(
-                title = "Libraries",
+                title = stringResource(R.string.libraries),
                 startIcon = Icons.AutoMirrored.Filled.MenuBook,
                 onClick = {
                     navController.navigate(SettingsDestination.Libraries)
