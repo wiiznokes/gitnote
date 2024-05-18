@@ -1,6 +1,8 @@
 package io.github.wiiznokes.gitnote.manager
 
 import android.util.Log
+import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -49,6 +51,8 @@ class GitManager {
         }
     }
 
+    private val uiHelper = MyApp.appModule.uiHelper
+
     private val locker = Mutex()
     private var isRepoInitialized = false
     private var isLibInitialized = false
@@ -86,7 +90,7 @@ class GitManager {
 
         val res = createRepoLib(repoPath)
         if (res < 0) {
-            throw GitException("Can't create repo: $res")
+            throw GitException(uiHelper.getString(R.string.error_create_repo, res.toString()))
         }
         isRepoInitialized = true
     }
@@ -98,7 +102,7 @@ class GitManager {
 
         val res = openRepoLib(repoPath)
         if (res < 0) {
-            throw GitException("can't open repo: $res")
+            throw GitException(uiHelper.getString(R.string.error_open_repo, res))
         }
         isRepoInitialized = true
     }
@@ -124,7 +128,7 @@ class GitManager {
         )
 
         if (res < 0) {
-            throw GitException("can't clone repo: $res")
+            throw GitException(uiHelper.getString(R.string.error_clone_repo, res))
         }
 
         isRepoInitialized = true
@@ -145,7 +149,7 @@ class GitManager {
         var res = isChangeLib()
 
         if (res < 0) {
-            throw GitException("can't know if there is files change: $res")
+            throw GitException(uiHelper.getString(R.string.error_commit_file_change, res))
         }
 
         if (res == 0) {
@@ -156,7 +160,7 @@ class GitManager {
 
         res = commitAllLib(username)
         if (res < 0) {
-            throw GitException("can't commit: $res")
+            throw GitException(uiHelper.getString(R.string.error_commit_repo, res.toString()))
         }
 
     }
@@ -170,7 +174,11 @@ class GitManager {
         )
 
         if (res < 0) {
-            throw Exception("Can't push: $res")
+            Log.d(TAG, "push: $res")
+            val msg = uiHelper.getString(R.string.error_push_repo, res.toString())
+            Log.d(TAG, "push: $msg")
+
+            throw Exception(uiHelper.getString(R.string.error_push_repo, res.toString()))
         }
 
     }
@@ -185,7 +193,7 @@ class GitManager {
         )
 
         if (res < 0) {
-            throw Exception("Can't pull: $res")
+            throw Exception(uiHelper.getString(R.string.error_pull_repo, res.toString()))
         }
     }
 

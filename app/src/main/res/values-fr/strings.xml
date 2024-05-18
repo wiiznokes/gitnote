@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="system_theme">Système</string>
+    <string name="light_theme">Clair</string>
+    <string name="dark_theme">Sombre</string>
+
+
+    <string name="modification_sort_type">Modification</string>
+    <string name="alpha_numeric_sort_type">Alpha numérique</string>
+
+    <string name="ascending_sort_order">Ascendant</string>
+    <string name="descending_sort_order">Descendant</string>
+
+
+    <string name="automatic">Automatique</string>
+
+
+    <string name="error_invalid_name">Le nom est invalide</string>
+    <string name="error_invalid_extension">L\'extension est invalide</string>
+
+    <string name="error_folder_already_exist">Le dossier existe déjà</string>
+
+    <string name="new_folder_label">Nom du nouveau dossier</string>
+    <string name="create_new_folder">Créer un nouveau dossier</string>
+
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <string name="save">Sauvegarder</string>
+
+    <string name="none">Aucun</string>
+    <string name="settings">Paramètres</string>
+    <string name="search_in_notes">Rechercher dans les notes</string>
+    <string name="user_interface">Interface</string>
+    <string name="dynamic_colors">Couleurs dynamique</string>
+    <string name="sort_type">Type de tri</string>
+    <string name="sort_order">Odre du tri</string>
+    <string name="minimal_note_width">Largeur minimal d\'une note</string>
+    <string name="show_long_notes">Montrer les longues notes entièrement</string>
+    <string name="remember_last_opened_folder">Se souvenir du dernier dossier ouvert</string>
+    <string name="show_the_full_notes_path">Montrer le chemin entier des notes</string>
+    <string name="show_the_full_notes_path_subtitle">Notez que le comportement par défaut montrera le chemin entier si plus de deux notes partage le même nom</string>
+    <string name="folder_filters">Filtre de dossier</string>
+    <string name="folder_filters_subtitle">Définir des regex pour filtrer certain dossier du dépôt</string>
+    <string name="edit">Édition</string>
+    <string name="default_note_extension">Extension par défaut des notes</string>
+    <string name="show_lines_number">Montrer le numéro des lignes</string>
+    <string name="repository">Dépôt</string>
+    <string name="password">Mot de passe</string>
+    <string name="username">Nom d\'utilisateur</string>
+    <string name="remote_url">Url du dépôt distant</string>
+    <string name="close_repository">Fermer le dépôt</string>
+    <string name="close_repository_confirmation">Voulez vous vraiment fermer le dépôt ?</string>
+    <string name="version">Version</string>
+    <string name="show_logs">Montrer les logs</string>
+    <string name="report_an_issue">Signaler un problème</string>
+    <string name="source_code">Code source</string>
+    <string name="libraries">Bibliothèques open source</string>
+    <string name="copy_all_logs">Copiez tous les logs</string>
+    <string name="note_name">Nom de la note</string>
+    <string name="delete_this_folder">Supprimer ce dossier</string>
+    <string name="theme">Thème</string>
+    <string name="delete_this_note">Supprimer cette note</string>
+    <string name="select_multiple_notes">Sélectionner plusieurs notes</string>
+    <string name="error_invalid_link">Lien invalide, impossible de l\'ouvrir</string>
+    <string name="error_file_already_exist">Le fichier exist déjà</string>
+    <string name="error_create_file">Impossible de créer le fichier: %1$s</string>
+    <string name="error_write_file">Impossible d\'écrire le fichier: %1%s</string>
+    <string name="error_delete_file">Impossible de supprimer le fichier %1$s: %2$s</string>
+    <string name="error_create_folder">Impossible de créer le dossier: %1$s</string>
+    <string name="error_pull_repo">Impossible de pull: %1$s</string>
+    <string name="error_push_repo">Impossible de push: %1$s</string>
+    <string name="error_commit_repo">Impossible de commit: %1$s</string>
+    <string name="error_commit_file_change">Impossible de savoir si il y a des changements dans le dépôt: %1$s</string>
+    <string name="error_clone_repo">Impossible de clone: %1$s</string>
+    <string name="error_open_repo">Impossible d\'ouvrir le dépôt: %1$s</string>
+    <string name="error_create_repo">Impossible de créer le dépôt: %1$s</string>
+
+</resources>

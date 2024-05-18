@@ -38,8 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -115,7 +117,7 @@ fun EditScreen(
                         },
                         singleLine = true,
                         placeholder = {
-                            Text(text = "Note name")
+                            Text(text = stringResource(R.string.note_name))
                         },
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = MaterialTheme.colorScheme.tertiary,

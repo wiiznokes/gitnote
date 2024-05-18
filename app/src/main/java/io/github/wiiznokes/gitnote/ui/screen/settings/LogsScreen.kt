@@ -23,10 +23,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.BuildConfig
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -124,7 +126,7 @@ fun LogsScreen(
             val clipboardManager: ClipboardManager = LocalClipboardManager.current
 
             options.add(CustomDropDownModel(
-                text = "Copy all logs",
+                text = stringResource(R.string.copy_all_logs),
                 onClick = {
                     clipboardManager.setText(AnnotatedString((logState.value)))
                 }

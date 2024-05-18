@@ -143,12 +143,12 @@ class EditViewModel() : ViewModel() {
     ): Result<Note> {
 
         if (!NameValidation.check(name)) {
-            uiHelper.makeToast(uiHelper.getString(R.string.invalid_name))
+            uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_name))
             return failure(DataFormatException("name invalid: $name"))
         }
 
         if (!NameValidation.check(fileExtension.text)) {
-            uiHelper.makeToast(uiHelper.getString(R.string.invalid_extension))
+            uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_extension))
             return failure(DataFormatException("extension invalid: $name"))
         }
 
@@ -165,7 +165,7 @@ class EditViewModel() : ViewModel() {
 
             if (newFile.path != previousFile.path) {
                 if (newFile.exist()) {
-                    uiHelper.makeToast("New file already exist")
+                    uiHelper.makeToast(uiHelper.getString(R.string.error_file_already_exist))
                     return failure(EditException(EditExceptionType.NoteAlreadyExist))
                 }
             }
@@ -205,12 +205,12 @@ class EditViewModel() : ViewModel() {
 
 
         if (!NameValidation.check(name)) {
-            uiHelper.makeToast(uiHelper.getString(R.string.invalid_name))
+            uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_name))
             return failure(DataFormatException("name invalid: $name"))
         }
 
         if (!NameValidation.check(fileExtension.text)) {
-            uiHelper.makeToast(uiHelper.getString(R.string.invalid_extension))
+            uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_extension))
             return failure(DataFormatException("extension invalid: $name"))
         }
 
