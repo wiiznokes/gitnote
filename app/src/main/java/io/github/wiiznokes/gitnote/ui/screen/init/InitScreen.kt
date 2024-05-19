@@ -12,6 +12,7 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.util.crossFade
@@ -42,17 +43,6 @@ fun InitScreen(
         transitionSpec = InitNavTransitionSpec
     ) { initDestination ->
         when (initDestination) {
-            is InitDestination.LocalStoragePermission -> LocalStoragePermissionScreen(
-                onSuccess = {
-                    navController.popUpTo(inclusive = true) {
-                        it == InitDestination.LocalStoragePermission
-                    }
-
-                    if (runBlocking { vm.tryInit() }) onInitSuccess()
-                    else navController.navigate(InitDestination.Main)
-                }
-            )
-
 
             InitDestination.Main -> MainScreen(
                 navController = navController
@@ -79,20 +69,21 @@ fun InitScreen(
                         )
                     },
                     onFinish = { path ->
+                        val newRepoState = NewRepoState.DeviceStorage(path)
 
                         when (initDestination.newRepoSource) {
                             NewRepoSource.Create -> {
-                                vm.createRepo(path, onSuccess = onInitSuccess)
+                                vm.createRepo(newRepoState, onSuccess = onInitSuccess)
                             }
 
                             NewRepoSource.Open -> {
-                                vm.openRepo(path, onSuccess = onInitSuccess)
+                                vm.openRepo(newRepoState, onSuccess = onInitSuccess)
                             }
 
                             NewRepoSource.Clone -> {
                                 vm.checkPathForClone(path).onSuccess {
                                     navController.navigate(
-                                        InitDestination.Remote(repoPath = path)
+                                        InitDestination.Remote(newRepoState)
                                     )
                                 }
                             }
@@ -107,7 +98,7 @@ fun InitScreen(
             }
 
             is InitDestination.Remote -> RemoteScreen(
-                repoPath = initDestination.repoPath,
+                repoState = initDestination.repoState,
                 onInitSuccess = onInitSuccess,
                 onBackClick = {
                     navController.pop()
@@ -134,17 +125,14 @@ private object InitNavTransitionSpec : NavTransitionSpec<InitDestination> {
                         crossFade()
                     }
 
-                    InitDestination.LocalStoragePermission -> crossFade()
                     InitDestination.Main -> slide(backWard = true)
                     is InitDestination.Remote -> slide()
                 }
             }
 
-            InitDestination.LocalStoragePermission -> crossFade()
             InitDestination.Main -> {
                 when (to) {
                     is InitDestination.FileExplorer -> slide()
-                    InitDestination.LocalStoragePermission -> crossFade()
                     InitDestination.Main -> crossFade()
                     is InitDestination.Remote -> slide()
                 }
@@ -153,7 +141,6 @@ private object InitNavTransitionSpec : NavTransitionSpec<InitDestination> {
             is InitDestination.Remote -> {
                 when (to) {
                     is InitDestination.FileExplorer -> slide(backWard = true)
-                    InitDestination.LocalStoragePermission -> crossFade()
                     InitDestination.Main -> slide(backWard = true)
                     is InitDestination.Remote -> crossFade()
                 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -14,6 +15,7 @@ import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun MainScreen(
@@ -29,14 +31,18 @@ fun MainScreen(
         verticalArrangement = Arrangement.spacedBy(80.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val repoPath = vm.prefs.repoPath.getAsState()
+        val repoPath = remember {
+            try {
+                vm.prefs.repoPathBlocking()
+            } catch (e: Exception) { ""}
+        }
 
         Button(
             onClick = {
                 navController.navigate(
                     InitDestination.FileExplorer(
                         title = "Choose the repo folder",
-                        path = repoPath.value,
+                        path = repoPath,
                         newRepoSource = NewRepoSource.Create,
                     )
                 )
@@ -53,7 +59,7 @@ fun MainScreen(
                 navController.navigate(
                     InitDestination.FileExplorer(
                         title = "Pick the repo folder",
-                        path = repoPath.value,
+                        path = repoPath,
                         newRepoSource = NewRepoSource.Open,
                     )
                 )
@@ -70,7 +76,7 @@ fun MainScreen(
                 navController.navigate(
                     InitDestination.FileExplorer(
                         title = "Choose the folder where the repo will be cloned",
-                        path = repoPath.value,
+                        path = repoPath,
                         newRepoSource = NewRepoSource.Clone,
                     )
                 )

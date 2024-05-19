@@ -4,10 +4,15 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.data.AppPreferences
+import io.github.wiiznokes.gitnote.data.NewRepoState
+import io.github.wiiznokes.gitnote.data.RepoState
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
+import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.GitException
 import io.github.wiiznokes.gitnote.manager.GitExceptionType
+import io.github.wiiznokes.gitnote.ui.destination.Destination
+import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,21 +36,21 @@ class InitViewModel : ViewModel() {
     }
 
 
-    fun createRepo(repoPath: String, onSuccess: () -> Unit) {
+    fun createRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            NodeFs.Folder.fromPath(repoPath).isEmptyDirectory().onFailure {
+            NodeFs.Folder.fromPath(repoState.repoPath()).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
 
 
-            gitManager.createRepo(repoPath).onFailure {
+            gitManager.createRepo(repoState.repoPath()).onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
 
-            prefs.initRepo(repoPath)
+            prefs.initRepo(repoState)
 
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.updateDatabase()
@@ -87,11 +92,11 @@ class InitViewModel : ViewModel() {
         return success(Unit)
     }
 
-    fun openRepo(repoPath: String, onSuccess: () -> Unit) {
+    fun openRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            openRepoSuspend(repoPath).onSuccess {
-                prefs.initRepo(repoPath)
+            openRepoSuspend(repoState.repoPath()).onSuccess {
+                prefs.initRepo(repoState)
                 onSuccess()
             }
         }
@@ -105,7 +110,7 @@ class InitViewModel : ViewModel() {
 
 
     fun cloneRepo(
-        repoPath: String,
+        repoState: NewRepoState,
         repoUrl: String,
         gitCreed: GitCreed? = null,
         onSuccess: () -> Unit
@@ -116,7 +121,7 @@ class InitViewModel : ViewModel() {
             _cloneState.emit(CloneState.Cloning(0))
 
             gitManager.cloneRepo(
-                repoPath = repoPath,
+                repoPath = repoState.repoPath(),
                 repoUrl = repoUrl,
                 creed = gitCreed,
                 progressCallback = {
@@ -131,7 +136,7 @@ class InitViewModel : ViewModel() {
 
             _cloneState.emit(CloneState.Cloned)
 
-            prefs.initRepo(repoPath)
+            prefs.initRepo(repoState)
             prefs.remoteUrl.update(repoUrl)
 
             gitCreed?.let {
@@ -149,8 +154,17 @@ class InitViewModel : ViewModel() {
 
     suspend fun tryInit(): Boolean {
 
-        if (!prefs.isRepoInitialize.get()) return false
-        val repoPath = prefs.repoPath.get()
+        when (prefs.repoState.get()) {
+            RepoState.NoRepo -> return false
+            RepoState.AppStorage -> { }
+            RepoState.DeviceStorage -> {
+                if (!StoragePermissionHelper.isPermissionGranted()) {
+                    return false
+                }
+            }
+        }
+
+        val repoPath = prefs.repoPath()
 
         openRepoSuspend(repoPath).onFailure {
             CoroutineScope(Dispatchers.IO).launch {
@@ -158,7 +172,6 @@ class InitViewModel : ViewModel() {
             }
             return false
         }
-
         return true
     }
 

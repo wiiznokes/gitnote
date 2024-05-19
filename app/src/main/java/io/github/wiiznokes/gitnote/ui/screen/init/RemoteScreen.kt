@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import io.github.wiiznokes.gitnote.ui.model.Provider
@@ -223,7 +224,7 @@ private fun ElevatedCard(
 
 @Composable
 fun RemoteScreen(
-    repoPath: String,
+    repoState: NewRepoState,
     onInitSuccess: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -256,7 +257,7 @@ fun RemoteScreen(
             )
 
             Text(
-                text = repoPath,
+                text = repoState.repoPath(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -390,7 +391,7 @@ fun RemoteScreen(
                 .padding(),
             onClick = {
                 vm.cloneRepo(
-                    repoPath = repoPath,
+                    repoState = repoState,
                     repoUrl = repoUrl.text,
                     gitCreed = if (withCreed) GitCreed(
                         userName = userName.text,

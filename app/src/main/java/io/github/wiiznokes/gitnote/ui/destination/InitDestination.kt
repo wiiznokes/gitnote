@@ -1,14 +1,11 @@
 package io.github.wiiznokes.gitnote.ui.destination
 
 import android.os.Parcelable
+import io.github.wiiznokes.gitnote.data.NewRepoState
 import kotlinx.parcelize.Parcelize
 
 
 sealed interface InitDestination : Parcelable {
-
-
-    @Parcelize
-    data object LocalStoragePermission : InitDestination
 
     @Parcelize
     data object Main : InitDestination
@@ -21,7 +18,7 @@ sealed interface InitDestination : Parcelable {
     ) : InitDestination
 
     @Parcelize
-    data class Remote(val repoPath: String) : InitDestination
+    data class Remote(val repoState: NewRepoState) : InitDestination
 
 }
 
@@ -30,3 +27,4 @@ enum class NewRepoSource {
     Open,
     Clone,
 }
+

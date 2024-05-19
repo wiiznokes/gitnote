@@ -56,23 +56,19 @@ class MainActivity : ComponentActivity() {
 
 
                 val startDestination: Destination = remember {
-                    if (!StoragePermissionHelper.isPermissionGranted()) {
-                        Destination.Init(InitDestination.LocalStoragePermission)
-                    } else {
-                        if (runBlocking { vm.tryInit() }) {
-                            if (isEditUnsaved()) {
-                                Log.d(TAG, "launch as EDIT_IS_UNSAVED")
-                                Destination.App(
-                                    AppDestination.EditSaved
-                                )
-                            } else {
-                                Destination.App(
-                                    AppDestination.Grid
-                                    //AppDestination.Settings(SettingsDestination.Main)
-                                )
-                            }
-                        } else Destination.Init(InitDestination.Main)
-                    }
+                    if (runBlocking { vm.tryInit() }) {
+                        if (isEditUnsaved()) {
+                            Log.d(TAG, "launch as EDIT_IS_UNSAVED")
+                            Destination.App(
+                                AppDestination.EditSaved
+                            )
+                        } else {
+                            Destination.App(
+                                AppDestination.Grid
+                                //AppDestination.Settings(SettingsDestination.Main)
+                            )
+                        }
+                    } else Destination.Init(InitDestination.Main)
                 }
 
 
@@ -104,11 +100,7 @@ class MainActivity : ComponentActivity() {
                             appDestination = destination.appDestination,
                             onStorageFailure = {
                                 navController.popAll()
-                                if (!StoragePermissionHelper.isPermissionGranted()) {
-                                    navController.navigate(Destination.Init(InitDestination.LocalStoragePermission))
-                                } else {
-                                    navController.navigate(Destination.Init(InitDestination.Main))
-                                }
+                                navController.navigate(Destination.Init(InitDestination.Main))
                             }
                         )
                     }
