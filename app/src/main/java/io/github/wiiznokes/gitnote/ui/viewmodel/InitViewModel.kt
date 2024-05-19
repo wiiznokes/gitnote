@@ -2,6 +2,8 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 
 
 import androidx.lifecycle.ViewModel
+import dev.olshevski.navigation.reimagined.NavController
+import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.NewRepoState
@@ -11,8 +13,8 @@ import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.GitException
 import io.github.wiiznokes.gitnote.manager.GitExceptionType
-import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
+import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +29,7 @@ class InitViewModel : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
-    private val uiHelper: UiHelper = MyApp.appModule.uiHelper
+    val uiHelper: UiHelper = MyApp.appModule.uiHelper
 
     private val storageManager = MyApp.appModule.storageManager
 
@@ -35,6 +37,31 @@ class InitViewModel : ViewModel() {
         private const val TAG = "InitViewModel"
     }
 
+    fun initRepoWithSource(
+        repoState: NewRepoState,
+        newRepoSource: NewRepoSource,
+        navController: NavController<InitDestination>,
+        onSuccess: () -> Unit
+    ) {
+
+        when (newRepoSource) {
+            NewRepoSource.Create -> {
+                createRepo(repoState, onSuccess = onSuccess)
+            }
+
+            NewRepoSource.Open -> {
+                openRepo(repoState, onSuccess = onSuccess)
+            }
+
+            NewRepoSource.Clone -> {
+                checkPathForClone(repoState.repoPath()).onSuccess {
+                    navController.navigate(
+                        InitDestination.Remote(repoState)
+                    )
+                }
+            }
+        }
+    }
 
     fun createRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
