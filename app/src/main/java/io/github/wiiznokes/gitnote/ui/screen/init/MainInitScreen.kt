@@ -19,10 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
+import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.component.AppPage
@@ -53,7 +56,7 @@ fun MainScreen(
 
 
     AppPage(
-        title = "Choose method",
+        title = stringResource(R.string.app_page_choose_method),
         verticalArrangement = Arrangement.spacedBy(80.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,7 +67,7 @@ fun MainScreen(
             }
         ) {
             Text(
-                text = "Create local repository"
+                text = stringResource(R.string.create_repo)
             )
         }
 
@@ -75,7 +78,7 @@ fun MainScreen(
             }
         ) {
             Text(
-                text = "Open local repository"
+                text = stringResource(R.string.open_repo)
             )
         }
 
@@ -86,7 +89,7 @@ fun MainScreen(
             }
         ) {
             Text(
-                text = "Clone remote repository"
+                text = stringResource(R.string.clone_repo)
             )
         }
     }
@@ -132,7 +135,7 @@ fun MainScreen(
                     }
                 }
             ) {
-                Text(text = "Use app storage")
+                Text(text = stringResource(R.string.use_app_storage))
             }
 
 
@@ -159,7 +162,7 @@ fun MainScreen(
                             )
                         )
                     } else {
-                        vm.uiHelper.makeToast("Need permission to access the storage.")
+                        vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
                     }
                 }
                 Button(
@@ -182,13 +185,13 @@ fun MainScreen(
 
                     }
                 ) {
-                    Text(text = "Use device storage")
+                    Text(text = stringResource(R.string.use_device_storage))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Require full storage permission. You will be able to see the repository with a file explorer.",
+                    text = stringResource(R.string.use_device_storage_info),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

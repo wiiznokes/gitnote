@@ -65,5 +65,33 @@
     <string name="error_folder_already_exist">Folder already exist</string>
     <string name="grid">Grid</string>
     <string name="about">About</string>
+    <string name="app_page_choose_method">Choose method</string>
+    <string name="create_repo">Create local repository</string>
+    <string name="open_repo">Open local repository</string>
+    <string name="clone_repo">Clone remote repository</string>
+    <string name="use_app_storage">Use app storage</string>
+    <string name="error_need_storage_permission">Need permission to access the storage.</string>
+    <string name="use_device_storage">Use device storage</string>
+    <string name="use_device_storage_info">Require full storage permission. You will be able to see the repository with a file explorer.</string>
+    <string name="create_repo_explorer">Create repository in this folder</string>
+    <string name="open_repo_explorer">Open this repository</string>
+    <string name="clone_repo_explorer">Clone repository in this folder</string>
+    <string name="quick_links">Quick links</string>
+    <string name="quick_links_main_page">Main page</string>
+    <string name="quick_links_create_repo">Create repo</string>
+    <string name="quick_links_create_token">Create Token</string>
+    <string name="quick_links_see_repos">See repos</string>
+    <string name="app_page_clone_repository">Clone repository</string>
+    <string name="where_repo_is_cloned">Path where the repo will be cloned</string>
+    <string name="clone_step_url">1. Enter the Git clone URL (Https)</string>
+    <string name="clone_step_url_label">url</string>
+    <string name="with_credentials">With credentials</string>
+    <string name="clone_step_username">2. Username</string>
+    <string name="clone_step_username_label">Username</string>
+    <string name="clone_step_password">3. Password (dev. token)</string>
+    <string name="clone_step_password_label">Password</string>
+    <string name="clone_repo_button">Clone repo</string>
+    <string name="error_path_not_directory">The path is not a directory</string>
+    <string name="error_path_not_empty">The path is not empty</string>
 
 </resources>

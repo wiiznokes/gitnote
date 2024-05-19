@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
@@ -97,7 +99,7 @@ private fun OpenLinks(
 
         Text(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "Quick links",
+            text = stringResource(R.string.quick_links),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -165,28 +167,28 @@ private fun OpenLinks(
 
                         provider.value.mainPage?.let {
                             OpenLinkButton(
-                                text = "Main page",
+                                text = stringResource(R.string.quick_links_main_page),
                                 url = it
                             )
                         }
 
                         provider.value.createRepo?.let {
                             OpenLinkButton(
-                                text = "Create repo",
+                                text = stringResource(R.string.quick_links_create_repo),
                                 url = it
                             )
                         }
 
                         provider.value.createToken?.let {
                             OpenLinkButton(
-                                text = "Create Token",
+                                text = stringResource(R.string.quick_links_create_token),
                                 url = it
                             )
                         }
 
                         provider.value.checkOutRepo?.let {
                             OpenLinkButton(
-                                text = "See repos",
+                                text = stringResource(R.string.quick_links_see_repos),
                                 url = it
                             )
                         }
@@ -238,7 +240,7 @@ fun RemoteScreen(
     val vm: InitViewModel = viewModel()
 
     AppPage(
-        title = "Clone repository",
+        title = stringResource(R.string.app_page_clone_repository),
         horizontalAlignment = Alignment.CenterHorizontally,
         onBackClick = onBackClick,
     ) {
@@ -258,7 +260,7 @@ fun RemoteScreen(
                 .padding(vertical = 50.dp)
         ) {
             Text(
-                text = "Path where the repo will be cloned",
+                text = stringResource(R.string.where_repo_is_cloned),
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -278,7 +280,7 @@ fun RemoteScreen(
         }
 
         InitGroupExplication(
-            explication = "1. Enter the Git clone URL (Https)"
+            explication = stringResource(R.string.clone_step_url)
         ) {
             OutlinedTextField(
                 value = repoUrl,
@@ -286,7 +288,7 @@ fun RemoteScreen(
                     repoUrl = it
                 },
                 label = {
-                    Text(text = "clone URL")
+                    Text(text = stringResource(R.string.clone_step_url_label))
                 },
                 singleLine = true,
                 isError = repoUrl.text.contains(" ") || repoUrl.text.isEmpty(),
@@ -310,7 +312,7 @@ fun RemoteScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "With credentials")
+                Text(text = stringResource(R.string.with_credentials))
                 IconButton(
                     onClick = { withCreed = !withCreed }
                 ) {
@@ -344,7 +346,7 @@ fun RemoteScreen(
         AnimatedVisibility(visible = withCreed) {
             Column {
                 InitGroupExplication(
-                    explication = "2. Username"
+                    explication = stringResource(R.string.clone_step_username)
                 ) {
                     OutlinedTextField(
                         value = userName,
@@ -352,10 +354,7 @@ fun RemoteScreen(
                             userName = it
                         },
                         label = {
-                            Text(text = "Username")
-                        },
-                        placeholder = {
-                            Text(text = "MyUserName")
+                            Text(text = stringResource(R.string.clone_step_username_label))
                         },
                         singleLine = true,
                         isError = userName.text.isEmpty()
@@ -364,7 +363,7 @@ fun RemoteScreen(
                 }
 
                 InitGroupExplication(
-                    explication = "3. Password (dev. token)"
+                    explication = stringResource(R.string.clone_step_password)
                 ) {
 
                     OutlinedTextField(
@@ -373,7 +372,7 @@ fun RemoteScreen(
                             password = it
                         },
                         label = {
-                            Text("Password")
+                            Text(stringResource(R.string.clone_step_password_label))
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
@@ -410,7 +409,7 @@ fun RemoteScreen(
             },
             enabled = cloneState.isClickable()
         ) {
-            Text(text = "Clone repo")
+            Text(text = stringResource(R.string.clone_repo_button))
             Icon(imageVector = Icons.Default.Download, contentDescription = null)
         }
     }

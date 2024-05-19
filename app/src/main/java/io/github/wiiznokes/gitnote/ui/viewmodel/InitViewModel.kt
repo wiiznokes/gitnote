@@ -3,6 +3,7 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.data.RepoState
@@ -72,8 +73,9 @@ class InitViewModel : ViewModel() {
     private suspend fun openRepoSuspend(repoState: NewRepoState): Result<Unit> {
 
         if (!NodeFs.Folder.fromPath(repoState.repoPath()).exist()) {
-            uiHelper.makeToast("Path is not a directory")
-            return failure(GitException(GitExceptionType.WrongPath))
+            val msg = uiHelper.getString(R.string.error_path_not_directory)
+            uiHelper.makeToast(msg)
+            return failure(Exception(msg))
         }
 
         gitManager.openRepo(repoState.repoPath()).onFailure {

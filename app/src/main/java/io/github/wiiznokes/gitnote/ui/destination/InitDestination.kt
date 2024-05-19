@@ -1,6 +1,8 @@
 package io.github.wiiznokes.gitnote.ui.destination
 
 import android.os.Parcelable
+import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import kotlinx.parcelize.Parcelize
 
@@ -29,10 +31,12 @@ enum class NewRepoSource {
 
 
     fun getExplorerTitle(): String {
+        val context = MyApp.appModule.context
+        
         return when (this) {
-            Create -> "Create repository in this folder"
-            Open -> "Open this repository"
-            Clone -> "Clone repository in this folder"
+            Create -> context.getString(R.string.create_repo_explorer)
+            Open -> context.getString(R.string.open_repo_explorer)
+            Clone -> context.getString(R.string.clone_repo_explorer)
         }
     }
 }
