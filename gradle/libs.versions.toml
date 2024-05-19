@@ -2,80 +2,60 @@
 agp = "8.4.0"
 
 # https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
-kotlin = "1.9.23"
-compose-compiler = "1.5.13"
+kotlin = "1.9.24"
+compose-compiler = "1.5.14"
 
 # https://github.com/google/ksp/releases
-ksp = "1.9.23-1.0.20"
+# sync with the kotlin version
+ksp = "1.9.24-1.0.20"
 
-fuzzywuzzy = "1.4.0"
-kotlinx-coroutines-test = "1.8.0"
-ktx = "1.13.1"
-runner = "1.5.2"
-viewmodel-lifecycle = "2.7.0"
-splash-screen = "1.0.1"
-compose-activity = "1.9.0"
-paging = "3.2.1"
-datastore-preferences = "1.1.1"
-work-runtime = "2.9.0"
+ktx-core = "1.13.1"
+ktx-lifecycle = "2.7.0"
+
+# https://developer.android.com/develop/ui/compose/bom/bom-mapping
 compose-bom = "2024.05.00"
-accompanist = "0.34.0"
-reimagined-navigation = "1.5.0"
-about-libraries = "11.1.4"
-markdown = "0.6.1"
-document-file = "1.0.1"
-junit-ktx = "1.1.5"
-constraintlayout = "1.0.1"
-ui-tooling = "1.6.7"
+
 room = "2.6.1"
+about-libraries = "11.1.4"
 
 [libraries]
 # AndroidX Core
-androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "viewmodel-lifecycle" }
-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "viewmodel-lifecycle" }
-splash-screen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splash-screen" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version.ref = "compose-activity" }
-paging-common-ktx = { group = "androidx.paging", name = "paging-common-ktx", version.ref = "paging" }
-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime" }
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
-androidx-document-file = { group = "androidx.documentfile", name = "documentfile", version.ref = "document-file" }
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx-core" }
+runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
+runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
+compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.0" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
 
 # Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "ui-tooling" }
-compose-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayout" }
+compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.0.1" }
 
 # Accompanist
-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version = "0.34.0" }
 
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
-# Compose Navigation
-reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version.ref = "reimagined-navigation" }
-
-# about-libraries
-about-libraries = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "about-libraries" }
-
 # Markdown
-markdown = { group = "org.jetbrains", name = "markdown", version.ref = "markdown" }
+markdown = { group = "org.jetbrains", name = "markdown", version = "0.6.1" }
 
-# Fuzzy
-fuzzywuzzy = { module = "me.xdrop:fuzzywuzzy", version.ref = "fuzzywuzzy" }
+# 3-party
+about-libraries = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "about-libraries" }
+reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version = "1.5.0" }
+fuzzywuzzy = { module = "me.xdrop:fuzzywuzzy", version = "1.4.0" }
 
 # Test
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
-test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junit-ktx" }
-androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.0" }
+test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.1.5" }
+androidx-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

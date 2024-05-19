@@ -1,6 +1,6 @@
 # GitNote WIP
 
-*Supported Android versions: 12 to 14*
+*Supported Android versions: 9 to 14*
 
 Android note which integrate Git. You can use this app with other desktop editors.
 
@@ -20,10 +20,10 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] edit/rename/create/update note/file
 - [x] time based sort
 - [ ] rename/create/delete noteFolder/directory
-- [ ] available on f-droid
-- [ ] easy login (without copy pasting token, like GitJournal)
 - [ ] Markdown integration
+- [ ] available on f-droid
 - [ ] private repo with ssh
+- [ ] easy login (without copy pasting token, like GitJournal (require ssh support))
 
 <p  style="text-align: center;">
   <img src="assets/grid.png" width="32%"  alt="grid screen"/>
