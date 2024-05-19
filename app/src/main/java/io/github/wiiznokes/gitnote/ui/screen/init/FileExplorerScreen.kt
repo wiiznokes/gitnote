@@ -13,13 +13,16 @@ import androidx.compose.material.icons.rounded.CreateNewFolder
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,7 +43,8 @@ fun FileExplorerScreen(
     path: String?,
     onDirectoryClick: (String) -> Unit,
     onFinish: (String) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    title: String
 ) {
 
 
@@ -92,12 +96,7 @@ fun FileExplorerScreen(
                     onFinish(vm.currentDir.path)
                 }
             ) {
-                val text = when (newRepoSource) {
-                    NewRepoSource.Create -> "Create repository in this folder"
-                    NewRepoSource.Open -> "Open this repository"
-                    NewRepoSource.Clone -> "Clone repository in this folder"
-                }
-                Text(text = text)
+                Text(text = title)
             }
         }
     ) {
@@ -113,7 +112,8 @@ fun FileExplorerScreen(
                             path = parent.path,
                             fullName = ".."
                         ),
-                        onDirectoryClick = onDirectoryClick
+                        onDirectoryClick = onDirectoryClick,
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -140,7 +140,8 @@ private data class FolderItem(
 @Composable
 private fun FolderRow(
     item: FolderItem,
-    onDirectoryClick: (String) -> Unit
+    onDirectoryClick: (String) -> Unit,
+    color: Color = LocalContentColor.current
 ) {
     Row(
         modifier = Modifier
@@ -154,12 +155,14 @@ private fun FolderRow(
         SimpleIcon(
             modifier = Modifier
                 .size(50.dp),
-            imageVector = Icons.Rounded.Folder
+            imageVector = Icons.Rounded.Folder,
+            tint = color
         )
         Text(
             text = item.fullName,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            color = color
         )
     }
 }

@@ -87,7 +87,8 @@ fun InitScreen(
                         navController.popUpTo(inclusive = false) {
                             it !is InitDestination.FileExplorer
                         }
-                    }
+                    },
+                    title = initDestination.title
                 )
             }
 

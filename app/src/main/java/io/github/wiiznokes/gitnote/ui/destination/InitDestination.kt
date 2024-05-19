@@ -30,9 +30,9 @@ enum class NewRepoSource {
 
     fun getExplorerTitle(): String {
         return when (this) {
-            Create -> "Choose the repo folder"
-            Open -> "Pick the repo folder"
-            Clone -> "Choose the folder where the repo will be cloned"
+            Create -> "Create repository in this folder"
+            Open -> "Open this repository"
+            Clone -> "Clone repository in this folder"
         }
     }
 }
