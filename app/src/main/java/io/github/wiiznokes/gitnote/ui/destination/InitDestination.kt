@@ -1,7 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.destination
 
 import android.os.Parcelable
-import androidx.compose.runtime.Composable
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import kotlinx.parcelize.Parcelize
 

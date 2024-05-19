@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,14 +23,12 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.BaseDialog
 import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
-import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 
 
 private val padding = 12.dp

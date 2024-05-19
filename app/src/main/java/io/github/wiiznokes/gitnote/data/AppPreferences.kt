@@ -19,7 +19,9 @@ class AppPreferences(
 ) : PreferencesManager(context, "settings") {
 
     companion object {
-        val appStorageRepoPath = MyApp.appModule.context.filesDir.toPath().resolve("repo").pathString
+        val appStorageRepoPath =
+            MyApp.appModule.context.filesDir.toPath().resolve("repo").pathString
+        const val DEFAULT_USERNAME = "gitnote"
     }
 
     val dynamicColor = booleanPreference("dynamicColor", true)
@@ -29,7 +31,7 @@ class AppPreferences(
 
     private val repoPath = stringPreference("repoPath")
 
-    suspend fun repoPath() : String {
+    suspend fun repoPath(): String {
         return when (repoState.get()) {
             RepoState.NoRepo -> throw Exception("calling repoPath function with no repo initialized")
             RepoState.AppStorage -> appStorageRepoPath
@@ -43,7 +45,9 @@ class AppPreferences(
     fun repoPathSafely(): String {
         return try {
             repoPathBlocking()
-        } catch (e: Exception) { ""}
+        } catch (e: Exception) {
+            ""
+        }
     }
 
     val remoteUrl = stringPreference("remoteUrl", "")
@@ -98,6 +102,7 @@ class AppPreferences(
             NewRepoState.AppStorage -> {
                 this.repoState.update(RepoState.AppStorage)
             }
+
             is NewRepoState.DeviceStorage -> {
                 this.repoState.update(RepoState.DeviceStorage)
                 this.repoPath.update(repoState.path)
@@ -114,7 +119,6 @@ class AppPreferences(
 }
 
 
-
 enum class RepoState {
     NoRepo,
     AppStorage,
@@ -124,7 +128,7 @@ enum class RepoState {
 @Parcelize
 sealed class NewRepoState : Parcelable {
     data object AppStorage : NewRepoState()
-    class DeviceStorage(val path: String): NewRepoState()
+    class DeviceStorage(val path: String) : NewRepoState()
 
     fun repoPath(): String {
         return when (this) {

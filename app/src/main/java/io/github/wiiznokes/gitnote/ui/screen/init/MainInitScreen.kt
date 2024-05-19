@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
 
 
 private sealed class StorageChooser {
-    data object UnExpanded: StorageChooser()
-    data class Expanded(val source: NewRepoSource): StorageChooser()
+    data object UnExpanded : StorageChooser()
+    data class Expanded(val source: NewRepoSource) : StorageChooser()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +48,8 @@ fun MainScreen(
         factory = viewModelFactory { InitViewModel() }
     )
 
-    val showStorageChooser: MutableState<StorageChooser> = remember { mutableStateOf(StorageChooser.UnExpanded) }
+    val showStorageChooser: MutableState<StorageChooser> =
+        remember { mutableStateOf(StorageChooser.UnExpanded) }
 
 
     AppPage(
@@ -93,8 +94,8 @@ fun MainScreen(
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    
-     val  storageChooser = showStorageChooser.value
+
+    val storageChooser = showStorageChooser.value
 
     if (storageChooser is StorageChooser.Expanded) {
         ModalBottomSheet(
@@ -103,7 +104,7 @@ fun MainScreen(
             },
             sheetState = sheetState
         ) {
-            
+
             fun closeSheet() {
                 scope.launch { sheetState.hide() }.invokeOnCompletion {
                     if (!sheetState.isVisible) {
@@ -123,16 +124,13 @@ fun MainScreen(
                     when (storageChooser.source) {
                         NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
                         NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
-                        NewRepoSource.Clone -> {
-                            vm.checkPathForClone(repoState.repoPath()).onSuccess {
-                                navController.navigate(
-                                    InitDestination.Remote(repoState)
-                                )
-                            }
-                        }
+                        NewRepoSource.Clone -> navController.navigate(
+                            InitDestination.Remote(
+                                repoState
+                            )
+                        )
                     }
-                },
-                enabled = storageChooser.source != NewRepoSource.Open
+                }
             ) {
                 Text(text = "Use app storage")
             }
@@ -145,13 +143,6 @@ fun MainScreen(
                     .fillMaxWidth(0.9F)
                     .align(Alignment.CenterHorizontally),
             ) {
-
-                Text(
-                    text = "Require full storage permission. You will be able to see the repository with a file explorer.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
 
                 val storagePermissionHelper = remember {
                     StoragePermissionHelper()
@@ -193,6 +184,13 @@ fun MainScreen(
                 ) {
                     Text(text = "Use device storage")
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Require full storage permission. You will be able to see the repository with a file explorer.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
 
             Spacer(modifier = Modifier.height(20.dp))

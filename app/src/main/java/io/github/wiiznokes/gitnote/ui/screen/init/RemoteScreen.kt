@@ -93,103 +93,109 @@ private fun OpenLinks(
     provider: MutableState<Provider>
 ) {
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+    Column(modifier = Modifier.padding(15.dp)) {
 
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = "Quick links",
+            style = MaterialTheme.typography.bodyMedium
+        )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
-            var providerExpanded by remember {
-                mutableStateOf(false)
-            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                var providerExpanded by remember {
+                    mutableStateOf(false)
+                }
 
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
 
-                Box {
+                    Box {
 
-                    Button(
-                        modifier = Modifier.padding(start = 7.dp),
-                        onClick = { providerExpanded = !providerExpanded },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                    ) {
-                        Text(
-                            text = provider.value.name
-                        )
-                    }
-
-
-                    DropdownMenu(
-                        expanded = providerExpanded,
-                        onDismissRequest = { providerExpanded = false }
-                    ) {
-
-                        Provider.entries.forEach {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(text = it.name)
-                                },
-                                onClick = {
-                                    provider.value = it
-                                    vm.viewModelScope.launch {
-                                        vm.prefs.provider.update(it)
-                                    }
-                                }
+                        Button(
+                            modifier = Modifier.padding(start = 7.dp),
+                            onClick = { providerExpanded = !providerExpanded },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
                             )
+                        ) {
+                            Text(
+                                text = provider.value.name
+                            )
+                        }
+
+
+                        DropdownMenu(
+                            expanded = providerExpanded,
+                            onDismissRequest = { providerExpanded = false }
+                        ) {
+
+                            Provider.entries.forEach {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = it.name)
+                                    },
+                                    onClick = {
+                                        provider.value = it
+                                        vm.viewModelScope.launch {
+                                            vm.prefs.provider.update(it)
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            }
 
 
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
 
-                    provider.value.mainPage?.let {
-                        OpenLinkButton(
-                            text = "Main page",
-                            url = it
-                        )
+                        provider.value.mainPage?.let {
+                            OpenLinkButton(
+                                text = "Main page",
+                                url = it
+                            )
+                        }
+
+                        provider.value.createRepo?.let {
+                            OpenLinkButton(
+                                text = "Create repo",
+                                url = it
+                            )
+                        }
+
+                        provider.value.createToken?.let {
+                            OpenLinkButton(
+                                text = "Create Token",
+                                url = it
+                            )
+                        }
+
+                        provider.value.checkOutRepo?.let {
+                            OpenLinkButton(
+                                text = "See repos",
+                                url = it
+                            )
+                        }
                     }
 
-                    provider.value.createRepo?.let {
-                        OpenLinkButton(
-                            text = "Create repo",
-                            url = it
-                        )
-                    }
-
-                    provider.value.createToken?.let {
-                        OpenLinkButton(
-                            text = "Create Token",
-                            url = it
-                        )
-                    }
-
-                    provider.value.checkOutRepo?.let {
-                        OpenLinkButton(
-                            text = "See repos",
-                            url = it
-                        )
-                    }
                 }
 
+
             }
-
-
         }
     }
 }
@@ -282,11 +288,11 @@ fun RemoteScreen(
                 label = {
                     Text(text = "clone URL")
                 },
-                placeholder = {
-                    Text(text = "https://github.com/wiiznokes/gitnote.git")
-                },
                 singleLine = true,
-                isError = repoUrl.text.contains(" ")
+                isError = repoUrl.text.contains(" ") || repoUrl.text.isEmpty(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri
+                )
             )
         }
 
@@ -352,12 +358,13 @@ fun RemoteScreen(
                             Text(text = "MyUserName")
                         },
                         singleLine = true,
+                        isError = userName.text.isEmpty()
                     )
 
                 }
 
                 InitGroupExplication(
-                    explication = "3. Password"
+                    explication = "3. Password (dev. token)"
                 ) {
 
                     OutlinedTextField(
@@ -370,6 +377,7 @@ fun RemoteScreen(
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
+                        isError = userName.text.isEmpty()
                     )
                 }
             }

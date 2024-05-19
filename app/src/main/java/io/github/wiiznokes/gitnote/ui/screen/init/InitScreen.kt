@@ -19,7 +19,6 @@ import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
-import kotlinx.coroutines.runBlocking
 
 private const val TAG = "InitScreen"
 

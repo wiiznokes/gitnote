@@ -38,6 +38,7 @@ class InitViewModel : ViewModel() {
         folder.delete()
         folder.create()
     }
+
     fun createRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -66,14 +67,6 @@ class InitViewModel : ViewModel() {
             onSuccess()
         }
 
-    }
-
-    fun checkPathForClone(repoPath: String): Result<Unit> {
-        val result = NodeFs.Folder.fromPath(repoPath).isEmptyDirectory()
-        result.onFailure {
-            uiHelper.makeToast(it.message)
-        }
-        return result
     }
 
     private suspend fun openRepoSuspend(repoState: NewRepoState): Result<Unit> {
@@ -110,6 +103,14 @@ class InitViewModel : ViewModel() {
 
     }
 
+
+    fun checkPathForClone(repoPath: String): Result<Unit> {
+        val result = NodeFs.Folder.fromPath(repoPath).isEmptyDirectory()
+        result.onFailure {
+            uiHelper.makeToast(it.message)
+        }
+        return result
+    }
 
     private val _cloneState: MutableStateFlow<CloneState> = MutableStateFlow(CloneState.Idle)
     val cloneState: StateFlow<CloneState>
@@ -164,13 +165,12 @@ class InitViewModel : ViewModel() {
 
     suspend fun tryInit(): Boolean {
 
-
-
         val repoState = when (prefs.repoState.get()) {
             RepoState.NoRepo -> return false
             RepoState.AppStorage -> {
                 NewRepoState.AppStorage
             }
+
             RepoState.DeviceStorage -> {
                 if (!StoragePermissionHelper.isPermissionGranted()) {
                     return false

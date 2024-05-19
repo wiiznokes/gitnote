@@ -8,6 +8,7 @@ import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
+import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
@@ -47,10 +48,9 @@ class StorageManager {
         }
 
         // todo: maybe async this call
-        gitManager.commitAll(prefs.userName.get()).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
             uiHelper.makeToast(it.message)
         }
-
 
         if (remoteUrl.isNotEmpty()) {
             // todo: maybe async this call
@@ -58,7 +58,6 @@ class StorageManager {
                 uiHelper.makeToast(it.message)
             }
         }
-
 
         updateDatabaseWithoutLocker()
 
@@ -247,10 +246,10 @@ class StorageManager {
         f: suspend () -> Result<T>
     ): Result<T> {
 
-
+        val creed = prefs.gitCreed()
         val remoteUrl = prefs.remoteUrl.get()
 
-        gitManager.commitAll(prefs.userName.get()).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
             return failure(it)
         }
         updateDatabaseWithoutLocker().onFailure {
@@ -267,7 +266,7 @@ class StorageManager {
         )
 
         if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(prefs.gitCreed()).onFailure {
+            gitManager.pull(creed).onFailure {
                 it.printStackTrace()
             }
         }
@@ -276,13 +275,13 @@ class StorageManager {
             return failure(it)
         }
 
-        gitManager.commitAll(prefs.userName.get()).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
             return failure(it)
         }
 
 
         if (remoteUrl.isNotEmpty()) {
-            gitManager.push(prefs.gitCreed()).onFailure {
+            gitManager.push(creed).onFailure {
                 it.printStackTrace()
             }
         }
