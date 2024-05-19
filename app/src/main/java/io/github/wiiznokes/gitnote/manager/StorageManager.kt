@@ -38,9 +38,12 @@ class StorageManager {
         Log.d(TAG, "updateDatabaseAndRepo")
 
         val creed = prefs.gitCreed()
+        val remoteUrl = prefs.remoteUrl.get()
 
-        gitManager.pull(creed).onFailure {
-            uiHelper.makeToast(it.message)
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(creed).onFailure {
+                uiHelper.makeToast(it.message)
+            }
         }
 
         // todo: maybe async this call
@@ -48,10 +51,14 @@ class StorageManager {
             uiHelper.makeToast(it.message)
         }
 
-        // todo: maybe async this call
-        gitManager.push(creed).onFailure {
-            uiHelper.makeToast(it.message)
+
+        if (remoteUrl.isNotEmpty()) {
+            // todo: maybe async this call
+            gitManager.push(creed).onFailure {
+                uiHelper.makeToast(it.message)
+            }
         }
+
 
         updateDatabaseWithoutLocker()
 
@@ -241,6 +248,8 @@ class StorageManager {
     ): Result<T> {
 
 
+        val remoteUrl = prefs.remoteUrl.get()
+
         gitManager.commitAll(prefs.userName.get()).onFailure {
             return failure(it)
         }
@@ -257,8 +266,10 @@ class StorageManager {
             }
         )
 
-        gitManager.pull(prefs.gitCreed()).onFailure {
-            it.printStackTrace()
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(prefs.gitCreed()).onFailure {
+                it.printStackTrace()
+            }
         }
 
         updateDatabaseWithoutLocker().onFailure {
@@ -268,9 +279,14 @@ class StorageManager {
         gitManager.commitAll(prefs.userName.get()).onFailure {
             return failure(it)
         }
-        gitManager.push(prefs.gitCreed()).onFailure {
-            it.printStackTrace()
+
+
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.push(prefs.gitCreed()).onFailure {
+                it.printStackTrace()
+            }
         }
+
         prefs.databaseCommit.update(gitManager.lastCommit())
 
         return success(payload)
