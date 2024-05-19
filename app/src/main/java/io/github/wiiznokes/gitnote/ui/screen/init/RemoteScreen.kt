@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -48,6 +49,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import io.github.wiiznokes.gitnote.ui.model.Provider
@@ -92,103 +95,109 @@ private fun OpenLinks(
     provider: MutableState<Provider>
 ) {
 
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+    Column(modifier = Modifier.padding(15.dp)) {
 
+        Text(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = stringResource(R.string.quick_links),
+            style = MaterialTheme.typography.bodyMedium
+        )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
-            var providerExpanded by remember {
-                mutableStateOf(false)
-            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                var providerExpanded by remember {
+                    mutableStateOf(false)
+                }
 
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
 
-                Box {
+                    Box {
 
-                    Button(
-                        modifier = Modifier.padding(start = 7.dp),
-                        onClick = { providerExpanded = !providerExpanded },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                    ) {
-                        Text(
-                            text = provider.value.name
-                        )
-                    }
-
-
-                    DropdownMenu(
-                        expanded = providerExpanded,
-                        onDismissRequest = { providerExpanded = false }
-                    ) {
-
-                        Provider.entries.forEach {
-                            DropdownMenuItem(
-                                text = {
-                                    Text(text = it.name)
-                                },
-                                onClick = {
-                                    provider.value = it
-                                    vm.viewModelScope.launch {
-                                        vm.prefs.provider.update(it)
-                                    }
-                                }
+                        Button(
+                            modifier = Modifier.padding(start = 7.dp),
+                            onClick = { providerExpanded = !providerExpanded },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
                             )
+                        ) {
+                            Text(
+                                text = provider.value.name
+                            )
+                        }
+
+
+                        DropdownMenu(
+                            expanded = providerExpanded,
+                            onDismissRequest = { providerExpanded = false }
+                        ) {
+
+                            Provider.entries.forEach {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(text = it.name)
+                                    },
+                                    onClick = {
+                                        provider.value = it
+                                        vm.viewModelScope.launch {
+                                            vm.prefs.provider.update(it)
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            }
 
 
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState()),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState()),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
 
-                    provider.value.mainPage?.let {
-                        OpenLinkButton(
-                            text = "Main page",
-                            url = it
-                        )
+                        provider.value.mainPage?.let {
+                            OpenLinkButton(
+                                text = stringResource(R.string.quick_links_home_page),
+                                url = it
+                            )
+                        }
+
+                        provider.value.createRepo?.let {
+                            OpenLinkButton(
+                                text = stringResource(R.string.quick_links_create_repo),
+                                url = it
+                            )
+                        }
+
+                        provider.value.createToken?.let {
+                            OpenLinkButton(
+                                text = stringResource(R.string.quick_links_create_token),
+                                url = it
+                            )
+                        }
+
+                        provider.value.checkOutRepo?.let {
+                            OpenLinkButton(
+                                text = stringResource(R.string.quick_links_see_repos),
+                                url = it
+                            )
+                        }
                     }
 
-                    provider.value.createRepo?.let {
-                        OpenLinkButton(
-                            text = "Create repo",
-                            url = it
-                        )
-                    }
-
-                    provider.value.createToken?.let {
-                        OpenLinkButton(
-                            text = "Create Token",
-                            url = it
-                        )
-                    }
-
-                    provider.value.checkOutRepo?.let {
-                        OpenLinkButton(
-                            text = "See repos",
-                            url = it
-                        )
-                    }
                 }
 
+
             }
-
-
         }
     }
 }
@@ -223,7 +232,7 @@ private fun ElevatedCard(
 
 @Composable
 fun RemoteScreen(
-    repoPath: String,
+    repoState: NewRepoState,
     onInitSuccess: () -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -231,7 +240,7 @@ fun RemoteScreen(
     val vm: InitViewModel = viewModel()
 
     AppPage(
-        title = "Clone repository",
+        title = stringResource(R.string.app_page_clone_repository),
         horizontalAlignment = Alignment.CenterHorizontally,
         onBackClick = onBackClick,
     ) {
@@ -251,12 +260,12 @@ fun RemoteScreen(
                 .padding(vertical = 50.dp)
         ) {
             Text(
-                text = "Path where the repo will be cloned",
+                text = stringResource(R.string.where_repo_is_cloned),
                 style = MaterialTheme.typography.bodyLarge
             )
 
             Text(
-                text = repoPath,
+                text = repoState.repoPath(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -271,7 +280,7 @@ fun RemoteScreen(
         }
 
         InitGroupExplication(
-            explication = "1. Enter the Git clone URL (Https)"
+            explication = stringResource(R.string.clone_step_url)
         ) {
             OutlinedTextField(
                 value = repoUrl,
@@ -279,13 +288,13 @@ fun RemoteScreen(
                     repoUrl = it
                 },
                 label = {
-                    Text(text = "clone URL")
-                },
-                placeholder = {
-                    Text(text = "https://github.com/wiiznokes/gitnote.git")
+                    Text(text = stringResource(R.string.clone_step_url_label))
                 },
                 singleLine = true,
-                isError = repoUrl.text.contains(" ")
+                isError = repoUrl.text.contains(" ") || repoUrl.text.isEmpty(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri
+                )
             )
         }
 
@@ -303,7 +312,7 @@ fun RemoteScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(text = "With credentials")
+                Text(text = stringResource(R.string.with_credentials))
                 IconButton(
                     onClick = { withCreed = !withCreed }
                 ) {
@@ -337,7 +346,7 @@ fun RemoteScreen(
         AnimatedVisibility(visible = withCreed) {
             Column {
                 InitGroupExplication(
-                    explication = "2. Username"
+                    explication = stringResource(R.string.clone_step_username)
                 ) {
                     OutlinedTextField(
                         value = userName,
@@ -345,18 +354,16 @@ fun RemoteScreen(
                             userName = it
                         },
                         label = {
-                            Text(text = "Username")
-                        },
-                        placeholder = {
-                            Text(text = "MyUserName")
+                            Text(text = stringResource(R.string.clone_step_username_label))
                         },
                         singleLine = true,
+                        isError = userName.text.isEmpty()
                     )
 
                 }
 
                 InitGroupExplication(
-                    explication = "3. Password"
+                    explication = stringResource(R.string.clone_step_password)
                 ) {
 
                     OutlinedTextField(
@@ -365,10 +372,11 @@ fun RemoteScreen(
                             password = it
                         },
                         label = {
-                            Text("Password")
+                            Text(stringResource(R.string.clone_step_password_label))
                         },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
+                        isError = userName.text.isEmpty()
                     )
                 }
             }
@@ -390,7 +398,7 @@ fun RemoteScreen(
                 .padding(),
             onClick = {
                 vm.cloneRepo(
-                    repoPath = repoPath,
+                    repoState = repoState,
                     repoUrl = repoUrl.text,
                     gitCreed = if (withCreed) GitCreed(
                         userName = userName.text,
@@ -401,7 +409,7 @@ fun RemoteScreen(
             },
             enabled = cloneState.isClickable()
         ) {
-            Text(text = "Clone repo")
+            Text(text = stringResource(R.string.clone_repo_button))
             Icon(imageVector = Icons.Default.Download, contentDescription = null)
         }
     }

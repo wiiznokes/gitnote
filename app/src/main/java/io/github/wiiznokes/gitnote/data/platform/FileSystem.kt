@@ -1,6 +1,8 @@
 package io.github.wiiznokes.gitnote.data.platform
 
 import android.os.Environment
+import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.util.toResult
@@ -11,6 +13,7 @@ import java.nio.file.attribute.FileTime
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteExisting
@@ -140,11 +143,11 @@ sealed class NodeFs(
 
             try {
                 if (!pathFs.isDirectory()) {
-                    return failure(Exception("The path is not a directory"))
+                    return failure(Exception(MyApp.appModule.context.getString(R.string.error_path_not_directory)))
                 }
 
                 if (pathFs.listDirectoryEntries().isNotEmpty()) {
-                    return failure(Exception("The path is not empty"))
+                    return failure(Exception(MyApp.appModule.context.getString(R.string.error_path_not_empty)))
                 }
 
             } catch (e: Exception) {
@@ -185,7 +188,7 @@ sealed class NodeFs(
 
         override fun create(): Result<Unit> {
             return toResult {
-                pathFs.createDirectory()
+                pathFs.createDirectories()
             }
         }
 

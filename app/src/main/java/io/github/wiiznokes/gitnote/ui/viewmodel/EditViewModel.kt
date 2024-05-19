@@ -154,7 +154,7 @@ class EditViewModel() : ViewModel() {
 
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
-        prefs.repoPath.getBlocking().let { rootPath ->
+        prefs.repoPathBlocking().let { rootPath ->
             val previousFile = NodeFs.File.fromPath(rootPath, previousNote.relativePath)
 
             if (!previousFile.exist()) {
@@ -216,7 +216,7 @@ class EditViewModel() : ViewModel() {
 
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
-        prefs.repoPath.getBlocking().let { rootPath ->
+        prefs.repoPathBlocking().let { rootPath ->
             if (NodeFs.File.fromPath(rootPath, relativePath).exist()) {
                 uiHelper.makeToast("New note already exist")
                 return failure(EditException(EditExceptionType.NoteAlreadyExist))

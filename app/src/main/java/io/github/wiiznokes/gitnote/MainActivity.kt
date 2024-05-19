@@ -15,7 +15,6 @@ import dev.olshevski.navigation.reimagined.popAll
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
-import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
@@ -56,23 +55,19 @@ class MainActivity : ComponentActivity() {
 
 
                 val startDestination: Destination = remember {
-                    if (!StoragePermissionHelper.isPermissionGranted()) {
-                        Destination.Init(InitDestination.LocalStoragePermission)
-                    } else {
-                        if (runBlocking { vm.tryInit() }) {
-                            if (isEditUnsaved()) {
-                                Log.d(TAG, "launch as EDIT_IS_UNSAVED")
-                                Destination.App(
-                                    AppDestination.EditSaved
-                                )
-                            } else {
-                                Destination.App(
-                                    AppDestination.Grid
-                                    //AppDestination.Settings(SettingsDestination.Main)
-                                )
-                            }
-                        } else Destination.Init(InitDestination.Main)
-                    }
+                    if (runBlocking { vm.tryInit() }) {
+                        if (isEditUnsaved()) {
+                            Log.d(TAG, "launch as EDIT_IS_UNSAVED")
+                            Destination.App(
+                                AppDestination.EditSaved
+                            )
+                        } else {
+                            Destination.App(
+                                AppDestination.Grid
+                                //AppDestination.Settings(SettingsDestination.Main)
+                            )
+                        }
+                    } else Destination.Init(InitDestination.Main)
                 }
 
 
@@ -104,11 +99,7 @@ class MainActivity : ComponentActivity() {
                             appDestination = destination.appDestination,
                             onStorageFailure = {
                                 navController.popAll()
-                                if (!StoragePermissionHelper.isPermissionGranted()) {
-                                    navController.navigate(Destination.Init(InitDestination.LocalStoragePermission))
-                                } else {
-                                    navController.navigate(Destination.Init(InitDestination.Main))
-                                }
+                                navController.navigate(Destination.Init(InitDestination.Main))
                             }
                         )
                     }

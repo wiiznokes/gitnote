@@ -47,7 +47,7 @@ class GitManager {
 
         init {
             Log.d(TAG, "init")
-            System.loadLibrary("gitnote")
+            System.loadLibrary("git_wrapper")
         }
     }
 

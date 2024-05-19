@@ -78,5 +78,33 @@
     <string name="error_create_repo">Impossible de créer le dépôt: %1$s</string>
     <string name="grid">Grille</string>
     <string name="about">À propos</string>
+    <string name="app_page_choose_method">Choisir la méthode</string>
+    <string name="create_repo">Créer un dépôt local</string>
+    <string name="open_repo">Ouvrir un dépôt local</string>
+    <string name="clone_repo">Cloner un dépôt distant</string>
+    <string name="use_app_storage">Utiliser la mémoire de l\'app</string>
+    <string name="error_need_storage_permission">L\'application a besoin de cette permission pour accéder au stockage</string>
+    <string name="use_device_storage">Utiliser la mémoire de l\'appareil</string>
+    <string name="use_device_storage_info">Requiert une autorisation d\'accès au stockage complet de l\'appareil. Vous aurez la possibilité d\'accéder au dépôt sur votre ordinateur par la suite.</string>
+    <string name="create_repo_explorer">Créer un dépôt dans ce dossier</string>
+    <string name="open_repo_explorer">Ouvrir ce dépôt</string>
+    <string name="clone_repo_explorer">Cloner le dépôt dans ce dossier</string>
+    <string name="quick_links">Liens rapides</string>
+    <string name="quick_links_home_page">Page d\'accueil</string>
+    <string name="quick_links_create_repo">Créer dépôt</string>
+    <string name="quick_links_create_token">Créer token</string>
+    <string name="quick_links_see_repos">Voir les référentiel</string>
+    <string name="app_page_clone_repository">Cloner le référentiel</string>
+    <string name="where_repo_is_cloned">Chemin où le référentiel sera cloné</string>
+    <string name="clone_step_url">1. Entrez l\'url du référentiel (https)</string>
+    <string name="clone_step_url_label">url</string>
+    <string name="with_credentials">Avec identifiants</string>
+    <string name="clone_step_username">2. Nom d\'utilisateur</string>
+    <string name="clone_step_username_label">Nom d\'utilisateur</string>
+    <string name="clone_step_password">3. Mot de passe (dev. token)</string>
+    <string name="clone_step_password_label">Mot de passe</string>
+    <string name="clone_repo_button">Cloner le référentiel</string>
+    <string name="error_path_not_directory">Le chemin n\'est pas un répertoire</string>
+    <string name="error_path_not_empty">Le dossier n\'est pas vide</string>
 
 </resources>

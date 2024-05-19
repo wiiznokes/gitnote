@@ -1,6 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.model
 
 import android.os.Parcelable
+import io.github.wiiznokes.gitnote.data.AppPreferences
 import kotlinx.parcelize.Parcelize
 
 
@@ -31,6 +32,11 @@ data class GitCreed(
     val userName: String,
     val password: String,
 ) : Parcelable {
+
+    companion object {
+        fun usernameOrDefault(creed: GitCreed?): String =
+            creed?.userName ?: AppPreferences.DEFAULT_USERNAME
+    }
 
     override fun toString(): String =
         "GitCreed(userName=${userName}, password=${"*".repeat(password.length)})"

@@ -129,7 +129,7 @@ class GridViewModel : ViewModel() {
 
         val relativePath = "$relativeParentPath/$name"
 
-        prefs.repoPath.getBlocking().let { rootPath ->
+        prefs.repoPathBlocking().let { rootPath ->
             if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
                 uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
                 return false
