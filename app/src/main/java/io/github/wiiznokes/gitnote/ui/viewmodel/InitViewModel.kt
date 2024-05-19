@@ -96,18 +96,19 @@ class InitViewModel : ViewModel() {
         return result
     }
 
-    private suspend fun openRepoSuspend(repoPath: String): Result<Unit> {
+    private suspend fun openRepoSuspend(repoState: NewRepoState): Result<Unit> {
 
-        if (!NodeFs.Folder.fromPath(repoPath).exist()) {
+        if (!NodeFs.Folder.fromPath(repoState.repoPath()).exist()) {
             uiHelper.makeToast("Path is not a directory")
             return failure(GitException(GitExceptionType.WrongPath))
         }
 
-        gitManager.openRepo(repoPath).onFailure {
+        gitManager.openRepo(repoState.repoPath()).onFailure {
             uiHelper.makeToast(it.message)
             return failure(it)
         }
 
+        prefs.initRepo(repoState)
 
         // yes, there can be pending file not committed
         // but they will be committed in the updateDatabaseAndRepo function
@@ -122,8 +123,7 @@ class InitViewModel : ViewModel() {
     fun openRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            openRepoSuspend(repoState.repoPath()).onSuccess {
-                prefs.initRepo(repoState)
+            openRepoSuspend(repoState).onSuccess {
                 onSuccess()
             }
         }
@@ -181,19 +181,28 @@ class InitViewModel : ViewModel() {
 
     suspend fun tryInit(): Boolean {
 
-        when (prefs.repoState.get()) {
+
+
+        val repoState = when (prefs.repoState.get()) {
             RepoState.NoRepo -> return false
-            RepoState.AppStorage -> { }
+            RepoState.AppStorage -> {
+                NewRepoState.AppStorage
+            }
             RepoState.DeviceStorage -> {
                 if (!StoragePermissionHelper.isPermissionGranted()) {
                     return false
                 }
+                val repoPath = try {
+                    prefs.repoPath()
+                } catch (e: Exception) {
+                    return false
+                }
+                NewRepoState.DeviceStorage(repoPath)
             }
         }
 
-        val repoPath = prefs.repoPath()
 
-        openRepoSuspend(repoPath).onFailure {
+        openRepoSuspend(repoState).onFailure {
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.closeRepo()
             }
