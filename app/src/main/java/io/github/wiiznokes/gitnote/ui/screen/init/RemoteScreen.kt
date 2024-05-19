@@ -167,7 +167,7 @@ private fun OpenLinks(
 
                         provider.value.mainPage?.let {
                             OpenLinkButton(
-                                text = stringResource(R.string.quick_links_main_page),
+                                text = stringResource(R.string.quick_links_home_page),
                                 url = it
                             )
                         }
