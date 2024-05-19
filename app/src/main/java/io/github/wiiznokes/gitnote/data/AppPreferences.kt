@@ -17,6 +17,11 @@ import kotlin.io.path.pathString
 class AppPreferences(
     context: Context
 ) : PreferencesManager(context, "settings") {
+
+    companion object {
+        val appStorageRepoPath = MyApp.appModule.context.filesDir.toPath().resolve("repo").pathString
+    }
+
     val dynamicColor = booleanPreference("dynamicColor", true)
     val theme = enumPreference("theme", Theme.SYSTEM)
 
@@ -123,10 +128,8 @@ sealed class NewRepoState : Parcelable {
 
     fun repoPath(): String {
         return when (this) {
-            AppStorage -> appStorageRepoPath
+            AppStorage -> AppPreferences.appStorageRepoPath
             is DeviceStorage -> this.path
         }
     }
 }
-
-private val appStorageRepoPath = MyApp.appModule.context.filesDir.toPath().resolve("repo").pathString

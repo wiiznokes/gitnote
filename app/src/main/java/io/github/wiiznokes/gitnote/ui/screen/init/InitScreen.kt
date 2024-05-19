@@ -70,14 +70,19 @@ fun InitScreen(
                         )
                     },
                     onFinish = { path ->
+                        val repoState = NewRepoState.DeviceStorage(path)
 
-                        vm.initRepoWithSource(
-                            repoState = NewRepoState.DeviceStorage(path),
-                            newRepoSource = initDestination.newRepoSource,
-                            navController = navController,
-                            onSuccess = onInitSuccess
-                        )
-
+                        when (initDestination.newRepoSource) {
+                            NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
+                            NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
+                            NewRepoSource.Clone -> {
+                                vm.checkPathForClone(repoState.repoPath()).onSuccess {
+                                    navController.navigate(
+                                        InitDestination.Remote(repoState)
+                                    )
+                                }
+                            }
+                        }
                     },
                     onBackClick = {
                         navController.popUpTo(inclusive = false) {

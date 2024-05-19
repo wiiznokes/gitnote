@@ -11,6 +11,7 @@ import java.nio.file.attribute.FileTime
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
 import kotlin.io.path.deleteExisting
@@ -185,7 +186,7 @@ sealed class NodeFs(
 
         override fun create(): Result<Unit> {
             return toResult {
-                pathFs.createDirectory()
+                pathFs.createDirectories()
             }
         }
 

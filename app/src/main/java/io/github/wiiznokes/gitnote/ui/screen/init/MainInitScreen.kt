@@ -118,12 +118,19 @@ fun MainScreen(
                     .align(Alignment.CenterHorizontally),
                 onClick = {
                     closeSheet()
-                    vm.initRepoWithSource(
-                        repoState = NewRepoState.AppStorage,
-                        newRepoSource = storageChooser.source,
-                        navController = navController,
-                        onSuccess = onInitSuccess
-                    )
+
+                    val repoState = NewRepoState.AppStorage
+                    when (storageChooser.source) {
+                        NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
+                        NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
+                        NewRepoSource.Clone -> {
+                            vm.checkPathForClone(repoState.repoPath()).onSuccess {
+                                navController.navigate(
+                                    InitDestination.Remote(repoState)
+                                )
+                            }
+                        }
+                    }
                 },
                 enabled = storageChooser.source != NewRepoSource.Open
             ) {

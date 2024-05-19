@@ -2,8 +2,6 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 
 
 import androidx.lifecycle.ViewModel
-import dev.olshevski.navigation.reimagined.NavController
-import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.NewRepoState
@@ -13,8 +11,6 @@ import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.GitException
 import io.github.wiiznokes.gitnote.manager.GitExceptionType
-import io.github.wiiznokes.gitnote.ui.destination.InitDestination
-import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,35 +33,19 @@ class InitViewModel : ViewModel() {
         private const val TAG = "InitViewModel"
     }
 
-    fun initRepoWithSource(
-        repoState: NewRepoState,
-        newRepoSource: NewRepoSource,
-        navController: NavController<InitDestination>,
-        onSuccess: () -> Unit
-    ) {
-
-        when (newRepoSource) {
-            NewRepoSource.Create -> {
-                createRepo(repoState, onSuccess = onSuccess)
-            }
-
-            NewRepoSource.Open -> {
-                openRepo(repoState, onSuccess = onSuccess)
-            }
-
-            NewRepoSource.Clone -> {
-                checkPathForClone(repoState.repoPath()).onSuccess {
-                    navController.navigate(
-                        InitDestination.Remote(repoState)
-                    )
-                }
-            }
-        }
+    private fun prepareLocalStorageRepoPath() {
+        val folder = NodeFs.Folder.fromPath(AppPreferences.appStorageRepoPath)
+        folder.delete()
+        folder.create()
     }
-
     fun createRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
+
+            if (repoState is NewRepoState.AppStorage) {
+                prepareLocalStorageRepoPath()
+            }
+
             NodeFs.Folder.fromPath(repoState.repoPath()).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
@@ -144,6 +124,9 @@ class InitViewModel : ViewModel() {
     ) {
 
         CoroutineScope(Dispatchers.IO).launch {
+            if (repoState is NewRepoState.AppStorage) {
+                prepareLocalStorageRepoPath()
+            }
 
             _cloneState.emit(CloneState.Cloning(0))
 
