@@ -6,7 +6,6 @@
 
 - missing feature for folder management: remove, move, rename
 - missing feature for note management: move
-- add option to use the local storage of the app to use repositories
 - support f-droid
   - example repo: https://github.com/libre-tube/LibreTube/tree/master
   - doc: https://f-droid.org/en/docs/

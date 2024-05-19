@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.wiiznokes.gitnote"
-        minSdk = 28
+        minSdk = 30
         targetSdk = 34
         versionCode = 1
         versionName = File("VERSION").readText()

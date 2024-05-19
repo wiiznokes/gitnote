@@ -13,9 +13,6 @@
     <string name="descending_sort_order">Descendant</string>
 
 
-    <string name="automatic">Automatique</string>
-
-
     <string name="error_invalid_name">Le nom est invalide</string>
     <string name="error_invalid_extension">L\'extension est invalide</string>
 
@@ -66,7 +63,7 @@
     <string name="error_invalid_link">Lien invalide, impossible de l\'ouvrir</string>
     <string name="error_file_already_exist">Le fichier exist déjà</string>
     <string name="error_create_file">Impossible de créer le fichier: %1$s</string>
-    <string name="error_write_file">Impossible d\'écrire le fichier: %1%s</string>
+    <string name="error_write_file">Impossible d\'écrire le fichier: %1$s</string>
     <string name="error_delete_file">Impossible de supprimer le fichier %1$s: %2$s</string>
     <string name="error_create_folder">Impossible de créer le dossier: %1$s</string>
     <string name="error_pull_repo">Impossible de pull: %1$s</string>

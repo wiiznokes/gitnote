@@ -1,6 +1,6 @@
 # GitNote WIP
 
-*Supported Android versions: 9 to 14*
+_Supported Android versions: 9 to 14_
 
 Android note which integrate Git. You can use this app with other desktop editors.
 

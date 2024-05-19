@@ -53,7 +53,6 @@ fun InitScreen(
 
 
                 FileExplorerScreen(
-                    newRepoSource = initDestination.newRepoSource,
                     path = initDestination.path?.let {
                         it.ifEmpty {
                             null

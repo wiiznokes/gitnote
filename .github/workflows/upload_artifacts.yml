@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-            lfs: true
+          lfs: true
 
       - run: |
           git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
@@ -43,13 +43,13 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      
+
       - name: Retrieve the secret and decode it to a file
         env:
           KEY_BASE64: ${{ secrets.KEY_BASE64 }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-      
+
       # todo: specifie arch
       - name: Build apk
         env:
@@ -65,7 +65,7 @@ jobs:
           # warning: do not use github.event syntax here
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
           mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
-      
+
       # when downloading, this will be: pathdest/name/filename
       - uses: actions/upload-artifact@v4
         with:

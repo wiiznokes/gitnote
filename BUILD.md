@@ -1,6 +1,5 @@
 # Build
 
-
 This app uses this [fork](https://github.com/wiiznokes/libgit2-android) of the [libgit2](https://github.com/libgit2/libgit2) library.
 You can compile it from source or use the binaries already in place in the jniLibs folder.
 

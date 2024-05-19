@@ -16,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,14 +31,12 @@ import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
-import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
 import io.github.wiiznokes.gitnote.ui.viewmodel.FileExplorerViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 
 @Composable
 fun FileExplorerScreen(
-    newRepoSource: NewRepoSource,
     path: String?,
     onDirectoryClick: (String) -> Unit,
     onFinish: (String) -> Unit,

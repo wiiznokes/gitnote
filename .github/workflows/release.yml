@@ -24,7 +24,6 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CARGO_TERM_COLOR: always
 
-  
 jobs:
   setup-env:
     runs-on: ubuntu-latest
@@ -39,7 +38,7 @@ jobs:
 
       - name: Get app version
         run: echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
-      
+
       - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
         name: Setup options for nightly
         run: |
@@ -52,7 +51,7 @@ jobs:
         run: |
           echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
           echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
-      
+
       - name: Set up outputs
         id: set_outputs
         run: |
@@ -60,8 +59,7 @@ jobs:
           echo "tag_name=${{ env.TAG_NAME }}" >> "$GITHUB_OUTPUT"
           echo "version_name=${{ env.VERSION_NAME }}" >> "$GITHUB_OUTPUT"
           echo "prerelease=${{ env.PRERELEASE }}" >> "$GITHUB_OUTPUT"
-    
-     
+
   upload-artifacts:
     needs: setup-env
     uses: ./.github/workflows/upload_artifacts.yml
@@ -92,7 +90,7 @@ jobs:
           # delete previous nightly release
           gh release delete nightly --yes || true
           git push --delete origin nightly || true
-          
+
           git tag ${{ needs.setup-env.outputs.tag_name }}
           git push origin --tags
 

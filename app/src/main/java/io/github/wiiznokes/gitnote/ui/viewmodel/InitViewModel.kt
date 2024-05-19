@@ -10,8 +10,6 @@ import io.github.wiiznokes.gitnote.data.RepoState
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
-import io.github.wiiznokes.gitnote.manager.GitException
-import io.github.wiiznokes.gitnote.manager.GitExceptionType
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

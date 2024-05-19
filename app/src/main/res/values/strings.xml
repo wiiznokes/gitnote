@@ -7,7 +7,6 @@
     <string name="alpha_numeric_sort_type">Alpha numeric</string>
     <string name="ascending_sort_order">Ascending</string>
     <string name="descending_sort_order">Descending</string>
-    <string name="automatic">Automatic</string>
     <string name="new_folder_label">New folder name</string>
     <string name="create_new_folder">Create new folder</string>
     <string name="yes">Yes</string>

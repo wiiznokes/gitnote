@@ -13,10 +13,10 @@ fun removeFirstAndLastSlash(input: String): String {
         return result
 
     if (result.length == 1) {
-        if (result.first() == '/')
-            return ""
+        return if (result.first() == '/')
+            ""
         else
-            return result
+            result
     }
 
     if (result.first() == '/') {

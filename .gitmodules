@@ -1,4 +1,0 @@
-[submodule "libgit2-android"]
-	path = libgit2-android
-	url = https://github.com/wiiznokes/libgit2-android
-	branch = patch-android
