@@ -80,6 +80,7 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env,
 
     err = git_reference_name_to_id(&sha_last_commit, repo, "HEAD");
 
+    // XXX: can fail with error 4 if there are no commit yet in the repo
     CHECK_LG2_RETURN(err, "git_reference_name_to_id", NULL);
 
     // Convert git_oid to string

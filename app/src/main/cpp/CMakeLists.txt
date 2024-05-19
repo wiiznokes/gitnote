@@ -1,7 +1,7 @@
 
 
 cmake_minimum_required(VERSION 3.22.1)
-project("gitnote")
+project("git_wrapper")
 
 
 set(JNI_LIBS ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
@@ -18,7 +18,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         merge.cpp
         remote.cpp
         CallbackHandler.cpp
-        gitnote.cpp)
+        git_wrapper.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
         ${JNI_LIBS}/libgit2.so
