@@ -57,6 +57,8 @@ jobs:
           skip_checkout: true
           skip_fetch: true
           file_pattern: 'VERSION'
+
+      - if: ${{ github.event.inputs.is_nightly == 'false' }}
         name: Setup options for a new release
         run: |
           echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
