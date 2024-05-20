@@ -149,6 +149,8 @@ fun DrawerScreen(
                         mutableStateOf(Offset.Zero)
                     }
 
+                    // todo: impl options
+                    /*
                     // need this box for clickPosition
                     Box {
                         CustomDropDown(
@@ -165,6 +167,8 @@ fun DrawerScreen(
                             clickPosition = clickPosition
                         )
                     }
+
+                     */
 
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
