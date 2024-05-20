@@ -17,13 +17,7 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] edit view
 - [x] private repo with https
 - [x] remote sync
-- [x] edit/rename/create/update note/file
 - [x] time based sort
-- [ ] rename/create/delete noteFolder/directory
-- [ ] Markdown integration
-- [ ] available on f-droid
-- [ ] private repo with ssh
-- [ ] easy login (without copy pasting token, like GitJournal (require ssh support))
 
 <p  style="text-align: center;">
   <img src="assets/grid.png" width="32%"  alt="grid screen"/>

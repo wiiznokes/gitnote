@@ -6,7 +6,7 @@ on:
       is_nightly:
         description: "Is nightly"
         required: false
-        default: false
+        default: true
         type: boolean
   # push:
   #   branches:
@@ -36,8 +36,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get app version
-        run: echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set app version
+      - run: |
+          date +"%y.%m" > VERSION
+          echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Set version file
+          skip_checkout: true
+          skip_fetch: true
+          file_pattern: 'VERSION'
 
       - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
         name: Setup options for nightly
