@@ -4,7 +4,6 @@ import android.util.Log
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
-import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
@@ -183,24 +182,20 @@ class StorageManager {
         }
     }
 
-    suspend fun deleteNotes(noteRelativePaths: List<String>): Result<Unit> = locker.withLock {
-        Log.d(TAG, "deleteNotes: ${noteRelativePaths.size}")
+    suspend fun deleteNotes(notes: List<Note>): Result<Unit> = locker.withLock {
+        Log.d(TAG, "deleteNotes: ${notes.size}")
 
         update {
-
             // optimization because we only see the db state on screen
-            noteRelativePaths.forEach { noteRelativePath ->
-                val removedNoteCount = dao.removeNote(noteRelativePath)
-                if (removedNoteCount != 1) {
-                    Log.e(TAG, "removed note count was != 1 from the doa: $removedNoteCount")
-                }
+            notes.forEach { note ->
+                dao.removeNote(note)
             }
 
-            val rootPath = prefs.repoPath()
-            noteRelativePaths.forEach { noteRelativePath ->
+            val repoPath = prefs.repoPath()
+            notes.forEach { note ->
 
-                Log.d(TAG, "deleting $noteRelativePath")
-                val file = NodeFs.File.fromPath(rootPath, noteRelativePath)
+                Log.d(TAG, "deleting $note")
+                val file = note.toFileFs(repoPath)
 
                 file.delete().onFailure {
                     val message =

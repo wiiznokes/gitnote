@@ -109,10 +109,6 @@ interface RepoDatabaseDao {
     @Delete
     suspend fun removeNote(note: Note)
 
-    @Query("DELETE  FROM Notes WHERE relativePath = :relativePath")
-    suspend fun removeNote(relativePath: String): Int
-
-
     @Query("DELETE  FROM NoteFolders")
     fun removeAllNoteFolder()
 

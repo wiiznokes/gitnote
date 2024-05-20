@@ -118,7 +118,7 @@ fun GridScreen(
             GridViewTop(
                 vm = vm,
                 offset = offset,
-                selectedNotes = selectedNotes,
+                selectedNotesNumber = selectedNotes.size,
                 maxOffset = maxOffset,
                 drawerState = drawerState,
                 onSettingsClick = onSettingsClick,
@@ -166,7 +166,7 @@ private fun GridView(
     maxOffset: Float,
     offset: MutableFloatState,
     onEditClick: (Note, EditType) -> Unit,
-    selectedNotes: List<String>,
+    selectedNotes: List<Note>,
     fabExpanded: MutableState<Boolean>,
 ) {
     val gridNotes by vm.gridNotes.collectAsState()
@@ -179,6 +179,7 @@ private fun GridView(
     var lastQuery: String = rememberSaveable { query.value }
 
     if (lastQuery != query.value) {
+        @Suppress("UNUSED_VALUE")
         lastQuery = query.value
         LaunchedEffect(null) {
             gridState.animateScrollToItem(index = 0)
@@ -264,8 +265,7 @@ private fun GridView(
                                     gridNote.note, EditType.Update
                                 )
                             } else {
-                                vm.selectNote(
-                                    gridNote.note.relativePath, add = !gridNote.selected
+                                vm.selectNote(gridNote.note, add = !gridNote.selected
                                 )
                             }
                         })
@@ -289,7 +289,7 @@ private fun GridView(
                                     if (selectedNotes.isEmpty()) CustomDropDownModel(text = stringResource(
                                         R.string.select_multiple_notes
                                     ), onClick = {
-                                        vm.selectNote(gridNote.note.relativePath, true)
+                                        vm.selectNote(gridNote.note, true)
                                     }) else null,
                                 ),
                                 clickPosition = clickPosition

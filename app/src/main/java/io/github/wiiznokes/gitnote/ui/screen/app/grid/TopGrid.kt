@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
@@ -59,7 +60,7 @@ private const val TAG = "TopGridScreen"
 fun GridViewTop(
     vm: GridViewModel,
     offset: MutableFloatState,
-    selectedNotes: List<String>,
+    selectedNotesNumber: Int,
     maxOffset: MutableFloatState,
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
@@ -69,7 +70,7 @@ fun GridViewTop(
     val statusBarHeight = 0.dp
 
     AnimatedContent(
-        targetState = selectedNotes.isEmpty(),
+        targetState = selectedNotesNumber == 0,
         label = "",
     ) { shouldShowSearchBar ->
         if (shouldShowSearchBar) {
@@ -87,7 +88,7 @@ fun GridViewTop(
                 statusBarHeight = statusBarHeight,
                 topBarHeight = topBarHeight,
                 vm = vm,
-                selectedNotes = selectedNotes
+                selectedNotesNumber = selectedNotesNumber
             )
         }
     }
@@ -225,7 +226,7 @@ private fun SelectableTopBar(
     statusBarHeight: Dp,
     topBarHeight: Dp,
     vm: GridViewModel,
-    selectedNotes: List<String>
+    selectedNotesNumber: Int
 ) {
     Row(
         modifier = Modifier
@@ -252,7 +253,7 @@ private fun SelectableTopBar(
             }
 
             Text(
-                text = selectedNotes.size.toString(),
+                text = selectedNotesNumber.toString(),
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -280,7 +281,7 @@ private fun SelectableTopBar(
                         CustomDropDownModel(
                             text = pluralStringResource(
                                 R.plurals.delete_selected_notes,
-                                selectedNotes.size
+                                selectedNotesNumber
                             ),
                             onClick = { vm.deleteSelectedNotes() }
                         )

@@ -64,10 +64,9 @@ class GridViewModel : ViewModel() {
         get() = _currentNoteFolderRelativePath.asStateFlow()
 
 
-    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+    private val _selectedNotes: MutableStateFlow<List<Note>> = MutableStateFlow(emptyList())
 
-    // todo: take a Note here
-    val selectedNotes: StateFlow<List<String>>
+    val selectedNotes: StateFlow<List<Note>>
         get() = _selectedNotes.asStateFlow()
 
 
@@ -83,11 +82,8 @@ class GridViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             allNotes.collect { allNotes ->
-                //  Log.d(TAG, "filter selected note, depend on allNotes")
                 selectedNotes.value.filter { selectedNote ->
-                    allNotes.contains { note ->
-                        note.relativePath == selectedNote
-                    }
+                    allNotes.contains(selectedNote)
                 }.let { newSelectedNotes ->
                     _selectedNotes.emit(newSelectedNotes)
                 }
@@ -150,11 +146,11 @@ class GridViewModel : ViewModel() {
     /**
      * @param add true if the note must be selected, false otherwise
      */
-    fun selectNote(relativePath: String, add: Boolean) = viewModelScope.launch {
+    fun selectNote(note: Note, add: Boolean) = viewModelScope.launch {
         if (add) {
-            selectedNotes.value.plus(relativePath)
+            selectedNotes.value.plus(note)
         } else {
-            selectedNotes.value.minus(relativePath)
+            selectedNotes.value.minus(note)
         }.let {
             _selectedNotes.emit(it)
         }
@@ -179,7 +175,7 @@ class GridViewModel : ViewModel() {
     }
 
     fun deleteNote(note: Note) {
-        selectNote(note.relativePath, false)
+        selectNote(note, false)
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNote(note)
             uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_notes_delete, 1))
@@ -260,7 +256,7 @@ class GridViewModel : ViewModel() {
                 } else {
                     name
                 },
-                selected = selectedNotes.contains(note.relativePath),
+                selected = selectedNotes.contains(note),
                 note = note
             )
         }

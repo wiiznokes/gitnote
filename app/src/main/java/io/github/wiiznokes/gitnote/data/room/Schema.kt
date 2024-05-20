@@ -55,6 +55,13 @@ data class NoteFolder(
     fun toFolderFs(rootPath: String): NodeFs.Folder {
         return NodeFs.Folder.fromPath(rootPath, relativePath)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        return id == (other as Note).id
+    }
+    override fun hashCode(): Int = id
 }
 
 @Entity(
@@ -122,4 +129,11 @@ data class Note(
     fun toFileFs(rootPath: String): NodeFs.File {
         return NodeFs.File.fromPath(rootPath, relativePath)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        return id == (other as Note).id
+    }
+    override fun hashCode(): Int = id
 }
