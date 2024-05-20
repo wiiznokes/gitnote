@@ -157,7 +157,7 @@ fun EditScreen(
 
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (vm.name.value.text.isNotEmpty() && vm.content.value.text.isNotEmpty()) {
+            if (vm.name.value.text.isNotEmpty()) {
                 FloatingActionButton(
                     modifier = Modifier,
                     containerColor = MaterialTheme.colorScheme.primary,
