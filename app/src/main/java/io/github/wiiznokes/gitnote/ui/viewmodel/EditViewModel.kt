@@ -187,7 +187,7 @@ class EditViewModel() : ViewModel() {
                 return@launch
             }
 
-            uiHelper.makeToast("Note successfully updated")
+            uiHelper.makeToast(uiHelper.getString(R.string.success_note_update))
         }
         return success(newNote)
     }
@@ -218,7 +218,7 @@ class EditViewModel() : ViewModel() {
 
         prefs.repoPathBlocking().let { rootPath ->
             if (NodeFs.File.fromPath(rootPath, relativePath).exist()) {
-                uiHelper.makeToast("New note already exist")
+                uiHelper.makeToast(uiHelper.getString(R.string.error_file_already_exist))
                 return failure(EditException(EditExceptionType.NoteAlreadyExist))
             }
         }
@@ -234,7 +234,7 @@ class EditViewModel() : ViewModel() {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
-            uiHelper.makeToast("Note successfully created")
+            uiHelper.makeToast(uiHelper.getString(R.string.success_note_create))
         }
 
         return success(note)

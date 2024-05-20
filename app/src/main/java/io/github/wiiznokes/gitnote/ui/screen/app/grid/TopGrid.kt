@@ -40,6 +40,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -264,10 +265,10 @@ private fun SelectableTopBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box {
-                var expanded by remember { mutableStateOf(false) }
+                val expanded = remember { mutableStateOf(false) }
                 IconButton(
                     onClick = {
-                        expanded = !expanded
+                        expanded.value = true
                     }
                 ) {
                     SimpleIcon(
@@ -276,25 +277,15 @@ private fun SelectableTopBar(
                     )
                 }
 
-                DropdownMenu(
+                CustomDropDown(
                     expanded = expanded,
-                    onDismissRequest = {
-                        expanded = false
-                    },
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp)),
-                ) {
-                    DropdownMenuItem(
-                        text = { Text(text = "Delete") },
-                        onClick = {
-                            vm.deleteSelectedNotes()
-                            expanded = false
-                        },
-                        colors = MenuDefaults.itemColors(
-                            textColor = MaterialTheme.colorScheme.onSurface
+                    options = listOf(
+                        CustomDropDownModel(
+                            text = pluralStringResource(R.plurals.delete_selected_notes, selectedNotes.size),
+                            onClick = { vm.deleteSelectedNotes() }
                         )
                     )
-                }
+                )
             }
         }
     }

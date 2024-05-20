@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="system_theme">Système</string>
     <string name="light_theme">Clair</string>
@@ -103,5 +103,17 @@
     <string name="clone_repo_button">Cloner le référentiel</string>
     <string name="error_path_not_directory">Le chemin n\'est pas un répertoire</string>
     <string name="error_path_not_empty">Le dossier n\'est pas vide</string>
+    <string name="success_note_update">Note mise à jour avec succès</string>
+    <string name="success_note_create">Note créée avec succès</string>
+
+    <plurals name="delete_selected_notes">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Supprimer la note selectionnée</item>
+        <item quantity="other">Supprimer les notes selectionnées</item>
+    </plurals>
+
+    <plurals name="success_notes_delete">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Note supprimée avec succès</item>
+        <item quantity="other">Notes supprimées avec succès</item>
+    </plurals>
 
 </resources>

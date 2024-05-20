@@ -40,7 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -69,7 +72,7 @@ data class DrawerFolderModel(
 )
 
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DrawerScreen(
     vm: GridViewModel,
@@ -142,18 +145,30 @@ fun DrawerScreen(
                         mutableStateOf(false)
                     }
 
-                    CustomDropDown(
-                        expanded = dropDownExpanded,
-                        shape = MaterialTheme.shapes.medium,
-                        options = listOf(
-                            CustomDropDownModel(
-                                text = stringResource(R.string.delete_this_folder),
-                                onClick = {
-                                    vm.deleteFolder(noteFolder.relativePath)
-                                }
+                    val clickPosition = remember {
+                        mutableStateOf(Offset.Zero)
+                    }
+
+                    // todo: impl options
+                    /*
+                    // need this box for clickPosition
+                    Box {
+                        CustomDropDown(
+                            expanded = dropDownExpanded,
+                            shape = MaterialTheme.shapes.medium,
+                            options = listOf(
+                                CustomDropDownModel(
+                                    text = stringResource(R.string.delete_this_folder),
+                                    onClick = {
+                                        vm.deleteFolder(noteFolder.relativePath)
+                                    }
+                                ),
                             ),
+                            clickPosition = clickPosition
                         )
-                    )
+                    }
+
+                     */
 
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
@@ -167,7 +182,11 @@ fun DrawerScreen(
                                     onClick = {
                                         vm.openFolder(noteFolder.relativePath)
                                     }
-                                ),
+                                )
+                                .pointerInteropFilter {
+                                    clickPosition.value = Offset(it.x, it.y)
+                                    false
+                                },
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
