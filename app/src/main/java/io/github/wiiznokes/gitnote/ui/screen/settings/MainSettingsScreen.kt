@@ -137,12 +137,14 @@ fun MainSettingsScreen(
                 }
             )
 
+            /*
             DefaultSettingsRow(
                 title = stringResource(R.string.folder_filters),
                 subTitle = stringResource(R.string.folder_filters_subtitle)
             ) {
                 navController.navigate(SettingsDestination.FolderFilters)
             }
+             */
         }
 
         SettingsSection(
@@ -158,6 +160,7 @@ fun MainSettingsScreen(
                 }
             )
 
+            /*
             val showLinesNumber by vm.prefs.showLinesNumber.getAsState()
             ToggleableSettings(
                 title = stringResource(R.string.show_lines_number),
@@ -165,6 +168,7 @@ fun MainSettingsScreen(
             ) {
                 vm.update { vm.prefs.showLinesNumber.update(it) }
             }
+             */
         }
 
         SettingsSection(
