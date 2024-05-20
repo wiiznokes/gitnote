@@ -27,6 +27,8 @@ env:
 jobs:
   setup-env:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       app_version: ${{ steps.set_outputs.outputs.app_version }}
       tag_name: ${{ steps.set_outputs.outputs.tag_name }}
@@ -41,13 +43,6 @@ jobs:
           date +"%y.%m" > VERSION
           echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Set version file
-          skip_checkout: true
-          skip_fetch: true
-          file_pattern: 'VERSION'
-
       - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
         name: Setup options for nightly
         run: |
@@ -56,6 +51,12 @@ jobs:
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Set version file
+          skip_checkout: true
+          skip_fetch: true
+          file_pattern: 'VERSION'
         name: Setup options for a new release
         run: |
           echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
@@ -79,7 +80,6 @@ jobs:
   publish:
     needs: [upload-artifacts, setup-env]
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
