@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
-import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
@@ -131,19 +130,17 @@ class GridViewModel : ViewModel() {
 
         val relativePath = "$relativeParentPath/$name"
 
-        prefs.repoPathBlocking().let { rootPath ->
-            if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
-                uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
-                return false
-            }
+        val noteFolder = NoteFolder.new(
+            relativePath = relativePath
+        )
+
+        if (noteFolder.toFolderFs(prefs.repoPathBlocking()).exist()) {
+            uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
+            return false
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            storageManager.createNoteFolder(
-                noteFolder = NoteFolder.new(
-                    relativePath = relativePath
-                )
-            )
+            storageManager.createNoteFolder(noteFolder)
         }
 
         return true
@@ -172,7 +169,12 @@ class GridViewModel : ViewModel() {
             val currentSelectedNotes = selectedNotes.value
             unselectAllNotes()
             storageManager.deleteNotes(currentSelectedNotes)
-            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_notes_delete, currentSelectedNotes.size))
+            uiHelper.makeToast(
+                uiHelper.getQuantityString(
+                    R.plurals.success_notes_delete,
+                    currentSelectedNotes.size
+                )
+            )
         }
     }
 

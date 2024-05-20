@@ -17,11 +17,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -281,7 +278,10 @@ private fun SelectableTopBar(
                     expanded = expanded,
                     options = listOf(
                         CustomDropDownModel(
-                            text = pluralStringResource(R.plurals.delete_selected_notes, selectedNotes.size),
+                            text = pluralStringResource(
+                                R.plurals.delete_selected_notes,
+                                selectedNotes.size
+                            ),
                             onClick = { vm.deleteSelectedNotes() }
                         )
                     )

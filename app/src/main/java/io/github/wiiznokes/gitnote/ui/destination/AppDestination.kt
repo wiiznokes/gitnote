@@ -20,10 +20,10 @@ sealed interface AppDestination : Parcelable {
 
 @Parcelize
 sealed class EditParams : Parcelable {
-    data object Saved: EditParams()
+    data object Saved : EditParams()
 
     data class Idle(
         val note: Note,
         val editType: EditType
-    ): EditParams()
+    ) : EditParams()
 }

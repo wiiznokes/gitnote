@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.helper.UiHelper
@@ -155,15 +154,19 @@ class EditViewModel() : ViewModel() {
 
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
-        prefs.repoPathBlocking().let { rootPath ->
-            val previousFile = NodeFs.File.fromPath(rootPath, previousNote.relativePath)
+        val newNote = Note.new(
+            relativePath = relativePath,
+            content = content,
+            id = id
+        )
 
+        prefs.repoPathBlocking().let { repoPath ->
+            val previousFile = previousNote.toFileFs(repoPath)
             if (!previousFile.exist()) {
                 Log.w(TAG, "previous file ${previousFile.path} does not exist")
             }
 
-            val newFile = NodeFs.File.fromPath(rootPath, relativePath)
-
+            val newFile = newNote.toFileFs(repoPath)
             if (newFile.path != previousFile.path) {
                 if (newFile.exist()) {
                     uiHelper.makeToast(uiHelper.getString(R.string.error_file_already_exist))
@@ -171,12 +174,6 @@ class EditViewModel() : ViewModel() {
                 }
             }
         }
-
-        val newNote = Note.new(
-            relativePath = relativePath,
-            content = content,
-            id = id
-        )
 
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -217,18 +214,16 @@ class EditViewModel() : ViewModel() {
 
         val relativePath = "$parentPath/$name.${fileExtension.text}"
 
-        prefs.repoPathBlocking().let { rootPath ->
-            if (NodeFs.File.fromPath(rootPath, relativePath).exist()) {
-                uiHelper.makeToast(uiHelper.getString(R.string.error_file_already_exist))
-                return failure(EditException(EditExceptionType.NoteAlreadyExist))
-            }
-        }
-
         val note = Note.new(
             relativePath = relativePath,
             content = content,
             id = id,
         )
+
+        if (note.toFileFs(prefs.repoPathBlocking()).exist()) {
+            uiHelper.makeToast(uiHelper.getString(R.string.error_file_already_exist))
+            return failure(EditException(EditExceptionType.NoteAlreadyExist))
+        }
 
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.createNote(note).onFailure {
