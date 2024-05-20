@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set app version
-      - run: |
+        run: |
           date +"%y.%m" > VERSION
           echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
 
