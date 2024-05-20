@@ -192,6 +192,9 @@ fun ToggleableSettings(
                 checked = checked,
                 onCheckedChange = onCheckedChange
             )
+        },
+        onClick = {
+            onCheckedChange(!checked)
         }
     )
 }
