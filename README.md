@@ -2,7 +2,7 @@
 
 _Supported Android versions: 11 to 14_
 
-Android note which integrate Git. You can use this app with other desktop editors.
+Android note app which integrate Git. You can use this app with other desktop editors.
 
 ## Why
 

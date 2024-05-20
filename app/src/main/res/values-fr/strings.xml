@@ -115,5 +115,10 @@
         <item quantity="one" tools:ignore="ImpliedQuantity">Note supprimée avec succès</item>
         <item quantity="other">Notes supprimées avec succès</item>
     </plurals>
+    <string name="error_delete_folder">Impossible de supprimer le dossier: %1$s</string>
 
+    <plurals name="success_noteFolders_delete">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Dossier supprimé avec succès</item>
+        <item quantity="other">Dossiers supprimés avec succès</item>
+    </plurals>
 </resources>

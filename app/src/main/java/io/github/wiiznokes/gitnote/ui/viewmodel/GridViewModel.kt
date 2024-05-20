@@ -182,8 +182,11 @@ class GridViewModel : ViewModel() {
         }
     }
 
-    fun deleteFolder(relativePath: String) {
-        // todo
+    fun deleteFolder(noteFolder: NoteFolder) {
+        CoroutineScope(Dispatchers.IO).launch {
+            storageManager.deleteNoteFolder(noteFolder)
+            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_noteFolders_delete, 1))
+        }
     }
 
 
@@ -272,12 +275,10 @@ class GridViewModel : ViewModel() {
     }.combine(notes) { folders, notes ->
         folders.map { folder ->
             DrawerFolderModel(
-                relativePath = folder.relativePath,
-                fullName = folder.fullName(),
                 noteCount = notes.count {
                     it.parentPath().startsWith(folder.relativePath)
                 },
-                id = folder.id
+                noteFolder = folder
             )
         }
     }.stateIn(

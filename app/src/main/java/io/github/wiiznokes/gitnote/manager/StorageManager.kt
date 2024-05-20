@@ -221,14 +221,40 @@ class StorageManager {
 
         update {
             dao.insertNoteFolder(noteFolder)
-
+            
+            val folderFs = noteFolder.toFolderFs(prefs.repoPath())
+            
+            folderFs.delete().onFailure { 
+                
+            }
+            
             val rootPath = prefs.repoPath()
             val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
-
+            
+            
             folder.create().onFailure {
                 val message = uiHelper.getString(R.string.error_create_folder, it.message)
                 Log.e(TAG, message)
                 uiHelper.makeToast(message)
+            }
+
+            success(Unit)
+        }
+    }
+
+    suspend fun deleteNoteFolder(noteFolder: NoteFolder): Result<Unit> = locker.withLock {
+        Log.d(TAG, "deleteNoteFolder: $noteFolder")
+
+        update {
+            dao.deleteNoteFolder(noteFolder)
+
+            val rootPath = prefs.repoPath()
+            val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
+
+            folder.delete().onFailure {
+                val msg = uiHelper.getString(R.string.error_delete_folder, it.message)
+                Log.e(TAG, msg)
+                uiHelper.makeToast(msg)
             }
 
             success(Unit)

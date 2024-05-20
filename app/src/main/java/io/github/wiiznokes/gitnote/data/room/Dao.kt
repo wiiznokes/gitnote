@@ -83,9 +83,25 @@ interface RepoDatabaseDao {
     @Upsert
     suspend fun insertNoteFolder(noteFolder: NoteFolder)
 
+    /**
+     * Delete all notes inside the note folder, and the note folder
+     */
+    suspend fun deleteNoteFolder(noteFolder: NoteFolder) {
+        internalDeleteNotesIn(noteFolder.relativePath)
+        internalDeleteNoteFolder(noteFolder)
+    }
 
-    // todo
-    // suspend fun removeNoteFolder(noteFolder: NoteFolder)
+    /**
+     * Private
+     */
+    @Query("DELETE FROM Notes WHERE relativePath LIKE :relativePath || '%'")
+    suspend fun internalDeleteNotesIn(relativePath: String)
+
+    /**
+     * Private
+     */
+    @Delete
+    suspend fun internalDeleteNoteFolder(noteFolder: NoteFolder)
 
     @Upsert
     suspend fun insertNote(note: Note)

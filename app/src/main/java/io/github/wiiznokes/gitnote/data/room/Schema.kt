@@ -3,6 +3,7 @@ package io.github.wiiznokes.gitnote.data.room
 import android.os.Parcelable
 import androidx.room.Entity
 import io.github.wiiznokes.gitnote.BuildConfig
+import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.data.requireNotEndOrStartWithSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
@@ -49,6 +50,10 @@ data class NoteFolder(
     fun parentPath(): String? {
         if (relativePath == "") return null
         return relativePath.substringBeforeLast("/", missingDelimiterValue = "")
+    }
+
+    fun toFolderFs(rootPath: String): NodeFs.Folder {
+        return NodeFs.Folder.fromPath(rootPath, relativePath)
     }
 }
 
