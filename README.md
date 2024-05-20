@@ -1,4 +1,4 @@
-# GitNote WIP
+# GitNote
 
 _Supported Android versions: 11 to 14_
 
