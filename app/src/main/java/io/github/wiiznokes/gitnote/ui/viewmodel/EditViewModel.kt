@@ -16,6 +16,7 @@ import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.StorageManager
+import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import kotlinx.coroutines.CoroutineScope
@@ -280,25 +281,28 @@ fun isEditUnsaved(): Boolean {
 }
 
 @Composable
-fun delegateEditVM(editType: EditType?, previousNote: Note?): EditViewModel {
-    return if (editType != null && previousNote != null) {
-        viewModel<EditViewModel>(
+fun newEditViewModel(editParams: EditParams): EditViewModel {
+
+    return when (editParams) {
+        is EditParams.Idle -> viewModel<EditViewModel>(
             factory = viewModelFactory {
-                EditViewModel(editType, previousNote)
+                EditViewModel(editParams.editType, editParams.note)
             }
         )
-    } else {
-        viewModel<EditViewModel>(
-            factory = viewModelFactory {
-                EditViewModel(
-                    editType = readObj(EDIT_EDIT_TYPE),
-                    previousNote = readObj(EDIT_PREVIOUS_NOTE),
-                    name = readObj(EDIT_NAME),
-                    content = readObj(EDIT_CONTENT),
-                    fileExtension = readObj(EDIT_FILE_EXTENSION),
-                )
-            }
-        )
+
+        EditParams.Saved -> {
+            viewModel<EditViewModel>(
+                factory = viewModelFactory {
+                    EditViewModel(
+                        editType = readObj(EDIT_EDIT_TYPE),
+                        previousNote = readObj(EDIT_PREVIOUS_NOTE),
+                        name = readObj(EDIT_NAME),
+                        content = readObj(EDIT_CONTENT),
+                        fileExtension = readObj(EDIT_FILE_EXTENSION),
+                    )
+                }
+            )
+        }
     }
 }
 

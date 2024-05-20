@@ -46,27 +46,26 @@ import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.viewmodel.delegateEditVM
+import io.github.wiiznokes.gitnote.ui.viewmodel.newEditViewModel
 
 
 private const val TAG = "EditScreen"
 
-
-// todo: maybe use fragment to reuse the note of gridview
-//  like in google keep, this will potentially allow a nice transition
-//  from a note of the grid to edit
+/**
+ * initialEditType and initialNote equal null
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
-    initialEditType: EditType?,
-    initialNote: Note?,
+    editParams: EditParams,
     onFinished: () -> Unit,
 ) {
 
 
-    val vm = delegateEditVM(initialEditType, initialNote)
+    val vm = newEditViewModel(editParams)
 
     val nameFocusRequester = remember { FocusRequester() }
     val textFocusRequester = remember { FocusRequester() }

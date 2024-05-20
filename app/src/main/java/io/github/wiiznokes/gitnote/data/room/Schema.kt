@@ -118,4 +118,8 @@ data class Note(
             requireNotEndOrStartWithSlash(nameWithoutExtension())
         }
     }
+
+    fun toFileFs(rootPath: String): NodeFs.File {
+        return NodeFs.File.fromPath(rootPath, relativePath)
+    }
 }

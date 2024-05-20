@@ -113,7 +113,7 @@ class StorageManager {
             dao.insertNote(new)
 
             val rootPath = prefs.repoPath()
-            val previousFile = NodeFs.File.fromPath(rootPath, previous.relativePath)
+            val previousFile = previous.toFileFs(rootPath)
 
             previousFile.delete().onFailure {
                 val message =
@@ -122,8 +122,7 @@ class StorageManager {
                 uiHelper.makeToast(message)
             }
 
-            val newFile = NodeFs.File.fromPath(rootPath, new.relativePath)
-
+            val newFile = new.toFileFs(rootPath)
             newFile.create().onFailure {
                 val message = uiHelper.getString(R.string.error_create_file, it.message)
                 Log.e(TAG, message)
@@ -150,8 +149,7 @@ class StorageManager {
         update {
             dao.insertNote(note)
 
-            val rootPath = prefs.repoPath()
-            val file = NodeFs.File.fromPath(rootPath, note.relativePath)
+            val file = note.toFileFs(prefs.repoPath())
 
             file.create().onFailure {
                 val message = uiHelper.getString(R.string.error_create_file, it.message)
@@ -175,8 +173,7 @@ class StorageManager {
         update {
             dao.removeNote(note)
 
-            val rootPath = prefs.repoPath()
-            val file = NodeFs.File.fromPath(rootPath, note.relativePath)
+            val file = note.toFileFs(prefs.repoPath())
             file.delete().onFailure {
                 val message = uiHelper.getString(R.string.error_delete_file, file.path, it.message)
                 Log.e(TAG, message)
@@ -221,17 +218,8 @@ class StorageManager {
 
         update {
             dao.insertNoteFolder(noteFolder)
-            
-            val folderFs = noteFolder.toFolderFs(prefs.repoPath())
-            
-            folderFs.delete().onFailure { 
-                
-            }
-            
-            val rootPath = prefs.repoPath()
-            val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
-            
-            
+
+            val folder = noteFolder.toFolderFs(prefs.repoPath())
             folder.create().onFailure {
                 val message = uiHelper.getString(R.string.error_create_folder, it.message)
                 Log.e(TAG, message)
@@ -248,9 +236,7 @@ class StorageManager {
         update {
             dao.deleteNoteFolder(noteFolder)
 
-            val rootPath = prefs.repoPath()
-            val folder = NodeFs.Folder.fromPath(rootPath, noteFolder.relativePath)
-
+            val folder = noteFolder.toFolderFs(prefs.repoPath())
             folder.delete().onFailure {
                 val msg = uiHelper.getString(R.string.error_delete_folder, it.message)
                 Log.e(TAG, msg)

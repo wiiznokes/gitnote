@@ -11,13 +11,19 @@ sealed interface AppDestination : Parcelable {
     data object Grid : AppDestination
 
     @Parcelize
-    data class Edit(val note: Note, val editType: EditType) : AppDestination
-
-    @Parcelize
-    data object EditSaved : AppDestination
+    data class Edit(val params: EditParams) : AppDestination
 
     @Parcelize
     data class Settings(val settingsDestination: SettingsDestination) : AppDestination
 
 }
 
+@Parcelize
+sealed class EditParams : Parcelable {
+    data object Saved: EditParams()
+
+    data class Idle(
+        val note: Note,
+        val editType: EditType
+    ): EditParams()
+}

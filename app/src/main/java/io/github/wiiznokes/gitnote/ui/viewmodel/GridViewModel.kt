@@ -66,6 +66,8 @@ class GridViewModel : ViewModel() {
 
 
     private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
+
+    // todo: take a Note here
     val selectedNotes: StateFlow<List<String>>
         get() = _selectedNotes.asStateFlow()
 

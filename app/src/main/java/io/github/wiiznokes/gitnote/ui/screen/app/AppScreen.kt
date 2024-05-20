@@ -11,6 +11,7 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
+import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
 import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsScreen
@@ -47,17 +48,20 @@ fun AppScreen(
                         )
                     },
                     onEditClick = { note, editType ->
-                        navController.navigate(AppDestination.Edit(note, editType))
+                        navController.navigate(AppDestination.Edit(EditParams.Idle(note, editType)))
                     },
                     onStorageFailure = onStorageFailure
                 )
             }
 
             is AppDestination.Edit -> EditScreen(
-                initialNote = it.note,
-                initialEditType = it.editType,
+                editParams = it.params,
                 onFinished = {
                     navController.pop()
+
+                    if (it.params == EditParams.Saved) {
+                        navController.navigate(AppDestination.Grid)
+                    }
                 }
             )
 
@@ -65,15 +69,6 @@ fun AppScreen(
                 onBackClick = { navController.pop() },
                 destination = it.settingsDestination,
                 onStorageFailure = onStorageFailure
-            )
-
-            AppDestination.EditSaved -> EditScreen(
-                initialNote = null,
-                initialEditType = null,
-                onFinished = {
-                    navController.pop()
-                    navController.navigate(AppDestination.Grid)
-                }
             )
         }
     }
@@ -98,7 +93,6 @@ private object AppNavTransitionSpec : NavTransitionSpec<AppDestination> {
             }
 
             is AppDestination.Settings -> slide(backWard = true)
-            AppDestination.EditSaved -> crossFade()
         }
     }
 }
