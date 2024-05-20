@@ -17,6 +17,7 @@ import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
+import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
 import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
                         if (isEditUnsaved()) {
                             Log.d(TAG, "launch as EDIT_IS_UNSAVED")
                             Destination.App(
-                                AppDestination.EditSaved
+                                AppDestination.Edit(EditParams.Saved)
                             )
                         } else {
                             Destination.App(

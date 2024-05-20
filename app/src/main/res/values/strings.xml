@@ -94,6 +94,7 @@
     <string name="error_path_not_empty">The folder is not empty</string>
     <string name="success_note_update">Note successfully updated</string>
     <string name="success_note_create">Note successfully created</string>
+    <string name="error_delete_folder">Can\'t delete folder: %1$s</string>
 
     <plurals name="delete_selected_notes">
         <item quantity="one">Delete selected note</item>
@@ -103,6 +104,11 @@
     <plurals name="success_notes_delete">
         <item quantity="one">Note successfully deleted</item>
         <item quantity="other">Notes successfully deleted</item>
+    </plurals>
+
+    <plurals name="success_noteFolders_delete">
+        <item quantity="one">Folder successfully deleted</item>
+        <item quantity="other">Folders successfully deleted</item>
     </plurals>
 
 </resources>

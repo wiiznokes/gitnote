@@ -3,6 +3,7 @@ package io.github.wiiznokes.gitnote.data.room
 import android.os.Parcelable
 import androidx.room.Entity
 import io.github.wiiznokes.gitnote.BuildConfig
+import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.data.requireNotEndOrStartWithSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
@@ -50,6 +51,17 @@ data class NoteFolder(
         if (relativePath == "") return null
         return relativePath.substringBeforeLast("/", missingDelimiterValue = "")
     }
+
+    fun toFolderFs(rootPath: String): NodeFs.Folder {
+        return NodeFs.Folder.fromPath(rootPath, relativePath)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        return id == (other as Note).id
+    }
+    override fun hashCode(): Int = id
 }
 
 @Entity(
@@ -113,4 +125,15 @@ data class Note(
             requireNotEndOrStartWithSlash(nameWithoutExtension())
         }
     }
+
+    fun toFileFs(rootPath: String): NodeFs.File {
+        return NodeFs.File.fromPath(rootPath, relativePath)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+        return id == (other as Note).id
+    }
+    override fun hashCode(): Int = id
 }

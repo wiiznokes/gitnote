@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
@@ -65,10 +66,8 @@ import kotlinx.coroutines.launch
 private const val TAG = "DrawerScreen"
 
 data class DrawerFolderModel(
-    val relativePath: String,
-    val fullName: String,
     val noteCount: Int,
-    val id: Int
+    val noteFolder: NoteFolder,
 )
 
 
@@ -139,7 +138,7 @@ fun DrawerScreen(
         ) {
 
             items(currentNoteFolders,
-                key = { it.id }) { noteFolder ->
+                key = { it.noteFolder.id }) { drawerNoteFolder ->
                 Box {
                     val dropDownExpanded = remember {
                         mutableStateOf(false)
@@ -149,8 +148,6 @@ fun DrawerScreen(
                         mutableStateOf(Offset.Zero)
                     }
 
-                    // todo: impl options
-                    /*
                     // need this box for clickPosition
                     Box {
                         CustomDropDown(
@@ -160,15 +157,13 @@ fun DrawerScreen(
                                 CustomDropDownModel(
                                     text = stringResource(R.string.delete_this_folder),
                                     onClick = {
-                                        vm.deleteFolder(noteFolder.relativePath)
+                                        vm.deleteFolder(drawerNoteFolder.noteFolder)
                                     }
                                 ),
                             ),
                             clickPosition = clickPosition
                         )
                     }
-
-                     */
 
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
 
@@ -180,7 +175,7 @@ fun DrawerScreen(
                                         dropDownExpanded.value = true
                                     },
                                     onClick = {
-                                        vm.openFolder(noteFolder.relativePath)
+                                        vm.openFolder(drawerNoteFolder.noteFolder.relativePath)
                                     }
                                 )
                                 .pointerInteropFilter {
@@ -194,7 +189,7 @@ fun DrawerScreen(
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
 
                                 Text(
-                                    text = noteFolder.noteCount.toString(),
+                                    text = drawerNoteFolder.noteCount.toString(),
                                     modifier = Modifier
                                         .padding(LocalSpaces.current.smallPadding)
                                 )
@@ -215,7 +210,7 @@ fun DrawerScreen(
                                     SimpleSpacer(width = LocalSpaces.current.smallPadding)
 
                                     Text(
-                                        text = noteFolder.fullName,
+                                        text = drawerNoteFolder.noteFolder.fullName(),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                     )

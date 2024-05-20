@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
-import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
@@ -65,8 +64,9 @@ class GridViewModel : ViewModel() {
         get() = _currentNoteFolderRelativePath.asStateFlow()
 
 
-    private val _selectedNotes: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
-    val selectedNotes: StateFlow<List<String>>
+    private val _selectedNotes: MutableStateFlow<List<Note>> = MutableStateFlow(emptyList())
+
+    val selectedNotes: StateFlow<List<Note>>
         get() = _selectedNotes.asStateFlow()
 
 
@@ -82,11 +82,8 @@ class GridViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             allNotes.collect { allNotes ->
-                //  Log.d(TAG, "filter selected note, depend on allNotes")
                 selectedNotes.value.filter { selectedNote ->
-                    allNotes.contains { note ->
-                        note.relativePath == selectedNote
-                    }
+                    allNotes.contains(selectedNote)
                 }.let { newSelectedNotes ->
                     _selectedNotes.emit(newSelectedNotes)
                 }
@@ -129,19 +126,17 @@ class GridViewModel : ViewModel() {
 
         val relativePath = "$relativeParentPath/$name"
 
-        prefs.repoPathBlocking().let { rootPath ->
-            if (NodeFs.Folder.fromPath(rootPath, relativePath).exist()) {
-                uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
-                return false
-            }
+        val noteFolder = NoteFolder.new(
+            relativePath = relativePath
+        )
+
+        if (noteFolder.toFolderFs(prefs.repoPathBlocking()).exist()) {
+            uiHelper.makeToast(uiHelper.getString(R.string.error_folder_already_exist))
+            return false
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            storageManager.createNoteFolder(
-                noteFolder = NoteFolder.new(
-                    relativePath = relativePath
-                )
-            )
+            storageManager.createNoteFolder(noteFolder)
         }
 
         return true
@@ -151,11 +146,11 @@ class GridViewModel : ViewModel() {
     /**
      * @param add true if the note must be selected, false otherwise
      */
-    fun selectNote(relativePath: String, add: Boolean) = viewModelScope.launch {
+    fun selectNote(note: Note, add: Boolean) = viewModelScope.launch {
         if (add) {
-            selectedNotes.value.plus(relativePath)
+            selectedNotes.value.plus(note)
         } else {
-            selectedNotes.value.minus(relativePath)
+            selectedNotes.value.minus(note)
         }.let {
             _selectedNotes.emit(it)
         }
@@ -170,20 +165,28 @@ class GridViewModel : ViewModel() {
             val currentSelectedNotes = selectedNotes.value
             unselectAllNotes()
             storageManager.deleteNotes(currentSelectedNotes)
-            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_notes_delete, currentSelectedNotes.size))
+            uiHelper.makeToast(
+                uiHelper.getQuantityString(
+                    R.plurals.success_notes_delete,
+                    currentSelectedNotes.size
+                )
+            )
         }
     }
 
     fun deleteNote(note: Note) {
-        selectNote(note.relativePath, false)
+        selectNote(note, false)
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNote(note)
             uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_notes_delete, 1))
         }
     }
 
-    fun deleteFolder(relativePath: String) {
-        // todo
+    fun deleteFolder(noteFolder: NoteFolder) {
+        CoroutineScope(Dispatchers.IO).launch {
+            storageManager.deleteNoteFolder(noteFolder)
+            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_noteFolders_delete, 1))
+        }
     }
 
 
@@ -253,7 +256,7 @@ class GridViewModel : ViewModel() {
                 } else {
                     name
                 },
-                selected = selectedNotes.contains(note.relativePath),
+                selected = selectedNotes.contains(note),
                 note = note
             )
         }
@@ -272,12 +275,10 @@ class GridViewModel : ViewModel() {
     }.combine(notes) { folders, notes ->
         folders.map { folder ->
             DrawerFolderModel(
-                relativePath = folder.relativePath,
-                fullName = folder.fullName(),
                 noteCount = notes.count {
                     it.parentPath().startsWith(folder.relativePath)
                 },
-                id = folder.id
+                noteFolder = folder
             )
         }
     }.stateIn(

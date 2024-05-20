@@ -17,11 +17,8 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -48,6 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
@@ -62,7 +60,7 @@ private const val TAG = "TopGridScreen"
 fun GridViewTop(
     vm: GridViewModel,
     offset: MutableFloatState,
-    selectedNotes: List<String>,
+    selectedNotesNumber: Int,
     maxOffset: MutableFloatState,
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
@@ -72,7 +70,7 @@ fun GridViewTop(
     val statusBarHeight = 0.dp
 
     AnimatedContent(
-        targetState = selectedNotes.isEmpty(),
+        targetState = selectedNotesNumber == 0,
         label = "",
     ) { shouldShowSearchBar ->
         if (shouldShowSearchBar) {
@@ -90,7 +88,7 @@ fun GridViewTop(
                 statusBarHeight = statusBarHeight,
                 topBarHeight = topBarHeight,
                 vm = vm,
-                selectedNotes = selectedNotes
+                selectedNotesNumber = selectedNotesNumber
             )
         }
     }
@@ -228,7 +226,7 @@ private fun SelectableTopBar(
     statusBarHeight: Dp,
     topBarHeight: Dp,
     vm: GridViewModel,
-    selectedNotes: List<String>
+    selectedNotesNumber: Int
 ) {
     Row(
         modifier = Modifier
@@ -255,7 +253,7 @@ private fun SelectableTopBar(
             }
 
             Text(
-                text = selectedNotes.size.toString(),
+                text = selectedNotesNumber.toString(),
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -281,7 +279,10 @@ private fun SelectableTopBar(
                     expanded = expanded,
                     options = listOf(
                         CustomDropDownModel(
-                            text = pluralStringResource(R.plurals.delete_selected_notes, selectedNotes.size),
+                            text = pluralStringResource(
+                                R.plurals.delete_selected_notes,
+                                selectedNotesNumber
+                            ),
                             onClick = { vm.deleteSelectedNotes() }
                         )
                     )

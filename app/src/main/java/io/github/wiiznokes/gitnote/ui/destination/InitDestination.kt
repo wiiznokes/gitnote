@@ -32,7 +32,7 @@ enum class NewRepoSource {
 
     fun getExplorerTitle(): String {
         val context = MyApp.appModule.context
-        
+
         return when (this) {
             Create -> context.getString(R.string.create_repo_explorer)
             Open -> context.getString(R.string.open_repo_explorer)
