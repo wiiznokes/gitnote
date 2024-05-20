@@ -45,12 +45,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,17 +85,13 @@ fun GridScreen(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                DrawerScreen(
-                    vm = vm,
-                    drawerState = drawerState
-                )
-            }
+    ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
+        ModalDrawerSheet {
+            DrawerScreen(
+                vm = vm, drawerState = drawerState
+            )
         }
-    ) {
+    }) {
 
 
         val maxOffset = remember { mutableFloatStateOf(0f) }
@@ -116,35 +114,31 @@ fun GridScreen(
             mutableStateOf(false)
         }
 
-        Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
-                GridViewTop(
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
+            GridViewTop(
+                vm = vm,
+                offset = offset,
+                selectedNotes = selectedNotes,
+                maxOffset = maxOffset,
+                drawerState = drawerState,
+                onSettingsClick = onSettingsClick,
+                topBarHeight = topBarHeight,
+                searchFocusRequester = searchFocusRequester,
+            )
+
+        }, floatingActionButton = {
+
+            if (selectedNotes.isEmpty()) {
+                FloatingActionButtons(
                     vm = vm,
                     offset = offset,
-                    selectedNotes = selectedNotes,
-                    maxOffset = maxOffset,
-                    drawerState = drawerState,
-                    onSettingsClick = onSettingsClick,
-                    topBarHeight = topBarHeight,
+                    onEditClick = onEditClick,
                     searchFocusRequester = searchFocusRequester,
+                    expanded = fabExpanded,
                 )
-
-            },
-            floatingActionButton = {
-
-                if (selectedNotes.isEmpty()) {
-                    FloatingActionButtons(
-                        vm = vm,
-                        offset = offset,
-                        onEditClick = onEditClick,
-                        searchFocusRequester = searchFocusRequester,
-                        expanded = fabExpanded,
-                    )
-                }
-
             }
-        ) {
+
+        }) {
 
             GridView(
                 vm = vm,
@@ -160,7 +154,11 @@ fun GridScreen(
 }
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterialApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 private fun GridView(
     topBarHeight: Dp,
@@ -213,12 +211,9 @@ private fun GridView(
             modifier = Modifier
                 .fillMaxSize()
                 .pullRefresh(pullRefreshState)
-                .nestedScroll(nestedScrollConnection),
-            contentPadding = PaddingValues(
+                .nestedScroll(nestedScrollConnection), contentPadding = PaddingValues(
                 horizontal = 3.dp
-            ),
-            columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
-            state = gridState
+            ), columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp), state = gridState
 
         ) {
 
@@ -228,14 +223,14 @@ private fun GridView(
                 Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
             }
 
-            items(
-                items = gridNotes,
-                key = { it.note.id }
-            ) { gridNote ->
-
+            items(items = gridNotes, key = { it.note.id }) { gridNote ->
 
                 val dropDownExpanded = remember {
                     mutableStateOf(false)
+                }
+
+                val clickPosition = remember {
+                    mutableStateOf(Offset.Zero)
                 }
 
                 Card(
@@ -244,13 +239,11 @@ private fun GridView(
                     ),
                     border = if (dropDownExpanded.value) {
                         BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
+                            width = 2.dp, color = MaterialTheme.colorScheme.primary
                         )
                     } else if (gridNote.selected) {
                         BorderStroke(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.onSurface
+                            width = 2.dp, color = MaterialTheme.colorScheme.onSurface
                         )
                     } else {
                         BorderStroke(
@@ -263,56 +256,53 @@ private fun GridView(
                             maxHeight = if (showFullNoteHeight.value) Dp.Unspecified else 500.dp
                         )
                         .padding(3.dp)
-                        .combinedClickable(
-                            onLongClick = {
-                                dropDownExpanded.value = true
-                            },
-                            onClick = {
-                                if (selectedNotes.isEmpty()) {
-                                    onEditClick(
-                                        gridNote.note,
-                                        EditType.Update
-                                    )
-                                } else {
-                                    vm.selectNote(
-                                        gridNote.note.relativePath,
-                                        add = !gridNote.selected
-                                    )
-                                }
+                        .combinedClickable(onLongClick = {
+                            dropDownExpanded.value = true
+                        }, onClick = {
+                            if (selectedNotes.isEmpty()) {
+                                onEditClick(
+                                    gridNote.note, EditType.Update
+                                )
+                            } else {
+                                vm.selectNote(
+                                    gridNote.note.relativePath, add = !gridNote.selected
+                                )
                             }
-                        ),
+                        })
+                        .pointerInteropFilter {
+                            clickPosition.value = Offset(it.x, it.y)
+                            false
+                        },
                 ) {
                     Box {
-                        CustomDropDown(
-                            expanded = dropDownExpanded,
-                            shape = MaterialTheme.shapes.medium,
-                            options = listOf(
-                                CustomDropDownModel(
-                                    text = stringResource(R.string.delete_this_note),
-                                    onClick = {
-                                        vm.deleteNote(gridNote.note)
-                                    }
-                                ),
-                                if (selectedNotes.isEmpty()) CustomDropDownModel(
-                                    text = stringResource(R.string.select_multiple_notes),
-                                    onClick = {
-                                        vm.selectNote(gridNote.note.relativePath, true)
-                                    }
-                                ) else null,
-                            )
-                        )
 
+                        // need this box for clickPosition
+                        Box {
+                            CustomDropDown(
+                                expanded = dropDownExpanded,
+                                shape = MaterialTheme.shapes.medium,
+                                options = listOf(
+                                    CustomDropDownModel(text = stringResource(R.string.delete_this_note),
+                                        onClick = {
+                                            vm.deleteNote(gridNote.note)
+                                        }),
+                                    if (selectedNotes.isEmpty()) CustomDropDownModel(text = stringResource(
+                                        R.string.select_multiple_notes
+                                    ), onClick = {
+                                        vm.selectNote(gridNote.note.relativePath, true)
+                                    }) else null,
+                                ),
+                                clickPosition = clickPosition
+                            )
+                        }
                         Column(
-                            modifier = Modifier
-                                .padding(10.dp),
+                            modifier = Modifier.padding(10.dp),
                             verticalArrangement = Arrangement.Top,
                             horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
-                                text = if (showFullPathOfNotes.value)
-                                    gridNote.note.relativePath else gridNote.title,
-                                modifier = Modifier
-                                    .padding(bottom = 6.dp),
+                                text = if (showFullPathOfNotes.value) gridNote.note.relativePath else gridNote.title,
+                                modifier = Modifier.padding(bottom = 6.dp),
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Bold,
@@ -379,8 +369,7 @@ private fun rememberNestedScrollConnection(
 
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 //Log.d(TAG, "onPreScroll(available: ${available.y})")
-                if (!shouldBlock)
-                    keyboardController?.hide()
+                if (!shouldBlock) keyboardController?.hide()
 
                 fabExpanded.value = false
 
@@ -388,9 +377,7 @@ private fun rememberNestedScrollConnection(
             }
 
             override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
+                consumed: Offset, available: Offset, source: NestedScrollSource
             ): Offset {
                 //Log.d(TAG, "onPostScroll(consumed: ${consumed.y}, available: ${available.y})")
                 return calculateOffset(available.y)
