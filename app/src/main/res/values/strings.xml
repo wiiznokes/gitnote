@@ -92,5 +92,17 @@
     <string name="clone_repo_button">clone repository</string>
     <string name="error_path_not_directory">The path is not a directory</string>
     <string name="error_path_not_empty">The folder is not empty</string>
+    <string name="success_note_update">Note successfully updated</string>
+    <string name="success_note_create">Note successfully created</string>
+
+    <plurals name="delete_selected_notes">
+        <item quantity="one">Delete selected note</item>
+        <item quantity="other">Delete selected notes</item>
+    </plurals>
+
+    <plurals name="success_notes_delete">
+        <item quantity="one">Note successfully deleted</item>
+        <item quantity="other">Notes successfully deleted</item>
+    </plurals>
 
 </resources>
