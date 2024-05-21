@@ -20,9 +20,9 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] time based sort
 
 <p  style="text-align: center;">
-  <img src="assets/grid.png" width="32%"  alt="grid screen"/>
-  <img src="assets/drawer.png" width="32%"  alt="drawer screen"/> 
-  <img src="assets/edit.png" width="32%"  alt="edit screen"/>
+  <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/grid.png" width="32%"  alt="grid screen"/>
+  <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/drawer.png" width="32%"  alt="drawer screen"/> 
+  <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/edit.png" width="32%"  alt="edit screen"/>
 </p>
 
 # Install
