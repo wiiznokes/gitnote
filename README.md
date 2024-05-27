@@ -1,4 +1,8 @@
+<img align="left" src="assets/app_icon.svg" alt="app icon" width="90px">
+
 # GitNote
+
+<br/>
 
 _Supported Android versions: 11 to 14_
 
