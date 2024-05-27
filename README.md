@@ -1,4 +1,4 @@
-<table>
+<table style="border: none;">
   <tr>
     <td><h1>GitNote</h1></td>
     <td><img src="assets/gitnote_icon.svg" alt="app icon" width="100px" /></td>
