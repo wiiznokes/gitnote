@@ -56,7 +56,7 @@ jobs:
           commit_message: Set version file
           skip_checkout: true
           skip_fetch: true
-          file_pattern: 'VERSION'
+          file_pattern: "VERSION"
 
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
         name: Setup options for a new release
