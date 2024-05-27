@@ -1,4 +1,4 @@
-<img align="left" src="assets/gitnote_icon.svg" alt="app icon" width="90px">
+<img align="left" src="assets/app_icon.svg" alt="app icon" width="90px">
 
 # GitNote
 
