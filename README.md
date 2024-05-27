@@ -1,9 +1,10 @@
-<table cellpadding="0"border="0">
-  <tr>
-    <td><h1>GitNote</h1></td>
-    <td><img src="assets/gitnote_icon.svg" alt="app icon" width="100px" /></td>
-  </tr>
-</table>
+
+
+<img align="left" src="assets/gitnote_icon.svg" alt="app icon" width="100px">
+
+# GitNote
+
+<br/><br/>
 
 _Supported Android versions: 11 to 14_
 
