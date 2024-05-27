@@ -1,8 +1,10 @@
 
 
-<img align="left" src="assets/gitnote_icon.svg" alt="app icon" width="100px">
+<img align="left" src="assets/gitnote_icon.svg" alt="app icon" width="90px">
 
 # GitNote
+
+<br/><br/>
 
 _Supported Android versions: 11 to 14_
 
