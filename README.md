@@ -1,4 +1,19 @@
-# GitNote
+
+
+
+<div style="display: flex; align-items: center; justify-content: space-between;">
+  <h1>GitNote</h1>
+  <img src="assets/gitnote_icon.svg" alt="app icon" style="width:100px; height: auto;"/>
+</div>
+
+
+<div style="display: flex; align-items: center; align: center;">
+  <h1>GitNote</h1>
+  <img src="assets/gitnote_icon.svg" alt="app icon" style="width:100px; height: auto;"/>
+</div>
+
+
+
 
 _Supported Android versions: 11 to 14_
 
