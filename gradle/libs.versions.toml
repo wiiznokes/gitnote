@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.0"
+agp = "8.4.2"
 
 # https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
 kotlin = "1.9.24"
@@ -10,13 +10,13 @@ compose-compiler = "1.5.14"
 ksp = "1.9.24-1.0.20"
 
 ktx-core = "1.13.1"
-ktx-lifecycle = "2.7.0"
+ktx-lifecycle = "2.8.2"
 
 # https://developer.android.com/develop/ui/compose/bom/bom-mapping
-compose-bom = "2024.05.00"
+compose-bom = "2024.06.00"
 
 room = "2.6.1"
-about-libraries = "11.1.4"
+about-libraries = "11.2.1"
 
 [libraries]
 # AndroidX Core
@@ -53,7 +53,7 @@ reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined
 fuzzywuzzy = { module = "me.xdrop:fuzzywuzzy", version = "1.4.0" }
 
 # Test
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.0" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
 test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.1.5" }
 androidx-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
 
