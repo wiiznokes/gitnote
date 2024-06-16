@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.2"
+agp = "8.5.0"
 
 # https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
 kotlin = "1.9.24"
@@ -27,6 +27,8 @@ compose-activity = { group = "androidx.activity", name = "activity-compose", ver
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
 
 # Compose
+# https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
+compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }

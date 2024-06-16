@@ -1,5 +1,7 @@
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 plugins {
     alias(libs.plugins.android.application)
@@ -16,19 +18,25 @@ android {
     compileSdk = 34
 
     defaultConfig {
+
+        fun getGitHash(): String {
+            val command = arrayOf("git", "rev-parse", "HEAD")
+            val process = Runtime.getRuntime().exec(command)
+            val reader = BufferedReader(InputStreamReader(process.inputStream))
+            return reader.readLine()
+        }
+
+        fun getVersion(): String {
+            val currentDate = LocalDate.now()
+            val formatter = DateTimeFormatter.ofPattern("yy.MM")
+            return currentDate.format(formatter)
+        }
+
         applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
-        versionName = File("VERSION").readText()
-
-        fun getGitHash(): String {
-            val command = "git rev-parse HEAD"
-            val process = Runtime.getRuntime().exec(command)
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-
-            return reader.readLine()
-        }
+        versionName = getVersion()
 
         buildConfigField(
             "String",
@@ -140,7 +148,7 @@ dependencies {
     //implementation(libs.splash.screen)
 
     // Compose
-    implementation(platform(libs.compose.bom))
+    implementation(platform(libs.compose.bom.alpha))
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.compose.material3)

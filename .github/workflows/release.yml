@@ -40,8 +40,7 @@ jobs:
 
       - name: Set app version
         run: |
-          date +"%y.%m" > VERSION
-          echo "APP_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+          echo "APP_VERSION=$(date +"%y.%m")" >> $GITHUB_ENV
 
       - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
         name: Setup options for nightly
@@ -50,13 +49,6 @@ jobs:
           echo "VERSION_NAME=nightly" >> $GITHUB_ENV
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
-      - if: ${{ github.event.inputs.is_nightly == 'false' }}
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Set version file
-          skip_checkout: true
-          skip_fetch: true
-          file_pattern: "VERSION"
 
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
         name: Setup options for a new release
