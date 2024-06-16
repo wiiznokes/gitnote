@@ -59,7 +59,7 @@ data class NoteFolder(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
-        return id == (other as Note).id
+        return id == (other as NoteFolder).id
     }
     override fun hashCode(): Int = id
 }
