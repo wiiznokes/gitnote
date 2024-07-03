@@ -9,7 +9,7 @@ interface ProviderLink {
     val mainPage: String?
     val createRepo: String?
     val createToken: String?
-    val checkOutRepo: String?
+    val listRepo: String?
 }
 
 enum class Provider : ProviderLink {
@@ -17,13 +17,13 @@ enum class Provider : ProviderLink {
         override val mainPage: String = "https://github.com/"
         override val createRepo: String = "https://github.com/new"
         override val createToken: String = "https://github.com/settings/tokens"
-        override val checkOutRepo: String? = null
+        override val listRepo: String? = null
     },
-    Other {
-        override val mainPage: String? = null
-        override val createRepo: String? = null
-        override val createToken: String? = null
-        override val checkOutRepo: String? = null
+    GitLab {
+        override val mainPage: String = "https://gitlab.com/"
+        override val createRepo: String = "https://gitlab.com/projects/new#blank_project"
+        override val createToken: String = "https://gitlab.com/-/user_settings/personal_access_tokens"
+        override val listRepo: String = "https://gitlab.com/dashboard/projects"
     },
 }
 

@@ -145,6 +145,7 @@ private fun OpenLinks(
                                         Text(text = it.name)
                                     },
                                     onClick = {
+                                        providerExpanded = false
                                         provider.value = it
                                         vm.viewModelScope.launch {
                                             vm.prefs.provider.update(it)
@@ -164,39 +165,32 @@ private fun OpenLinks(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-
-                        provider.value.mainPage?.let {
+                        provider.value.listRepo?.let {
                             OpenLinkButton(
-                                text = stringResource(R.string.quick_links_home_page),
+                                text = stringResource(R.string.quick_links_see_repos),
                                 url = it
                             )
                         }
-
-                        provider.value.createRepo?.let {
-                            OpenLinkButton(
-                                text = stringResource(R.string.quick_links_create_repo),
-                                url = it
-                            )
-                        }
-
                         provider.value.createToken?.let {
                             OpenLinkButton(
                                 text = stringResource(R.string.quick_links_create_token),
                                 url = it
                             )
                         }
-
-                        provider.value.checkOutRepo?.let {
+                        provider.value.createRepo?.let {
                             OpenLinkButton(
-                                text = stringResource(R.string.quick_links_see_repos),
+                                text = stringResource(R.string.quick_links_create_repo),
+                                url = it
+                            )
+                        }
+                        provider.value.mainPage?.let {
+                            OpenLinkButton(
+                                text = stringResource(R.string.quick_links_home_page),
                                 url = it
                             )
                         }
                     }
-
                 }
-
-
             }
         }
     }
@@ -217,8 +211,7 @@ private fun ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    vertical = 20.dp,
-                    horizontal = 15.dp
+                    vertical = 20.dp, horizontal = 15.dp
                 ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
