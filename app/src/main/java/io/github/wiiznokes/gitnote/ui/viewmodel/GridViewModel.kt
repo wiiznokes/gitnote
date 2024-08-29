@@ -209,12 +209,6 @@ class GridViewModel : ViewModel() {
         allNotes.filter {
             it.relativePath.startsWith(path)
         }
-    }.combine(query) { allNotesInCurrentPath, query ->
-        if (query.isNotEmpty()) {
-            fuzzySort(query, allNotesInCurrentPath)
-        } else {
-            allNotesInCurrentPath
-        }
     }.let { filteredNotesFlow ->
         combine(
             filteredNotesFlow, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()
@@ -231,6 +225,12 @@ class GridViewModel : ViewModel() {
                     Descending -> filteredNotes.sortedByDescending { it.fullName() }
                 }
             }
+        }
+    }.combine(query) { allNotesInCurrentPath, query ->
+        if (query.isNotEmpty()) {
+            fuzzySort(query, allNotesInCurrentPath)
+        } else {
+            allNotesInCurrentPath
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
