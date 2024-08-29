@@ -1,35 +1,27 @@
 [versions]
-agp = "8.5.0"
-
-# https://developer.android.com/jetpack/androidx/releases/compose-kotlin?hl=fr
-kotlin = "1.9.24"
-compose-compiler = "1.5.14"
+agp = "8.5.2"
+kotlin = "2.0.20"
 
 # https://github.com/google/ksp/releases
 # sync with the kotlin version
-ksp = "1.9.24-1.0.20"
+ksp = "2.0.20-1.0.24"
 
-ktx-core = "1.13.1"
-ktx-lifecycle = "2.8.2"
-
-# https://developer.android.com/develop/ui/compose/bom/bom-mapping
-compose-bom = "2024.06.00"
-
+ktx-lifecycle = "2.8.4"
 room = "2.6.1"
 about-libraries = "11.2.1"
 
 [libraries]
 # AndroidX Core
-androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx-core" }
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.13.1" }
 runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
 runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.0" }
+compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.1" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
 
 # Compose
 # https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
-compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+# compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.08.00" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -56,11 +48,12 @@ fuzzywuzzy = { module = "me.xdrop:fuzzywuzzy", version = "1.4.0" }
 
 # Test
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
-test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.1.5" }
-androidx-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
+test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.2.1" }
+androidx-runner = { group = "androidx.test", name = "runner", version = "1.6.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "about-libraries" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

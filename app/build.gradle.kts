@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.about.libraries)
     // for room
     alias(libs.plugins.ksp)
@@ -60,7 +61,6 @@ android {
         }
     }
 
-
     signingConfigs {
         create("release") {
 
@@ -97,7 +97,6 @@ android {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
 
-
     kotlinOptions {
         jvmTarget = "21"
     }
@@ -111,14 +110,6 @@ android {
         checkReleaseBuilds = false
     }
 
-    composeOptions.kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
@@ -126,11 +117,8 @@ android {
         }
     }
 
-
     ndkVersion = "26.1.10909125"
 }
-
-
 
 kotlin {
     jvmToolchain(21)
@@ -147,8 +135,11 @@ dependencies {
     //implementation(libs.work.runtime.ktx)
     //implementation(libs.splash.screen)
 
+
+    val composeBom = platform(libs.compose.bom)
+
     // Compose
-    implementation(platform(libs.compose.bom.alpha))
+    implementation(composeBom)
     implementation(libs.compose.ui)
     implementation(libs.compose.material)
     implementation(libs.compose.material3)
@@ -185,6 +176,7 @@ dependencies {
     testImplementation(libs.test.junit.ktx)
 
     // integration test
+    androidTestImplementation(composeBom)
     androidTestImplementation(libs.test.junit.ktx)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.runner)
