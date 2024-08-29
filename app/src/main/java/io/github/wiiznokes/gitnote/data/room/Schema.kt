@@ -61,6 +61,7 @@ data class NoteFolder(
         if (other == null || this::class != other::class) return false
         return id == (other as NoteFolder).id
     }
+
     override fun hashCode(): Int = id
 }
 
@@ -135,5 +136,6 @@ data class Note(
         if (other == null || this::class != other::class) return false
         return id == (other as Note).id
     }
+
     override fun hashCode(): Int = id
 }

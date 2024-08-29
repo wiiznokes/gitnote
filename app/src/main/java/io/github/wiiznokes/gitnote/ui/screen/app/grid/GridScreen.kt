@@ -265,7 +265,8 @@ private fun GridView(
                                     gridNote.note, EditType.Update
                                 )
                             } else {
-                                vm.selectNote(gridNote.note, add = !gridNote.selected
+                                vm.selectNote(
+                                    gridNote.note, add = !gridNote.selected
                                 )
                             }
                         })

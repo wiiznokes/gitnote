@@ -20,7 +20,6 @@ import io.github.wiiznokes.gitnote.ui.model.SortType.Modification
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
 import io.github.wiiznokes.gitnote.ui.util.fuzzySort
 import io.github.wiiznokes.gitnote.ui.util.mapAndCombine
-import io.github.wiiznokes.gitnote.util.contains
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -167,8 +166,7 @@ class GridViewModel : ViewModel() {
             storageManager.deleteNotes(currentSelectedNotes)
             uiHelper.makeToast(
                 uiHelper.getQuantityString(
-                    R.plurals.success_notes_delete,
-                    currentSelectedNotes.size
+                    R.plurals.success_notes_delete, currentSelectedNotes.size
                 )
             )
         }
@@ -219,9 +217,7 @@ class GridViewModel : ViewModel() {
         }
     }.let { filteredNotesFlow ->
         combine(
-            filteredNotesFlow,
-            prefs.sortType.getFlow(),
-            prefs.sortOrder.getFlow()
+            filteredNotesFlow, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()
         ) { filteredNotes, sortType, sortOrder ->
 
             when (sortType) {
@@ -255,9 +251,7 @@ class GridViewModel : ViewModel() {
                     note.relativePath
                 } else {
                     name
-                },
-                selected = selectedNotes.contains(note),
-                note = note
+                }, selected = selectedNotes.contains(note), note = note
             )
         }
     }.stateIn(
@@ -266,8 +260,7 @@ class GridViewModel : ViewModel() {
 
 
     val drawerFolders = combine(
-        dao.allNoteFolders(),
-        currentNoteFolderRelativePath
+        dao.allNoteFolders(), currentNoteFolderRelativePath
     ) { notesFolders, path ->
         notesFolders.filter {
             it.parentPath() == path
@@ -277,8 +270,7 @@ class GridViewModel : ViewModel() {
             DrawerFolderModel(
                 noteCount = notes.count {
                     it.parentPath().startsWith(folder.relativePath)
-                },
-                noteFolder = folder
+                }, noteFolder = folder
             )
         }
     }.stateIn(
