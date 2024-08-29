@@ -169,9 +169,6 @@ dependencies {
     // Markdown to HTML
     //implementation(libs.markdown)
 
-    // Fuzzy search
-    implementation(libs.fuzzywuzzy)
-
     // unit test
     testImplementation(libs.test.junit.ktx)
 
