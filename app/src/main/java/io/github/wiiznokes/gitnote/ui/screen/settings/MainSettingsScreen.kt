@@ -259,7 +259,7 @@ fun MainSettingsScreen(
             isLast = true
         ) {
             var version = BuildConfig.VERSION_NAME
-            version += "-${BuildConfig.GIT_HASH.substring(0..7)}"
+            version += "-${BuildConfig.GIT_HASH.substring(0..6)}"
             version += if (BuildConfig.DEBUG) "-debug" else "-release"
             val clipboardManager = LocalClipboardManager.current
 
