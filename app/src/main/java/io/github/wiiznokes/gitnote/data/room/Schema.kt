@@ -78,7 +78,7 @@ data class Note(
 ) : Parcelable, Serializable {
 
     override fun toString(): String =
-        "Note(relativePath=$relativePath, id=$id)"
+        "Note(relativePath=$relativePath, id=$id, content=$content)"
 
     companion object {
         fun new(

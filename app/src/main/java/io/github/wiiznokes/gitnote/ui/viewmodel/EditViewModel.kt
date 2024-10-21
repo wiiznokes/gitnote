@@ -119,7 +119,6 @@ class EditViewModel() : ViewModel() {
                 name = name.value.text,
                 fileExtension = fileExtension.value,
                 content = content.value.text,
-                id = previousNote.id
             ).onSuccess {
                 if (onSuccess != null) {
                     onSuccess()
@@ -139,7 +138,6 @@ class EditViewModel() : ViewModel() {
         name: String,
         fileExtension: FileExtension,
         content: String,
-        id: Int
     ): Result<Note> {
 
         if (!NameValidation.check(name)) {
@@ -157,7 +155,6 @@ class EditViewModel() : ViewModel() {
         val newNote = Note.new(
             relativePath = relativePath,
             content = content,
-            id = id
         )
 
         prefs.repoPathBlocking().let { repoPath ->

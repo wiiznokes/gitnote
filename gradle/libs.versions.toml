@@ -1,27 +1,27 @@
 [versions]
-agp = "8.5.2"
-kotlin = "2.0.20"
+agp = "8.7.1"
+kotlin = "2.0.21"
 
 # https://github.com/google/ksp/releases
 # sync with the kotlin version
 ksp = "2.0.20-1.0.24"
 
-ktx-lifecycle = "2.8.4"
+ktx-lifecycle = "2.8.6"
 room = "2.6.1"
-about-libraries = "11.2.1"
+about-libraries = "11.2.3"
 
 [libraries]
 # AndroidX Core
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.13.1" }
 runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
 runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.1" }
+compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.3" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
 
 # Compose
 # https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
 # compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.08.00" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.10.00" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -46,7 +46,7 @@ about-libraries = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", 
 reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version = "1.5.0" }
 
 # Test
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.9.0" }
 test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.2.1" }
 androidx-runner = { group = "androidx.test", name = "runner", version = "1.6.2" }
 
