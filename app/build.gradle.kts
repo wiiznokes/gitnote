@@ -35,7 +35,7 @@ android {
 
         applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 30
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = getVersion()
 
