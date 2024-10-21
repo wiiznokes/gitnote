@@ -284,7 +284,7 @@ fun MainSettingsScreen(
                 title = stringResource(R.string.report_an_issue),
                 startIcon = Icons.Default.BugReport,
                 onClick = {
-                    uriHandler.openUri("https://github.com/wiiznokes/gitnote/issues/new/choose")
+                    uriHandler.openUri("https://github.com/wiiznokes/gitnote/issues")
                 }
             )
             DefaultSettingsRow(
