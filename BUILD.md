@@ -6,8 +6,10 @@ You can compile it from source or use the binaries already in place in the jniLi
 I all case, you will need to clone this [repo](https://github.com/wiiznokes/libgit2-android) to get the header.
 
 ```
-git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
+git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android app/libgit2-android
 ```
+
+Make sure you're in the `app` folder when cloning it.
 
 You can't just `sudo apt install libgit2-dev` because `cmake` won't let you use the header in `/usr/include` for some reason.
 

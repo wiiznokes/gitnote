@@ -6,7 +6,7 @@ project("git_wrapper")
 
 set(JNI_LIBS ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
 
-include_directories(${CMAKE_SOURCE_DIR}/../../../../libgit2-android/include)
+include_directories(${CMAKE_SOURCE_DIR}/../../../libgit2-android/include)
 
 # Attempt to use libgit2 headers from the system
 #target_include_directories(logging PRIVATE /usr/include)
