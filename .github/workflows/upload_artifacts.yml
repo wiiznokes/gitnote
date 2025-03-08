@@ -25,7 +25,7 @@ jobs:
           lfs: true
 
       - run: |
-          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
+          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android app/libgit2-android
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
