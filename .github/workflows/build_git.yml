@@ -21,21 +21,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
-
-      - name: Clone submodule
-        run: |
-          git submodule update --init --recursive
-
-      - run: |
-          cd libgit2-android
-          source build.sh
-          export ANDROID_ABI=$INPUT_ARCH
-          install_ndk > /dev/null 2>&1
-          build_openssl
-          build_libssh2
-          build_libgit2
-          copy_libs artifacts
+          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android app/libgit2-android
+          git -C app/libgit2-android submodule update --init
+          ANDROID_API=34 ANDROID_ABI=$INPUT_ARCH BUILD_ALL=1 INSTALL_NDK=1 JNI_LIBS_PATH=artifacts ./build.sh
 
       - uses: actions/upload-artifact@v4
         with:
