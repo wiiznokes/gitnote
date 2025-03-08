@@ -1,0 +1,10 @@
+Android note app with real file. Can be sync with git providers such as Github
+
+• reate/open/clone repositories
+• fuzzy search (global and from specific folder)
+* grid view
+* tree view
+* edit view
+* private repo with https
+* remote sync
+* time based sort
