@@ -31,5 +31,4 @@ google-services.json
 # Android Profiling
 *.hprof
 
-libgit2-android
 .project
