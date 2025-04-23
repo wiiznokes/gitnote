@@ -1,4 +1,4 @@
-name: Build Apk
+name: Build-Apk
 
 on:
   workflow_dispatch:
