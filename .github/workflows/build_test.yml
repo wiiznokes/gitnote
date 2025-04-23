@@ -11,6 +11,8 @@ on:
       version:
         required: true
         type: string
+  push:
+    
 
 jobs:
   build:
