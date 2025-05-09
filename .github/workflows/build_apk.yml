@@ -1,31 +1,35 @@
-name: Upload Artifacts
+name: Build-Apk
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        required: false
+        required: true
         type: string
-        default: "nightly"
   workflow_call:
     inputs:
       version:
         required: true
         type: string
 
-env:
-  CARGO_TERM_COLOR: always
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-upload:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
+          submodules: recursive
 
-      - run: |
-          git clone https://github.com/wiiznokes/libgit2-android --depth=1 --branch=patch-android
+      - name: Build Libgit2
+        run: |
+          cd app/libgit2-android
+          ANDROID_API=34 ANDROID_ABI=arm64-v8a BUILD_ALL=1 INSTALL_NDK=1 ./build.sh
+          ANDROID_API=34 ANDROID_ABI=x86_64 BUILD_ALL=1 CLEAN=1 ./build.sh
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -50,7 +54,6 @@ jobs:
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
 
-      # todo: specifie arch
       - name: Build apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -59,16 +62,8 @@ jobs:
         run: |
           ./gradlew assembleRelease
 
-      - run: |
-          mkdir -p packages
-
-          # warning: do not use github.event syntax here
-          # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
-          mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
-
-      # when downloading, this will be: pathdest/name/filename
       - uses: actions/upload-artifact@v4
         with:
-          name: releases
-          path: packages/*
+          name: gitnote-release-${{ inputs.version }}.apk
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error

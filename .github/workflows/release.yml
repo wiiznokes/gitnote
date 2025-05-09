@@ -49,7 +49,6 @@ jobs:
           echo "VERSION_NAME=nightly" >> $GITHUB_ENV
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
-
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
         name: Setup options for a new release
         run: |
@@ -64,15 +63,15 @@ jobs:
           echo "version_name=${{ env.VERSION_NAME }}" >> "$GITHUB_OUTPUT"
           echo "prerelease=${{ env.PRERELEASE }}" >> "$GITHUB_OUTPUT"
 
-  upload-artifacts:
+  build-apk:
     needs: setup-env
-    uses: ./.github/workflows/upload_artifacts.yml
+    uses: ./.github/workflows/build_apk.yml
     secrets: inherit
     with:
       version: ${{ needs.setup-env.outputs.version_name }}
 
   publish:
-    needs: [upload-artifacts, setup-env]
+    needs: [build-apk, setup-env]
     runs-on: ubuntu-latest
     permissions:
       contents: write

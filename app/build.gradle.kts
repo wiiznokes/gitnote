@@ -37,7 +37,7 @@ android {
         minSdk = 30
         targetSdk = 35
         versionCode = 1
-        versionName = getVersion()
+        versionName = "25.05"
 
         buildConfigField(
             "String",
@@ -117,7 +117,7 @@ android {
         }
     }
 
-    ndkVersion = "26.1.10909125"
+    ndkVersion = "27.2.12479018"
 }
 
 kotlin {
