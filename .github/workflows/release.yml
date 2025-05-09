@@ -49,7 +49,6 @@ jobs:
           echo "VERSION_NAME=nightly" >> $GITHUB_ENV
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
-
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
         name: Setup options for a new release
         run: |
