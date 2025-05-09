@@ -55,8 +55,8 @@ jobs:
         name: Setup options for a stable release
         run: |
           echo "APP_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          echo "TAG_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
-          echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
+          echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "VERSION_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
       - name: Set up outputs
         id: set_outputs
