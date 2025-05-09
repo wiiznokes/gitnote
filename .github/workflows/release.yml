@@ -15,7 +15,7 @@ on:
       - "*.md"
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-release
   cancel-in-progress: true
 
 env:
