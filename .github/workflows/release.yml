@@ -8,6 +8,11 @@ on:
         required: false
         default: true
         type: boolean
+      version:
+        description: "App version"
+        required: false
+        default: ""
+        type: string
   push:
     branches:
       - master
@@ -38,21 +43,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set app version
+      - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
+        name: Setup options for a nightly release
         run: |
           echo "APP_VERSION=$(date +"%y.%m")" >> $GITHUB_ENV
-
-      - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
-        name: Setup options for nightly
-        run: |
           echo "TAG_NAME=nightly" >> $GITHUB_ENV
           echo "VERSION_NAME=nightly" >> $GITHUB_ENV
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
       - if: ${{ github.event.inputs.is_nightly == 'false' }}
-        name: Setup options for a new release
+        name: Setup options for a stable release
         run: |
-          echo "TAG_NAME=v${{ env.APP_VERSION }}" >> $GITHUB_ENV
+          echo "APP_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "TAG_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
           echo "VERSION_NAME=${{ env.APP_VERSION }}" >> $GITHUB_ENV
 
       - name: Set up outputs
