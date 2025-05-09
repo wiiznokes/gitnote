@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build
+    name: Build-Debug
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
           ./gradlew assembleDebug
 
   prettier:
-    name: Prettier fmt
+    name: Prettier-Fmt
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
