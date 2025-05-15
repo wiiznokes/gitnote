@@ -44,7 +44,6 @@ class GridViewModel : ViewModel() {
     private val dao = db.repoDatabaseDao
     val uiHelper = MyApp.appModule.uiHelper
 
-
     private val _query = MutableStateFlow("")
     val query = _query
 

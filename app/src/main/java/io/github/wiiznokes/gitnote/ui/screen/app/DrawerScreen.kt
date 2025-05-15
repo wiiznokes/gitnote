@@ -137,7 +137,8 @@ fun DrawerScreen(
             state = listState
         ) {
 
-            items(currentNoteFolders,
+            items(
+                currentNoteFolders,
                 key = { it.noteFolder.id }) { drawerNoteFolder ->
                 Box {
                     val dropDownExpanded = remember {

@@ -23,7 +23,6 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,7 +50,7 @@ private const val TAG = "GridViewBottom"
 @Composable
 fun FloatingActionButtons(
     vm: GridViewModel,
-    offset: MutableFloatState,
+    offset: Float,
     onEditClick: (Note, EditType) -> Unit,
     searchFocusRequester: FocusRequester,
     expanded: MutableState<Boolean>,
@@ -62,7 +61,7 @@ fun FloatingActionButtons(
     FABs(
         expanded = expanded,
         modifier = Modifier
-            .offset { IntOffset(x = 0, y = -offset.floatValue.roundToInt()) },
+            .offset { IntOffset(x = 0, y = -offset.roundToInt()) },
         items = listOf(
             FABItem(
                 icon = Icons.Default.Add,

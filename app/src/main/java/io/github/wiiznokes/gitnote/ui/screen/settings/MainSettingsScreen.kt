@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.screen.settings
 
-import android.content.ActivityNotFoundException
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Logout

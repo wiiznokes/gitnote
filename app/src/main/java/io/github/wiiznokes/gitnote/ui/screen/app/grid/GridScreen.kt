@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -73,6 +75,9 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 
 private const val TAG = "GridScreen"
 
+private const val maxOffset = -500f
+internal val topBarHeight = 80.dp
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun GridScreen(
@@ -93,13 +98,6 @@ fun GridScreen(
         }
     }) {
 
-
-        val maxOffset = remember { mutableFloatStateOf(0f) }
-        val offset = remember { mutableFloatStateOf(0f) }
-
-
-        val topBarHeight = 80.dp
-
         val selectedNotes by vm.selectedNotes.collectAsState()
 
         if (selectedNotes.isNotEmpty()) {
@@ -114,41 +112,49 @@ fun GridScreen(
             mutableStateOf(false)
         }
 
-        Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
-            GridViewTop(
-                vm = vm,
+        val offset = remember { mutableFloatStateOf(0f) }
+
+        Scaffold(
+            contentWindowInsets = WindowInsets.safeContent,
+            containerColor = MaterialTheme.colorScheme.background,
+            floatingActionButton = {
+
+                if (selectedNotes.isEmpty()) {
+                    FloatingActionButtons(
+                        vm = vm,
+                        offset = offset.floatValue,
+                        onEditClick = onEditClick,
+                        searchFocusRequester = searchFocusRequester,
+                        expanded = fabExpanded,
+                    )
+                }
+
+            }) { padding ->
+
+            val nestedScrollConnection = rememberNestedScrollConnection(
                 offset = offset,
-                selectedNotesNumber = selectedNotes.size,
-                maxOffset = maxOffset,
-                drawerState = drawerState,
-                onSettingsClick = onSettingsClick,
-                topBarHeight = topBarHeight,
-                searchFocusRequester = searchFocusRequester,
+                fabExpanded = fabExpanded,
             )
 
-        }, floatingActionButton = {
-
-            if (selectedNotes.isEmpty()) {
-                FloatingActionButtons(
-                    vm = vm,
-                    offset = offset,
-                    onEditClick = onEditClick,
-                    searchFocusRequester = searchFocusRequester,
-                    expanded = fabExpanded,
-                )
-            }
-
-        }) {
 
             GridView(
                 vm = vm,
                 topBarHeight = topBarHeight,
                 onEditClick = onEditClick,
-                maxOffset = maxOffset.floatValue,
-                offset = offset,
                 selectedNotes = selectedNotes,
-                fabExpanded = fabExpanded,
+                nestedScrollConnection = nestedScrollConnection,
             )
+
+            TopBar(
+                vm = vm,
+                offset = offset.floatValue,
+                selectedNotesNumber = selectedNotes.size,
+                drawerState = drawerState,
+                onSettingsClick = onSettingsClick,
+                searchFocusRequester = searchFocusRequester,
+                padding = padding
+            )
+
         }
     }
 }
@@ -163,11 +169,9 @@ fun GridScreen(
 private fun GridView(
     topBarHeight: Dp,
     vm: GridViewModel,
-    maxOffset: Float,
-    offset: MutableFloatState,
+    nestedScrollConnection: NestedScrollConnection,
     onEditClick: (Note, EditType) -> Unit,
     selectedNotes: List<Note>,
-    fabExpanded: MutableState<Boolean>,
 ) {
     val gridNotes by vm.gridNotes.collectAsState()
 
@@ -186,12 +190,6 @@ private fun GridView(
         }
     }
 
-
-    val nestedScrollConnection = rememberNestedScrollConnection(
-        collapsingTopHeight = maxOffset,
-        offset = offset,
-        fabExpanded = fabExpanded,
-    )
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullRefreshState(isRefreshing, {
@@ -221,7 +219,7 @@ private fun GridView(
             item(
                 span = StaggeredGridItemSpan.FullLine
             ) {
-                Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+                Spacer(modifier = Modifier.height(topBarHeight + 40.dp))
             }
 
             items(items = gridNotes, key = { it.note.id }) { gridNote ->
@@ -283,15 +281,17 @@ private fun GridView(
                                 expanded = dropDownExpanded,
                                 shape = MaterialTheme.shapes.medium,
                                 options = listOf(
-                                    CustomDropDownModel(text = stringResource(R.string.delete_this_note),
+                                    CustomDropDownModel(
+                                        text = stringResource(R.string.delete_this_note),
                                         onClick = {
                                             vm.deleteNote(gridNote.note)
                                         }),
-                                    if (selectedNotes.isEmpty()) CustomDropDownModel(text = stringResource(
-                                        R.string.select_multiple_notes
-                                    ), onClick = {
-                                        vm.selectNote(gridNote.note, true)
-                                    }) else null,
+                                    if (selectedNotes.isEmpty()) CustomDropDownModel(
+                                        text = stringResource(
+                                            R.string.select_multiple_notes
+                                        ), onClick = {
+                                            vm.selectNote(gridNote.note, true)
+                                        }) else null,
                                 ),
                                 clickPosition = clickPosition
                             )
@@ -351,10 +351,10 @@ private fun GridView(
 //  the stretching will cause tbe offset to not change
 @Composable
 private fun rememberNestedScrollConnection(
-    collapsingTopHeight: Float,
     offset: MutableFloatState,
     fabExpanded: MutableState<Boolean>,
 ): NestedScrollConnection {
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -363,8 +363,8 @@ private fun rememberNestedScrollConnection(
 
         object : NestedScrollConnection {
             fun calculateOffset(delta: Float): Offset {
-                offset.floatValue = (offset.floatValue + delta).coerceIn(-collapsingTopHeight, 0f)
-                //Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, collapsingTopHeight: $collapsingTopHeight)")
+                offset.floatValue = (offset.floatValue + delta).coerceIn(maxOffset, 0f)
+                Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, delta: $delta)")
                 return Offset.Zero
             }
 

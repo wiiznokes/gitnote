@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -56,17 +55,15 @@ import kotlin.math.roundToInt
 private const val TAG = "TopGridScreen"
 
 @Composable
-fun GridViewTop(
+fun TopBar(
     vm: GridViewModel,
-    offset: MutableFloatState,
+    padding: PaddingValues,
+    offset: Float,
     selectedNotesNumber: Int,
-    maxOffset: MutableFloatState,
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
-    topBarHeight: Dp,
     searchFocusRequester: FocusRequester,
 ) {
-    val statusBarHeight = 17.dp
 
     AnimatedContent(
         targetState = selectedNotesNumber == 0,
@@ -74,9 +71,8 @@ fun GridViewTop(
     ) { shouldShowSearchBar ->
         if (shouldShowSearchBar) {
             SearchBar(
-                statusBarHeight = statusBarHeight,
-                maxOffset = maxOffset,
-                offset = offset.floatValue,
+                padding = padding,
+                offset = offset,
                 drawerState = drawerState,
                 vm = vm,
                 onSettingsClick = onSettingsClick,
@@ -84,7 +80,7 @@ fun GridViewTop(
             )
         } else {
             SelectableTopBar(
-                statusBarHeight = statusBarHeight,
+                padding = padding,
                 topBarHeight = topBarHeight,
                 vm = vm,
                 selectedNotesNumber = selectedNotesNumber
@@ -96,8 +92,7 @@ fun GridViewTop(
 
 @Composable
 private fun SearchBar(
-    statusBarHeight: Dp,
-    maxOffset: MutableFloatState,
+    padding: PaddingValues,
     offset: Float,
     drawerState: DrawerState,
     vm: GridViewModel,
@@ -134,11 +129,9 @@ private fun SearchBar(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(padding)
             .padding(horizontal = 30.dp)
-            .padding(top = statusBarHeight + 10.dp)
-            .onSizeChanged { size ->
-                maxOffset.floatValue = size.height.toFloat() + statusBarHeight.value + 60f
-            }
+            //.padding(top = 25.dp)
             .offset { IntOffset(x = 0, y = offset.roundToInt()) }
             .focusRequester(searchFocusRequester),
         value = queryTextField,
@@ -222,7 +215,7 @@ private fun SearchBar(
 
 @Composable
 private fun SelectableTopBar(
-    statusBarHeight: Dp,
+    padding: PaddingValues,
     topBarHeight: Dp,
     vm: GridViewModel,
     selectedNotesNumber: Int
@@ -230,9 +223,9 @@ private fun SelectableTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(padding)
             .height(topBarHeight)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
-            .padding(top = statusBarHeight),
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {

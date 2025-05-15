@@ -125,7 +125,8 @@ fun LogsScreen(
 
             val clipboardManager: ClipboardManager = LocalClipboardManager.current
 
-            options.add(CustomDropDownModel(
+            options.add(
+                CustomDropDownModel(
                 text = stringResource(R.string.copy_all_logs),
                 onClick = {
                     clipboardManager.setText(AnnotatedString((logState.value)))
