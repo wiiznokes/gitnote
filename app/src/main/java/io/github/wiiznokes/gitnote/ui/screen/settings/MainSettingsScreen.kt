@@ -1,5 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.settings
 
+import android.content.ClipData
+import android.content.ClipDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -13,11 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewModelScope
 import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.BuildConfig
@@ -32,6 +37,7 @@ import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainSettingsScreen(
@@ -260,13 +266,20 @@ fun MainSettingsScreen(
             var version = BuildConfig.VERSION_NAME
             version += "-${BuildConfig.GIT_HASH.substring(0..6)}"
             version += if (BuildConfig.DEBUG) "-debug" else "-release"
-            val clipboardManager = LocalClipboardManager.current
+            val clipboardManager = LocalClipboard.current
 
             DefaultSettingsRow(
                 title = stringResource(R.string.version),
                 subTitle = version,
                 onClick = {
-                    clipboardManager.setText(AnnotatedString(version))
+                    val data = ClipData(
+                        ClipDescription("version of gitnote", arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)),
+                        ClipData.Item(version)
+                    )
+
+                    vm.viewModelScope.launch {
+                        clipboardManager.setClipEntry(ClipEntry(data))
+                    }
                 }
             )
 

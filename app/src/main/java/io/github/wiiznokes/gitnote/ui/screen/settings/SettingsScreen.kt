@@ -59,7 +59,8 @@ fun SettingsScreen(
                 LogsScreen(
                     onBackClick = {
                         navController.pop()
-                    }
+                    },
+                    vm = vm
                 )
             }
 

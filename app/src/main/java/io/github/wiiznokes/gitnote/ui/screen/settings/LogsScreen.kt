@@ -1,5 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.settings
 
+import android.content.ClipData
+import android.content.ClipDescription
 import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,18 +23,19 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -68,6 +71,7 @@ private fun getTextStyleFromInt(id: Int): TextStyle {
 @Composable
 fun LogsScreen(
     onBackClick: () -> Unit,
+    vm: SettingsViewModel
 ) {
 
     val logLevel = remember {
@@ -123,13 +127,21 @@ fun LogsScreen(
                 }
             }.toMutableList()
 
-            val clipboardManager: ClipboardManager = LocalClipboardManager.current
+            val clipboardManager = LocalClipboard.current
 
             options.add(
                 CustomDropDownModel(
                 text = stringResource(R.string.copy_all_logs),
                 onClick = {
-                    clipboardManager.setText(AnnotatedString((logState.value)))
+                    val data = ClipData(
+                        ClipDescription("logs of gitnote", arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)),
+                        ClipData.Item(logState.value)
+                    )
+
+                    vm.viewModelScope.launch {
+                        clipboardManager.setClipEntry(ClipEntry(data))
+                    }
+
                 }
             ))
 

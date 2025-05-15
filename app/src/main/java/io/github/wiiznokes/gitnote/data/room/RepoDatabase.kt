@@ -40,7 +40,7 @@ abstract class RepoDatabase : RoomDatabase() {
                     klass = RepoDatabase::class.java,
                     name = TAG
                 )
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(false)
                 .addCallback(onMigration)
                 .build()
         }
