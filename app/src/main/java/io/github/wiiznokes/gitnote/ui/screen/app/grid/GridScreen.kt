@@ -219,7 +219,7 @@ private fun GridView(
             item(
                 span = StaggeredGridItemSpan.FullLine
             ) {
-                Spacer(modifier = Modifier.height(topBarHeight + 40.dp))
+                Spacer(modifier = Modifier.height(topBarHeight + 40.dp + 15.dp))
             }
 
             items(items = gridNotes, key = { it.note.id }) { gridNote ->

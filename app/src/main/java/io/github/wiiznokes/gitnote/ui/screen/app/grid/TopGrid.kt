@@ -130,8 +130,8 @@ private fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(padding)
-            .padding(horizontal = 30.dp)
-            //.padding(top = 25.dp)
+            .padding(horizontal = 10.dp)
+            .padding(top = 15.dp)
             .offset { IntOffset(x = 0, y = offset.roundToInt()) }
             .focusRequester(searchFocusRequester),
         value = queryTextField,
