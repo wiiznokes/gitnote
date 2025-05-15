@@ -62,8 +62,16 @@ jobs:
         run: |
           ./gradlew assembleRelease
 
+          
+      - run: |
+          mkdir -p packages
+
+          # warning: do not use github.event syntax here
+          # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
+          mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
+
       - uses: actions/upload-artifact@v4
         with:
-          name: gitnote-release-${{ inputs.version }}.apk
-          path: app/build/outputs/apk/release/app-release.apk
+          name: releases
+          path: packages/*
           if-no-files-found: error
