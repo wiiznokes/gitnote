@@ -16,7 +16,7 @@ plugins {
 
 android {
     namespace = "io.github.wiiznokes.gitnote"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
 
@@ -45,12 +45,14 @@ android {
             "\"${getGitHash()}\""
         )
 
-        resourceConfigurations.addAll(
-            listOf(
-                "en",
-                "fr"
+        androidResources {
+            localeFilters += (
+                listOf(
+                    "en",
+                    "fr"
+                )
             )
-        )
+        }
 
         vectorDrawables.useSupportLibrary = true
 

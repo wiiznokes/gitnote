@@ -1,34 +1,34 @@
 [versions]
-agp = "8.7.1"
-kotlin = "2.0.21"
+agp = "8.10.0"
+kotlin = "2.1.21"
 
 # https://github.com/google/ksp/releases
 # sync with the kotlin version
-ksp = "2.0.20-1.0.24"
+ksp = "2.1.21-2.0.1"
 
-ktx-lifecycle = "2.8.6"
-room = "2.6.1"
+ktx-lifecycle = "2.9.0"
+room = "2.7.1"
 about-libraries = "11.2.3"
 
 [libraries]
 # AndroidX Core
-androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.13.1" }
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
 runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
 runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.9.3" }
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
+compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.6" }
 
 # Compose
 # https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
 # compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.10.00" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.05.00" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.0.1" }
+compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.1.1" }
 
 # Accompanist
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version = "0.34.0" }
