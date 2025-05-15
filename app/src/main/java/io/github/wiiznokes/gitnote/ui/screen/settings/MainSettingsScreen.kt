@@ -217,7 +217,7 @@ fun MainSettingsScreen(
                         onClick = {
                             try {
                                 uriHandler.openUri(remoteUrl)
-                            } catch (e: ActivityNotFoundException) {
+                            } catch (e: Exception) {
                                 vm.uiHelper.makeToast(vm.uiHelper.getString(R.string.error_invalid_link))
                             }
                         }
