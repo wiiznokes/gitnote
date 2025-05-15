@@ -364,7 +364,7 @@ private fun rememberNestedScrollConnection(
         object : NestedScrollConnection {
             fun calculateOffset(delta: Float): Offset {
                 offset.floatValue = (offset.floatValue + delta).coerceIn(maxOffset, 0f)
-                Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, delta: $delta)")
+                //Log.d(TAG, "calculateOffset(newOffset: ${offset.floatValue}, delta: $delta)")
                 return Offset.Zero
             }
 
