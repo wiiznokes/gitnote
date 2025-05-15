@@ -66,7 +66,7 @@ fun GridViewTop(
     topBarHeight: Dp,
     searchFocusRequester: FocusRequester,
 ) {
-    val statusBarHeight = 0.dp
+    val statusBarHeight = 17.dp
 
     AnimatedContent(
         targetState = selectedNotesNumber == 0,
