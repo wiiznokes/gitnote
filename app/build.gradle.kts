@@ -61,12 +61,6 @@ android {
         ndk {
             abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
         }
-
-        externalNativeBuild {
-            cmake {
-                cFlags.add("-DCMAKE_SHARED_LINKER_FLAGS=-Wl,--build-id=none")
-            }
-        }
     }
 
     signingConfigs {

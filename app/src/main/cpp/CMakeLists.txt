@@ -6,6 +6,9 @@ project("git_wrapper")
 
 set(JNI_LIBS ${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id=none")
+target_link_options(${CMAKE_PROJECT_NAME} PUBLIC "-Wl,--build-id=none")
+
 include_directories(${CMAKE_SOURCE_DIR}/../../../libgit2-android/include)
 
 # Attempt to use libgit2 headers from the system
