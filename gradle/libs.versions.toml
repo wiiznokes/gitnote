@@ -8,7 +8,7 @@ ksp = "2.1.21-2.0.1"
 
 ktx-lifecycle = "2.9.0"
 room = "2.7.1"
-about-libraries = "11.2.3"
+about-libraries = "12.1.2"
 
 [libraries]
 # AndroidX Core

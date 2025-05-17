@@ -20,6 +20,7 @@ fun LibrariesScreen(
         disableVerticalScroll = true
     ) {
         LibrariesContainer(
+            showDescription = true,
             modifier = Modifier
                 .fillMaxSize(),
         )
