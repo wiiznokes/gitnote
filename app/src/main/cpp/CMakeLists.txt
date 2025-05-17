@@ -24,3 +24,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         ${JNI_LIBS}/libgit2.so
         android
         log)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--build-id=none")
+target_link_options(${CMAKE_PROJECT_NAME} PUBLIC "-Wl,--build-id=none")

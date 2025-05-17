@@ -62,7 +62,6 @@ jobs:
         run: |
           ./gradlew assembleRelease
 
-          
       - run: |
           mkdir -p packages
 
