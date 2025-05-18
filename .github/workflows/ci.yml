@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build-Debug
+  build-ci:
+    name: Build-Debug-Ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,8 +32,8 @@ jobs:
         run: |
           ./gradlew assembleDebug
 
-  prettier:
-    name: Prettier-Fmt
+  prettier-ci:
+    name: Prettier-Fmt-Ci
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
