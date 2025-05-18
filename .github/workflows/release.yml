@@ -30,9 +30,15 @@ jobs:
       contents: write
     steps:
 
-      - run: echo "prerelease=${{ inputs.prerelease }}"
-      
-      - if: ${{ inputs.prerelease  == 'true' }}
+      - name: 1 att
+        run: echo "prerelease=${{ inputs.prerelease }}"
+
+      - name: 2 att
+        if: ${{ inputs.prerelease  == 'true' }}
+        run: |
+          echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+      - name: Set prerelease flag
+        if: ${{ github.event.inputs.prerelease == 'true' }}
         run: |
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
