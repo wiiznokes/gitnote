@@ -9,7 +9,7 @@ on:
       - "*.md"
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}-nightly
+  group: ${{ github.sha }}-${{ github.workflow }}-nightly
   cancel-in-progress: true
 
 jobs:
