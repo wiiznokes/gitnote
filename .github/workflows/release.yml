@@ -72,16 +72,21 @@ jobs:
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
           mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
 
-      - if: ${{ (inputs.prerelease  == 'true') }}
+      - name: Set prerelease flag
+        if: ${{ github.event.inputs.prerelease == 'true' }}
         run: |
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
 
       - name: Publish release
         run: |
+          # delete tag/release if needed
+          gh release delete ${{ inputs.version }} --yes || true
+          git push --delete origin ${{ inputs.version }} || true
+
           git tag ${{ inputs.version }}
           git push origin --tags
 
           # https://cli.github.com/manual/gh_release_create
           gh release create ${{ inputs.version }} --title "${{ inputs.version }}" \
             --verify-tag ${{ env.PRERELEASE }} --generate-notes --target $GITHUB_SHA \
-            ./packages/*/*
+            ./packages/*
