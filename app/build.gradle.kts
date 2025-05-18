@@ -43,8 +43,8 @@ android {
         applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 30
         targetSdk = 35
-        versionCode = 5
-        versionName = "25.05.5"
+        versionCode = 6
+        versionName = "25.05.6-rc1"
 
         buildConfigField(
             "String",
