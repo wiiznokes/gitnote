@@ -6,11 +6,20 @@ on:
       version:
         required: true
         type: string
+        description: "App version"
+      is_nightly:
+        description: "Is nightly"
+        type: boolean
+        required: true
   workflow_call:
     inputs:
       version:
         required: true
         type: string
+      is_nightly:
+        description: "Is nightly"
+        type: boolean
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-build-apk
@@ -48,19 +57,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Retrieve the secret and decode it to a file
+      - if: ${{ github.event.inputs.is_nightly == 'false' }}
+        name: Retrieve the secret and decode it to a file
         env:
           KEY_BASE64: ${{ secrets.KEY_BASE64 }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
 
-      - name: Build apk
+      - if: ${{ github.event.inputs.is_nightly == 'false' }}
+        name: Build apk
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          ./gradlew assembleRelease
+        run: ./gradlew assembleRelease
+
+      - if: ${{ github.event.inputs.is_nightly == 'true' }}
+        name: Build apk
+        run: ./gradlew assembleNightly
 
       - run: |
           mkdir -p packages

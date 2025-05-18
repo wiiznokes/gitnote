@@ -17,10 +17,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewModelScope
 import dev.olshevski.navigation.reimagined.NavController
@@ -263,9 +261,8 @@ fun MainSettingsScreen(
             title = stringResource(R.string.about),
             isLast = true
         ) {
-            var version = BuildConfig.VERSION_NAME
-            version += "-${BuildConfig.GIT_HASH.substring(0..6)}"
-            version += if (BuildConfig.DEBUG) "-debug" else "-release"
+            val version =
+                "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}-${BuildConfig.GIT_HASH.substring(0..6)}"
             val clipboardManager = LocalClipboard.current
 
             DefaultSettingsRow(

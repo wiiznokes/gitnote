@@ -72,6 +72,7 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.setup-env.outputs.version_name }}
+      is_nightly: ${{ github.event.inputs.is_nightly }}
 
   publish:
     needs: [build-apk, setup-env]

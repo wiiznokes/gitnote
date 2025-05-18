@@ -93,6 +93,13 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
 
+
+        create("nightly") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            applicationIdSuffix = ".nightly"
+        }
+
         debug {
             applicationIdSuffix = ".debug"
         }
