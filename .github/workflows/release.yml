@@ -1,23 +1,17 @@
-name: Release
+name: Publish Release
 
 on:
   workflow_dispatch:
     inputs:
-      is_nightly:
-        description: "Is nightly"
-        required: false
-        default: true
-        type: boolean
       version:
         description: "App version"
-        required: false
-        default: ""
+        required: true
         type: string
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - "*.md"
+      prerelease:
+        description: "Is pre-release"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-release
@@ -30,77 +24,64 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  setup-env:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      app_version: ${{ steps.set_outputs.outputs.app_version }}
-      tag_name: ${{ steps.set_outputs.outputs.tag_name }}
-      version_name: ${{ steps.set_outputs.outputs.version_name }}
-      prerelease: ${{ steps.set_outputs.outputs.prerelease }}
-
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+          submodules: recursive
 
-      - if: ${{ (github.event.inputs.is_nightly  == 'true') || (github.event.inputs.is_nightly  == '') }}
-        name: Setup options for a nightly release
+      # - name: Build Libgit2
+      #   run: |
+      #     cd app/libgit2-android
+      #     ANDROID_API=34 ANDROID_ABI=arm64-v8a BUILD_ALL=1 INSTALL_NDK=1 ./build.sh
+      #     ANDROID_API=34 ANDROID_ABI=x86_64 BUILD_ALL=1 CLEAN=1 ./build.sh
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      # https://github.com/actions/cache/blob/main/examples.md#java---gradle
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle
+
+      - name: Retrieve the secret and decode it to a file and Build apk
+        env:
+          KEY_BASE64: ${{ secrets.KEY_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "APP_VERSION=$(date +"%y.%m")" >> $GITHUB_ENV
-          echo "TAG_NAME=nightly" >> $GITHUB_ENV
-          echo "VERSION_NAME=nightly" >> $GITHUB_ENV
+          echo $KEY_BASE64 | base64 --decode > app/key.jks
+          ./gradlew assembleRelease
+
+          mkdir -p packages
+          # warning: do not use github.event syntax here
+          # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
+          mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
+
+      - if: ${{ (inputs.prerelease  == 'true') }}
+        run: |
           echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
-
-      - if: ${{ github.event.inputs.is_nightly == 'false' }}
-        name: Setup options for a stable release
-        run: |
-          echo "APP_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-          echo "VERSION_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
-
-      - name: Set up outputs
-        id: set_outputs
-        run: |
-          echo "app_version=${{ env.APP_VERSION }}" >> "$GITHUB_OUTPUT"
-          echo "tag_name=${{ env.TAG_NAME }}" >> "$GITHUB_OUTPUT"
-          echo "version_name=${{ env.VERSION_NAME }}" >> "$GITHUB_OUTPUT"
-          echo "prerelease=${{ env.PRERELEASE }}" >> "$GITHUB_OUTPUT"
-
-  build-apk:
-    needs: setup-env
-    uses: ./.github/workflows/build_apk.yml
-    secrets: inherit
-    with:
-      version: ${{ needs.setup-env.outputs.version_name }}
-      is_nightly: ${{ inputs.is_nightly }}
-
-  publish:
-    needs: [build-apk, setup-env]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # https://github.com/actions/checkout/issues/1471
-          fetch-tags: false
-
-      # must be after checkout because it will remove artifacts
-      - uses: actions/download-artifact@v4
-        with:
-          path: "packages"
 
       - name: Publish release
         run: |
-          # delete previous nightly release
-          gh release delete nightly --yes || true
-          git push --delete origin nightly || true
-
-          git tag ${{ needs.setup-env.outputs.tag_name }}
+          git tag ${{ inputs.version }}
           git push origin --tags
 
           # https://cli.github.com/manual/gh_release_create
-          gh release create ${{ needs.setup-env.outputs.tag_name }} --title "${{ needs.setup-env.outputs.version_name }}" \
-            --verify-tag ${{ needs.setup-env.outputs.prerelease }} --generate-notes --target $GITHUB_SHA \
+          gh release create ${{ inputs.version }} --title "${{ inputs.version }}" \
+            --verify-tag ${{ env.PRERELEASE }} --generate-notes --target $GITHUB_SHA \
             ./packages/*/*
