@@ -1,7 +1,9 @@
-<img align="left" src="assets/app_icon.svg" alt="app icon" width="90px">
+<p align="left">
+  <img align="left" src="assets/app_icon.svg" alt="app icon" width="90px" />
+  <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
+</p>
 
-# GitNote
-
+<a href="https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote"><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid Badge" height="50"></a>
 <br/>
 
 _Supported Android versions: 11 to 15_
