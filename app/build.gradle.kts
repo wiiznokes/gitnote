@@ -183,7 +183,8 @@ dependencies {
     implementation(libs.about.libraries)
 
     // Markdown to HTML
-    //implementation(libs.markdown)
+    implementation(libs.richtext.commonmark)
+    implementation(libs.richtext.ui.material3)
 
     // unit test
     testImplementation(libs.test.junit.ktx)

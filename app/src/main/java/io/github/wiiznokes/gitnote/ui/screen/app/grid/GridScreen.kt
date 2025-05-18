@@ -64,11 +64,14 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
+import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerScreen
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 
@@ -311,12 +314,18 @@ private fun GridView(
                                 color = MaterialTheme.colorScheme.tertiary
                             )
 
-                            Text(
-                                text = gridNote.note.content,
-                                modifier = Modifier,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            if (gridNote.note.fileExtension() is FileExtension.Md) {
+                                RichText {
+                                    Markdown(gridNote.note.content)
+                                }
+                            } else {
+                                Text(
+                                    text = gridNote.note.content,
+                                    modifier = Modifier,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
