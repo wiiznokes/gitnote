@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release:
+  nightly:
     runs-on: ubuntu-latest
     permissions:
       contents: write
