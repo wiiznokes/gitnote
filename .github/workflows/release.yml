@@ -29,6 +29,13 @@ jobs:
     permissions:
       contents: write
     steps:
+
+      - run: echo "prerelease=${{ inputs.prerelease }}"
+      
+      - if: ${{ inputs.prerelease  == 'true' }}
+        run: |
+          echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
         with:
           lfs: true
@@ -72,9 +79,7 @@ jobs:
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
           mv app/build/outputs/apk/release/app-release.apk packages/gitnote-release-${{ inputs.version }}.apk
 
-      - if: ${{ (inputs.prerelease  == 'true') }}
-        run: |
-          echo "PRERELEASE=--prerelease" >> $GITHUB_ENV
+      
 
       - name: Publish release
         run: |
