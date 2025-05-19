@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.screen.app
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -14,7 +13,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -102,7 +102,7 @@ fun EditScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            vm.onFinish()
+                            vm.shouldSaveWhenQuitting = false
                             onFinished()
                         },
                     ) {
@@ -151,7 +151,7 @@ fun EditScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            vm.onValidation(onSuccess = null)
+                            vm.save()
                         },
                         enabled = !isReadOnlyModeActive
                     ) {
@@ -159,23 +159,27 @@ fun EditScreen(
                             imageVector = Icons.Default.Save,
                         )
                     }
-                    if (isReadOnlyModeActive) {
-                        Spacer(modifier = Modifier.width(10.dp))
-                        IconButton(
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            onClick = {
-                                vm.viewModelScope.launch {
-                                    vm.prefs.isReadOnlyModeActive.update(false)
-                                }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    IconButton(
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        onClick = {
+                            vm.viewModelScope.launch {
+                                vm.prefs.isReadOnlyModeActive.update(!isReadOnlyModeActive)
+                            }
+                        },
+                    ) {
+                        SimpleIcon(
+                            imageVector = if (isReadOnlyModeActive) {
+                                Icons.Default.Lock
+                            } else {
+                                Icons.Default.LockOpen
                             },
-                        ) {
-                            SimpleIcon(
-                                imageVector = Icons.Default.Edit,
-                            )
-                        }
+                        )
                     }
                 }
             )
@@ -189,8 +193,7 @@ fun EditScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
-                        vm.onFinish()
-                        vm.onValidation(onSuccess = onFinished)
+                        vm.save(onSuccess = onFinished)
                     }
                 ) {
                     SimpleIcon(
@@ -203,16 +206,14 @@ fun EditScreen(
     ) { paddingValues ->
 
         if (isReadOnlyModeActive && vm.fileExtension.value is FileExtension.Md) {
-            Log.d(TAG, vm.content.value.text)
-            Box {
-                RichText(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                ) {
-                    Markdown(vm.content.value.text)
-                }
+            RichText(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                Markdown(vm.content.value.text)
             }
+
 
         } else {
             TextField(
@@ -234,8 +235,7 @@ fun EditScreen(
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        vm.onFinish()
-                        vm.onValidation(onSuccess = onFinished)
+                        vm.save(onSuccess = onFinished)
                     }
                 ),
                 readOnly = isReadOnlyModeActive

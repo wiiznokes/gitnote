@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.helper.UiHelper
@@ -50,7 +49,7 @@ class EditViewModel() : ViewModel() {
     lateinit var content: MutableState<TextFieldValue>
     lateinit var fileExtension: MutableState<FileExtension>
 
-    private var isSaved: Boolean = false
+    var shouldSaveWhenQuitting: Boolean = true
 
     constructor(editType: EditType, previousNote: Note) : this() {
         this.editType = editType
@@ -91,12 +90,13 @@ class EditViewModel() : ViewModel() {
     private val uiHelper: UiHelper = MyApp.appModule.uiHelper
     val prefs = MyApp.appModule.appPreferences
 
+    fun save(onSuccess: () -> Unit = {}) {
 
-    fun onFinish() {
-        isSaved = true
-    }
-
-    fun onValidation(onSuccess: (() -> Unit)?) {
+        if (isPreviousNoteTheSame()) {
+            uiHelper.makeToast(uiHelper.getString(R.string.error_note_is_the_same))
+            onSuccess()
+            return
+        }
 
         when (editType) {
             EditType.Create -> create(
@@ -106,12 +106,9 @@ class EditViewModel() : ViewModel() {
                 content = content.value.text,
                 id = previousNote.id
             ).onSuccess {
-                if (onSuccess != null) {
-                    onSuccess()
-                } else {
-                    editType = EditType.Update
-                    previousNote = it
-                }
+                editType = EditType.Update
+                previousNote = it
+                onSuccess()
             }
 
             EditType.Update -> update(
@@ -121,16 +118,13 @@ class EditViewModel() : ViewModel() {
                 fileExtension = fileExtension.value,
                 content = content.value.text,
             ).onSuccess {
-                if (onSuccess != null) {
-                    onSuccess()
-                } else {
-                    previousNote = it
-                }
+                previousNote = it
+                onSuccess()
             }
         }
     }
 
-    /** Return early to note block the ui thread.
+    /** Return early to not block the ui thread.
      * This is a best effort to catch problem
      */
     private fun update(
@@ -234,15 +228,17 @@ class EditViewModel() : ViewModel() {
         return success(note)
     }
 
+    private fun isPreviousNoteTheSame(): Boolean =
+        previousNote.nameWithoutExtension() == name.value.text
+                && previousNote.content == content.value.text
+                && previousNote.fileExtension().text == fileExtension.value.text
+
     override fun onCleared() {
 
-        fun isPreviousNoteTheSame(): Boolean =
-            previousNote.nameWithoutExtension() == name.value.text
-                    && previousNote.content == content.value.text
-                    && previousNote.fileExtension().text == fileExtension.value.text
 
 
-        if (isSaved || isPreviousNoteTheSame()) {
+
+        if (!shouldSaveWhenQuitting || isPreviousNoteTheSame()) {
             writeObj(EDIT_IS_UNSAVED, false)
             return
         }

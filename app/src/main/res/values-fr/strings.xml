@@ -73,6 +73,7 @@
     <string name="error_clone_repo">Impossible de clone: %1$s</string>
     <string name="error_open_repo">Impossible d\'ouvrir le dépôt: %1$s</string>
     <string name="error_create_repo">Impossible de créer le dépôt: %1$s</string>
+    <string name="error_note_is_the_same">Aucune modification</string>
     <string name="grid">Grille</string>
     <string name="about">À propos</string>
     <string name="app_page_choose_method">Choisir la méthode</string>
