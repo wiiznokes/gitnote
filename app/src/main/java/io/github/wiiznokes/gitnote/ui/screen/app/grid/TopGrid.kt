@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -183,6 +184,7 @@ private fun SearchBar(
                         )
                     }
 
+                    val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
                     CustomDropDown(
                         expanded = expanded,
@@ -190,6 +192,16 @@ private fun SearchBar(
                             CustomDropDownModel(
                                 text = stringResource(R.string.settings),
                                 onClick = onSettingsClick
+                            ),
+                            CustomDropDownModel(
+                                text = if (readOnlyMode) stringResource(
+                                    R.string.read_only_mode_deactive
+                                ) else stringResource(R.string.read_only_mode_activate),
+                                onClick = {
+                                    vm.viewModelScope.launch {
+                                        vm.prefs.isReadOnlyModeActive.update(!readOnlyMode)
+                                    }
+                                }
                             ),
                         )
                     )

@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.helper.UiHelper
@@ -88,7 +89,7 @@ class EditViewModel() : ViewModel() {
 
     private val storageManager: StorageManager = MyApp.appModule.storageManager
     private val uiHelper: UiHelper = MyApp.appModule.uiHelper
-    private val prefs = MyApp.appModule.appPreferences
+    val prefs = MyApp.appModule.appPreferences
 
 
     fun onFinish() {

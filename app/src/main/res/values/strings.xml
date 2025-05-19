@@ -111,4 +111,7 @@
         <item quantity="other">Folders successfully deleted</item>
     </plurals>
 
+    <string name="read_only_mode_activate">Activate read only mode</string>
+    <string name="read_only_mode_deactive">Deactivate read only mode</string>
+
 </resources>

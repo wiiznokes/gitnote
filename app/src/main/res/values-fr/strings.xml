@@ -106,19 +106,22 @@
     <string name="success_note_update">Note mise à jour avec succès</string>
     <string name="success_note_create">Note créée avec succès</string>
 
-    <plurals name="delete_selected_notes">
+    <plurals name="delete_selected_notes" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Supprimer la note selectionnée</item>
         <item quantity="other">Supprimer les notes selectionnées</item>
     </plurals>
 
-    <plurals name="success_notes_delete">
+    <plurals name="success_notes_delete" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Note supprimée avec succès</item>
         <item quantity="other">Notes supprimées avec succès</item>
     </plurals>
     <string name="error_delete_folder">Impossible de supprimer le dossier: %1$s</string>
 
-    <plurals name="success_noteFolders_delete">
+    <plurals name="success_noteFolders_delete" tools:ignore="MissingQuantity">
         <item quantity="one" tools:ignore="ImpliedQuantity">Dossier supprimé avec succès</item>
         <item quantity="other">Dossiers supprimés avec succès</item>
     </plurals>
+
+    <string name="read_only_mode_activate">Activer la lecture seule</string>
+    <string name="read_only_mode_deactive">Desactiver la lecture seule</string>
 </resources>
