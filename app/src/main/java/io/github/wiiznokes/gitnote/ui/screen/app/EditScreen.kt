@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +13,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -44,6 +45,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -52,6 +56,7 @@ import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.newEditViewModel
+import kotlinx.coroutines.launch
 
 
 private const val TAG = "EditScreen"
@@ -83,11 +88,11 @@ fun EditScreen(
         }
     }
 
+    val isReadOnlyModeActive = vm.prefs.isReadOnlyModeActive.getAsState().value
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
-        contentColor = MaterialTheme.colorScheme.background,
         topBar = {
-
             val backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(15.dp)
 
             TopAppBar(
@@ -97,7 +102,7 @@ fun EditScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            vm.onFinish()
+                            vm.shouldSaveWhenQuitting = false
                             onFinished()
                         },
                     ) {
@@ -117,6 +122,7 @@ fun EditScreen(
                         onValueChange = {
                             vm.name.value = it
                         },
+                        readOnly = isReadOnlyModeActive,
                         singleLine = true,
                         placeholder = {
                             Text(text = stringResource(R.string.note_name))
@@ -137,7 +143,7 @@ fun EditScreen(
                     )
                 },
                 actions = {
-                    ExtensionChooser(vm.fileExtension)
+                    ExtensionChooser(vm.fileExtension, isReadOnlyModeActive)
                     Spacer(modifier = Modifier.width(10.dp))
                     IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
@@ -145,28 +151,49 @@ fun EditScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            vm.onValidation(onSuccess = null)
-                        }
+                            vm.save()
+                        },
+                        enabled = !isReadOnlyModeActive
                     ) {
                         SimpleIcon(
                             imageVector = Icons.Default.Save,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    IconButton(
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        onClick = {
+                            vm.viewModelScope.launch {
+                                vm.prefs.isReadOnlyModeActive.update(!isReadOnlyModeActive)
+                            }
+                        },
+                    ) {
+                        SimpleIcon(
+                            imageVector = if (isReadOnlyModeActive) {
+                                Icons.Default.Lock
+                            } else {
+                                Icons.Default.LockOpen
+                            },
                         )
                     }
                 }
             )
         },
         floatingActionButton = {
-
             // bug: https://issuetracker.google.com/issues/224005027
             //AnimatedVisibility(visible = currentNoteFolderRelativePath.isNotEmpty()) {
-            if (vm.name.value.text.isNotEmpty()) {
+            if (!isReadOnlyModeActive && vm.name.value.text.isNotEmpty()) {
                 FloatingActionButton(
                     modifier = Modifier,
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
-                        vm.onFinish()
-                        vm.onValidation(onSuccess = onFinished)
+                        vm.save(onSuccess = onFinished)
                     }
                 ) {
                     SimpleIcon(
@@ -177,38 +204,51 @@ fun EditScreen(
             }
         }
     ) { paddingValues ->
-        TextField(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .focusRequester(textFocusRequester),
-            value = vm.content.value,
-            onValueChange = {
-                vm.content.value = it
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.background,
-                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    vm.onFinish()
-                    vm.onValidation(onSuccess = onFinished)
-                }
-            )
-        )
 
+        if (isReadOnlyModeActive && vm.fileExtension.value is FileExtension.Md) {
+            RichText(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                Markdown(vm.content.value.text)
+            }
+
+
+        } else {
+            TextField(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .focusRequester(textFocusRequester),
+                value = vm.content.value,
+                onValueChange = {
+                    vm.content.value = it
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        vm.save(onSuccess = onFinished)
+                    }
+                ),
+                readOnly = isReadOnlyModeActive
+            )
+        }
     }
 }
 
 
 @Composable
 private fun ExtensionChooser(
-    fileExtension: MutableState<FileExtension>
+    fileExtension: MutableState<FileExtension>,
+    isReadOnly: Boolean,
 ) {
     Box {
         val expanded = remember { mutableStateOf(false) }
@@ -216,9 +256,8 @@ private fun ExtensionChooser(
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary
             ),
-            onClick = {
-                expanded.value = true
-            }
+            onClick = { expanded.value = true },
+            enabled = !isReadOnly
         ) {
             Text(
                 text = '.' + fileExtension.value.text,

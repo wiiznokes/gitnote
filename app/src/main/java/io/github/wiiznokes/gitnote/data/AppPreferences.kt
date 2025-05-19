@@ -116,6 +116,8 @@ class AppPreferences(
         databaseCommit.update("")
     }
 
+    val isReadOnlyModeActive = booleanPreference("isReadOnlyModeActive", false)
+
 }
 
 

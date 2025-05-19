@@ -62,6 +62,7 @@
     <string name="error_invalid_name">Name is invalid</string>
     <string name="error_invalid_extension">Extension is invalid</string>
     <string name="error_folder_already_exist">Folder already exist</string>
+    <string name="error_note_is_the_same">No modification</string>
     <string name="grid">Grid</string>
     <string name="about">About</string>
     <string name="app_page_choose_method">Choose method</string>
@@ -110,5 +111,8 @@
         <item quantity="one">Folder successfully deleted</item>
         <item quantity="other">Folders successfully deleted</item>
     </plurals>
+
+    <string name="read_only_mode_activate">Activate read only mode</string>
+    <string name="read_only_mode_deactive">Deactivate read only mode</string>
 
 </resources>
