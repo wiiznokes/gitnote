@@ -72,13 +72,20 @@ android {
 
     signingConfigs {
         create("release") {
-
             // on powershell
             // $env:KEY_ALIAS = "var"
             keyAlias = System.getenv("KEY_ALIAS")
             keyPassword = System.getenv("KEY_PASSWORD")
             storeFile = file("key.jks")
             storePassword = System.getenv("STORE_PASSWORD")
+        }
+
+        // need this because debug key is machine dependent
+        create("nightly") {
+            keyAlias = "key0"
+            keyPassword = "123456"
+            storeFile = file("nightly-signing-key.jks")
+            storePassword = "123456"
         }
     }
     buildTypes {
@@ -96,7 +103,7 @@ android {
 
         create("nightly") {
             initWith(getByName("release"))
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("nightly")
             applicationIdSuffix = ".nightly"
         }
 
