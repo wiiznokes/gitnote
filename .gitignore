@@ -32,3 +32,5 @@ google-services.json
 *.hprof
 
 .project
+
+!app/nightly-signing-key.jks
