@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -237,7 +238,6 @@ fun RemoteScreen(
     AppPage(
         title = stringResource(R.string.app_page_clone_repository),
         horizontalAlignment = Alignment.CenterHorizontally,
-        contentWindowInsets = WindowInsets.safeContent,
         onBackClick = onBackClick,
     ) {
 
@@ -390,8 +390,6 @@ fun RemoteScreen(
         }
 
         Button(
-            modifier = Modifier
-                .padding(),
             onClick = {
                 vm.cloneRepo(
                     repoState = repoState,
