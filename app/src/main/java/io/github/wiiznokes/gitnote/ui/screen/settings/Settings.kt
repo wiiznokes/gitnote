@@ -31,7 +31,7 @@ import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 
 
-private val padding = 12.dp
+private val padding = 10.dp
 
 
 @Composable
