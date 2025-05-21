@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import com.halilibo.richtext.commonmark.Markdown
 import com.halilibo.richtext.ui.material3.RichText
 import io.github.wiiznokes.gitnote.R
@@ -56,7 +55,6 @@ import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.newEditViewModel
-import kotlinx.coroutines.launch
 
 
 private const val TAG = "EditScreen"
@@ -88,7 +86,8 @@ fun EditScreen(
         }
     }
 
-    val isReadOnlyModeActive = vm.prefs.isReadOnlyModeActive.getAsState().value
+    val isReadOnlyModeActive =
+        !vm.shouldForceNotReadOnlyMode.value && vm.prefs.isReadOnlyModeActive.getAsState().value
 
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -168,9 +167,7 @@ fun EditScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
                         onClick = {
-                            vm.viewModelScope.launch {
-                                vm.prefs.isReadOnlyModeActive.update(!isReadOnlyModeActive)
-                            }
+                            vm.setReadOnlyMode(!isReadOnlyModeActive)
                         },
                     ) {
                         SimpleIcon(

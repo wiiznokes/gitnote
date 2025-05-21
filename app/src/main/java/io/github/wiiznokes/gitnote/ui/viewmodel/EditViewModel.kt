@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
@@ -51,7 +52,12 @@ class EditViewModel() : ViewModel() {
 
     var shouldSaveWhenQuitting: Boolean = true
 
+    val shouldForceNotReadOnlyMode: MutableState<Boolean> = mutableStateOf(false)
+
     constructor(editType: EditType, previousNote: Note) : this() {
+
+        shouldForceNotReadOnlyMode.value = editType == EditType.Create
+
         this.editType = editType
         this.previousNote = previousNote
 
@@ -76,6 +82,9 @@ class EditViewModel() : ViewModel() {
         content: String,
         fileExtension: FileExtension,
     ) : this() {
+
+        shouldForceNotReadOnlyMode.value = editType == EditType.Create
+
         this.editType = editType
         this.previousNote = previousNote
         this.name = mutableStateOf(TextFieldValue(name, selection = TextRange(name.length)))
@@ -85,6 +94,13 @@ class EditViewModel() : ViewModel() {
         Log.d(TAG, "init saved: $previousNote, $editType")
     }
 
+    fun setReadOnlyMode(value: Boolean) {
+        shouldForceNotReadOnlyMode.value = false
+
+        viewModelScope.launch {
+            prefs.isReadOnlyModeActive.update(value)
+        }
+    }
 
     private val storageManager: StorageManager = MyApp.appModule.storageManager
     private val uiHelper: UiHelper = MyApp.appModule.uiHelper
