@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.app
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -8,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
@@ -43,10 +46,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
+import com.halilibo.richtext.ui.string.RichTextStringStyle
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -203,10 +210,23 @@ fun EditScreen(
     ) { paddingValues ->
 
         if (isReadOnlyModeActive && vm.fileExtension.value is FileExtension.Md) {
+
             RichText(
                 modifier = Modifier
-                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
                     .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(15.dp),
+                style = RichTextStyle(
+                    stringStyle = RichTextStringStyle(
+                        linkStyle = TextLinkStyles(
+                            style = SpanStyle(
+                                color = if (isSystemInDarkTheme()) Color(0xFF3268ae) else
+                                    Color(0xFF5a9ae6)
+                            )
+                        )
+                    )
+                )
             ) {
                 Markdown(vm.content.value.text)
             }
