@@ -315,9 +315,19 @@ private fun GridView(
                             )
 
                             if (gridNote.note.fileExtension() is FileExtension.Md) {
+                                // todo: activate this when we can deactivate the link opening
+                                // https://github.com/halilozercan/compose-richtext/issues/158
+                                /*
                                 RichText {
                                     Markdown(gridNote.note.content)
                                 }
+                                 */
+                                Text(
+                                    text = gridNote.note.content,
+                                    modifier = Modifier,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                             } else {
                                 Text(
                                     text = gridNote.note.content,
