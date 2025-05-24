@@ -3,7 +3,9 @@
   <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
 </p>
 
+<a href="https://f-droid.org/en/packages/io.github.wiiznokes.gitnote/"><img src="https://f-droid.org/badge/get-it-on.svg" alt="F-Droid Badge" height="50"></a>
 <a href="https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote"><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid Badge" height="50"></a>
+
 <br/>
 
 _Supported Android versions: 11 to 15_
