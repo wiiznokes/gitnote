@@ -82,7 +82,6 @@ fun TopBar(
         } else {
             SelectableTopBar(
                 padding = padding,
-                topBarHeight = topBarHeight,
                 vm = vm,
                 selectedNotesNumber = selectedNotesNumber
             )
@@ -228,7 +227,6 @@ private fun SearchBar(
 @Composable
 private fun SelectableTopBar(
     padding: PaddingValues,
-    topBarHeight: Dp,
     vm: GridViewModel,
     selectedNotesNumber: Int
 ) {

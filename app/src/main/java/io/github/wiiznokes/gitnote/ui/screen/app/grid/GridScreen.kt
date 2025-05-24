@@ -142,10 +142,10 @@ fun GridScreen(
 
             GridView(
                 vm = vm,
-                topBarHeight = topBarHeight,
                 onEditClick = onEditClick,
                 selectedNotes = selectedNotes,
                 nestedScrollConnection = nestedScrollConnection,
+                padding = padding
             )
 
             TopBar(
@@ -170,11 +170,11 @@ fun GridScreen(
 )
 @Composable
 private fun GridView(
-    topBarHeight: Dp,
     vm: GridViewModel,
     nestedScrollConnection: NestedScrollConnection,
     onEditClick: (Note, EditType) -> Unit,
     selectedNotes: List<Note>,
+    padding: PaddingValues,
 ) {
     val gridNotes by vm.gridNotes.collectAsState()
 
@@ -354,7 +354,7 @@ private fun GridView(
             state = pullRefreshState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = topBarHeight),
+                .padding(top = topBarHeight + padding.calculateTopPadding()),
             backgroundColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             scale = true
