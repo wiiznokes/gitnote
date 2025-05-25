@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -210,28 +211,27 @@ fun EditScreen(
     ) { paddingValues ->
 
         if (isReadOnlyModeActive && vm.fileExtension.value is FileExtension.Md) {
-
-            RichText(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(15.dp),
-                style = RichTextStyle(
-                    stringStyle = RichTextStringStyle(
-                        linkStyle = TextLinkStyles(
-                            style = SpanStyle(
-                                color = if (isSystemInDarkTheme()) Color(0xFF3268ae) else
-                                    Color(0xFF5a9ae6)
+            SelectionContainer {
+                RichText(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(15.dp),
+                    style = RichTextStyle(
+                        stringStyle = RichTextStringStyle(
+                            linkStyle = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = if (isSystemInDarkTheme()) Color(0xFF3268ae) else
+                                        Color(0xFF5a9ae6)
+                                )
                             )
                         )
                     )
-                )
-            ) {
-                Markdown(vm.content.value.text)
+                ) {
+                    Markdown(vm.content.value.text)
+                }
             }
-
-
         } else {
             TextField(
                 modifier = Modifier
