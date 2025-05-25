@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -36,11 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -232,63 +234,74 @@ private fun SelectableTopBar(
 ) {
     Row(
         modifier = Modifier
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
             .fillMaxWidth()
-            .padding(padding)
-            .height(topBarHeight)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)),
+            .padding(top = padding.calculateTopPadding())
+            .height(topBarHeight - 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
-            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = padding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = padding.calculateEndPadding(LocalLayoutDirection.current)
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(
-                onClick = {
-                    vm.unselectAllNotes()
-                }
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                SimpleIcon(
-                    imageVector = Icons.Rounded.Close,
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Text(
-                text = selectedNotesNumber.toString(),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box {
-                val expanded = remember { mutableStateOf(false) }
                 IconButton(
                     onClick = {
-                        expanded.value = true
+                        vm.unselectAllNotes()
                     }
                 ) {
                     SimpleIcon(
-                        imageVector = Icons.Rounded.MoreVert,
+                        imageVector = Icons.Rounded.Close,
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
-                CustomDropDown(
-                    expanded = expanded,
-                    options = listOf(
-                        CustomDropDownModel(
-                            text = pluralStringResource(
-                                R.plurals.delete_selected_notes,
-                                selectedNotesNumber
-                            ),
-                            onClick = { vm.deleteSelectedNotes() }
+                Text(
+                    text = selectedNotesNumber.toString(),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box {
+                    val expanded = remember { mutableStateOf(false) }
+                    IconButton(
+                        onClick = {
+                            expanded.value = true
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Rounded.MoreVert,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    CustomDropDown(
+                        expanded = expanded,
+                        options = listOf(
+                            CustomDropDownModel(
+                                text = pluralStringResource(
+                                    R.plurals.delete_selected_notes,
+                                    selectedNotesNumber
+                                ),
+                                onClick = { vm.deleteSelectedNotes() }
+                            )
                         )
                     )
-                )
+                }
             }
         }
     }
