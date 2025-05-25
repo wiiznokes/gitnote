@@ -47,7 +47,7 @@ class StorageManager {
         }
 
         // todo: maybe async this call
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed), "commit from gitnote to update the repo of the app").onFailure {
             uiHelper.makeToast(it.message)
         }
 
@@ -107,7 +107,9 @@ class StorageManager {
         Log.d(TAG, "updateNote: previous = $previous")
         Log.d(TAG, "updateNote: new = $new")
 
-        update {
+        update(
+            commitMessage = "gitnote changed ${previous.relativePath}"
+        ) {
             dao.removeNote(previous)
             dao.insertNote(new)
 
@@ -145,7 +147,9 @@ class StorageManager {
     suspend fun createNote(note: Note): Result<Unit> = locker.withLock {
         Log.d(TAG, "createNote: $note")
 
-        update {
+        update(
+            commitMessage = "gitnote created ${note.relativePath}"
+        ) {
             dao.insertNote(note)
 
             val file = note.toFileFs(prefs.repoPath())
@@ -169,7 +173,9 @@ class StorageManager {
     suspend fun deleteNote(note: Note): Result<Unit> = locker.withLock {
 
         Log.d(TAG, "deleteNote: $note")
-        update {
+        update(
+            commitMessage = "gitnote deleted ${note.relativePath}"
+        ) {
             dao.removeNote(note)
 
             val file = note.toFileFs(prefs.repoPath())
@@ -185,7 +191,9 @@ class StorageManager {
     suspend fun deleteNotes(notes: List<Note>): Result<Unit> = locker.withLock {
         Log.d(TAG, "deleteNotes: ${notes.size}")
 
-        update {
+        update(
+            commitMessage = "gitnote deleted ${notes.size} notes"
+        ) {
             // optimization because we only see the db state on screen
             notes.forEach { note ->
                 dao.removeNote(note)
@@ -211,7 +219,9 @@ class StorageManager {
     suspend fun createNoteFolder(noteFolder: NoteFolder): Result<Unit> = locker.withLock {
         Log.d(TAG, "createNoteFolder: $noteFolder")
 
-        update {
+        update(
+            commitMessage = "gitnote created folder ${noteFolder.relativePath}"
+        ) {
             dao.insertNoteFolder(noteFolder)
 
             val folder = noteFolder.toFolderFs(prefs.repoPath())
@@ -228,7 +238,9 @@ class StorageManager {
     suspend fun deleteNoteFolder(noteFolder: NoteFolder): Result<Unit> = locker.withLock {
         Log.d(TAG, "deleteNoteFolder: $noteFolder")
 
-        update {
+        update(
+            commitMessage = "gitnote deleted folder ${noteFolder.relativePath}"
+        ) {
             dao.deleteNoteFolder(noteFolder)
 
             val folder = noteFolder.toFolderFs(prefs.repoPath())
@@ -250,13 +262,14 @@ class StorageManager {
 
 
     private suspend fun <T> update(
+        commitMessage: String,
         f: suspend () -> Result<T>
     ): Result<T> {
 
         val creed = prefs.gitCreed()
         val remoteUrl = prefs.remoteUrl.get()
 
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed), "commit from gitnote, before doing a change").onFailure {
             return failure(it)
         }
         updateDatabaseWithoutLocker().onFailure {
@@ -282,7 +295,7 @@ class StorageManager {
             return failure(it)
         }
 
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed)).onFailure {
+        gitManager.commitAll(GitCreed.usernameOrDefault(creed), commitMessage).onFailure {
             return failure(it)
         }
 

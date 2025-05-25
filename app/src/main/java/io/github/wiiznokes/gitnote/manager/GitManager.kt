@@ -142,7 +142,7 @@ class GitManager {
         lastCommitLib()
     }.getOrDefault("") ?: ""
 
-    suspend fun commitAll(username: String): Result<Unit> = safelyAccessLibGit2 {
+    suspend fun commitAll(username: String, message: String): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "commit all: $username")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
 
@@ -158,7 +158,7 @@ class GitManager {
             return@safelyAccessLibGit2
         }
 
-        res = commitAllLib(username)
+        res = commitAllLib(username, message)
         if (res < 0) {
             throw GitException(uiHelper.getString(R.string.error_commit_repo, res.toString()))
         }
@@ -230,7 +230,7 @@ private external fun cloneRepoLib(
 
 private external fun lastCommitLib(): String?
 
-private external fun commitAllLib(username: String): Int
+private external fun commitAllLib(username: String, message: String): Int
 private external fun pushLib(
     username: String?, password: String?,
     progressCallback: ((Int) -> Unit)? = null

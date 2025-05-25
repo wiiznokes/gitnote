@@ -98,7 +98,10 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(JNIEnv *env,
 extern "C"
 JNIEXPORT jint JNICALL
 Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, jclass,
-                                                                   jstring usernameObj) {
+                                                                   jstring usernameObj,
+                                                                   jstring messageObj) {
+
+
 
     int err;
 
@@ -157,9 +160,8 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, 
         return err;
     }
 
+    const char *message = env->GetStringUTFChars(messageObj, nullptr);
 
-    // todo: upgrade the message commit (maybe add the time and the name of the file being updated
-    //  (take this from from Kotlin or check what file are committed from git)
     err = git_commit_create_v(
             &commit_id,
             repo,
@@ -167,11 +169,13 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, 
             signature,
             signature,
             NULL,
-            "Commit from gitnote",
+            message,
             tree,
             1,
             parent_commit
     );
+
+    env->ReleaseStringUTFChars(messageObj, message);
 
     check_lg2(err, "git_commit_create_v");
 
