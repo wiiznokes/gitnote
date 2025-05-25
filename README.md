@@ -33,10 +33,6 @@ Because all apps which integrate git on Android either separate the note title f
   <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/edit.png" width="32%"  alt="edit screen"/>
 </p>
 
-# Install
-
-You can either download from the release page, or use [Obtainium](https://github.com/ImranR98/Obtainium), to get updates easily.
-
 # Build
 
 [See](./BUILD.md).
