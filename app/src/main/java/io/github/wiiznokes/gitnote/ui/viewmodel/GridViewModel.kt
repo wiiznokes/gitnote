@@ -205,8 +205,12 @@ class GridViewModel : ViewModel() {
 
 
     private val notes = allNotes.combine(currentNoteFolderRelativePath) { allNotes, path ->
-        allNotes.filter {
-            it.relativePath.startsWith(path)
+        if (path.isEmpty()) {
+            allNotes
+        } else {
+            allNotes.filter {
+                it.relativePath.startsWith("$path/")
+            }
         }
     }.let { filteredNotesFlow ->
         combine(
