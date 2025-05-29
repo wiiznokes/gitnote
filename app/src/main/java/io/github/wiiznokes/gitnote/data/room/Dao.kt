@@ -87,12 +87,13 @@ interface RepoDatabaseDao {
      * Delete all notes inside the note folder, and the note folder
      */
     suspend fun deleteNoteFolder(noteFolder: NoteFolder) {
-        internalDeleteNotesIn(noteFolder.relativePath)
+        internalDeleteNotesIn(noteFolder.relativePath + '/')
         internalDeleteNoteFolder(noteFolder)
     }
 
     /**
      * Private
+     * Note: always add a '/' at the end of relativePath param
      */
     @Query("DELETE FROM Notes WHERE relativePath LIKE :relativePath || '%'")
     suspend fun internalDeleteNotesIn(relativePath: String)
