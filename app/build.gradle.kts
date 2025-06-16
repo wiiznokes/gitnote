@@ -2,7 +2,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import io.github.andrefigas.rustjni.reflection.Visibility
 
 
 plugins {
@@ -15,21 +14,20 @@ plugins {
     // for compose navigation
     id("kotlin-parcelize")
 
-    id("io.github.andrefigas.rustjni") version "0.0.24"
+    id("org.mozilla.rust-android-gradle.rust-android") version "0.9.6"
 }
 
-rustJni{
-    rustPath = "./app/src/main/rust"
-    jniHost = "io.github.wiiznokes.gitnote.manager.GitManager"
-    jniMethodsVisibility = Visibility.PRIVATE
-    ndkVersion = "27.2.12479018"
-    architectures {
-        aarch64_linux_android("aarch64-linux-android21-clang")
-        x86_64_linux_android("x86_64-linux-android21-clang")
+cargo {
+    module  = "./src/main/rust"
+    libname = "git_wrapper"
+    targets = listOf("arm64", "x86_64")
+}
+
+tasks.whenTaskAdded {
+    if (name == "javaPreCompileDebug" || name == "javaPreCompileRelease") {
+        dependsOn("cargoBuild")
     }
-    rustVersion = ">=1.0.0"
 }
-
 android {
     namespace = "io.github.wiiznokes.gitnote"
     compileSdk = 35
