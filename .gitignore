@@ -34,5 +34,8 @@ google-services.json
 .project
 
 !app/nightly-signing-key.jks
-/app/src/main/rust/target
+
 .kotlin/
+
+target/
+app/src/main/rust/.cargo/config.toml
