@@ -34,3 +34,4 @@ google-services.json
 .project
 
 !app/nightly-signing-key.jks
+/app/src/main/rust/target
