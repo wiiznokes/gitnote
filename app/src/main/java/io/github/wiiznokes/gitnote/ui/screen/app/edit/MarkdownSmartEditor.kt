@@ -12,17 +12,20 @@ fun markdownSmartEditor(
     v: TextFieldValue
 ): TextFieldValue {
 
-    // handle delete key when the line is:
-    // - x
-    //
-    if (prev.text.length >= v.text.length) {
-        return v
-    }
-
     if (v.selection.start == v.selection.end) {
+
         val cursorPos = v.selection.start
         if (cursorPos > 0 && cursorPos <= v.text.length) {
+
+
             if (v.text[cursorPos - 1] == '\n') {
+
+                // handle delete key when the line is:
+                // - x
+                //
+                if (prev.text.length >= v.text.length) {
+                    return v
+                }
 
                 val lineBefore = v.text.substring(0, cursorPos - 1).lastIndexOf('\n').let {
                     if (it == -1) 0 else it + 1
@@ -75,6 +78,27 @@ fun markdownSmartEditor(
                             selection = TextRange(cursorPos + padding.length)
                         )
                     }
+                }
+            } else {
+
+                if (prev.text.length == v.text.length + 1) {
+
+                    val start = v.text.substring(0, cursorPos).lastIndexOf('\n').let {
+                        if (it == -1) 0 else it + 1
+                    }
+
+                    val currentLine = v.text.substring(start, cursorPos)
+
+                    if (currentLine.isBlank() && (prev.text[cursorPos] == ' ' || prev.text[cursorPos] == '\t')) {
+                        return TextFieldValue(
+                            text = v.text.substring(0, start) + v.text.substring(
+                                cursorPos,
+                                v.text.length
+                            ),
+                            selection = TextRange(cursorPos - (cursorPos - start))
+                        )
+                    }
+
                 }
             }
         }
