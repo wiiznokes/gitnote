@@ -194,7 +194,7 @@ dependencies {
     implementation(libs.richtext.ui.material3)
 
     // unit test
-    testImplementation(libs.test.junit.ktx)
+    testImplementation(kotlin("test"))
 
     // integration test
     androidTestImplementation(composeBom)
