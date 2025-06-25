@@ -3,7 +3,10 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.IntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -19,8 +22,12 @@ import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.screen.app.edit.markdownSmartEditor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -29,6 +36,10 @@ import java.util.zip.DataFormatException
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
+data class History(
+    val index: Int,
+    val size: Int,
+)
 
 enum class EditExceptionType {
     NoteAlreadyExist,
@@ -47,7 +58,17 @@ class EditViewModel() : ViewModel() {
     lateinit var editType: EditType
     private lateinit var previousNote: Note
     lateinit var name: MutableState<TextFieldValue>
-    lateinit var content: MutableState<TextFieldValue>
+
+    private val _content: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue())
+    val content: StateFlow<TextFieldValue>
+        get() = _content.asStateFlow()
+
+    private val history = mutableListOf<TextFieldValue>()
+
+    private val _historyManager: MutableStateFlow<History> = MutableStateFlow(History(index = 0, size = 1))
+    val historyManager: StateFlow<History>
+        get() = _historyManager.asStateFlow()
+
     lateinit var fileExtension: MutableState<FileExtension>
 
     var shouldSaveWhenQuitting: Boolean = true
@@ -64,12 +85,15 @@ class EditViewModel() : ViewModel() {
         this.name = previousNote.nameWithoutExtension().let {
             mutableStateOf(TextFieldValue(it, selection = TextRange(it.length)))
         }
-        this.content = mutableStateOf(
-            TextFieldValue(
-                previousNote.content,
-                selection = TextRange(0)
-            )
+
+        val textFieldValue = TextFieldValue(
+            previousNote.content,
+            selection = TextRange(0)
         )
+
+        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+        history.add(textFieldValue)
+
         this.fileExtension = mutableStateOf(previousNote.fileExtension())
 
         Log.d(TAG, "init: $previousNote, $editType")
@@ -88,10 +112,68 @@ class EditViewModel() : ViewModel() {
         this.editType = editType
         this.previousNote = previousNote
         this.name = mutableStateOf(TextFieldValue(name, selection = TextRange(name.length)))
-        this.content = mutableStateOf(TextFieldValue(content, selection = TextRange(0)))
+        val textFieldValue = TextFieldValue(
+            content,
+            selection = TextRange(0)
+        )
+        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+        history.add(textFieldValue)
         this.fileExtension = mutableStateOf(fileExtension)
 
         Log.d(TAG, "init saved: $previousNote, $editType")
+    }
+
+    fun onValueChange(v: TextFieldValue) {
+        // don't bloat history with different selection
+        if (content.value.text == v.text) {
+            viewModelScope.launch { _content.emit(v.copy()) }
+            return
+        }
+
+        val newValue = if (fileExtension.value is FileExtension.Md) {
+            markdownSmartEditor(content.value, v)
+        } else {
+            v
+        }
+        viewModelScope.launch { _content.emit(newValue.copy()) }
+
+        val historyManager = historyManager.value
+
+        var i = (history.size - 1) - historyManager.index
+        while (i > 0) {
+            history.removeAt(history.lastIndex)
+            i--
+        }
+
+        history.add(newValue)
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = history.size,
+                index = historyManager.index + 1
+            ))
+        }
+    }
+
+    fun undo() {
+        val historyManager = historyManager.value
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = historyManager.size,
+                index = historyManager.index - 1
+            ))
+        }
+        viewModelScope.launch { _content.emit(history[historyManager.index - 1].copy()) }
+    }
+
+    fun redo() {
+        val historyManager = historyManager.value
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = historyManager.size,
+                index = historyManager.index + 1
+            ))
+        }
+        viewModelScope.launch { _content.emit(history[historyManager.index + 1].copy()) }
     }
 
     fun setReadOnlyMode(value: Boolean) {
