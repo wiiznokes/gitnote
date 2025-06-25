@@ -2,15 +2,13 @@ package io.github.wiiznokes.gitnote
 
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.ListType
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.analyzeListItem
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.shouldRemoveLineRegex
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class RegexTest {
-
-
+    
     @Test
     fun shouldRemoveLineValidMatches() {
         val validCases = listOf(
@@ -26,7 +24,10 @@ class RegexTest {
             " \t - ",
         )
         for (input in validCases) {
-            assertTrue(shouldRemoveLineRegex.containsMatchIn(input), "Should match: '$input'")
+            val info = analyzeListItem(input)
+
+            assertNotNull(info, input)
+            assertTrue(info.shouldRemove(), "$input $info")
         }
     }
 
@@ -50,7 +51,11 @@ class RegexTest {
         )
 
         for (input in invalidCases) {
-            assertFalse(shouldRemoveLineRegex.containsMatchIn(input), "Should NOT match: '$input'")
+            val info = analyzeListItem(input)
+
+            if (info != null) {
+                assertFalse(info.shouldRemove(), input)
+            }
         }
     }
 

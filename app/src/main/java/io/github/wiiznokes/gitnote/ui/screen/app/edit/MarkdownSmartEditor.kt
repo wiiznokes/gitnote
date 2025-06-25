@@ -7,8 +7,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 private const val TAG = "markdownSmartEditor"
 
-val shouldRemoveLineRegex = Regex("""^\s*(?:[-*]|\d+\.|- \[[ x]])\s*$""")
-
 fun markdownSmartEditor(
     prev: TextFieldValue,
     v: TextFieldValue
@@ -38,8 +36,15 @@ fun markdownSmartEditor(
                     v.text.substring(cursorPos, it)
                 }
 
+//                val lines = v.text.substring(0, cursorPos - 1).lines().reversed().map {
+//                    Pair(analyzeListItem(it), it)
+//                }
+
+                val res = analyzeListItemSafely(lineBefore)
+
                 // remove
-                if (currentLine.isEmpty() && shouldRemoveLineRegex.containsMatchIn(lineBefore)) {
+                if (currentLine.isEmpty() && res?.shouldRemove() == true) {
+
                     val newPos = cursorPos - (lineBefore.length + 1)
                     return TextFieldValue(
                         text = v.text.substring(0, newPos) + v.text.substring(
@@ -48,13 +53,6 @@ fun markdownSmartEditor(
                         ),
                         selection = TextRange(newPos)
                     )
-                }
-
-                val res = try {
-                    analyzeListItem(lineBefore)
-                } catch (e: Exception) {
-                    Log.d(TAG, "$e")
-                    null
                 }
 
                 // we are in a list
@@ -85,6 +83,7 @@ data class ListItemInfo(
     val listType: ListType,
     val isTaskList: Boolean,
     val padding: String,
+    val title: String?,
 ) {
 
     fun text(): String {
@@ -99,6 +98,19 @@ data class ListItemInfo(
         } else {
             text
         }
+    }
+
+    fun shouldRemove(): Boolean {
+        return title?.isNotBlank() != true
+    }
+}
+
+fun analyzeListItemSafely(line: String): ListItemInfo? {
+    return try {
+        analyzeListItem(line)
+    } catch (e: Exception) {
+        Log.d(TAG, "$e")
+        null
     }
 }
 
@@ -123,5 +135,8 @@ fun analyzeListItem(line: String): ListItemInfo? {
 
     val isTaskList = match.groups[5] != null
 
-    return ListItemInfo(listType, isTaskList, padding)
+
+    val title = match.groups[6]?.value
+
+    return ListItemInfo(listType, isTaskList, padding, title)
 }
