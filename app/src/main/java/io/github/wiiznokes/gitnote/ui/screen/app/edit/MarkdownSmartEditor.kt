@@ -7,12 +7,20 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 private const val TAG = "markdownSmartEditor"
 
-val shouldRemoveLineRegex = Regex("""^\s*(?:[-*]|\.\d+|- \[[ x]])\s*$""")
+val shouldRemoveLineRegex = Regex("""^\s*(?:[-*]|\d+\.|- \[[ x]])\s*$""")
 
 fun markdownSmartEditor(
     prev: TextFieldValue,
     v: TextFieldValue
 ): TextFieldValue {
+
+    // handle delete key when the line is:
+    // - x
+    //
+    if (prev.text.length >= v.text.length) {
+        return v
+    }
+
     if (v.selection.start == v.selection.end) {
         val cursorPos = v.selection.start
         if (cursorPos > 0 && cursorPos <= v.text.length) {
@@ -30,20 +38,8 @@ fun markdownSmartEditor(
                     v.text.substring(cursorPos, it)
                 }
 
-                if (currentLine.isNotEmpty()) {
-                    return v
-                }
-
-                // handle delete key when the line is:
-                // - x
-                //
-                if (prev.text.length >= v.text.length) {
-                    return v
-                }
-
                 // remove
-                if (shouldRemoveLineRegex.containsMatchIn(lineBefore)) {
-                    Log.d(TAG, "remove: $lineBefore")
+                if (currentLine.isEmpty() && shouldRemoveLineRegex.containsMatchIn(lineBefore)) {
                     val newPos = cursorPos - (lineBefore.length + 1)
                     return TextFieldValue(
                         text = v.text.substring(0, newPos) + v.text.substring(
@@ -54,31 +50,71 @@ fun markdownSmartEditor(
                     )
                 }
 
-                // add a new line
-                if (lineBefore.startsWith("- ")) {
-                    return TextFieldValue(
-                        text = v.text.substring(0, cursorPos) + "- " + v.text.substring(
-                            cursorPos,
-                            v.text.length
-                        ),
-                        selection = TextRange(cursorPos + 2)
-                    )
-                }
+                val res = analyzeListItem(lineBefore)
 
-                if (lineBefore.startsWith("* ")) {
+                // we are in a list
+                if (res != null) {
+                    val newText = res.text()
                     return TextFieldValue(
-                        text = v.text.substring(0, cursorPos) + "* " + v.text.substring(
+                        text = v.text.substring(0, cursorPos) + newText + v.text.substring(
                             cursorPos,
                             v.text.length
                         ),
-                        selection = TextRange(cursorPos + 2)
+                        selection = TextRange(cursorPos + newText.length)
                     )
                 }
             }
         }
     }
+
     return v
 }
 
+sealed class ListType {
+    object Dash : ListType()
+    object Asterisk : ListType()
+    data class Number(val number: Int) : ListType()
+}
 
+data class ListItemInfo(
+    val listType: ListType,
+    val isTaskList: Boolean
+) {
 
+    fun text(): String {
+        val text = when (this.listType) {
+            ListType.Asterisk -> "* "
+            ListType.Dash -> "- "
+            is ListType.Number -> "${this.listType.number + 1}. "
+        }
+
+        return if (this.isTaskList) {
+            "$text[ ] "
+        } else {
+            text
+        }
+    }
+}
+
+fun analyzeListItem(line: String): ListItemInfo? {
+    val regex = Regex("""^\s*(?:(-)|(\*)|(\d+)\.)\s(?:\[([ xX])]\s)?(.+)?""")
+    val match = regex.matchEntire(line) ?: return null
+
+    val listType = when {
+        match.groups[1]?.value != null -> ListType.Dash
+        match.groups[2]?.value != null -> ListType.Asterisk
+        match.groups[3]?.value != null -> match.groups[3]?.value?.toInt()?.let {
+            ListType.Number(it)
+        }
+        else -> null
+    }
+
+    if (listType == null) {
+        Log.w(TAG, "listType is null but we have a match")
+        return null
+    }
+
+    val isTaskList = match.groups[4] != null
+
+    return ListItemInfo(listType, isTaskList)
+}
