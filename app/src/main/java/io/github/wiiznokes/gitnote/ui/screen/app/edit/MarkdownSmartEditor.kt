@@ -36,14 +36,10 @@ fun markdownSmartEditor(
                     v.text.substring(cursorPos, it)
                 }
 
-//                val lines = v.text.substring(0, cursorPos - 1).lines().reversed().map {
-//                    Pair(analyzeListItem(it), it)
-//                }
-
                 val res = analyzeListItemSafely(lineBefore)
 
                 // remove
-                if (currentLine.isEmpty() && res?.shouldRemove() == true) {
+                if (currentLine.isBlank() && res?.shouldRemove() == true) {
 
                     val newPos = cursorPos - (lineBefore.length + 1)
                     return TextFieldValue(
@@ -59,12 +55,26 @@ fun markdownSmartEditor(
                 if (res != null) {
                     val newText = res.text()
                     return TextFieldValue(
-                        text = v.text.substring(0, cursorPos) + res.padding + newText + v.text.substring(
+                        text = v.text.substring(
+                            0,
+                            cursorPos
+                        ) + res.padding + newText + v.text.substring(
                             cursorPos,
                             v.text.length
                         ),
                         selection = TextRange(cursorPos + res.padding.length + newText.length)
                     )
+                } else {
+                    val padding = getPadding(lineBefore)
+                    if (padding != null) {
+                        return TextFieldValue(
+                            text = v.text.substring(0, cursorPos) + padding + v.text.substring(
+                                cursorPos,
+                                v.text.length
+                            ),
+                            selection = TextRange(cursorPos + padding.length)
+                        )
+                    }
                 }
             }
         }
@@ -126,6 +136,7 @@ fun analyzeListItem(line: String): ListItemInfo? {
         match.groups[4]?.value != null -> match.groups[4]?.value?.toInt()?.let {
             ListType.Number(it)
         }
+
         else -> null
     }
 
@@ -139,4 +150,9 @@ fun analyzeListItem(line: String): ListItemInfo? {
     val title = match.groups[6]?.value
 
     return ListItemInfo(listType, isTaskList, padding, title)
+}
+
+fun getPadding(line: String): String? {
+    val match = Regex("^\\s+").find(line)
+    return match?.value
 }

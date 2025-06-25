@@ -47,7 +47,10 @@ class StorageManager {
         }
 
         // todo: maybe async this call
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed), "commit from gitnote to update the repo of the app").onFailure {
+        gitManager.commitAll(
+            GitCreed.usernameOrDefault(creed),
+            "commit from gitnote to update the repo of the app"
+        ).onFailure {
             uiHelper.makeToast(it.message)
         }
 
@@ -269,7 +272,10 @@ class StorageManager {
         val creed = prefs.gitCreed()
         val remoteUrl = prefs.remoteUrl.get()
 
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed), "commit from gitnote, before doing a change").onFailure {
+        gitManager.commitAll(
+            GitCreed.usernameOrDefault(creed),
+            "commit from gitnote, before doing a change"
+        ).onFailure {
             return failure(it)
         }
         updateDatabaseWithoutLocker().onFailure {

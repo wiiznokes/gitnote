@@ -252,8 +252,6 @@ class EditViewModel() : ViewModel() {
     override fun onCleared() {
 
 
-
-
         if (!shouldSaveWhenQuitting || isPreviousNoteTheSame()) {
             writeObj(EDIT_IS_UNSAVED, false)
             return

@@ -8,7 +8,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class RegexTest {
-    
+
     @Test
     fun shouldRemoveLineValidMatches() {
         val validCases = listOf(

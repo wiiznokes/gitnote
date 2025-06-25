@@ -131,19 +131,22 @@ fun LogsScreen(
 
             options.add(
                 CustomDropDownModel(
-                text = stringResource(R.string.copy_all_logs),
-                onClick = {
-                    val data = ClipData(
-                        ClipDescription("logs of gitnote", arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)),
-                        ClipData.Item(logState.value)
-                    )
+                    text = stringResource(R.string.copy_all_logs),
+                    onClick = {
+                        val data = ClipData(
+                            ClipDescription(
+                                "logs of gitnote",
+                                arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                            ),
+                            ClipData.Item(logState.value)
+                        )
 
-                    vm.viewModelScope.launch {
-                        clipboardManager.setClipEntry(ClipEntry(data))
+                        vm.viewModelScope.launch {
+                            clipboardManager.setClipEntry(ClipEntry(data))
+                        }
+
                     }
-
-                }
-            ))
+                ))
 
             CustomDropDown(expanded = logLevelExpanded, options = options)
             IconButton(onClick = { logLevelExpanded.value = true }) {
