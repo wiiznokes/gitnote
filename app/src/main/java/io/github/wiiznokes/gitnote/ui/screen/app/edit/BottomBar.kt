@@ -3,6 +3,7 @@ package io.github.wiiznokes.gitnote.ui.screen.app.edit
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.EditViewModel
 
 val bottomBarHeight = 50.dp
@@ -47,7 +49,7 @@ fun BottomBar(
     isReadOnlyModeActive: Boolean,
 ) {
 
-    val textFormatExpanded = rememberSaveable(isReadOnlyModeActive) { mutableStateOf(false) }
+    val textFormatExpanded = rememberSaveable(isReadOnlyModeActive, vm.fileExtension.value) { mutableStateOf(false) }
 
     val modifier = Modifier
         .fillMaxWidth()
@@ -69,26 +71,30 @@ private fun DefaultRow(
     isReadOnlyModeActive: Boolean,
 ) {
 
-    Row(
+    Box(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
 
         Row(
+            modifier = Modifier
+                .align(Alignment.BottomStart),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            SmallButton(
-                onClick = {
-                    textFormatExpanded.value = true
-                },
-                enabled = !isReadOnlyModeActive,
-                imageVector = Icons.Default.TextFormat,
-                contentDescription = "text format"
-            )
+            if (vm.fileExtension.value is FileExtension.Md) {
+                SmallButton(
+                    onClick = {
+                        textFormatExpanded.value = true
+                    },
+                    enabled = !isReadOnlyModeActive,
+                    imageVector = Icons.Default.TextFormat,
+                    contentDescription = "text format"
+                )
+            }
         }
 
         Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -109,6 +115,8 @@ private fun DefaultRow(
         }
 
         Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SmallButton(
