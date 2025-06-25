@@ -50,17 +50,22 @@ fun markdownSmartEditor(
                     )
                 }
 
-                val res = analyzeListItem(lineBefore)
+                val res = try {
+                    analyzeListItem(lineBefore)
+                } catch (e: Exception) {
+                    Log.d(TAG, "$e")
+                    null
+                }
 
                 // we are in a list
                 if (res != null) {
                     val newText = res.text()
                     return TextFieldValue(
-                        text = v.text.substring(0, cursorPos) + newText + v.text.substring(
+                        text = v.text.substring(0, cursorPos) + res.padding + newText + v.text.substring(
                             cursorPos,
                             v.text.length
                         ),
-                        selection = TextRange(cursorPos + newText.length)
+                        selection = TextRange(cursorPos + res.padding.length + newText.length)
                     )
                 }
             }
@@ -78,7 +83,8 @@ sealed class ListType {
 
 data class ListItemInfo(
     val listType: ListType,
-    val isTaskList: Boolean
+    val isTaskList: Boolean,
+    val padding: String,
 ) {
 
     fun text(): String {
@@ -97,24 +103,25 @@ data class ListItemInfo(
 }
 
 fun analyzeListItem(line: String): ListItemInfo? {
-    val regex = Regex("""^\s*(?:(-)|(\*)|(\d+)\.)\s(?:\[([ xX])]\s)?(.+)?""")
+    val regex = Regex("""^(\s*)(?:(-)|(\*)|(\d+)\.)\s(?:\[([ xX])]\s)?(.+)?""")
     val match = regex.matchEntire(line) ?: return null
 
+    val padding = match.groups[1]?.value ?: throw Exception("padding null: $line")
+
     val listType = when {
-        match.groups[1]?.value != null -> ListType.Dash
-        match.groups[2]?.value != null -> ListType.Asterisk
-        match.groups[3]?.value != null -> match.groups[3]?.value?.toInt()?.let {
+        match.groups[2]?.value != null -> ListType.Dash
+        match.groups[3]?.value != null -> ListType.Asterisk
+        match.groups[4]?.value != null -> match.groups[4]?.value?.toInt()?.let {
             ListType.Number(it)
         }
         else -> null
     }
 
     if (listType == null) {
-        Log.w(TAG, "listType is null but we have a match")
-        return null
+        throw Exception("listType is null but we have a match: $line")
     }
 
-    val isTaskList = match.groups[4] != null
+    val isTaskList = match.groups[5] != null
 
-    return ListItemInfo(listType, isTaskList)
+    return ListItemInfo(listType, isTaskList, padding)
 }

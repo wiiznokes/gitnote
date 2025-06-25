@@ -2,10 +2,7 @@ package io.github.wiiznokes.gitnote
 
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.ListType
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.analyzeListItem
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.asteriskListRegex
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.braceListRegex
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.shouldRemoveLineRegex
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.dashListRegex
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
