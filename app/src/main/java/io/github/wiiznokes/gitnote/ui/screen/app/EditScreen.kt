@@ -49,6 +49,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.halilibo.richtext.commonmark.Markdown
@@ -240,7 +242,11 @@ fun EditScreen(
                     .focusRequester(textFocusRequester),
                 value = vm.content.value,
                 onValueChange = {
-                    vm.content.value = it
+                    if (vm.fileExtension.value is FileExtension.Md) {
+                        vm.content.value = markdownSmartEditor(vm.content.value, it)
+                    } else {
+                        vm.content.value = it
+                    }
                 },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.background,
@@ -296,4 +302,73 @@ private fun ExtensionChooser(
             }
         )
     }
+}
+
+private fun markdownSmartEditor(
+    prev: TextFieldValue,
+    v: TextFieldValue
+): TextFieldValue {
+    if (v.selection.start == v.selection.end) {
+        val cursorPos = v.selection.start
+        if (cursorPos > 0 && cursorPos <= v.text.length) {
+            if (v.text[cursorPos - 1] == '\n') {
+
+                val lineBefore = v.text.substring(0, cursorPos - 1).lastIndexOf('\n').let {
+                    if (it == -1) 0 else it + 1
+                }.let {
+                    v.text.substring(it, cursorPos - 1)
+                }
+
+                val currentLine = v.text.indexOf('\n', startIndex = cursorPos).let {
+                    if (it == -1) v.text.length else it
+                }.let {
+                    v.text.substring(cursorPos, it)
+                }
+
+                if (currentLine.isNotEmpty()) {
+                    return v
+                }
+
+                // handle delete key when the line is:
+                // - x
+                //
+                if (prev.text.length >= v.text.length) {
+                    return v
+                }
+
+                // remove
+                if (lineBefore == "- " || lineBefore == "* ") {
+                    return TextFieldValue(
+                        text = v.text.substring(0, cursorPos - 3) + v.text.substring(
+                            cursorPos,
+                            v.text.length
+                        ),
+                        selection = TextRange(cursorPos - 3)
+                    )
+                }
+
+                // add a new line
+                if (lineBefore.startsWith("- ")) {
+                    return TextFieldValue(
+                        text = v.text.substring(0, cursorPos) + "- " + v.text.substring(
+                            cursorPos,
+                            v.text.length
+                        ),
+                        selection = TextRange(cursorPos + 2)
+                    )
+                }
+
+                if (lineBefore.startsWith("* ")) {
+                    return TextFieldValue(
+                        text = v.text.substring(0, cursorPos) + "* " + v.text.substring(
+                            cursorPos,
+                            v.text.length
+                        ),
+                        selection = TextRange(cursorPos + 2)
+                    )
+                }
+            }
+        }
+    }
+    return v
 }
