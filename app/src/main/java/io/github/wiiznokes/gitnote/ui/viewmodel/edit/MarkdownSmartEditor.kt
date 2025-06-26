@@ -45,7 +45,7 @@ fun markdownSmartEditor(
                 if (currentLine.isBlank() && res?.shouldRemove() == true) {
 
                     val newPos = cursorPos - (lineBefore.length + 1)
-                    return TextFieldValue(
+                    return v.copy(
                         text = v.text.substring(0, newPos) + v.text.substring(
                             cursorPos,
                             v.text.length
@@ -57,7 +57,7 @@ fun markdownSmartEditor(
                 // we are in a list
                 if (res != null) {
                     val newText = res.text()
-                    return TextFieldValue(
+                    return v.copy(
                         text = v.text.substring(
                             0,
                             cursorPos
@@ -70,7 +70,7 @@ fun markdownSmartEditor(
                 } else {
                     val padding = getPadding(lineBefore)
                     if (padding != null) {
-                        return TextFieldValue(
+                        return v.copy(
                             text = v.text.substring(0, cursorPos) + padding + v.text.substring(
                                 cursorPos,
                                 v.text.length
@@ -90,7 +90,7 @@ fun markdownSmartEditor(
                     val currentLine = v.text.substring(start, cursorPos)
 
                     if (currentLine.isBlank() && (prev.text[cursorPos] == ' ' || prev.text[cursorPos] == '\t')) {
-                        return TextFieldValue(
+                        return v.copy(
                             text = v.text.substring(0, start) + v.text.substring(
                                 cursorPos,
                                 v.text.length
@@ -179,4 +179,67 @@ fun analyzeListItem(line: String): ListItemInfo? {
 fun getPadding(line: String): String? {
     val match = Regex("^\\s+").find(line)
     return match?.value
+}
+
+
+fun onTitle(v: TextFieldValue): TextFieldValue {
+    val cursorPosMin = v.selection.min
+
+    val pattern = "### "
+    return if (v.selection.collapsed) {
+        // check if line start with "### "
+        val start = v.text.substring(0, cursorPosMin).lastIndexOf('\n').let {
+            if (it == -1) 0 else it + 1
+        }
+
+        // remove it
+        if (v.text.substring(start).startsWith(pattern)) {
+            v.copy(
+                text = v.text.substring(0, start) + v.text.substring(
+                    start + pattern.length,
+                    v.text.length
+                ),
+                selection = TextRange(cursorPosMin - pattern.length)
+            )
+        }
+        // add it
+        else {
+            v.copy(
+                text = v.text.substring(0, start) + pattern + v.text.substring(
+                    start,
+                    v.text.length
+                ),
+                selection = TextRange(cursorPosMin + pattern.length)
+            )
+        }
+    } else {
+        // check if the text before cursorPosStart is "### "
+
+        // remove it
+        if (v.text.substring(0, cursorPosMin).endsWith(pattern)) {
+            v.copy(
+                text = v.text.substring(0, cursorPosMin - pattern.length) + v.text.substring(
+                    cursorPosMin,
+                    v.text.length
+                ),
+                selection = TextRange(
+                    start = v.selection.start - pattern.length,
+                    end = v.selection.end - pattern.length,
+                )
+            )
+        }
+        // add it
+        else {
+            v.copy(
+                text = v.text.substring(0, cursorPosMin) + pattern + v.text.substring(
+                    cursorPosMin,
+                    v.text.length
+                ),
+                selection = TextRange(
+                    start = v.selection.start + pattern.length,
+                    end = v.selection.end + pattern.length,
+                )
+            )
+        }
+    }
 }

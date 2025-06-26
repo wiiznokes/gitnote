@@ -78,17 +78,17 @@ fun DefaultRow(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SmallButton(
-                onClick = {},
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "more actions"
-            )
-        }
+//        Row(
+//            modifier = Modifier
+//                .align(Alignment.BottomEnd),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            SmallButton(
+//                onClick = {},
+//                imageVector = Icons.Default.MoreVert,
+//                contentDescription = "more actions"
+//            )
+//        }
     }
 }
 

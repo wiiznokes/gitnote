@@ -26,6 +26,11 @@ class MarkDownVM : TextVM {
         val newValue = markdownSmartEditor(content.value, v)
         super.onValueChange(newValue)
     }
+
+    fun onTitle() {
+        val newValue = onTitle(content.value)
+        super.onValueChange(newValue)
+    }
 }
 
 

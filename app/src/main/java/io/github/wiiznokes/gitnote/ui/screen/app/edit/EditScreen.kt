@@ -55,9 +55,7 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newMarkDownVM
 
 private const val TAG = "EditScreen"
 
-/**
- * initialEditType and initialNote equal null
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(

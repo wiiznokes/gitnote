@@ -93,7 +93,7 @@ fun TextFormatRow(
         horizontalArrangement = Arrangement.Center
     ) {
         SmallButton(
-            onClick = {},
+            onClick = { vm.onTitle() },
             imageVector = Icons.Default.Title,
             contentDescription = "title"
         )
