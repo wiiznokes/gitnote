@@ -15,6 +15,7 @@ import dev.olshevski.navigation.reimagined.popAll
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
+import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
@@ -24,7 +25,6 @@ import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.isEditUnsaved
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.runBlocking
 
@@ -54,14 +54,25 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = dynamicColor
             ) {
 
-
                 val startDestination: Destination = remember {
                     if (runBlocking { vm.tryInit() }) {
-                        if (isEditUnsaved()) {
-                            Log.d(TAG, "launch as EDIT_IS_UNSAVED")
-                            Destination.App(
-                                AppDestination.Edit(EditParams.Saved)
-                            )
+                        if (NoteSaver.isEditUnsaved()) {
+                            val saveInfo = NoteSaver.getSaveState()
+                            if (saveInfo == null) {
+                                Log.d(TAG, "can't retrieve the last saved note state")
+                                Destination.App(AppDestination.Grid)
+                            } else {
+                                Log.d(TAG, "launch as EDIT_IS_UNSAVED")
+                                Destination.App(
+                                    AppDestination.Edit(EditParams.Saved(
+                                        note = saveInfo.previousNote,
+                                        editType = saveInfo.editType,
+                                        name = saveInfo.name,
+                                        content = saveInfo.content
+                                    ))
+                                )
+                            }
+
                         } else {
                             Destination.App(
                                 AppDestination.Grid

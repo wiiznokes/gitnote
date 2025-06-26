@@ -262,7 +262,11 @@ fun MainSettingsScreen(
             isLast = true
         ) {
             val version =
-                "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}-${BuildConfig.GIT_HASH.substring(0..6)}"
+                "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}-${
+                    BuildConfig.GIT_HASH.substring(
+                        0..6
+                    )
+                }"
             val clipboardManager = LocalClipboard.current
 
             DefaultSettingsRow(
@@ -270,7 +274,10 @@ fun MainSettingsScreen(
                 subTitle = version,
                 onClick = {
                     val data = ClipData(
-                        ClipDescription("version of gitnote", arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)),
+                        ClipDescription(
+                            "version of gitnote",
+                            arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                        ),
                         ClipData.Item(version)
                     )
 

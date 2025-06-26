@@ -13,6 +13,7 @@ import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
+import io.github.wiiznokes.gitnote.ui.screen.app.edit.EditScreen
 import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
 import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
@@ -59,7 +60,7 @@ fun AppScreen(
                 onFinished = {
                     navController.pop()
 
-                    if (it.params == EditParams.Saved) {
+                    if (it.params is EditParams.Saved) {
                         navController.navigate(AppDestination.Grid)
                     }
                 }

@@ -102,7 +102,6 @@ Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(JNIEnv *env, 
                                                                    jstring messageObj) {
 
 
-
     int err;
 
     git_index *index = NULL;

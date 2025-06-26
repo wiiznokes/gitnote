@@ -1,7 +1,8 @@
 package io.github.wiiznokes.gitnote
 
 import io.github.wiiznokes.gitnote.helper.NameValidation
-import org.junit.Test
+
+import kotlin.test.Test
 
 class PlatformTest {
 
@@ -23,4 +24,5 @@ class PlatformTest {
 
         assert(!NameValidation.check("aaf\nef"))
     }
+
 }

@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.viewmodel
+package io.github.wiiznokes.gitnote.ui.viewmodel.edit
 
 import android.content.Context
 import android.util.Log
@@ -14,13 +14,18 @@ import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.helper.NameValidation
+import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -29,6 +34,10 @@ import java.util.zip.DataFormatException
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
+data class History(
+    val index: Int,
+    val size: Int,
+)
 
 enum class EditExceptionType {
     NoteAlreadyExist,
@@ -38,17 +47,24 @@ class EditException(
     val type: EditExceptionType,
 ) : Exception(type.name)
 
-class EditViewModel() : ViewModel() {
+private const val TAG = "TextVM"
 
-    companion object {
-        private const val TAG = "EditViewModel"
-    }
+open class TextVM() : ViewModel() {
 
     lateinit var editType: EditType
     private lateinit var previousNote: Note
     lateinit var name: MutableState<TextFieldValue>
-    lateinit var content: MutableState<TextFieldValue>
-    lateinit var fileExtension: MutableState<FileExtension>
+
+    private val _content: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue())
+    val content: StateFlow<TextFieldValue>
+        get() = _content.asStateFlow()
+
+    private val history = mutableListOf<TextFieldValue>()
+
+    private val _historyManager: MutableStateFlow<History> = MutableStateFlow(History(index = 0, size = 1))
+    val historyManager: StateFlow<History>
+        get() = _historyManager.asStateFlow()
+
 
     var shouldSaveWhenQuitting: Boolean = true
 
@@ -64,13 +80,14 @@ class EditViewModel() : ViewModel() {
         this.name = previousNote.nameWithoutExtension().let {
             mutableStateOf(TextFieldValue(it, selection = TextRange(it.length)))
         }
-        this.content = mutableStateOf(
-            TextFieldValue(
-                previousNote.content,
-                selection = TextRange(0)
-            )
+
+        val textFieldValue = TextFieldValue(
+            previousNote.content,
+            selection = TextRange(0)
         )
-        this.fileExtension = mutableStateOf(previousNote.fileExtension())
+
+        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+        history.add(textFieldValue)
 
         Log.d(TAG, "init: $previousNote, $editType")
     }
@@ -80,7 +97,6 @@ class EditViewModel() : ViewModel() {
         previousNote: Note,
         name: String,
         content: String,
-        fileExtension: FileExtension,
     ) : this() {
 
         shouldForceNotReadOnlyMode.value = editType == EditType.Create
@@ -88,10 +104,65 @@ class EditViewModel() : ViewModel() {
         this.editType = editType
         this.previousNote = previousNote
         this.name = mutableStateOf(TextFieldValue(name, selection = TextRange(name.length)))
-        this.content = mutableStateOf(TextFieldValue(content, selection = TextRange(0)))
-        this.fileExtension = mutableStateOf(fileExtension)
+        val textFieldValue = TextFieldValue(
+            content,
+            selection = TextRange(0)
+        )
+        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+        history.add(textFieldValue)
 
         Log.d(TAG, "init saved: $previousNote, $editType")
+    }
+
+    open fun onValueChange(v: TextFieldValue) {
+
+        // don't bloat history with different selection
+        if (content.value.text == v.text) {
+            viewModelScope.launch { _content.emit(v.copy()) }
+            return
+        }
+
+
+        viewModelScope.launch { _content.emit(v.copy()) }
+
+        val historyManager = historyManager.value
+
+        var i = (history.size - 1) - historyManager.index
+        while (i > 0) {
+            history.removeAt(history.lastIndex)
+            i--
+        }
+
+        history.add(v)
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = history.size,
+                index = historyManager.index + 1
+            ))
+        }
+    }
+
+
+    fun undo() {
+        val historyManager = historyManager.value
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = historyManager.size,
+                index = historyManager.index - 1
+            ))
+        }
+        viewModelScope.launch { _content.emit(history[historyManager.index - 1].copy()) }
+    }
+
+    fun redo() {
+        val historyManager = historyManager.value
+        viewModelScope.launch {
+            _historyManager.emit(History(
+                size = historyManager.size,
+                index = historyManager.index + 1
+            ))
+        }
+        viewModelScope.launch { _content.emit(history[historyManager.index + 1].copy()) }
     }
 
     fun setReadOnlyMode(value: Boolean) {
@@ -118,7 +189,7 @@ class EditViewModel() : ViewModel() {
             EditType.Create -> create(
                 parentPath = previousNote.parentPath(),
                 name = name.value.text,
-                fileExtension = fileExtension.value,
+                fileExtension = previousNote.fileExtension(),
                 content = content.value.text,
                 id = previousNote.id
             ).onSuccess {
@@ -131,7 +202,7 @@ class EditViewModel() : ViewModel() {
                 previousNote = previousNote,
                 parentPath = previousNote.parentPath(),
                 name = name.value.text,
-                fileExtension = fileExtension.value,
+                fileExtension = previousNote.fileExtension(),
                 content = content.value.text,
             ).onSuccess {
                 previousNote = it
@@ -247,63 +318,37 @@ class EditViewModel() : ViewModel() {
     private fun isPreviousNoteTheSame(): Boolean =
         previousNote.nameWithoutExtension() == name.value.text
                 && previousNote.content == content.value.text
-                && previousNote.fileExtension().text == fileExtension.value.text
 
     override fun onCleared() {
-
-
-
-
-        if (!shouldSaveWhenQuitting || isPreviousNoteTheSame()) {
-            writeObj(EDIT_IS_UNSAVED, false)
-            return
-        }
-
-        writeObj(EDIT_IS_UNSAVED, true)
-        Log.d(TAG, "EDIT_IS_UNSAVED")
-        writeObj(EDIT_NAME, name.value.text)
-        writeObj(EDIT_CONTENT, content.value.text)
-        writeObj(EDIT_FILE_EXTENSION, fileExtension.value)
-        writeObj(EDIT_PREVIOUS_NOTE, previousNote)
-        writeObj(EDIT_EDIT_TYPE, editType)
+        NoteSaver.save(
+            shouldSave = shouldSaveWhenQuitting && !isPreviousNoteTheSame(),
+            name = name.value.text,
+            content = content.value.text,
+            previousNote = previousNote,
+            editType = editType
+        )
     }
 }
 
-private const val EDIT_IS_UNSAVED = "EDIT_IS_UNSAVED"
-
-private const val EDIT_EDIT_TYPE = "EDIT_EDIT_TYPE"
-private const val EDIT_PREVIOUS_NOTE = "EDIT_PREVIOUS_NOTE"
-private const val EDIT_NAME = "EDIT_NAME"
-private const val EDIT_CONTENT = "EDIT_CONTENT"
-private const val EDIT_FILE_EXTENSION = "EDIT_FILE_EXTENSION"
-
-fun isEditUnsaved(): Boolean {
-    return try {
-        readObj(EDIT_IS_UNSAVED)
-    } catch (e: Exception) {
-        false
-    }
-}
 
 @Composable
-fun newEditViewModel(editParams: EditParams): EditViewModel {
+fun newEditViewModel(editParams: EditParams): TextVM {
 
     return when (editParams) {
-        is EditParams.Idle -> viewModel<EditViewModel>(
+        is EditParams.Idle -> viewModel<TextVM>(
             factory = viewModelFactory {
-                EditViewModel(editParams.editType, editParams.note)
+                TextVM(editParams.editType, editParams.note)
             }
         )
 
-        EditParams.Saved -> {
-            viewModel<EditViewModel>(
+        is EditParams.Saved -> {
+            viewModel<TextVM>(
                 factory = viewModelFactory {
-                    EditViewModel(
-                        editType = readObj(EDIT_EDIT_TYPE),
-                        previousNote = readObj(EDIT_PREVIOUS_NOTE),
-                        name = readObj(EDIT_NAME),
-                        content = readObj(EDIT_CONTENT),
-                        fileExtension = readObj(EDIT_FILE_EXTENSION),
+                    TextVM(
+                        editType = editParams.editType,
+                        previousNote = editParams.note,
+                        name = editParams.name,
+                        content = editParams.content,
                     )
                 }
             )
@@ -311,25 +356,3 @@ fun newEditViewModel(editParams: EditParams): EditViewModel {
     }
 }
 
-private fun <T : Serializable> writeObj(path: String, obj: T) {
-    try {
-        val fileOutputStream =
-            MyApp.appModule.context.openFileOutput(path, Context.MODE_PRIVATE)
-        val objectOutputStream = ObjectOutputStream(fileOutputStream)
-        objectOutputStream.writeObject(obj)
-        objectOutputStream.close()
-        fileOutputStream.close()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
-
-private fun <T> readObj(path: String): T {
-    val fileInputStream = MyApp.appModule.context.openFileInput(path)
-    val objectInputStream = ObjectInputStream(fileInputStream)
-    @Suppress("UNCHECKED_CAST") val res = objectInputStream.readObject() as T
-    objectInputStream.close()
-    fileInputStream.close()
-    return res
-}
