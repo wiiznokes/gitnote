@@ -60,7 +60,7 @@ fun AppScreen(
                 onFinished = {
                     navController.pop()
 
-                    if (it.params == EditParams.Saved) {
+                    if (it.params is EditParams.Saved) {
                         navController.navigate(AppDestination.Grid)
                     }
                 }

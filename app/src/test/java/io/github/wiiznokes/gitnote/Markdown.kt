@@ -1,7 +1,7 @@
 package io.github.wiiznokes.gitnote
 
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.ListType
-import io.github.wiiznokes.gitnote.ui.screen.app.edit.analyzeListItem
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.ListType
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.analyzeListItem
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull

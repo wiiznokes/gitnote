@@ -2,13 +2,11 @@ package io.github.wiiznokes.gitnote.ui.screen.app.edit
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
@@ -16,9 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
@@ -33,7 +29,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,16 +40,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.viewmodel.newEditViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newEditViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newMarkDownVM
 
 
 private const val TAG = "EditScreen"
@@ -68,7 +65,11 @@ fun EditScreen(
     onFinished: () -> Unit,
 ) {
 
-    val vm = newEditViewModel(editParams)
+    val vm = when (editParams.fileExtension()) {
+        is FileExtension.Txt -> newEditViewModel(editParams)
+        is FileExtension.Md -> newMarkDownVM(editParams)
+        is FileExtension.Other -> TODO()
+    }
 
     val nameFocusRequester = remember { FocusRequester() }
     val textFocusRequester = remember { FocusRequester() }
@@ -140,25 +141,6 @@ fun EditScreen(
                     )
                 },
                 actions = {
-                    ExtensionChooser(vm.fileExtension, isReadOnlyModeActive)
-                    Spacer(modifier = Modifier.width(10.dp))
-                    IconButton(
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        onClick = {
-                            vm.save()
-                        },
-                        enabled = !isReadOnlyModeActive
-                    ) {
-                        SimpleIcon(
-                            imageVector = Icons.Default.Save,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
                     IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -210,58 +192,98 @@ fun EditScreen(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                Content(
-                    vm = vm,
-                    textFocusRequester = textFocusRequester,
-                    onFinished = onFinished,
-                    isReadOnlyModeActive = isReadOnlyModeActive
-                )
+
+                val textContent = vm.content.collectAsState().value
+
+                when (vm) {
+                    is MarkDownVM -> {
+                        MarkDownContent(
+                            vm = vm,
+                            textFocusRequester = textFocusRequester,
+                            onFinished = onFinished,
+                            isReadOnlyModeActive = isReadOnlyModeActive,
+                            textContent = textContent
+                        )
+                    }
+
+                    else -> {
+                        GenericTextField(
+                            vm = vm,
+                            textFocusRequester = textFocusRequester,
+                            onFinished = onFinished,
+                            isReadOnlyModeActive = isReadOnlyModeActive,
+                            textContent = textContent
+                        )
+                    }
+                }
             }
 
-            BottomBar(
-                vm = vm,
-                isReadOnlyModeActive = isReadOnlyModeActive
-            )
+            when (vm) {
+                is MarkDownVM -> {
+                    val textFormatExpanded =
+                        rememberSaveable(isReadOnlyModeActive) { mutableStateOf(false) }
+
+                    if (textFormatExpanded.value) {
+                        TextFormatRow(vm = vm, textFormatExpanded = textFormatExpanded)
+                    } else {
+                        DefaultRow(
+                            vm = vm,
+                            isReadOnlyModeActive = isReadOnlyModeActive,
+                            leftContent = {
+                                SmallButton(
+                                    onClick = {
+                                        textFormatExpanded.value = true
+                                    },
+                                    enabled = !isReadOnlyModeActive,
+                                    imageVector = Icons.Default.TextFormat,
+                                    contentDescription = "text format"
+                                )
+                            }
+                        )
+                    }
+
+                }
+
+                else -> {
+                    DefaultRow(
+                        vm = vm,
+                        isReadOnlyModeActive = isReadOnlyModeActive,
+                    )
+                }
+            }
         }
 
 
     }
 }
-
 
 @Composable
-private fun ExtensionChooser(
-    fileExtension: MutableState<FileExtension>,
-    isReadOnly: Boolean,
+fun GenericTextField(
+    vm: TextVM,
+    textFocusRequester: FocusRequester,
+    onFinished: () -> Unit,
+    isReadOnlyModeActive: Boolean = false,
+    textContent: TextFieldValue,
 ) {
-    Box {
-        val expanded = remember { mutableStateOf(false) }
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary
-            ),
-            onClick = { expanded.value = true },
-            enabled = !isReadOnly
-        ) {
-            Text(
-                text = '.' + fileExtension.value.text,
-                color = MaterialTheme.colorScheme.onSecondary,
-                style = MaterialTheme.typography.titleSmall,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+    TextField(
+        modifier = Modifier
+            .fillMaxSize()
+            .focusRequester(textFocusRequester),
+        value = textContent,
+        onValueChange = { vm.onValueChange(it) },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { vm.save(onSuccess = onFinished) }
+        ),
+        readOnly = isReadOnlyModeActive
+    )
 
-        CustomDropDown(
-            expanded = expanded,
-            options = FileExtension.entries.map {
-                CustomDropDownModel(
-                    text = ".${it.text}",
-                    onClick = {
-                        fileExtension.value = it
-                    }
-                )
-            }
-        )
-    }
+
 }
-
