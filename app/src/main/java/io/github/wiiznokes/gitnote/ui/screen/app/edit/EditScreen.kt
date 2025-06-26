@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.app.edit
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -67,6 +68,13 @@ fun EditScreen(
         is FileExtension.Txt -> newEditViewModel(editParams)
         is FileExtension.Md -> newMarkDownVM(editParams)
         is FileExtension.Other -> TODO()
+    }
+
+    if (editParams is EditParams.Saved) {
+        BackHandler {
+            vm.shouldSaveWhenQuitting = false
+            onFinished()
+        }
     }
 
     val nameFocusRequester = remember { FocusRequester() }
