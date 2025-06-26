@@ -98,53 +98,53 @@ fun TextFormatRow(
             contentDescription = "title"
         )
 
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.FormatBold,
-            contentDescription = "bold"
-        )
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.FormatItalic,
-            contentDescription = "italic"
-        )
-
-        SmallSeparator()
-
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.Link,
-            contentDescription = "link"
-        )
-
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.Code,
-            contentDescription = "code"
-        )
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.FormatQuote,
-            contentDescription = "quote"
-        )
-
-        SmallSeparator()
-
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.AutoMirrored.Filled.List,
-            contentDescription = "unordered list"
-        )
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.Checklist,
-            contentDescription = "checklist"
-        )
-        SmallButton(
-            onClick = {},
-            imageVector = Icons.Default.FormatListNumbered,
-            contentDescription = "list number"
-        )
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.FormatBold,
+//            contentDescription = "bold"
+//        )
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.FormatItalic,
+//            contentDescription = "italic"
+//        )
+//
+//        SmallSeparator()
+//
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.Link,
+//            contentDescription = "link"
+//        )
+//
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.Code,
+//            contentDescription = "code"
+//        )
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.FormatQuote,
+//            contentDescription = "quote"
+//        )
+//
+//        SmallSeparator()
+//
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.AutoMirrored.Filled.List,
+//            contentDescription = "unordered list"
+//        )
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.Checklist,
+//            contentDescription = "checklist"
+//        )
+//        SmallButton(
+//            onClick = {},
+//            imageVector = Icons.Default.FormatListNumbered,
+//            contentDescription = "list number"
+//        )
 
 
         SmallSeparator()
