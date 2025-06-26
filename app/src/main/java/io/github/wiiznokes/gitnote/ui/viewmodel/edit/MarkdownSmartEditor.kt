@@ -41,7 +41,7 @@ fun markdownSmartEditor(
 
                 val res = analyzeListItemSafely(lineBefore)
 
-                // remove
+                // remove empty list line
                 if (currentLine.isBlank() && res?.shouldRemove() == true) {
 
                     val newPos = cursorPos - (lineBefore.length + 1)
@@ -55,6 +55,7 @@ fun markdownSmartEditor(
                 }
 
                 // we are in a list
+                // add a new empty similar list line
                 if (res != null) {
                     val newText = res.text()
                     return v.copy(
@@ -67,7 +68,9 @@ fun markdownSmartEditor(
                         ),
                         selection = TextRange(cursorPos + res.padding.length + newText.length)
                     )
-                } else {
+                }
+                // no list found, but we can still add the padding
+                else {
                     val padding = getPadding(lineBefore)
                     if (padding != null) {
                         return v.copy(
@@ -80,7 +83,7 @@ fun markdownSmartEditor(
                     }
                 }
             } else {
-
+                // remove padding, under certain conditions
                 if (prev.text.length == v.text.length + 1) {
 
                     val start = v.text.substring(0, cursorPos).lastIndexOf('\n').let {

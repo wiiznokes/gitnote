@@ -30,7 +30,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -199,7 +198,7 @@ fun EditScreen(
                 modifier = Modifier.weight(1f)
             ) {
 
-                val textContent = vm.content.collectAsState().value
+                val textContent = vm.content.value
 
                 when (vm) {
                     is MarkDownVM -> {

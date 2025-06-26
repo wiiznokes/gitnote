@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import java.util.zip.DataFormatException
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
+import androidx.compose.runtime.State
 
 data class History(
     val index: Int,
@@ -52,9 +53,8 @@ open class TextVM() : ViewModel() {
     private lateinit var previousNote: Note
     lateinit var name: MutableState<TextFieldValue>
 
-    private val _content: MutableStateFlow<TextFieldValue> = MutableStateFlow(TextFieldValue())
-    val content: StateFlow<TextFieldValue>
-        get() = _content.asStateFlow()
+    private val _content = mutableStateOf(TextFieldValue())
+    val content: State<TextFieldValue> get() = _content
 
     private val history = mutableListOf<TextFieldValue>()
 
@@ -83,7 +83,7 @@ open class TextVM() : ViewModel() {
             selection = TextRange(0)
         )
 
-        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+        _content.value = textFieldValue.copy()
         history.add(textFieldValue)
 
         Log.d(TAG, "init: $previousNote, $editType")
@@ -105,22 +105,32 @@ open class TextVM() : ViewModel() {
             content,
             selection = TextRange(0)
         )
-        viewModelScope.launch { _content.emit(textFieldValue.copy()) }
+
+        _content.value = textFieldValue.copy()
         history.add(textFieldValue)
 
         Log.d(TAG, "init saved: $previousNote, $editType")
     }
 
+    // https://medium.com/androiddevelopers/effective-state-management-for-textfield-in-compose-d6e5b070fbe5
+    // even if we are not doing anything async, sometime, when we long press enter for example,
+    // the value v will not be the last one set by `content.value`. This will instead by an internal copy
+    // of the TextField implementation (see article for more info)
+    // todo: report this to google
+
+    // another bug if when we long press the delete key and we pass in the delete alinea feature,
+    // we stop receiving `onValueChange` call. This seems unrelated to the issue above, e.i, idt it's a race
+    // condition
+    // todo: report this to google
     open fun onValueChange(v: TextFieldValue) {
 
         // don't bloat history with different selection
         if (content.value.text == v.text) {
-            viewModelScope.launch { _content.emit(v.copy()) }
+            _content.value = v.copy()
             return
         }
 
-
-        viewModelScope.launch { _content.emit(v.copy()) }
+        _content.value = v.copy()
 
         val historyManager = historyManager.value
 
@@ -148,7 +158,7 @@ open class TextVM() : ViewModel() {
                 index = historyManager.index - 1
             ))
         }
-        viewModelScope.launch { _content.emit(history[historyManager.index - 1].copy()) }
+        _content.value = history[historyManager.index - 1].copy()
     }
 
     fun redo() {
@@ -159,7 +169,7 @@ open class TextVM() : ViewModel() {
                 index = historyManager.index + 1
             ))
         }
-        viewModelScope.launch { _content.emit(history[historyManager.index + 1].copy()) }
+        _content.value = history[historyManager.index + 1].copy()
     }
 
     fun setReadOnlyMode(value: Boolean) {
