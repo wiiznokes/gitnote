@@ -302,3 +302,59 @@ fun onCode(v: TextFieldValue): TextFieldValue {
         addOrRemovePatternAtTheExtremitiesOfSelection(v, "`")
     }
 }
+
+fun onQuote(v: TextFieldValue): TextFieldValue {
+    val cursorPosMin = if (v.text.getOrNull(v.selection.min) == '\n') {
+        v.selection.min - 1
+    } else {
+        v.selection.min
+    }
+
+    val start = v.text.lastIndexOf('\n', startIndex = cursorPosMin).let {
+        if (it == -1) 0 else it + 1
+    }
+
+    val cursorPosMax = v.selection.max
+    val end = v.text.indexOf('\n', startIndex = cursorPosMax).let {
+        if (it == -1) v.text.length else it
+    }
+
+    val subString = v.text.substring(start, end)
+
+    val pattern = "> "
+
+    val countOfNewLine = subString.count { it == '\n' }
+    val countOfQuote = subString.split("\n$pattern").size - 1
+
+    // each line start with the pattern, remove it
+    return if (subString.startsWith(pattern) && countOfNewLine == countOfQuote) {
+        v.copy(
+            text = v.text.substring(0, start)
+                    + v.text.substring(start + pattern.length, end).replace("\n> ", "\n")
+                    + v.text.substring(end, v.text.length),
+            selection = if (v.selection.reversed) TextRange(
+                start = v.selection.start - (pattern.length + countOfNewLine * pattern.length),
+                end = v.selection.end - pattern.length,
+            ) else TextRange(
+                start = v.selection.start - pattern.length,
+                end = v.selection.end - (pattern.length + countOfNewLine * pattern.length),
+            )
+        )
+    }
+    // add the pattern to each line
+    else {
+        v.copy(
+            text = v.text.substring(0, start)
+                    + pattern
+                    + v.text.substring(start, end).replace("\n", "\n> ")
+                    + v.text.substring(end, v.text.length),
+            selection = if (v.selection.reversed) TextRange(
+                start = v.selection.start + pattern.length + countOfNewLine * pattern.length,
+                end = v.selection.end + pattern.length,
+            ) else TextRange(
+                start = v.selection.start + pattern.length,
+                end = v.selection.end + pattern.length + countOfNewLine * pattern.length,
+            )
+        )
+    }
+}
