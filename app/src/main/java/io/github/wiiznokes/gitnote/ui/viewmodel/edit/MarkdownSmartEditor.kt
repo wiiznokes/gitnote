@@ -42,7 +42,7 @@ fun markdownSmartEditor(
                     v.text.substring(cursorPos, it)
                 }
 
-                val res = analyzeListItemSafely(lineBefore)
+                val res = ListItemInfo.parseSafely(lineBefore)
 
                 // remove empty list line
                 if (currentLine.isBlank() && res?.shouldRemove() == true) {
@@ -135,6 +135,61 @@ data class ListItemInfo(
     val title: String? = null,
 ) {
 
+    companion object {
+
+        fun parseSafely(line: String): ListItemInfo? {
+            return try {
+                parse(line)
+            } catch (e: Exception) {
+                Log.d(TAG, "$e")
+                null
+            }
+        }
+
+        fun parse(line: String): ListItemInfo? {
+            val regex = Regex("""^(\s*)(?:(-)|(\*)|(\d+)\.)\s(?:\[([ xX])]\s)?(.+)?""")
+            val match = regex.matchEntire(line) ?: return null
+
+            val padding = match.groups[1]?.value ?: throw Exception("padding null: $line")
+
+            val listType = when {
+                match.groups[2]?.value != null -> ListType.Dash
+                match.groups[3]?.value != null -> ListType.Asterisk
+                match.groups[4]?.value != null -> match.groups[4]?.value?.toInt()?.let {
+                    ListType.Number(it)
+                }
+
+                else -> null
+            }
+
+            if (listType == null) {
+                throw Exception("listType is null but we have a match: $line")
+            }
+
+            val isTaskList = match.groups[5] != null
+
+            val isChecked = match.groups[5]?.value != " "
+
+            val title = match.groups[6]?.value
+
+            return ListItemInfo(
+                listType = listType,
+                isTaskList = isTaskList,
+                isChecked = isChecked,
+                padding = padding,
+                title = title
+            )
+        }
+
+
+        fun fromLineFallBack(line: String): ListItemInfo {
+            return ListItemInfo(
+                padding = getPadding(line) ?: ""
+            )
+        }
+
+    }
+
     fun prefix(numberOp: (Int) -> Int = { it }): String {
         var text = listType.prefix(numberOp)
         if (this.isTaskList) {
@@ -159,51 +214,10 @@ data class ListItemInfo(
     fun shouldRemove(): Boolean {
         return title?.isNotBlank() != true
     }
+
+
 }
 
-fun analyzeListItemSafely(line: String): ListItemInfo? {
-    return try {
-        analyzeListItem(line)
-    } catch (e: Exception) {
-        Log.d(TAG, "$e")
-        null
-    }
-}
-
-fun analyzeListItem(line: String): ListItemInfo? {
-    val regex = Regex("""^(\s*)(?:(-)|(\*)|(\d+)\.)\s(?:\[([ xX])]\s)?(.+)?""")
-    val match = regex.matchEntire(line) ?: return null
-
-    val padding = match.groups[1]?.value ?: throw Exception("padding null: $line")
-
-    val listType = when {
-        match.groups[2]?.value != null -> ListType.Dash
-        match.groups[3]?.value != null -> ListType.Asterisk
-        match.groups[4]?.value != null -> match.groups[4]?.value?.toInt()?.let {
-            ListType.Number(it)
-        }
-
-        else -> null
-    }
-
-    if (listType == null) {
-        throw Exception("listType is null but we have a match: $line")
-    }
-
-    val isTaskList = match.groups[5] != null
-
-    val isChecked = match.groups[5]?.value != " "
-
-    val title = match.groups[6]?.value
-
-    return ListItemInfo(
-        listType = listType,
-        isTaskList = isTaskList,
-        isChecked = isChecked,
-        padding = padding,
-        title = title
-    )
-}
 
 fun getPadding(line: String): String? {
     val match = Regex("^\\s+").find(line)
@@ -470,7 +484,7 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
     return multiLinePrefixModifier(
         v = v,
         f1 = {
-            val res = analyzeListItemSafely(line = it)
+            val res = ListItemInfo.parseSafely(line = it)
             if (res == null) {
                 atListOneListToConvert = true
             } else {
@@ -482,7 +496,7 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
         },
         f2 = { line, lineNumber ->
 
-            val res = analyzeListItemSafely(line)
+            val res = ListItemInfo.parseSafely(line)
             return@multiLinePrefixModifier if (res != null) {
                 if (atListOneListToConvert) {
                     res.copy(listType = ListType.Dash).line()
@@ -504,7 +518,7 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
     return multiLinePrefixModifier(
         v = v,
         f1 = {
-            val res = analyzeListItemSafely(line = it)
+            val res = ListItemInfo.parseSafely(line = it)
             if (res == null) {
                 atListOneListToConvert = true
             } else {
@@ -516,7 +530,7 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
         },
         f2 = { line, lineNumber ->
 
-            val res = analyzeListItemSafely(line)
+            val res = ListItemInfo.parseSafely(line)
             return@multiLinePrefixModifier if (res != null) {
                 if (atListOneListToConvert) {
                     res.copy(listType = ListType.Number(lineNumber)).line()
@@ -538,7 +552,7 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
     return multiLinePrefixModifier(
         v = v,
         f1 = {
-            val res = analyzeListItemSafely(line = it)
+            val res = ListItemInfo.parseSafely(line = it)
             if (res == null) {
                 atListOneListToConvert = true
             } else {
@@ -553,9 +567,8 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
         },
         f2 = { line, lineNumber ->
 
-            val res = analyzeListItemSafely(line)
+            val res = ListItemInfo.parseSafely(line)
             return@multiLinePrefixModifier if (res != null) {
-
                 if (atListOneListToConvert) {
                     res.copy(
                         isTaskList = true,

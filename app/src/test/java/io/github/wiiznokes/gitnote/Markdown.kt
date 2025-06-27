@@ -1,7 +1,7 @@
 package io.github.wiiznokes.gitnote
 
+import io.github.wiiznokes.gitnote.ui.viewmodel.edit.ListItemInfo
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.ListType
-import io.github.wiiznokes.gitnote.ui.viewmodel.edit.analyzeListItem
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -24,7 +24,7 @@ class RegexTest {
             " \t - ",
         )
         for (input in validCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             assertNotNull(info, input)
             assertTrue(info.shouldRemove(), "$input $info")
@@ -51,7 +51,7 @@ class RegexTest {
         )
 
         for (input in invalidCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             if (info != null) {
                 assertFalse(info.shouldRemove(), input)
@@ -69,7 +69,7 @@ class RegexTest {
             " \t - abc",
         )
         for (input in validCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             assertNotNull(info, input)
             assertTrue(info.listType is ListType.Dash)
@@ -87,7 +87,7 @@ class RegexTest {
             " \t * abc",
         )
         for (input in validCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             assertNotNull(info, input)
             assertTrue(info.listType is ListType.Asterisk)
@@ -102,7 +102,7 @@ class RegexTest {
             "122. abc",
         )
         for (input in validCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             assertNotNull(info, input)
             assertTrue(info.listType is ListType.Number)
@@ -124,7 +124,7 @@ class RegexTest {
             " \t 12. [X] task"
         )
         for (input in validCases) {
-            val info = analyzeListItem(input)
+            val info = ListItemInfo.parse(input)
 
             assertNotNull(info, input)
             assertTrue(info.isTaskList)
