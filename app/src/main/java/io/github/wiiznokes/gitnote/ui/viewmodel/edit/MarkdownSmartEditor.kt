@@ -198,10 +198,18 @@ data class ListItemInfo(
         return text
     }
 
-    fun line(numberOp: (Int) -> Int = { it }): String {
+    fun line(numberOp: (Int) -> Int = { it }, minusPaddingInTitle: Boolean = false): String {
         var finalText = padding
         finalText += prefix(numberOp)
-        finalText += title
+
+        if (title != null) {
+            finalText += if (minusPaddingInTitle) {
+                if (title.startsWith(padding))
+                    title.substring(padding.length)
+                else title
+            } else title
+        }
+
         return finalText
     }
 
@@ -480,6 +488,7 @@ fun onQuote(v: TextFieldValue): TextFieldValue {
 fun onUnorderedList(v: TextFieldValue): TextFieldValue {
 
     var atListOneListToConvert = false
+    var defaultListInfo: ListItemInfo? = null
 
     return multiLinePrefixModifier(
         v = v,
@@ -488,11 +497,14 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
             if (res == null) {
                 atListOneListToConvert = true
             } else {
+                if (defaultListInfo == null) {
+                    defaultListInfo = res
+                }
                 if (res.listType != ListType.Dash) {
                     atListOneListToConvert = true
                 }
             }
-            atListOneListToConvert
+            atListOneListToConvert && defaultListInfo != null
         },
         f2 = { line, lineNumber ->
 
@@ -505,7 +517,15 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
                 }
 
             } else {
-                "- $line"
+                if (defaultListInfo == null) {
+                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                }
+
+                defaultListInfo.copy(
+                    listType = ListType.Dash,
+                    isChecked = false,
+                    title = line
+                ).line(minusPaddingInTitle = true)
             }
         }
     )
@@ -514,6 +534,7 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
 fun onNumberedList(v: TextFieldValue): TextFieldValue {
 
     var atListOneListToConvert = false
+    var defaultListInfo: ListItemInfo? = null
 
     return multiLinePrefixModifier(
         v = v,
@@ -522,11 +543,14 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
             if (res == null) {
                 atListOneListToConvert = true
             } else {
+                if (defaultListInfo == null) {
+                    defaultListInfo = res
+                }
                 if (res.listType !is ListType.Number) {
                     atListOneListToConvert = true
                 }
             }
-            atListOneListToConvert
+            atListOneListToConvert && defaultListInfo != null
         },
         f2 = { line, lineNumber ->
 
@@ -538,7 +562,15 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
                     res.lineWithoutPrefix()
                 }
             } else {
-                "$lineNumber. $line"
+                if (defaultListInfo == null) {
+                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                }
+
+                defaultListInfo.copy(
+                    listType = ListType.Number(lineNumber),
+                    isChecked = false,
+                    title = line
+                ).line(minusPaddingInTitle = true)
             }
         }
     )
@@ -578,15 +610,15 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
                 }
 
             } else {
-                val listType = defaultListInfo ?: ListItemInfo()
+                if (defaultListInfo == null) {
+                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                }
 
-                listType.copy(
+                defaultListInfo.copy(
                     isTaskList = true,
                     isChecked = false,
-                    padding = "",
                     title = line
-                ).line(numberOp = { lineNumber })
-
+                ).line(numberOp = { lineNumber }, minusPaddingInTitle = true)
             }
         }
     )
