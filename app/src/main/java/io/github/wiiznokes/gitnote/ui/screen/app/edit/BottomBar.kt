@@ -12,11 +12,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +34,7 @@ val bottomBarHeight = 50.dp
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DefaultRow(
     vm: TextVM,
@@ -73,17 +80,25 @@ fun DefaultRow(
             )
         }
 
-//        Row(
-//            modifier = Modifier
-//                .align(Alignment.BottomEnd),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            SmallButton(
-//                onClick = {},
-//                imageVector = Icons.Default.MoreVert,
-//                contentDescription = "more actions"
-//            )
-//        }
+        val bottomSheetExpanded = rememberSaveable { mutableStateOf(false) }
+
+        if (bottomSheetExpanded.value) {
+            ModalBottomSheet(onDismissRequest = { bottomSheetExpanded.value = false }) {
+                Text("Extension: ${vm.previousNote.fileExtension().text}")
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SmallButton(
+                onClick = { bottomSheetExpanded.value = true },
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "more actions"
+            )
+        }
     }
 }
 
