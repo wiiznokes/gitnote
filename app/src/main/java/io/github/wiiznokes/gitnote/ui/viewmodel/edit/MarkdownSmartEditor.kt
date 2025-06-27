@@ -196,7 +196,7 @@ fun onTitle(v: TextFieldValue): TextFieldValue {
         }
 
         // remove it
-        if (v.text.substring(start).startsWith(pattern)) {
+        if (v.text.startsWith(pattern, startIndex = start)) {
             v.copy(
                 text = v.text.substring(0, start) + v.text.substring(
                     start + pattern.length,
@@ -258,7 +258,7 @@ fun addOrRemovePatternAtTheExtremitiesOfSelection(
 
     // if already present, remove it
     return if (v.text.substring(0, cursorPosMin).endsWith(startPattern)
-        && v.text.substring(cursorPosMax, v.text.length).startsWith(endPattern)
+        && v.text.startsWith(endPattern, startIndex = cursorPosMax)
     ) {
         v.copy(
             text = v.text.substring(0, cursorPosMin - startPattern.length)

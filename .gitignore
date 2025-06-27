@@ -35,3 +35,4 @@ google-services.json
 
 !app/nightly-signing-key.jks
 /app/src/main/rust/target
+.kotlin/
