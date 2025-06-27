@@ -60,7 +60,7 @@ fun markdownSmartEditor(
                 // we are in a list
                 // add a new empty similar list line
                 if (res != null) {
-                    val newText = res.prefix(numberOp = { it + 1})
+                    val newText = res.prefix(numberOp = { it + 1 })
                     return v.copy(
                         text = v.text.substring(
                             0,
@@ -192,7 +192,7 @@ fun analyzeListItem(line: String): ListItemInfo? {
 
     val isTaskList = match.groups[5] != null
 
-    val isChecked = match.groups[5]?.value?.length == 4
+    val isChecked = match.groups[5]?.value != " "
 
     val title = match.groups[6]?.value
 
@@ -329,63 +329,6 @@ fun onCode(v: TextFieldValue): TextFieldValue {
     }
 }
 
-fun onQuote(v: TextFieldValue): TextFieldValue {
-    val cursorPosMin = if (v.text.getOrNull(v.selection.min) == '\n') {
-        // if we are at the end of a line, decrement the cursor to include the line
-        v.selection.min - 1
-    } else {
-        v.selection.min
-    }
-
-    val start = v.text.lastIndexOf('\n', startIndex = cursorPosMin).let {
-        if (it == -1) 0 else it + 1
-    }
-
-    val cursorPosMax = v.selection.max
-    val end = v.text.indexOf('\n', startIndex = cursorPosMax).let {
-        if (it == -1) v.text.length else it
-    }
-
-    val subString = v.text.substring(start, end)
-
-    val pattern = "> "
-
-    val countOfNewLine = subString.count { it == '\n' }
-    val countOfQuote = subString.split("\n$pattern").size - 1
-
-    // each line start with the pattern, remove it
-    return if (subString.startsWith(pattern) && countOfNewLine == countOfQuote) {
-        v.copy(
-            text = v.text.substring(0, start)
-                    + v.text.substring(start + pattern.length, end).replace("\n> ", "\n")
-                    + v.text.substring(end, v.text.length),
-            selection = if (v.selection.reversed) TextRange(
-                start = v.selection.start - (pattern.length + countOfNewLine * pattern.length),
-                end = v.selection.end - pattern.length,
-            ) else TextRange(
-                start = v.selection.start - pattern.length,
-                end = v.selection.end - (pattern.length + countOfNewLine * pattern.length),
-            )
-        )
-    }
-    // add the pattern to each line
-    else {
-        v.copy(
-            text = v.text.substring(0, start)
-                    + pattern
-                    + v.text.substring(start, end).replace("\n", "\n> ")
-                    + v.text.substring(end, v.text.length),
-            selection = if (v.selection.reversed) TextRange(
-                start = v.selection.start + pattern.length + countOfNewLine * pattern.length,
-                end = v.selection.end + pattern.length,
-            ) else TextRange(
-                start = v.selection.start + pattern.length,
-                end = v.selection.end + pattern.length + countOfNewLine * pattern.length,
-            )
-        )
-    }
-}
-
 fun onLink(v: TextFieldValue): TextFieldValue {
     val cursorPosMin = v.selection.min
     val cursorPosMax = v.selection.max
@@ -429,7 +372,11 @@ fun onLink(v: TextFieldValue): TextFieldValue {
 
 fun Int.max(b: Int): Int = max(this, b)
 
-private fun listManager(
+/**
+ * @param f1: this callback will be called on each line selected. Return true if you want to short circuit.
+ * @param f2: this callback is also called on each line selected, after f1. Return the modified line
+ */
+private fun multiLinePrefixModifier(
     v: TextFieldValue,
     f1: (String) -> Boolean,
     f2: (String, Int) -> String
@@ -491,14 +438,36 @@ private fun listManager(
     )
 }
 
+fun onQuote(v: TextFieldValue): TextFieldValue {
 
+    var atListOneListToConvert = false
+    val pattern = "> "
+
+    return multiLinePrefixModifier(
+        v = v,
+        f1 = { line ->
+
+            if (!line.startsWith(pattern)) {
+                atListOneListToConvert = true
+            }
+            atListOneListToConvert
+        },
+        f2 = { line, lineNumber ->
+            return@multiLinePrefixModifier if (atListOneListToConvert) {
+                if (line.startsWith(pattern)) line else pattern + line
+            } else {
+                line.substring(startIndex = pattern.length)
+            }
+        }
+    )
+}
 
 
 fun onUnorderedList(v: TextFieldValue): TextFieldValue {
 
     var atListOneListToConvert = false
 
-    return listManager(
+    return multiLinePrefixModifier(
         v = v,
         f1 = {
             val res = analyzeListItemSafely(line = it)
@@ -514,7 +483,7 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
         f2 = { line, lineNumber ->
 
             val res = analyzeListItemSafely(line)
-            return@listManager if (res != null) {
+            return@multiLinePrefixModifier if (res != null) {
                 if (atListOneListToConvert) {
                     res.copy(listType = ListType.Dash).line()
                 } else {
@@ -532,7 +501,7 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
 
     var atListOneListToConvert = false
 
-    return listManager(
+    return multiLinePrefixModifier(
         v = v,
         f1 = {
             val res = analyzeListItemSafely(line = it)
@@ -548,7 +517,7 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
         f2 = { line, lineNumber ->
 
             val res = analyzeListItemSafely(line)
-            return@listManager if (res != null) {
+            return@multiLinePrefixModifier if (res != null) {
                 if (atListOneListToConvert) {
                     res.copy(listType = ListType.Number(lineNumber)).line()
                 } else {
@@ -566,7 +535,7 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
     var atListOneListToConvert = false
     var defaultListInfo: ListItemInfo? = null
 
-    return listManager(
+    return multiLinePrefixModifier(
         v = v,
         f1 = {
             val res = analyzeListItemSafely(line = it)
@@ -585,12 +554,12 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
         f2 = { line, lineNumber ->
 
             val res = analyzeListItemSafely(line)
-            return@listManager if (res != null) {
+            return@multiLinePrefixModifier if (res != null) {
 
                 if (atListOneListToConvert) {
                     res.copy(
                         isTaskList = true,
-                    ).line(numberOp = { lineNumber} )
+                    ).line(numberOp = { lineNumber })
                 } else {
                     res.lineWithoutPrefix()
                 }
@@ -603,7 +572,7 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
                     isChecked = false,
                     padding = "",
                     title = line
-                ).line(numberOp = { lineNumber} )
+                ).line(numberOp = { lineNumber })
 
             }
         }
