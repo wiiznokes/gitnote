@@ -58,6 +58,21 @@ class MarkDownVM : TextVM {
         val newValue = onLink(content.value)
         super.onValueChange(newValue)
     }
+
+    fun onUnorderedList() {
+        val newValue = onUnorderedList(content.value)
+        super.onValueChange(newValue)
+    }
+
+    fun onNumberedList() {
+        val newValue = onNumberedList(content.value)
+        super.onValueChange(newValue)
+    }
+
+    fun onTaskList() {
+        val newValue = onTaskList(content.value)
+        super.onValueChange(newValue)
+    }
 }
 
 

@@ -1,8 +1,11 @@
+@file:Suppress("IfThenToElvis")
+
 package io.github.wiiznokes.gitnote.ui.viewmodel.edit
 
 import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlin.math.max
 
 
 private const val TAG = "markdownSmartEditor"
@@ -57,7 +60,7 @@ fun markdownSmartEditor(
                 // we are in a list
                 // add a new empty similar list line
                 if (res != null) {
-                    val newText = res.text()
+                    val newText = res.prefix(numberOp = { it + 1})
                     return v.copy(
                         text = v.text.substring(
                             0,
@@ -114,27 +117,43 @@ sealed class ListType {
     object Dash : ListType()
     object Asterisk : ListType()
     data class Number(val number: Int) : ListType()
+
+    fun prefix(numberOp: (Int) -> Int = { it }): String {
+        return when (this) {
+            Asterisk -> "* "
+            Dash -> "- "
+            is Number -> "${numberOp(number)}. "
+        }
+    }
 }
 
 data class ListItemInfo(
-    val listType: ListType,
-    val isTaskList: Boolean,
-    val padding: String,
-    val title: String?,
+    val listType: ListType = ListType.Dash,
+    val isTaskList: Boolean = false,
+    val isChecked: Boolean = false,
+    val padding: String = "",
+    val title: String? = null,
 ) {
 
-    fun text(): String {
-        val text = when (this.listType) {
-            ListType.Asterisk -> "* "
-            ListType.Dash -> "- "
-            is ListType.Number -> "${this.listType.number + 1}. "
+    fun prefix(numberOp: (Int) -> Int = { it }): String {
+        var text = listType.prefix(numberOp)
+        if (this.isTaskList) {
+            text += if (isChecked) "[x] " else "[ ] "
         }
+        return text
+    }
 
-        return if (this.isTaskList) {
-            "$text[ ] "
-        } else {
-            text
-        }
+    fun line(numberOp: (Int) -> Int = { it }): String {
+        var finalText = padding
+        finalText += prefix(numberOp)
+        finalText += title
+        return finalText
+    }
+
+    fun lineWithoutPrefix(): String {
+        var finalText = padding
+        finalText += title
+        return finalText
     }
 
     fun shouldRemove(): Boolean {
@@ -173,10 +192,17 @@ fun analyzeListItem(line: String): ListItemInfo? {
 
     val isTaskList = match.groups[5] != null
 
+    val isChecked = match.groups[5]?.value?.length == 4
 
     val title = match.groups[6]?.value
 
-    return ListItemInfo(listType, isTaskList, padding, title)
+    return ListItemInfo(
+        listType = listType,
+        isTaskList = isTaskList,
+        isChecked = isChecked,
+        padding = padding,
+        title = title
+    )
 }
 
 fun getPadding(line: String): String? {
@@ -369,7 +395,8 @@ fun onLink(v: TextFieldValue): TextFieldValue {
 
     // remove url pattern
     return if (v.text.startsWith(startPattern, startIndex = cursorPosMin - startPattern.length)
-        && v.text.startsWith(endPattern, startIndex = cursorPosMax)) {
+        && v.text.startsWith(endPattern, startIndex = cursorPosMax)
+    ) {
         v.copy(
             text = v.text.substring(0, cursorPosMin - startPattern.length)
                     + v.text.substring(cursorPosMin, cursorPosMax)
@@ -398,4 +425,187 @@ fun onLink(v: TextFieldValue): TextFieldValue {
         )
     }
 
+}
+
+fun Int.max(b: Int): Int = max(this, b)
+
+private fun listManager(
+    v: TextFieldValue,
+    f1: (String) -> Boolean,
+    f2: (String, Int) -> String
+): TextFieldValue {
+    val cursorPosMin = if (v.text.getOrNull(v.selection.min) == '\n') {
+        // if we are at the end of a line, decrement the cursor to include the line
+        v.selection.min - 1
+    } else {
+        v.selection.min
+    }
+
+    val start = v.text.lastIndexOf('\n', startIndex = cursorPosMin).let {
+        if (it == -1) 0 else it + 1
+    }
+
+    val cursorPosMax = v.selection.max
+    val end = v.text.indexOf('\n', startIndex = cursorPosMax).let {
+        if (it == -1) v.text.length else it
+    }
+
+    val subString = v.text.substring(start, end)
+
+    val lines = subString.lines()
+
+    for (line in lines) {
+        if (f1(line)) break
+    }
+
+    var res = v.text.substring(0, start)
+
+    var deltaAll = 0
+    var deltaFirstLine = 0
+
+    for (line in lines.withIndex()) {
+        val newLine = f2(line.value, line.index + 1)
+        val delta = newLine.length - line.value.length
+        if (line.index == 0) {
+            deltaFirstLine = delta
+        }
+        deltaAll += delta
+        res += if (line.index == lines.size - 1) {
+            newLine
+        } else {
+            "$newLine\n"
+        }
+    }
+
+    res += v.text.substring(end, v.text.length)
+
+    return v.copy(
+        text = res,
+        selection = if (v.selection.reversed) TextRange(
+            start = (v.selection.start + deltaAll).max(start),
+            end = (v.selection.end + deltaFirstLine).max(start),
+        ) else TextRange(
+            start = (v.selection.start + deltaFirstLine).max(start),
+            end = (v.selection.end + deltaAll).max(start),
+        )
+    )
+}
+
+
+
+
+fun onUnorderedList(v: TextFieldValue): TextFieldValue {
+
+    var atListOneListToConvert = false
+
+    return listManager(
+        v = v,
+        f1 = {
+            val res = analyzeListItemSafely(line = it)
+            if (res == null) {
+                atListOneListToConvert = true
+            } else {
+                if (res.listType != ListType.Dash) {
+                    atListOneListToConvert = true
+                }
+            }
+            atListOneListToConvert
+        },
+        f2 = { line, lineNumber ->
+
+            val res = analyzeListItemSafely(line)
+            return@listManager if (res != null) {
+                if (atListOneListToConvert) {
+                    res.copy(listType = ListType.Dash).line()
+                } else {
+                    res.lineWithoutPrefix()
+                }
+
+            } else {
+                "- $line"
+            }
+        }
+    )
+}
+
+fun onNumberedList(v: TextFieldValue): TextFieldValue {
+
+    var atListOneListToConvert = false
+
+    return listManager(
+        v = v,
+        f1 = {
+            val res = analyzeListItemSafely(line = it)
+            if (res == null) {
+                atListOneListToConvert = true
+            } else {
+                if (res.listType !is ListType.Number) {
+                    atListOneListToConvert = true
+                }
+            }
+            atListOneListToConvert
+        },
+        f2 = { line, lineNumber ->
+
+            val res = analyzeListItemSafely(line)
+            return@listManager if (res != null) {
+                if (atListOneListToConvert) {
+                    res.copy(listType = ListType.Number(lineNumber)).line()
+                } else {
+                    res.lineWithoutPrefix()
+                }
+            } else {
+                "$lineNumber. $line"
+            }
+        }
+    )
+}
+
+fun onTaskList(v: TextFieldValue): TextFieldValue {
+
+    var atListOneListToConvert = false
+    var defaultListInfo: ListItemInfo? = null
+
+    return listManager(
+        v = v,
+        f1 = {
+            val res = analyzeListItemSafely(line = it)
+            if (res == null) {
+                atListOneListToConvert = true
+            } else {
+                if (defaultListInfo == null) {
+                    defaultListInfo = res
+                }
+                if (!res.isTaskList) {
+                    atListOneListToConvert = true
+                }
+            }
+            atListOneListToConvert && defaultListInfo != null
+        },
+        f2 = { line, lineNumber ->
+
+            val res = analyzeListItemSafely(line)
+            return@listManager if (res != null) {
+
+                if (atListOneListToConvert) {
+                    res.copy(
+                        isTaskList = true,
+                    ).line(numberOp = { lineNumber} )
+                } else {
+                    res.lineWithoutPrefix()
+                }
+
+            } else {
+                val listType = defaultListInfo ?: ListItemInfo()
+
+                listType.copy(
+                    isTaskList = true,
+                    isChecked = false,
+                    padding = "",
+                    title = line
+                ).line(numberOp = { lineNumber} )
+
+            }
+        }
+    )
 }
