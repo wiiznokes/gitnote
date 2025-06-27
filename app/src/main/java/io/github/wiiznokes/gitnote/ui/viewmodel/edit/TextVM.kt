@@ -1,9 +1,9 @@
 package io.github.wiiznokes.gitnote.ui.viewmodel.edit
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import java.util.zip.DataFormatException
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
-import androidx.compose.runtime.State
+import kotlin.math.absoluteValue
 
 data class History(
     val index: Int,
@@ -50,6 +50,8 @@ private const val TAG = "TextVM"
 open class TextVM() : ViewModel() {
 
     lateinit var editType: EditType
+        private set
+
     private lateinit var previousNote: Note
     lateinit var name: MutableState<TextFieldValue>
 
@@ -58,7 +60,8 @@ open class TextVM() : ViewModel() {
 
     private val history = mutableListOf<TextFieldValue>()
 
-    private val _historyManager: MutableStateFlow<History> = MutableStateFlow(History(index = 0, size = 1))
+    private val _historyManager: MutableStateFlow<History> =
+        MutableStateFlow(History(index = 0, size = 1))
     val historyManager: StateFlow<History>
         get() = _historyManager.asStateFlow()
 
@@ -118,7 +121,7 @@ open class TextVM() : ViewModel() {
     // of the TextField implementation (see article for more info)
     // todo: report this to google
 
-    // another bug if when we long press the delete key and we pass in the delete alinea feature,
+    // another bug if when we long press the delete key and we pass in the delete padding feature,
     // we stop receiving `onValueChange` call. This seems unrelated to the issue above, e.i, idt it's a race
     // condition
     // todo: report this to google
@@ -140,12 +143,55 @@ open class TextVM() : ViewModel() {
             i--
         }
 
+        fun isSimilar(v1: TextFieldValue, v2: TextFieldValue): Boolean {
+
+            if (v1.text.endsWith(".")) {
+                return false
+            }
+
+            if (!v1.text.endsWith(". ") && v1.text.endsWith(" ")) {
+                return false
+            }
+
+            if (v1.text.endsWith("\n")) {
+                return false
+            }
+            if (v1.text.endsWith("-")) {
+                return false
+            }
+
+            if ((v1.text.length - v2.text.length).absoluteValue >= 10)
+                return false
+
+            return true
+        }
+
         history.add(v)
+
+        fun cleanHistory() {
+            // we don't want to remove the last and first index of the history
+            // [_,a,ab] -> the size is 3, "a" will be removed
+            if (history.size < 3) return
+
+            var last = history.size - 1
+            val secondLast = last - 1
+
+            if (isSimilar(history[last], history[secondLast])) {
+                if (isSimilar(history[secondLast - 1], history[secondLast])) {
+                    history.removeAt(secondLast)
+                }
+            }
+        }
+
+        cleanHistory()
+
         viewModelScope.launch {
-            _historyManager.emit(History(
-                size = history.size,
-                index = historyManager.index + 1
-            ))
+            _historyManager.emit(
+                History(
+                    size = history.size,
+                    index = history.size - 1
+                )
+            )
         }
     }
 
@@ -153,10 +199,12 @@ open class TextVM() : ViewModel() {
     fun undo() {
         val historyManager = historyManager.value
         viewModelScope.launch {
-            _historyManager.emit(History(
-                size = historyManager.size,
-                index = historyManager.index - 1
-            ))
+            _historyManager.emit(
+                History(
+                    size = historyManager.size,
+                    index = historyManager.index - 1
+                )
+            )
         }
         _content.value = history[historyManager.index - 1].copy()
     }
@@ -164,10 +212,12 @@ open class TextVM() : ViewModel() {
     fun redo() {
         val historyManager = historyManager.value
         viewModelScope.launch {
-            _historyManager.emit(History(
-                size = historyManager.size,
-                index = historyManager.index + 1
-            ))
+            _historyManager.emit(
+                History(
+                    size = historyManager.size,
+                    index = historyManager.index + 1
+                )
+            )
         }
         _content.value = history[historyManager.index + 1].copy()
     }
