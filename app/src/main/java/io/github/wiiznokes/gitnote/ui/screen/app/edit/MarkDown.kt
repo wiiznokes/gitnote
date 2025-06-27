@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.Title
@@ -102,20 +103,20 @@ fun TextFormatRow(
             imageVector = Icons.Default.FormatItalic,
             contentDescription = "italic"
         )
-//
-//        SmallSeparator()
-//
+
+        SmallSeparator()
+
 //        SmallButton(
 //            onClick = {},
 //            imageVector = Icons.Default.Link,
 //            contentDescription = "link"
 //        )
 //
-//        SmallButton(
-//            onClick = {},
-//            imageVector = Icons.Default.Code,
-//            contentDescription = "code"
-//        )
+        SmallButton(
+            onClick = { vm.onCode() },
+            imageVector = Icons.Default.Code,
+            contentDescription = "code"
+        )
 //        SmallButton(
 //            onClick = {},
 //            imageVector = Icons.Default.FormatQuote,

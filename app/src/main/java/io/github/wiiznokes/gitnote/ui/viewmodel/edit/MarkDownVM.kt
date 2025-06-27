@@ -41,6 +41,11 @@ class MarkDownVM : TextVM {
         val newValue = addOrRemovePatternAtTheExtremitiesOfSelection(content.value, "_")
         super.onValueChange(newValue)
     }
+
+    fun onCode() {
+        val newValue = onCode(content.value)
+        super.onValueChange(newValue)
+    }
 }
 
 
