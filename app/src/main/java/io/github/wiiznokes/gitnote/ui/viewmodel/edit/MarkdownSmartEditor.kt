@@ -518,13 +518,14 @@ fun onUnorderedList(v: TextFieldValue): TextFieldValue {
 
             } else {
                 if (defaultListInfo == null) {
-                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                    defaultListInfo = ListItemInfo()
                 }
 
                 defaultListInfo.copy(
                     listType = ListType.Dash,
                     isChecked = false,
-                    title = line
+                    title = line,
+                    padding = getPadding(line) ?: ""
                 ).line(minusPaddingInTitle = true)
             }
         }
@@ -563,13 +564,14 @@ fun onNumberedList(v: TextFieldValue): TextFieldValue {
                 }
             } else {
                 if (defaultListInfo == null) {
-                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                    defaultListInfo = ListItemInfo()
                 }
 
                 defaultListInfo.copy(
                     listType = ListType.Number(lineNumber),
                     isChecked = false,
-                    title = line
+                    title = line,
+                    padding = getPadding(line) ?: ""
                 ).line(minusPaddingInTitle = true)
             }
         }
@@ -611,13 +613,14 @@ fun onTaskList(v: TextFieldValue): TextFieldValue {
 
             } else {
                 if (defaultListInfo == null) {
-                    defaultListInfo = ListItemInfo.fromLineFallBack(line)
+                    defaultListInfo = ListItemInfo()
                 }
 
                 defaultListInfo.copy(
                     isTaskList = true,
                     isChecked = false,
-                    title = line
+                    title = line,
+                    padding = getPadding(line) ?: ""
                 ).line(numberOp = { lineNumber }, minusPaddingInTitle = true)
             }
         }
