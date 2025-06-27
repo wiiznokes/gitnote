@@ -54,3 +54,17 @@ jobs:
           name: gitnote-nightly
           path: packages/*
           if-no-files-found: error
+
+      - name: Publish release
+        run: |
+          # delete previous nightly release
+          gh release delete nightly --yes || true
+          git push --delete origin nightly || true
+
+          git tag nightly
+          git push origin --tags
+
+          # https://cli.github.com/manual/gh_release_create
+          gh release create nightly --title "nightly" \
+            --verify-tag --prerelease --generate-notes --target $GITHUB_SHA \
+            ./packages/*
