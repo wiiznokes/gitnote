@@ -27,7 +27,7 @@ fun markdownSmartEditor(
                     return v
                 }
 
-                val lineBefore = v.text.substring(0, cursorPos - 1).lastIndexOf('\n').let {
+                val lineBefore = v.text.lastIndexOf('\n', startIndex = cursorPos - 2).let {
                     if (it == -1) 0 else it + 1
                 }.let {
                     v.text.substring(it, cursorPos - 1)
@@ -86,7 +86,7 @@ fun markdownSmartEditor(
                 // remove padding, under certain conditions
                 if (prev.text.length == v.text.length + 1) {
 
-                    val start = v.text.substring(0, cursorPos).lastIndexOf('\n').let {
+                    val start = v.text.lastIndexOf('\n', startIndex = cursorPos - 1).let {
                         if (it == -1) 0 else it + 1
                     }
 
@@ -191,7 +191,7 @@ fun onTitle(v: TextFieldValue): TextFieldValue {
     val pattern = "### "
     return if (v.selection.collapsed) {
         // check if line start with "### "
-        val start = v.text.substring(0, cursorPosMin).lastIndexOf('\n').let {
+        val start = v.text.lastIndexOf('\n', startIndex = cursorPosMin - 1).let {
             if (it == -1) 0 else it + 1
         }
 
