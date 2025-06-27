@@ -247,22 +247,26 @@ fun onTitle(v: TextFieldValue): TextFieldValue {
     }
 }
 
-fun addOrRemovePatternAtTheExtremitiesOfSelection(v: TextFieldValue, pattern: String): TextFieldValue {
 
+fun addOrRemovePatternAtTheExtremitiesOfSelection(
+    v: TextFieldValue,
+    startPattern: String,
+    endPattern: String
+): TextFieldValue {
     val cursorPosMin = v.selection.min
     val cursorPosMax = v.selection.max
 
     // if already present, remove it
-    return if (v.text.substring(0, cursorPosMin).endsWith(pattern)
-        && v.text.substring(cursorPosMax, v.text.length).startsWith(pattern)
+    return if (v.text.substring(0, cursorPosMin).endsWith(startPattern)
+        && v.text.substring(cursorPosMax, v.text.length).startsWith(endPattern)
     ) {
         v.copy(
-            text = v.text.substring(0, cursorPosMin - pattern.length)
+            text = v.text.substring(0, cursorPosMin - startPattern.length)
                     + v.text.substring(cursorPosMin, cursorPosMax)
-                    + v.text.substring(cursorPosMax + pattern.length, v.text.length),
+                    + v.text.substring(cursorPosMax + endPattern.length, v.text.length),
             selection = TextRange(
-                start = v.selection.start - pattern.length,
-                end = v.selection.end - pattern.length,
+                start = v.selection.start - startPattern.length,
+                end = v.selection.end - startPattern.length,
             )
         )
     }
@@ -270,13 +274,31 @@ fun addOrRemovePatternAtTheExtremitiesOfSelection(v: TextFieldValue, pattern: St
     else {
         v.copy(
             text = v.text.substring(0, cursorPosMin)
-                    + pattern + v.text.substring(cursorPosMin, cursorPosMax) + pattern
+                    + startPattern + v.text.substring(cursorPosMin, cursorPosMax) + endPattern
                     + v.text.substring(cursorPosMax, v.text.length),
             selection = TextRange(
-                start = v.selection.start + pattern.length,
-                end = v.selection.end + pattern.length,
+                start = v.selection.start + startPattern.length,
+                end = v.selection.end + startPattern.length,
             )
         )
 
+    }
+}
+
+fun addOrRemovePatternAtTheExtremitiesOfSelection(
+    v: TextFieldValue,
+    pattern: String
+): TextFieldValue {
+    return addOrRemovePatternAtTheExtremitiesOfSelection(v, pattern, pattern)
+}
+
+fun onCode(v: TextFieldValue): TextFieldValue {
+    val cursorPosMin = v.selection.min
+    val cursorPosMax = v.selection.max
+
+    return if (v.text.substring(cursorPosMin, cursorPosMax).contains('\n')) {
+        addOrRemovePatternAtTheExtremitiesOfSelection(v, "```\n", "\n```")
+    } else {
+        addOrRemovePatternAtTheExtremitiesOfSelection(v, "`")
     }
 }
