@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -107,12 +108,12 @@ fun TextFormatRow(
 
         SmallSeparator()
 
-//        SmallButton(
-//            onClick = {},
-//            imageVector = Icons.Default.Link,
-//            contentDescription = "link"
-//        )
-//
+        SmallButton(
+            onClick = { vm.onLink() },
+            imageVector = Icons.Default.Link,
+            contentDescription = "link"
+        )
+
         SmallButton(
             onClick = { vm.onCode() },
             imageVector = Icons.Default.Code,
