@@ -305,6 +305,7 @@ fun onCode(v: TextFieldValue): TextFieldValue {
 
 fun onQuote(v: TextFieldValue): TextFieldValue {
     val cursorPosMin = if (v.text.getOrNull(v.selection.min) == '\n') {
+        // if we are at the end of a line, decrement the cursor to include the line
         v.selection.min - 1
     } else {
         v.selection.min
