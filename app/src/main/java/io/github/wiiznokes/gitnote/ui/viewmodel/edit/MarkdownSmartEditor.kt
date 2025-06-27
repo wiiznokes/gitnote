@@ -359,3 +359,43 @@ fun onQuote(v: TextFieldValue): TextFieldValue {
         )
     }
 }
+
+fun onLink(v: TextFieldValue): TextFieldValue {
+    val cursorPosMin = v.selection.min
+    val cursorPosMax = v.selection.max
+
+    val startPattern = "["
+    val endPattern = "](url)"
+
+    // remove url pattern
+    return if (v.text.startsWith(startPattern, startIndex = cursorPosMin - startPattern.length)
+        && v.text.startsWith(endPattern, startIndex = cursorPosMax)) {
+        v.copy(
+            text = v.text.substring(0, cursorPosMin - startPattern.length)
+                    + v.text.substring(cursorPosMin, cursorPosMax)
+                    + v.text.substring(cursorPosMax + endPattern.length, v.text.length),
+            selection = TextRange(
+                start = v.selection.start - startPattern.length,
+                end = v.selection.end - startPattern.length,
+            )
+        )
+    }
+    // add it
+    else {
+        v.copy(
+            text = v.text.substring(0, cursorPosMin)
+                    + startPattern
+                    + v.text.substring(cursorPosMin, cursorPosMax)
+                    + endPattern
+                    + v.text.substring(cursorPosMax, v.text.length),
+            selection = if (v.selection.collapsed) TextRange(
+                start = v.selection.start + startPattern.length,
+                end = v.selection.end + startPattern.length,
+            ) else TextRange(
+                start = cursorPosMax + 3,
+                end = cursorPosMax + 6,
+            )
+        )
+    }
+
+}
