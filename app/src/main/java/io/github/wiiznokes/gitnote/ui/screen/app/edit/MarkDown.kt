@@ -13,6 +13,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FormatBold
+import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -90,16 +92,16 @@ fun TextFormatRow(
             contentDescription = "title"
         )
 
-//        SmallButton(
-//            onClick = {},
-//            imageVector = Icons.Default.FormatBold,
-//            contentDescription = "bold"
-//        )
-//        SmallButton(
-//            onClick = {},
-//            imageVector = Icons.Default.FormatItalic,
-//            contentDescription = "italic"
-//        )
+        SmallButton(
+            onClick = { vm.onBold() },
+            imageVector = Icons.Default.FormatBold,
+            contentDescription = "bold"
+        )
+        SmallButton(
+            onClick = { vm.onItalic() },
+            imageVector = Icons.Default.FormatItalic,
+            contentDescription = "italic"
+        )
 //
 //        SmallSeparator()
 //
