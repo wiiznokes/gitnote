@@ -130,6 +130,4 @@ class RegexTest {
             assertTrue(info.isTaskList)
         }
     }
-
-
 }
