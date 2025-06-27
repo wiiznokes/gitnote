@@ -12,6 +12,12 @@ concurrency:
   group: ${{ github.sha }}-${{ github.workflow }}-nightly
   cancel-in-progress: true
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CARGO_TERM_COLOR: always
+
 jobs:
   nightly:
     runs-on: ubuntu-latest
