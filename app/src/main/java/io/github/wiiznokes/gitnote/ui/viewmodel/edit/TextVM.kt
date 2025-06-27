@@ -52,7 +52,9 @@ open class TextVM() : ViewModel() {
     lateinit var editType: EditType
         private set
 
-    private lateinit var previousNote: Note
+    lateinit var previousNote: Note
+        private set
+
     lateinit var name: MutableState<TextFieldValue>
 
     private val _content = mutableStateOf(TextFieldValue())
