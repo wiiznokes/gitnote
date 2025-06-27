@@ -246,3 +246,37 @@ fun onTitle(v: TextFieldValue): TextFieldValue {
         }
     }
 }
+
+fun addOrRemovePatternAtTheExtremitiesOfSelection(v: TextFieldValue, pattern: String): TextFieldValue {
+
+    val cursorPosMin = v.selection.min
+    val cursorPosMax = v.selection.max
+
+    // if already present, remove it
+    return if (v.text.substring(0, cursorPosMin).endsWith(pattern)
+        && v.text.substring(cursorPosMax, v.text.length).startsWith(pattern)
+    ) {
+        v.copy(
+            text = v.text.substring(0, cursorPosMin - pattern.length)
+                    + v.text.substring(cursorPosMin, cursorPosMax)
+                    + v.text.substring(cursorPosMax + pattern.length, v.text.length),
+            selection = TextRange(
+                start = v.selection.start - pattern.length,
+                end = v.selection.end - pattern.length,
+            )
+        )
+    }
+    // else, add it
+    else {
+        v.copy(
+            text = v.text.substring(0, cursorPosMin)
+                    + pattern + v.text.substring(cursorPosMin, cursorPosMax) + pattern
+                    + v.text.substring(cursorPosMax, v.text.length),
+            selection = TextRange(
+                start = v.selection.start + pattern.length,
+                end = v.selection.end + pattern.length,
+            )
+        )
+
+    }
+}
