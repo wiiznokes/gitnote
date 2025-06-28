@@ -2,11 +2,11 @@ name: Nightly Build
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - "*.md"
+  # push:
+  #   branches:
+  #     - master
+  #   paths-ignore:
+  #     - "*.md"
 
 concurrency:
   group: ${{ github.sha }}-${{ github.workflow }}-nightly
