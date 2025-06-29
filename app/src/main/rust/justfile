@@ -3,14 +3,18 @@ set windows-powershell := true
 
 min-sdk := '30'
 
-export ndk := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
-export toolchain := ndk + '\toolchains\llvm\prebuilt\windows-x86_64'
-export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := toolchain + '\bin\x86_64-linux-android + min-sdk + -clang.cmd'
-export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := toolchain + '\bin\aarch64-linux-android + min-sdk + -clang.cmd'
+ndk := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
+toolchain := ndk + '\toolchains\llvm\prebuilt\windows-x86_64'
+export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := toolchain + '\bin\x86_64-linux-android' + min-sdk + '-clang.cmd'
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := toolchain + '\bin\aarch64-linux-android' + min-sdk + '-clang.cmd'
 
 
 build:
-    cargo build --target=x86_64-linux-android
+	cargo build --target=x86_64-linux-android
+	Copy-Item "./target\x86_64-linux-android\debug\libgit_wrapper.so" -Destination "../jniLibs\x86_64"
+	
+	cargo build --target=aarch64-linux-android
+	Copy-Item "./target\aarch64-linux-android\debug\libgit_wrapper.so" -Destination "../jniLibs\arm64-v8a"
 
 fix:
 	cargo clippy --workspace --all-features --fix --allow-dirty --allow-staged
