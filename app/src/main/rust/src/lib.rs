@@ -3,7 +3,7 @@ use jni::objects::JClass;
 use jni::sys::{jint, jobject, jstring};
 
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_initLib(
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
     env: JNIEnv,
     _class: JClass,
 ) -> jint {

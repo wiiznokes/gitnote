@@ -21,6 +21,7 @@ cargo {
     module  = "./src/main/rust"
     libname = "git_wrapper"
     targets = listOf("arm64", "x86_64")
+    prebuiltToolchains = true
 }
 
 tasks.whenTaskAdded {
@@ -29,6 +30,9 @@ tasks.whenTaskAdded {
     }
 }
 android {
+
+    ndkVersion = "27.2.12479018"
+
     namespace = "io.github.wiiznokes.gitnote"
     compileSdk = 35
     

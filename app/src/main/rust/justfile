@@ -1,0 +1,21 @@
+set windows-powershell := true
+# set shell := ["cmd.exe", "/c"]
+
+export NDK := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
+export TOOLCHAIN := NDK + '\toolchains\llvm\prebuilt\windows-x86_64'
+export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := TOOLCHAIN + '\bin\x86_64-linux-android35-clang.cmd'
+
+
+# export CC := TOOLCHAIN + '\bin\x86_64-linux-android35-clang.cmd'
+# export AR := TOOLCHAIN + '\bin\llvm-ar.exe'
+# export CXX := TOOLCHAIN + '\bin\x86_64-linux-android35-clang++.cmd'
+
+
+build:
+    cargo build --target=x86_64-linux-android
+
+fix:
+	cargo clippy --workspace --all-features --fix --allow-dirty --allow-staged
+
+fmt:
+	cargo fmt --all
