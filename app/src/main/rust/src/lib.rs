@@ -11,7 +11,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
 ) -> jint {
     println!("Parameters: {:?}", ());
 
-    42
+    10
 }
 
 #[unsafe(no_mangle)]
