@@ -62,7 +62,9 @@ class GitManager {
 
         try {
             if (!isLibInitialized) {
-                if (initLib() < 0) {
+                val res = initLib()
+                Log.d(TAG, "res on init = $res")
+                if (res < 0) {
                     throw GitException(GitExceptionType.InitLib)
                 }
                 isLibInitialized = true
