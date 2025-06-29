@@ -1,10 +1,12 @@
+#![allow(non_snake_case)]
+
 use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::{jint, jobject, jstring};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
-    env: JNIEnv,
+    _env: JNIEnv,
     _class: JClass,
 ) -> jint {
     println!("Parameters: {:?}", ());
@@ -13,8 +15,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_createRepoLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib(
+    _env: JNIEnv,
     _class: JClass,
     repoPath: jstring,
 ) -> jint {
@@ -23,8 +25,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_createRepo
     42
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_openRepoLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib(
+    _env: JNIEnv,
     _class: JClass,
     repoPath: jstring,
 ) -> jint {
@@ -33,8 +35,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_openRepoLi
     42
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_cloneRepoLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib(
+    _env: JNIEnv,
     _class: JClass,
     repoPath: jstring,
     remoteUrl: jstring,
@@ -48,7 +50,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_cloneRepoL
     );
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_lastCommitLib(
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(
     env: JNIEnv,
     _class: JClass,
 ) -> jstring {
@@ -60,8 +62,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_lastCommit
         .into_raw()
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_commitAllLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib(
+    _env: JNIEnv,
     _class: JClass,
     username: jstring,
     message: jstring,
@@ -71,8 +73,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_commitAllL
     42
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_pushLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib(
+    _env: JNIEnv,
     _class: JClass,
     username: jobject,
     password: jobject,
@@ -81,8 +83,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_pushLib(
     println!("Parameters: {:?}", (username, password, progressCallback));
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_pullLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib(
+    _env: JNIEnv,
     _class: JClass,
     username: jobject,
     password: jobject,
@@ -91,22 +93,22 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_pullLib(
     println!("Parameters: {:?}", (username, password, progressCallback));
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_freeLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_freeLib(
+    _env: JNIEnv,
     _class: JClass,
 ) {
     println!("Parameters: {:?}", ());
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_closeRepoLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_closeRepoLib(
+    _env: JNIEnv,
     _class: JClass,
 ) {
     println!("Parameters: {:?}", ());
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManager_isChangeLib(
-    env: JNIEnv,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_isChangeLib(
+    _env: JNIEnv,
     _class: JClass,
 ) -> jint {
     println!("Parameters: {:?}", ());

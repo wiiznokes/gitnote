@@ -1,14 +1,12 @@
 set windows-powershell := true
-# set shell := ["cmd.exe", "/c"]
-
-export NDK := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
-export TOOLCHAIN := NDK + '\toolchains\llvm\prebuilt\windows-x86_64'
-export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := TOOLCHAIN + '\bin\x86_64-linux-android35-clang.cmd'
 
 
-# export CC := TOOLCHAIN + '\bin\x86_64-linux-android35-clang.cmd'
-# export AR := TOOLCHAIN + '\bin\llvm-ar.exe'
-# export CXX := TOOLCHAIN + '\bin\x86_64-linux-android35-clang++.cmd'
+min-sdk := '30'
+
+export ndk := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
+export toolchain := ndk + '\toolchains\llvm\prebuilt\windows-x86_64'
+export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := toolchain + '\bin\x86_64-linux-android + min-sdk + -clang.cmd'
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := toolchain + '\bin\aarch64-linux-android + min-sdk + -clang.cmd'
 
 
 build:
