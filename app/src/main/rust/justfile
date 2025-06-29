@@ -2,8 +2,9 @@ set windows-powershell := true
 
 
 min-sdk := '30'
+ndk-version := '27.2.12479018'
 
-ndk := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\27.2.12479018'
+ndk := 'C:\Users\wiiz\AppData\Local\Android\Sdk\ndk\' + ndk-version
 toolchain := ndk + '\toolchains\llvm\prebuilt\windows-x86_64'
 export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := toolchain + '\bin\x86_64-linux-android' + min-sdk + '-clang.cmd'
 export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := toolchain + '\bin\aarch64-linux-android' + min-sdk + '-clang.cmd'
