@@ -26,9 +26,11 @@ cargo {
 
 tasks.whenTaskAdded {
     if (name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") {
+        outputs.upToDateWhen { false }
         dependsOn("cargoBuild")
     }
 }
+
 android {
 
     ndkVersion = "27.2.12479018"
