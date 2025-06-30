@@ -38,4 +38,3 @@ google-services.json
 .kotlin/
 
 target/
-app/src/main/rust/.cargo/config.toml
