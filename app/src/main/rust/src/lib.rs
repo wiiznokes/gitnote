@@ -1,8 +1,13 @@
 #![allow(non_snake_case)]
 
+use std::sync::{LazyLock, Mutex};
+
+use git2::Repository;
 use jni::JNIEnv;
-use jni::objects::JClass;
+use jni::objects::{JClass, JString};
 use jni::sys::{jint, jobject, jstring};
+
+static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
 
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
@@ -11,28 +16,55 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
 ) -> jint {
     println!("Parameters: {:?}", ());
 
-    10
+    0
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib(
-    _env: JNIEnv,
-    _class: JClass,
-    repoPath: jstring,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    repoPath: JString<'local>,
 ) -> jint {
-    println!("Parameters: {:?}", (repoPath));
+    let repo_path: String = env
+        .get_string(&repoPath)
+        .expect("Couldn't get java string!")
+        .into();
 
-    42
+    let repo = match Repository::init(repo_path) {
+        Ok(repo) => repo,
+        Err(e) => {
+            eprintln!("{e}");
+            return e.code() as jint;
+        }
+    };
+
+    REPO.lock().unwrap().replace(repo);
+
+    return 0;
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib(
-    _env: JNIEnv,
-    _class: JClass,
-    repoPath: jstring,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    repoPath: JString<'local>,
 ) -> jint {
-    println!("Parameters: {:?}", (repoPath));
 
-    42
+    let repo_path: String = env
+        .get_string(&repoPath)
+        .expect("Couldn't get java string!")
+        .into();
+
+    let repo = match Repository::open(repo_path) {
+        Ok(repo) => repo,
+        Err(e) => {
+            eprintln!("{e}");
+            return e.code() as jint;
+        }
+    };
+
+    REPO.lock().unwrap().replace(repo);
+
+    return 0;
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib(
