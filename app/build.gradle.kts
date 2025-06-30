@@ -17,11 +17,14 @@ plugins {
     id("org.mozilla.rust-android-gradle.rust-android") version "0.9.6"
 }
 
+val isDebug = gradle.startParameter.taskNames.any { it.contains("Debug") }
+
 cargo {
     module  = "./src/main/rust"
     libname = "git_wrapper"
     targets = listOf("arm64", "x86_64")
     prebuiltToolchains = true
+    profile = if (isDebug) "debug" else "release"
 }
 
 tasks.whenTaskAdded {
