@@ -38,11 +38,7 @@ jobs:
 
       - name: Compile
         run: |
-          
-          NDK_VERSION=$(grep ndkVersion app/build.gradle.kts | cut -d'"' -f2)
-          env
-          ls /usr/local/lib/android/sdk/ndk/
-
+          # we must set the bin path of the ndk in PATH because some cmake file will not find some tools
           export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"  && ./gradlew assembleDebug
 
   prettier-ci:
