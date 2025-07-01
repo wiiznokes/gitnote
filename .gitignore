@@ -36,5 +36,3 @@ google-services.json
 !app/nightly-signing-key.jks
 
 .kotlin/
-
-target/
