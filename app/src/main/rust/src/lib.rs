@@ -2,9 +2,12 @@
 
 use std::sync::{LazyLock, Mutex};
 
-use git2::{IndexAddOption, Repository, Signature};
+use git2::{
+    CertificateCheckStatus, Cred, FetchOptions, IndexAddOption, Progress, RemoteCallbacks,
+    Repository, Signature,
+};
 use jni::JNIEnv;
-use jni::objects::{JClass, JString};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jobject, jstring};
 
 #[macro_use]
@@ -68,19 +71,54 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepo
     return 0;
 }
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib(
-    _env: JNIEnv,
-    _class: JClass,
-    repoPath: jstring,
-    remoteUrl: jstring,
-    username: jobject,
-    password: jobject,
-    progressCallback: jobject,
-) {
-    info!(
-        "Parameters: {:?}",
-        (repoPath, remoteUrl, username, password, progressCallback)
-    );
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    repoPath: JString<'local>,
+    remoteUrl: JString<'local>,
+    username: JString<'local>,
+    password: JString<'local>,
+    _progressCallback: JObject<'local>,
+) -> jint {
+    let repo_path: String = env.get_string(&repoPath).unwrap().into();
+    let remote_url: String = env.get_string(&remoteUrl).unwrap().into();
+
+    let mut callbacks = RemoteCallbacks::new();
+
+    callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
+
+    if !username.is_null() && !password.is_null() {
+        let username: String = env.get_string(&username).unwrap().into();
+        let password: String = env.get_string(&password).unwrap().into();
+
+        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
+            Cred::userpass_plaintext(&username, &password)
+        });
+    }
+
+    callbacks.transfer_progress(|stats: Progress| {
+        // TODO: use `progress_callback` to send progress info back to Java
+        info!(
+            "received {}/{} objects",
+            stats.received_objects(),
+            stats.total_objects()
+        );
+        true
+    });
+
+    let mut fetch_options = FetchOptions::new();
+    fetch_options.remote_callbacks(callbacks);
+
+    let mut builder = git2::build::RepoBuilder::new();
+
+    let repo_result = builder
+        //.with_checkout(checkout) add this when using progress
+        .fetch_options(fetch_options)
+        .clone(&remote_url, std::path::Path::new(&repo_path));
+
+    unwrap_or_log!(repo_result, "git_clone");
+
+    0
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(
