@@ -1,11 +1,7 @@
 #![allow(non_snake_case)]
 
-use std::sync::{LazyLock, Mutex};
+use std::fmt::Display;
 
-use git2::{
-    CertificateCheckStatus, Cred, FetchOptions, IndexAddOption, Progress, PushOptions,
-    RemoteCallbacks, Repository, Signature, StatusOptions,
-};
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jstring};
@@ -16,9 +12,40 @@ use crate::utils::install_panic_hook;
 extern crate log;
 #[macro_use]
 mod utils;
-mod merge;
+mod libgit2;
 
-static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
+const OK: jint = 0;
+
+enum Error {
+    Git2 { error: git2::Error, msg: String },
+}
+
+impl Error {
+    fn git2(error: git2::Error, msg: &str) -> Self {
+        Self::Git2 {
+            error,
+            msg: msg.into(),
+        }
+    }
+}
+
+impl From<Error> for jint {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::Git2 { error, .. } => error.raw_code(),
+        }
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Git2 { error, msg } => {
+                write!(f, "{msg}: {error}")
+            }
+        }
+    }
+}
 
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
@@ -38,7 +65,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
             ),
     );
 
-    0
+    OK
 }
 
 #[unsafe(no_mangle)]
@@ -52,11 +79,9 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRe
         .expect("Couldn't get java string!")
         .into();
 
-    let repo = unwrap_or_log!(Repository::init(repo_path), "Repository::init");
+    unwrap_or_log!(libgit2::create_repo(&repo_path), "create_repo");
 
-    REPO.lock().unwrap().replace(repo);
-
-    0
+    OK
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib<'local>(
@@ -69,12 +94,16 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepo
         .expect("Couldn't get java string!")
         .into();
 
-    let repo = unwrap_or_log!(Repository::open(repo_path), "Repository::open");
+    unwrap_or_log!(libgit2::open_repo(&repo_path), "open_repo");
 
-    REPO.lock().unwrap().replace(repo);
-
-    0
+    OK
 }
+
+pub struct Creeds {
+    pub username: String,
+    pub password: String,
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib<'local>(
     mut env: JNIEnv<'local>,
@@ -88,63 +117,33 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     let repo_path: String = env.get_string(&repoPath).unwrap().into();
     let remote_url: String = env.get_string(&remoteUrl).unwrap().into();
 
-    let mut callbacks = RemoteCallbacks::new();
-
-    callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
-
-    if !username.is_null() && !password.is_null() {
+    let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
         let password: String = env.get_string(&password).unwrap().into();
 
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&username, &password)
-        });
-    }
+        Some(Creeds { username, password })
+    } else {
+        None
+    };
 
-    callbacks.transfer_progress(|stats: Progress| {
-        // TODO: use `progress_callback` to send progress info back to Java
-        info!(
-            "received {}/{} objects",
-            stats.received_objects(),
-            stats.total_objects()
-        );
-        true
-    });
+    unwrap_or_log!(
+        libgit2::clone_repo(&repo_path, &remote_url, creeds),
+        "clone_repo"
+    );
 
-    let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
-
-    let mut builder = git2::build::RepoBuilder::new();
-
-    let repo_result = builder
-        //.with_checkout(checkout) add this when using progress
-        .fetch_options(fetch_options)
-        .clone(&remote_url, std::path::Path::new(&repo_path));
-
-    let repo = unwrap_or_log!(repo_result, "git_clone");
-
-    REPO.lock().unwrap().replace(repo);
-
-    0
+    OK
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(
     env: JNIEnv,
     _class: JClass,
 ) -> jstring {
-    let repo = REPO.lock().expect("repo lock");
-    let repo = repo.as_ref().expect("repo");
+    let commit = match libgit2::last_commit() {
+        Some(commit) => commit,
+        None => return std::ptr::null_mut(),
+    };
 
-    // new repo how no commit, so this function can fail
-    let head = unwrap_or_log!(
-        repo.refname_to_id("HEAD"),
-        "refname_to_id",
-        std::ptr::null_mut()
-    );
-
-    let head = head.to_string();
-
-    env.new_string(head)
+    env.new_string(commit)
         .expect("Couldn't create Java string!")
         .into_raw()
 }
@@ -155,43 +154,12 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAl
     username: JString<'local>,
     message: JString<'local>,
 ) -> jint {
-    let repo = REPO.lock().expect("repo lock");
-    let repo = repo.as_ref().expect("repo");
-
-    let mut index = unwrap_or_log!(repo.index(), "index");
-
-    unwrap_or_log!(repo.index(), "index");
-
-    unwrap_or_log!(
-        index.add_all(["*"].iter(), IndexAddOption::DEFAULT, None),
-        "add_all"
-    );
-
-    // Write index to disk
-    unwrap_or_log!(index.write(), "write");
-
-    // Write tree
-    let tree_oid = unwrap_or_log!(index.write_tree(), "write_tree");
-
-    let tree = unwrap_or_log!(repo.find_tree(tree_oid), "find_tree");
-
-    // Get HEAD commit as parent, and Allow initial commit
-    let parent_commit = repo.head().and_then(|r| r.peel_to_commit()).ok();
-
     let username: String = env.get_string(&username).unwrap().into();
     let message: String = env.get_string(&message).unwrap().into();
 
-    let sig = unwrap_or_log!(Signature::now(&username, &username), "Signature::now");
+    unwrap_or_log!(libgit2::commit_all(&username, &message), "commit_all");
 
-    // Create commit
-    let commit_result = match parent_commit {
-        Some(ref parent) => repo.commit(Some("HEAD"), &sig, &sig, &message, &tree, &[parent]),
-        None => repo.commit(Some("HEAD"), &sig, &sig, &message, &tree, &[]),
-    };
-
-    unwrap_or_log!(commit_result, "commit");
-
-    0
+    OK
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<'local>(
@@ -201,33 +169,18 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<
     password: JString<'local>,
     _progressCallback: JObject<'local>,
 ) -> jint {
-    let repo = REPO.lock().expect("repo lock");
-    let repo = repo.as_ref().expect("repo");
-
-    let mut remote = unwrap_or_log!(repo.find_remote("origin"), "find_remote");
-
-    let refspecs = ["refs/heads/main:refs/heads/main"];
-
-    let mut callbacks = RemoteCallbacks::new();
-
-    callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
-
-    if !username.is_null() && !password.is_null() {
+    let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
         let password: String = env.get_string(&password).unwrap().into();
 
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&username, &password)
-        });
-    }
+        Some(Creeds { username, password })
+    } else {
+        None
+    };
 
-    let mut push_opts = PushOptions::new();
-    push_opts.remote_callbacks(callbacks);
+    unwrap_or_log!(libgit2::push(creeds), "push");
 
-    let res = remote.push(&refspecs, Some(&mut push_opts));
-    unwrap_or_log!(res, "push");
-
-    0
+    OK
 }
 
 #[unsafe(no_mangle)]
@@ -238,41 +191,18 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     password: JString<'local>,
     _progressCallback: JObject<'local>,
 ) -> jint {
-    let repo = REPO.lock().expect("repo lock");
-    let repo = repo.as_ref().expect("repo");
-
-    let mut remote = unwrap_or_log!(repo.find_remote("origin"), "find_remote");
-
-    let mut callbacks = RemoteCallbacks::new();
-
-    callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
-
-    if !username.is_null() && !password.is_null() {
+    let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
         let password: String = env.get_string(&password).unwrap().into();
 
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&username, &password)
-        });
-    }
+        Some(Creeds { username, password })
+    } else {
+        None
+    };
 
-    let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
+    unwrap_or_log!(libgit2::pull(creeds), "pull");
 
-    let res = remote.fetch(&[] as &[&str], Some(&mut fetch_options), None);
-
-    unwrap_or_log!(res, "fetch");
-
-    let fetch_head = unwrap_or_log!(repo.find_reference("FETCH_HEAD"), "find_reference");
-
-    let commit = unwrap_or_log!(
-        repo.reference_to_annotated_commit(&fetch_head),
-        "reference_to_annotated_commit"
-    );
-
-    unwrap_or_log!(merge::do_merge(repo, "main", commit), "merge");
-
-    0
+    OK
 }
 
 #[unsafe(no_mangle)]
@@ -287,23 +217,14 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_closeRep
     _env: JNIEnv,
     _class: JClass,
 ) {
-    let mut repo = REPO.lock().expect("repo lock");
-    repo.take();
+    libgit2::close();
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_isChangeLib(
     _env: JNIEnv,
     _class: JClass,
 ) -> jint {
-    let repo = REPO.lock().expect("repo lock");
-    let repo = repo.as_ref().expect("repo");
+    let is_change = unwrap_or_log!(libgit2::is_change(), "is_change");
 
-    let mut opts = StatusOptions::new();
-    opts.include_untracked(true).recurse_untracked_dirs(true);
-
-    let statuses = unwrap_or_log!(repo.statuses(Some(&mut opts)), "statuses");
-
-    let count = statuses.len();
-
-    (count > 0) as jint
+    is_change as jint
 }
