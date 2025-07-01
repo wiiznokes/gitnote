@@ -20,3 +20,5 @@ app/proguard-rules.pro
 
 
 libgit2-android
+
+target/

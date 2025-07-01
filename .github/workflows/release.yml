@@ -47,15 +47,14 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      # https://github.com/actions/cache/blob/main/examples.md#java---gradle
-      - uses: actions/cache@v4
+      - name: Install Rust toolchain
+        run: |
+          rustup update
+          rustup target add aarch64-linux-android x86_64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle
+          workspaces: "./app/src/main/rust/"
 
       - name: Retrieve the secret and decode it to a file and Build apk
         env:
@@ -65,7 +64,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-          ./gradlew assembleRelease
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleRelease
 
           mkdir -p packages
           # warning: do not use github.event syntax here
@@ -82,7 +81,7 @@ jobs:
           # delete tag/release if needed
           gh release delete nightly --yes || true
           git push --delete origin nightly || true
-          
+
           gh release delete ${{ inputs.version }} --yes || true
           git push --delete origin ${{ inputs.version }} || true
 

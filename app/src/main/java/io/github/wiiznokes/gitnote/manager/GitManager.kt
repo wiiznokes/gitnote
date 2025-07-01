@@ -1,6 +1,7 @@
 package io.github.wiiznokes.gitnote.manager
 
 import android.util.Log
+import androidx.annotation.Keep
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
@@ -62,7 +63,9 @@ class GitManager {
 
         try {
             if (!isLibInitialized) {
-                if (initLib() < 0) {
+                val res = initLib()
+                Log.d(TAG, "res on init = $res")
+                if (res < 0) {
                     throw GitException(GitExceptionType.InitLib)
                 }
                 isLibInitialized = true
@@ -107,6 +110,18 @@ class GitManager {
         isRepoInitialized = true
     }
 
+    private var actualCb: ((Int) -> Unit)? = null
+
+    /**
+     * This function is called from native code
+     */
+    @Keep
+    fun progressCb(progress: Int) {
+        if (actualCb!= null) {
+            actualCb?.invoke(progress)
+        }
+    }
+
     suspend fun cloneRepo(
         repoPath: String,
         repoUrl: String,
@@ -116,16 +131,17 @@ class GitManager {
         Log.d(TAG, "clone repo: $repoPath, $repoUrl, $creed")
         if (isRepoInitialized) throw GitException(GitExceptionType.RepoAlreadyInit)
 
+        actualCb = progressCallback
 
         val res = cloneRepoLib(
             repoPath = repoPath,
             remoteUrl = repoUrl,
             username = creed?.userName,
             password = creed?.password,
-            // cause error because of proguard
-            // https://stackoverflow.com/questions/77936218/how-to-tell-proguard-to-not-remove-a-lamda-function-parameter
-            //progressCallback = progressCallback
+            progressCallback = this
         )
+
+        actualCb = null
 
         if (res < 0) {
             throw GitException(uiHelper.getString(R.string.error_clone_repo, res))
@@ -224,7 +240,7 @@ private external fun cloneRepoLib(
     remoteUrl: String,
     username: String?,
     password: String?,
-    progressCallback: ((Int) -> Unit)? = null
+    progressCallback: GitManager
 ): Int
 
 

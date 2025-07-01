@@ -3,6 +3,7 @@ import java.io.InputStreamReader
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,9 +13,31 @@ plugins {
     alias(libs.plugins.ksp)
     // for compose navigation
     id("kotlin-parcelize")
+
+    id("org.mozilla.rust-android-gradle.rust-android") version "0.9.6"
+}
+
+val isDebug = gradle.startParameter.taskNames.any { it.contains("Debug") }
+
+cargo {
+    module  = "./src/main/rust"
+    libname = "git_wrapper"
+    targets = listOf("arm64", "x86_64")
+    prebuiltToolchains = true
+    profile = if (isDebug) "debug" else "release"
+}
+
+tasks.whenTaskAdded {
+    if (name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") {
+        outputs.upToDateWhen { false }
+        dependsOn("cargoBuild")
+    }
 }
 
 android {
+
+    ndkVersion = "27.2.12479018"
+
     namespace = "io.github.wiiznokes.gitnote"
     compileSdk = 35
     
@@ -65,9 +88,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
-        }
     }
 
     signingConfigs {
@@ -133,14 +153,6 @@ android {
         checkReleaseBuilds = false
     }
 
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
-
-    ndkVersion = "27.2.12479018"
 }
 
 kotlin {

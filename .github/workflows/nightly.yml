@@ -27,7 +27,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-          submodules: recursive
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -36,19 +35,18 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      # https://github.com/actions/cache/blob/main/examples.md#java---gradle
-      - uses: actions/cache@v4
+      - name: Install Rust toolchain
+        run: |
+          rustup update
+          rustup target add aarch64-linux-android x86_64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle
+          workspaces: "./app/src/main/rust/"
 
       - name: Build apk
         run: |
-          ./gradlew assembleNightly
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleNightly
 
           mkdir -p packages
           # warning: do not use github.event syntax here

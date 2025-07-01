@@ -19,7 +19,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-          submodules: recursive
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -28,9 +27,19 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
+      - name: Install Rust toolchain
+        run: |
+          rustup update
+          rustup target add aarch64-linux-android x86_64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "./app/src/main/rust/"
+
       - name: Compile
         run: |
-          ./gradlew assembleDebug
+          # we must set the bin path of the ndk in PATH because some cmake file will not find some tools
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleDebug
 
   prettier-ci:
     name: Prettier-Fmt-Ci
