@@ -10,7 +10,7 @@ pub fn install_panic_hook() {
         LAST_BACKTRACE.lock().unwrap().replace(bt);
 
         if let Some(s) = info.payload().downcast_ref::<&str>() {
-            error!("panic occurred: {:?}", s);
+            error!("panic occurred: {s:?}");
         } else {
             error!("panic occurred: unknown");
         }
