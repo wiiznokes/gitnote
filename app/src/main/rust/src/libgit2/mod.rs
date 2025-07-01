@@ -5,7 +5,7 @@ use git2::{
     RemoteCallbacks, Repository, Signature, StatusOptions,
 };
 
-use crate::{Creeds, Error};
+use crate::{Creeds, Error, ProgressCB};
 
 mod merge;
 
@@ -30,7 +30,12 @@ pub fn open_repo(repo_path: &str) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn clone_repo(repo_path: &str, remote_url: &str, creeds: Option<Creeds>) -> Result<(), Error> {
+pub fn clone_repo(
+    repo_path: &str,
+    remote_url: &str,
+    creeds: Option<Creeds>,
+    mut cb: ProgressCB,
+) -> Result<(), Error> {
     let mut callbacks = RemoteCallbacks::new();
 
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
@@ -42,12 +47,10 @@ pub fn clone_repo(repo_path: &str, remote_url: &str, creeds: Option<Creeds>) -> 
     }
 
     callbacks.transfer_progress(|stats: Progress| {
-        // TODO: use `progress_callback` to send progress info back to Java
-        info!(
-            "received {}/{} objects",
-            stats.received_objects(),
-            stats.total_objects()
-        );
+        let progress = stats.indexed_objects() as f32 / stats.total_objects() as f32 * 100.;
+
+        cb.progress(progress as i32);
+
         true
     });
 

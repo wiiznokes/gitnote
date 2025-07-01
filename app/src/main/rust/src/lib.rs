@@ -4,6 +4,7 @@ use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jstring};
 
+use crate::callback::ProgressCB;
 use crate::utils::install_panic_hook;
 
 #[macro_use]
@@ -102,6 +103,36 @@ pub struct Creeds {
     pub password: String,
 }
 
+mod callback {
+    use jni::{JNIEnv, objects::JObject};
+
+    pub struct ProgressCB<'a, 'b> {
+        env: &'b mut JNIEnv<'a>,
+        callback_class: JObject<'a>,
+    }
+
+    impl<'a, 'b> ProgressCB<'a, 'b> {
+        pub fn new(env: &'b mut JNIEnv<'a>, callback_class: JObject<'a>) -> Self {
+            Self {
+                env,
+                callback_class,
+            }
+        }
+        pub fn progress(&mut self, progress: i32) {
+            match self.env.call_method(
+                &self.callback_class,
+                "progressCb",
+                "(I)V",
+                &[progress.into()],
+            ) {
+                Ok(_) => {}
+                Err(e) => {
+                    error!("{e}");
+                }
+            }
+        }
+    }
+}
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib<'local>(
     mut env: JNIEnv<'local>,
@@ -110,7 +141,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     remote_url: JString<'local>,
     username: JString<'local>,
     password: JString<'local>,
-    _progress_callback: JObject<'local>,
+    progress_callback: JObject<'local>,
 ) -> jint {
     let repo_path: String = env.get_string(&repo_path).unwrap().into();
     let remote_url: String = env.get_string(&remote_url).unwrap().into();
@@ -124,8 +155,10 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
         None
     };
 
+    let cb = ProgressCB::new(&mut env, progress_callback);
+
     unwrap_or_log!(
-        libgit2::clone_repo(&repo_path, &remote_url, creeds),
+        libgit2::clone_repo(&repo_path, &remote_url, creeds, cb),
         "clone_repo"
     );
 
