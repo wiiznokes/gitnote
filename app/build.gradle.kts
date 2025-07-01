@@ -36,6 +36,8 @@ tasks.whenTaskAdded {
 
 android {
 
+    ndkVersion = "27.2.12479018"
+
     namespace = "io.github.wiiznokes.gitnote"
     compileSdk = 35
     
