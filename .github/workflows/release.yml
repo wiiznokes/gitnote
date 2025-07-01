@@ -82,7 +82,7 @@ jobs:
           # delete tag/release if needed
           gh release delete nightly --yes || true
           git push --delete origin nightly || true
-          
+
           gh release delete ${{ inputs.version }} --yes || true
           git push --delete origin ${{ inputs.version }} || true
 

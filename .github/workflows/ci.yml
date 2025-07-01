@@ -27,6 +27,15 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
+      - name: Install Rust toolchain
+        run: |
+          rustup update
+          rustup target add aarch64-linux-android x86_64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "./app/src/main/rust/"
+
       - name: Compile
         run: |
           ./gradlew assembleDebug
