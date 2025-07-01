@@ -10,6 +10,8 @@ use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jobject, jstring};
 
+use crate::utils::install_panic_hook;
+
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -22,6 +24,8 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
     _env: JNIEnv,
     _class: JClass,
 ) -> jint {
+    install_panic_hook();
+
     android_logger::init_once(
         android_logger::Config::default()
             .with_max_level(log::LevelFilter::Trace)
@@ -116,7 +120,9 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
         .fetch_options(fetch_options)
         .clone(&remote_url, std::path::Path::new(&repo_path));
 
-    unwrap_or_log!(repo_result, "git_clone");
+    let repo = unwrap_or_log!(repo_result, "git_clone");
+
+    REPO.lock().unwrap().replace(repo);
 
     0
 }
