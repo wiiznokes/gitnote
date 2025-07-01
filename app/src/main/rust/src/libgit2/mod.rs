@@ -9,6 +9,9 @@ use crate::{Creeds, Error};
 
 mod merge;
 
+const REMOTE: &str = "origin";
+const BRANCH: &str = "main";
+
 static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
 
 pub fn create_repo(repo_path: &str) -> Result<(), Error> {
@@ -114,10 +117,10 @@ pub fn push(creeds: Option<Creeds>) -> Result<(), Error> {
     let repo = repo.as_ref().expect("repo");
 
     let mut remote = repo
-        .find_remote("origin")
+        .find_remote(REMOTE)
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
-    let refspecs = ["refs/heads/main:refs/heads/main"];
+    let refspecs = [format!("refs/heads/{BRANCH}:refs/heads/{BRANCH}")];
 
     let mut callbacks = RemoteCallbacks::new();
 
@@ -144,7 +147,7 @@ pub fn pull(creeds: Option<Creeds>) -> Result<(), Error> {
     let repo = repo.as_ref().expect("repo");
 
     let mut remote = repo
-        .find_remote("origin")
+        .find_remote(REMOTE)
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
     let mut callbacks = RemoteCallbacks::new();
@@ -172,7 +175,7 @@ pub fn pull(creeds: Option<Creeds>) -> Result<(), Error> {
         .reference_to_annotated_commit(&fetch_head)
         .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
 
-    merge::do_merge(repo, "main", commit).map_err(|e| Error::git2(e, "do_merge"))?;
+    merge::do_merge(repo, BRANCH, commit).map_err(|e| Error::git2(e, "do_merge"))?;
 
     Ok(())
 }
