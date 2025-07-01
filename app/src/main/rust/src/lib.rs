@@ -1,5 +1,3 @@
-#![allow(non_snake_case)]
-
 use std::fmt::Display;
 
 use jni::JNIEnv;
@@ -72,10 +70,10 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    repoPath: JString<'local>,
+    repo_path: JString<'local>,
 ) -> jint {
     let repo_path: String = env
-        .get_string(&repoPath)
+        .get_string(&repo_path)
         .expect("Couldn't get java string!")
         .into();
 
@@ -87,10 +85,10 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRe
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    repoPath: JString<'local>,
+    repo_path: JString<'local>,
 ) -> jint {
     let repo_path: String = env
-        .get_string(&repoPath)
+        .get_string(&repo_path)
         .expect("Couldn't get java string!")
         .into();
 
@@ -108,14 +106,14 @@ pub struct Creeds {
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    repoPath: JString<'local>,
-    remoteUrl: JString<'local>,
+    repo_path: JString<'local>,
+    remote_url: JString<'local>,
     username: JString<'local>,
     password: JString<'local>,
-    _progressCallback: JObject<'local>,
+    _progress_callback: JObject<'local>,
 ) -> jint {
-    let repo_path: String = env.get_string(&repoPath).unwrap().into();
-    let remote_url: String = env.get_string(&remoteUrl).unwrap().into();
+    let repo_path: String = env.get_string(&repo_path).unwrap().into();
+    let remote_url: String = env.get_string(&remote_url).unwrap().into();
 
     let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
@@ -167,7 +165,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<
     _class: JClass<'local>,
     username: JString<'local>,
     password: JString<'local>,
-    _progressCallback: JObject<'local>,
+    _progress_callback: JObject<'local>,
 ) -> jint {
     let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
@@ -189,7 +187,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     _class: JClass<'local>,
     username: JString<'local>,
     password: JString<'local>,
-    _progressCallback: JObject<'local>,
+    _progress_callback: JObject<'local>,
 ) -> jint {
     let creeds = if !username.is_null() && !password.is_null() {
         let username: String = env.get_string(&username).unwrap().into();
