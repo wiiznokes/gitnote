@@ -38,6 +38,9 @@ jobs:
 
       - name: Compile
         run: |
+          env
+          ls /usr/local/lib/android/sdk/ndk/
+
           export PATH="/usr/local/lib/android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"  && ./gradlew assembleDebug
 
   prettier-ci:
