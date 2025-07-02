@@ -2,12 +2,19 @@
 export PATH := ${HOME}/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
 
 
-export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android21-clang
-export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android21-clang
 
 
 
-export OPENSSL_NO_VENDOR_PRIV ?= 1
+ifeq ($(OS),Windows_NT)
+	export OPENSSL_NO_VENDOR_PRIV ?= 1
+	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android21-clang.cmd
+	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android21-clang.cmd
+else
+	export OPENSSL_NO_VENDOR_PRIV ?= 0
+	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android21-clang
+	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android21-clang
+endif
+
 
 ARCH ?= x86_64
 

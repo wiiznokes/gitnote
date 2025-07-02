@@ -1,16 +1,26 @@
 # Build
 
-This app uses this [fork](https://github.com/wiiznokes/libgit2-android) of the [libgit2](https://github.com/libgit2/libgit2) library.
-You can compile it from source or use the binaries already in place in the jniLibs folder. Note that this binaries are stored using git-lfs. I think you just need to have this package when cloning the repo and `git` will download them automatically.
+### Linux
 
-I all case, you will need to clone the [repo](https://github.com/wiiznokes/libgit2-android) to get the headers.
+It simpler to build on Linux. You will need need to install
 
-```
-git submodule update --init
-```
+- [Rust](https://www.rust-lang.org/tools/install)
+- install the necessary targets: `rustup target add x86_64-linux-android aarch64-linux-android`
+- perl
 
-(Add `--recursive` if you want to build libgit2 from source).
+And i think that's it (open an issue if not).
+Then, just open Android studio and hit build. Gradle will automatically build the rust code, and all C libraries are vendored by crates (openssl, libgit2, openssh).
 
-You can't just `sudo apt install libgit2-dev` because `cmake` won't let you use the header in `/usr/include` for some reason.
+### Windows
 
-I you want to compile libgit2, good luck, you can find info in the `build.sh` script.
+On Windows, it's another story. The difficulty is to build openssl, because it require perl, but we can't just install the normal perl Windows version, because it will be incompatible with the build. (the error: `This perl implementation doesn't produce Unix like paths (with forward slash directory separators).  Please use an implementation that matches your building platform.`).
+I think we could make it works by using a msys2 environment, but then, there is the problem of telling gradle to use this environment, and i'm not familiar with any of theses.
+
+The the recommendent way to build on Windows is to install [Rust](https://www.rust-lang.org/tools/install), and use the already compiler openssl lib.
+To do that,
+
+1. open a git bash shell
+2. `cd app/src/main/rust`
+3. `just unzip-all` (note that this require [just](https://github.com/casey/just), but you can just copy paste the command if you don't want to install it)
+4. `make build ARCH=x86_64` and `make build ARCH=aarch64` (or `build-release` for a release build)
+5. 
