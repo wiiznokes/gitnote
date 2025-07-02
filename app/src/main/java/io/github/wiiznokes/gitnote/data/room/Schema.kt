@@ -21,7 +21,8 @@ private const val TAG = "DatabaseSchema"
 )
 data class NoteFolder(
     val relativePath: String,
-    val id: Int = RepoDatabase.generateUid()
+    val id: Int = RepoDatabase.generateUid(),
+    val lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
 ) {
 
     companion object {

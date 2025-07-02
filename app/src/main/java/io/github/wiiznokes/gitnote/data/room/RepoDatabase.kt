@@ -15,7 +15,7 @@ private const val TAG = "RepoDatabase"
 
 @Database(
     entities = [NoteFolder::class, Note::class],
-    version = 1
+    version = 2
 )
 abstract class RepoDatabase : RoomDatabase() {
 

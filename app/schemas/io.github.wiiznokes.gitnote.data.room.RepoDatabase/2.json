@@ -1,0 +1,79 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "4521c2cf1ac7100f123379eac9599dbb",
+    "entities": [
+      {
+        "tableName": "NoteFolders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `id` INTEGER NOT NULL, `lastModifiedTimeMillis` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
+        "fields": [
+          {
+            "fieldPath": "relativePath",
+            "columnName": "relativePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedTimeMillis",
+            "columnName": "lastModifiedTimeMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "relativePath"
+          ]
+        }
+      },
+      {
+        "tableName": "Notes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`relativePath` TEXT NOT NULL, `content` TEXT NOT NULL, `lastModifiedTimeMillis` INTEGER NOT NULL, `id` INTEGER NOT NULL, PRIMARY KEY(`relativePath`))",
+        "fields": [
+          {
+            "fieldPath": "relativePath",
+            "columnName": "relativePath",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastModifiedTimeMillis",
+            "columnName": "lastModifiedTimeMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "relativePath"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4521c2cf1ac7100f123379eac9599dbb')"
+    ]
+  }
+}
