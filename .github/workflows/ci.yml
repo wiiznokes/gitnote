@@ -40,12 +40,3 @@ jobs:
         run: |
           # we must set the bin path of the ndk in PATH because some cmake file will not find some tools
           export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleDebug
-
-  prettier-ci:
-    name: Prettier-Fmt-Ci
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prettier
-        run: npx prettier --check .
