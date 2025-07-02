@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use jni::JNIEnv;
-use jni::objects::{JClass, JObject, JString};
+use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jint, jstring};
 
 use crate::callback::ProgressCB;
@@ -15,8 +15,15 @@ mod libgit2;
 
 const OK: jint = 0;
 
+#[derive(Debug)]
 enum Error {
     Git2 { error: git2::Error, msg: String },
+}
+
+impl From<git2::Error> for Error {
+    fn from(value: git2::Error) -> Self {
+        Self::git2(value, "")
+    }
 }
 
 impl Error {
@@ -258,4 +265,60 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_isChange
     let is_change = unwrap_or_log!(libgit2::is_change(), "is_change");
 
     is_change as jint
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getTimestampsLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    j_map: JObject<'local>,
+) -> jint {
+    let timestamps = unwrap_or_log!(libgit2::get_timestamps(), "get_timestamps");
+
+    if let Err(e) = get_timestamps_jni(&mut env, &j_map, timestamps.iter()) {
+        error!("get_timestamps_jni: {e}");
+        return -1;
+    }
+
+    OK
+}
+
+fn get_timestamps_jni<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    j_map: &JObject<'local>,
+    timestamps: impl Iterator<Item = (&'a String, &'a i64)>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let map_class = env.get_object_class(j_map)?;
+    let put_method = env.get_method_id(
+        map_class,
+        "put",
+        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+    )?;
+
+    let long_class = env.find_class("java/lang/Long")?;
+    let long_ctor = env.get_method_id(&long_class, "<init>", "(J)V")?;
+
+    for (path, timestamp) in timestamps {
+        let j_key: JString = env.new_string(path)?;
+
+        unsafe {
+            let j_value = env.new_object_unchecked(
+                &long_class,
+                long_ctor,
+                &[JValue::Long(*timestamp).as_jni()],
+            )?;
+
+            env.call_method_unchecked(
+                j_map,
+                put_method,
+                jni::signature::ReturnType::Object,
+                &[
+                    JValue::Object(&JObject::from(j_key)).as_jni(),
+                    JValue::Object(&j_value).as_jni(),
+                ],
+            )?;
+        }
+    }
+
+    Ok(())
 }

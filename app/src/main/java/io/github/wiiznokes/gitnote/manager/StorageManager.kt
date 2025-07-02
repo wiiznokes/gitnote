@@ -90,7 +90,9 @@ class StorageManager {
         val repoPath = prefs.repoPath()
         Log.d(TAG, "repoPath = $repoPath")
 
-        dao.clearAndInit(repoPath)
+        val timestamps = gitManager.getTimestamps().getOrThrow()
+
+        dao.clearAndInit(repoPath, timestamps)
         prefs.databaseCommit.update(fsCommit)
 
         return success(Unit)

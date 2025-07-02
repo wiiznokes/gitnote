@@ -21,3 +21,6 @@ cp-openssl-build arch:
 
 clean:
 	cargo clean
+
+test:
+	cargo test  -- --ignored --nocapture

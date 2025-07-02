@@ -37,9 +37,7 @@ ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 endif
 
 
-unzip:
-	unzip openssl-prebuild/x86_64/install.zip
-	unzip openssl-prebuild/aarch64/install.zip
+
 
 build:
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
@@ -51,7 +49,9 @@ else
 endif
 	make cp_to_jni
 
-
+unzip:
+	unzip openssl-prebuild/x86_64/install.zip
+	unzip openssl-prebuild/aarch64/install.zip
 
 cp_to_jni:
 	mkdir -p ../jniLibs/x86_64
