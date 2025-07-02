@@ -15,6 +15,7 @@ import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
@@ -92,6 +93,7 @@ fun InitScreen(
             }
 
             is InitDestination.Remote -> RemoteScreen(
+                vm = vm,
                 repoState = initDestination.repoState,
                 onInitSuccess = onInitSuccess,
                 onBackClick = {

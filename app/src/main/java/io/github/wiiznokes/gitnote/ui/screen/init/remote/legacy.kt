@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init
+package io.github.wiiznokes.gitnote.ui.screen.init.remote
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
@@ -48,10 +48,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.olshevski.navigation.reimagined.NavBackHandler
+import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
 import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
@@ -59,8 +61,6 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.CloneState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import kotlinx.coroutines.launch
 
-
-private const val TAG = "RemoteScreen"
 
 @Composable
 private fun OpenLinkButton(
@@ -224,13 +224,17 @@ private fun ElevatedCard(
 
 
 @Composable
-fun RemoteScreen(
+fun RemoteScreen2(
+    vm: InitViewModel,
     repoState: NewRepoState,
     onInitSuccess: () -> Unit,
     onBackClick: () -> Unit
 ) {
 
-    val vm: InitViewModel = viewModel()
+    val navController =
+        rememberNavController(startDestination = RemoteDestination.SelectProvider(repoState))
+
+    NavBackHandler(navController)
 
     AppPage(
         title = stringResource(R.string.app_page_clone_repository),

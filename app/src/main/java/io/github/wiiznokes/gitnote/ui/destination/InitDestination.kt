@@ -4,6 +4,7 @@ import android.os.Parcelable
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
+import io.github.wiiznokes.gitnote.ui.model.Provider
 import kotlinx.parcelize.Parcelize
 
 
@@ -40,3 +41,5 @@ enum class NewRepoSource {
         }
     }
 }
+
+

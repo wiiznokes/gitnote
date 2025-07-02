@@ -19,13 +19,13 @@ enum class Provider : ProviderLink {
         override val createToken: String = "https://github.com/settings/tokens"
         override val listRepo: String? = null
     },
-    GitLab {
-        override val mainPage: String = "https://gitlab.com/"
-        override val createRepo: String = "https://gitlab.com/projects/new#blank_project"
-        override val createToken: String =
-            "https://gitlab.com/-/user_settings/personal_access_tokens"
-        override val listRepo: String = "https://gitlab.com/dashboard/projects"
-    },
+//    GitLab {
+//        override val mainPage: String = "https://gitlab.com/"
+//        override val createRepo: String = "https://gitlab.com/projects/new#blank_project"
+//        override val createToken: String =
+//            "https://gitlab.com/-/user_settings/personal_access_tokens"
+//        override val listRepo: String = "https://gitlab.com/dashboard/projects"
+//    },
 }
 
 @Parcelize
