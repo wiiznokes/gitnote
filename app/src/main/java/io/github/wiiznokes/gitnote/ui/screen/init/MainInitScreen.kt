@@ -1,6 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.init
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -55,11 +56,15 @@ fun MainScreen(
         remember { mutableStateOf(StorageChooser.UnExpanded) }
 
 
+
+
     AppPage(
         title = stringResource(R.string.app_page_choose_method),
         verticalArrangement = Arrangement.spacedBy(80.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+
 
         Button(
             onClick = {
@@ -71,10 +76,23 @@ fun MainScreen(
             )
         }
 
+        val (permissionLauncher, permissionName) = createPermissionLauncher(
+            vm = vm,
+            navController = navController,
+            title = NewRepoSource.Open.getExplorerTitle(),
+            newRepoSource = NewRepoSource.Open
+        )
 
         Button(
             onClick = {
-                showStorageChooser.value = StorageChooser.Expanded(NewRepoSource.Open)
+                requestPermissionOrNavigate(
+                    vm = vm,
+                    permissionLauncher = permissionLauncher,
+                    permissionName = permissionName,
+                    navController = navController,
+                    title = NewRepoSource.Open.getExplorerTitle(),
+                    newRepoSource = NewRepoSource.Open
+                )
             }
         ) {
             Text(
@@ -147,42 +165,27 @@ fun MainScreen(
                     .align(Alignment.CenterHorizontally),
             ) {
 
-                val storagePermissionHelper = remember {
-                    StoragePermissionHelper()
-                }
-                val (contract, permissionName) = storagePermissionHelper.permissionContract()
+                val (permissionLauncher, permissionName) = createPermissionLauncher(
+                    vm = vm,
+                    navController = navController,
+                    title = storageChooser.source.getExplorerTitle(),
+                    newRepoSource = storageChooser.source
+                )
 
-                val permissionLauncher = rememberLauncherForActivityResult(contract = contract) {
-                    if (it) {
-                        navController.navigate(
-                            InitDestination.FileExplorer(
-                                title = storageChooser.source.getExplorerTitle(),
-                                path = vm.prefs.repoPathSafely(),
-                                newRepoSource = storageChooser.source,
-                            )
-                        )
-                    } else {
-                        vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
-                    }
-                }
                 Button(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
                         closeSheet()
 
-                        if (!StoragePermissionHelper.isPermissionGranted()) {
-                            permissionLauncher.launch(permissionName)
-                        } else {
-                            navController.navigate(
-                                InitDestination.FileExplorer(
-                                    title = storageChooser.source.getExplorerTitle(),
-                                    path = vm.prefs.repoPathSafely(),
-                                    newRepoSource = storageChooser.source,
-                                )
-                            )
-                        }
-
+                        requestPermissionOrNavigate(
+                            vm = vm,
+                            permissionLauncher = permissionLauncher,
+                            permissionName = permissionName,
+                            navController = navController,
+                            title = storageChooser.source.getExplorerTitle(),
+                            newRepoSource = storageChooser.source
+                        )
                     }
                 ) {
                     Text(text = stringResource(R.string.use_device_storage))
@@ -199,5 +202,55 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(20.dp))
         }
 
+    }
+}
+
+@Composable
+fun createPermissionLauncher(
+    vm: InitViewModel,
+    navController: NavController<InitDestination>,
+    title: String,
+    newRepoSource: NewRepoSource
+) : Pair<ActivityResultLauncher<String>, String> {
+    val storagePermissionHelper = remember {
+        StoragePermissionHelper()
+    }
+    val (contract, permissionName) = storagePermissionHelper.permissionContract()
+
+    val permissionLauncher = rememberLauncherForActivityResult(contract = contract) {
+        if (it) {
+            navController.navigate(
+                InitDestination.FileExplorer(
+                    title = title,
+                    path = vm.prefs.repoPathSafely(),
+                    newRepoSource = newRepoSource,
+                )
+            )
+        } else {
+            vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
+        }
+    }
+
+    return permissionLauncher to permissionName
+}
+
+fun requestPermissionOrNavigate(
+    vm: InitViewModel,
+    permissionLauncher: ActivityResultLauncher<String>,
+    permissionName: String,
+    navController: NavController<InitDestination>,
+    title: String,
+    newRepoSource: NewRepoSource
+) {
+    if (!StoragePermissionHelper.isPermissionGranted()) {
+        permissionLauncher.launch(permissionName)
+    } else {
+        navController.navigate(
+            InitDestination.FileExplorer(
+                title = title,
+                path = vm.prefs.repoPathSafely(),
+                newRepoSource = newRepoSource,
+            )
+        )
     }
 }
