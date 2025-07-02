@@ -30,7 +30,7 @@ cargo {
 tasks.whenTaskAdded {
     if (name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") {
         outputs.upToDateWhen { false }
-        dependsOn("cargoBuild")
+        //dependsOn("cargoBuild")
     }
 }
 
