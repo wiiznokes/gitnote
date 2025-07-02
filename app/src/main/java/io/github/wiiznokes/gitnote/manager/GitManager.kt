@@ -213,6 +213,19 @@ class GitManager {
         }
     }
 
+    suspend fun getTimestamps(): Result<HashMap<String, Long>> = safelyAccessLibGit2 {
+        Log.d(TAG, "getTimestamps")
+
+        val h: HashMap<String, Long> = HashMap()
+
+        val res = getTimestampsLib(h)
+
+        if (res < 0) {
+            throw Exception("getTimestampsLib error $res")
+        }
+        h
+    }
+
 
     fun closeRepo() {
         job?.cancel()
@@ -265,4 +278,4 @@ private external fun closeRepoLib()
 
 private external fun isChangeLib(): Int
 
-
+private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
