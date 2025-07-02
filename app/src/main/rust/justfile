@@ -19,12 +19,5 @@ cp-openssl-build arch:
 	mv install.zip openssl-prebuild/{{arch}}
 
 
-unzip-all:
-	just unzip x86_64
-	just unzip aarch64
-
-unzip arch:
-	unzip openssl-prebuild/{{arch}}/install.zip
-
 clean:
 	cargo clean

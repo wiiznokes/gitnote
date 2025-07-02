@@ -37,9 +37,9 @@ ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 endif
 
 
-
-# rustup target add x86_64-linux-android aarch64-linux-android
-
+unzip:
+	unzip openssl-prebuild/x86_64/install.zip
+	unzip openssl-prebuild/aarch64/install.zip
 
 build:
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
