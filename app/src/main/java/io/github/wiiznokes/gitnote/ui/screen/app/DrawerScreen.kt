@@ -68,6 +68,7 @@ private const val TAG = "DrawerScreen"
 data class DrawerFolderModel(
     val noteCount: Int,
     val noteFolder: NoteFolder,
+    val lastModifiedTimeMillis: Long,
 )
 
 
