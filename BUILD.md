@@ -22,6 +22,7 @@ I think we could make it works by using a msys2 environment, but then, there is 
 The recommended way to build on Windows is to install [Rust](https://www.rust-lang.org/tools/install), and use the already compiled openssl libs.
 To do that,
 
+0. Add the ndk bin path to PATH
 1. open a git bash shell
 2. `cd app/src/main/rust`
 3. `make unzip`. This will unzip the openssl pre-build
