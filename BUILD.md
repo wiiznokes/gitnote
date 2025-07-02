@@ -21,6 +21,8 @@ To do that,
 
 1. open a git bash shell
 2. `cd app/src/main/rust`
-3. `just unzip-all` (note that this require [just](https://github.com/casey/just), but you can just copy paste the command if you don't want to install it)
-4. `make build ARCH=x86_64` and `make build ARCH=aarch64` (or `build-release` for a release build)
-5. 
+3. `just unzip-all` (note that this require [just](https://github.com/casey/just), but you can also copy paste the command if you don't want to install it)
+4. `make build` (you can add `DEBUG=0` for a release build). This will also copy the build artifacts to the jni folders
+5. comment the `dependsOn("cargoBuild")` line in `app/build.gradle.kts` and sync the project
+
+Et voilà!
