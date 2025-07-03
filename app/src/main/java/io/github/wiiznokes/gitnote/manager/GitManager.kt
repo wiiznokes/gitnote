@@ -262,3 +262,5 @@ private external fun closeRepoLib()
 private external fun isChangeLib(): Int
 
 private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
+
+external fun generateSshKeysLib(): Pair<String, String>

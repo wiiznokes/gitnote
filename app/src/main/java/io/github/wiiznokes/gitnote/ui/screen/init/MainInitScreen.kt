@@ -27,11 +27,11 @@ import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
@@ -141,7 +141,7 @@ fun MainScreen(
                 onClick = {
                     closeSheet()
 
-                    val repoState = NewRepoState.AppStorage
+                    val repoState = StorageConfiguration.App
                     when (storageChooser.source) {
                         NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
                         NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)

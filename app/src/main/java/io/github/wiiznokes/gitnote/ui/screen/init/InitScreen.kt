@@ -12,9 +12,9 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
-import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
@@ -69,7 +69,7 @@ fun InitScreen(
                         )
                     },
                     onFinish = { path ->
-                        val repoState = NewRepoState.DeviceStorage(path)
+                        val repoState = StorageConfiguration.Device(path)
 
                         when (initDestination.newRepoSource) {
                             NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
@@ -94,7 +94,7 @@ fun InitScreen(
 
             is InitDestination.Remote -> RemoteScreen(
                 vm = vm,
-                repoState = initDestination.repoState,
+                storageConfig = initDestination.storageConfig,
                 onInitSuccess = onInitSuccess,
                 onBackClick = {
                     navController.pop()

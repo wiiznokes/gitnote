@@ -275,6 +275,7 @@ dependencies = [
  "log",
  "rand_core",
  "ssh-key",
+ "zeroize",
 ]
 
 [[package]]

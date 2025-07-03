@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
-import io.github.wiiznokes.gitnote.data.NewRepoState
-import io.github.wiiznokes.gitnote.data.RepoState
+import io.github.wiiznokes.gitnote.data.StorageConfig
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.ui.model.Cred
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,26 +38,26 @@ class InitViewModel : ViewModel() {
         folder.create()
     }
 
-    fun createRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
+    fun createRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            if (repoState is NewRepoState.AppStorage) {
+            if (storageConfig is StorageConfiguration.App) {
                 prepareLocalStorageRepoPath()
             }
 
-            NodeFs.Folder.fromPath(repoState.repoPath()).isEmptyDirectory().onFailure {
+            NodeFs.Folder.fromPath(storageConfig.repoPath()).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
 
 
-            gitManager.createRepo(repoState.repoPath()).onFailure {
+            gitManager.createRepo(storageConfig.repoPath()).onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
 
-            prefs.initRepo(repoState)
+            prefs.initRepo(storageConfig)
 
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.updateDatabase()
@@ -68,20 +68,20 @@ class InitViewModel : ViewModel() {
 
     }
 
-    private suspend fun openRepoSuspend(repoState: NewRepoState): Result<Unit> {
+    private suspend fun openRepoSuspend(storageConfig: StorageConfiguration): Result<Unit> {
 
-        if (!NodeFs.Folder.fromPath(repoState.repoPath()).exist()) {
+        if (!NodeFs.Folder.fromPath(storageConfig.repoPath()).exist()) {
             val msg = uiHelper.getString(R.string.error_path_not_directory)
             uiHelper.makeToast(msg)
             return failure(Exception(msg))
         }
 
-        gitManager.openRepo(repoState.repoPath()).onFailure {
+        gitManager.openRepo(storageConfig.repoPath()).onFailure {
             uiHelper.makeToast(it.message)
             return failure(it)
         }
 
-        prefs.initRepo(repoState)
+        prefs.initRepo(storageConfig)
 
         // yes, there can be pending file not committed
         // but they will be committed in the updateDatabaseAndRepo function
@@ -93,7 +93,7 @@ class InitViewModel : ViewModel() {
         return success(Unit)
     }
 
-    fun openRepo(repoState: NewRepoState, onSuccess: () -> Unit) {
+    fun openRepo(repoState: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
             openRepoSuspend(repoState).onSuccess {
@@ -118,21 +118,21 @@ class InitViewModel : ViewModel() {
 
 
     fun cloneRepo(
-        repoState: NewRepoState,
+        storageConfig: StorageConfiguration,
         repoUrl: String,
         cred: Cred? = null,
         onSuccess: () -> Unit
     ) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            if (repoState is NewRepoState.AppStorage) {
+            if (storageConfig is StorageConfiguration.App) {
                 prepareLocalStorageRepoPath()
             }
 
             _cloneState.emit(CloneState.Cloning(0))
 
             gitManager.cloneRepo(
-                repoPath = repoState.repoPath(),
+                repoPath = storageConfig.repoPath(),
                 repoUrl = repoUrl,
                 cred = cred,
                 progressCallback = {
@@ -147,7 +147,7 @@ class InitViewModel : ViewModel() {
 
             _cloneState.emit(CloneState.Cloned)
 
-            prefs.initRepo(repoState)
+            prefs.initRepo(storageConfig)
             prefs.remoteUrl.update(repoUrl)
 
             prefs.updateCred(cred)
@@ -162,13 +162,16 @@ class InitViewModel : ViewModel() {
 
     suspend fun tryInit(): Boolean {
 
-        val repoState = when (prefs.repoState.get()) {
-            RepoState.NoRepo -> return false
-            RepoState.AppStorage -> {
-                NewRepoState.AppStorage
+        if (!prefs.isInit.get()) {
+            return false
+        }
+
+        val storageConfig = when (prefs.storageConfig.get()) {
+            StorageConfig.App -> {
+                StorageConfiguration.App
             }
 
-            RepoState.DeviceStorage -> {
+            StorageConfig.Device -> {
                 if (!StoragePermissionHelper.isPermissionGranted()) {
                     return false
                 }
@@ -177,12 +180,11 @@ class InitViewModel : ViewModel() {
                 } catch (e: Exception) {
                     return false
                 }
-                NewRepoState.DeviceStorage(repoPath)
+                StorageConfiguration.Device(repoPath)
             }
         }
 
-
-        openRepoSuspend(repoState).onFailure {
+        openRepoSuspend(storageConfig).onFailure {
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.closeRepo()
             }

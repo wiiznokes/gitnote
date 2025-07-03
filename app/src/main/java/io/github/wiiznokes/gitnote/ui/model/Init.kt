@@ -46,3 +46,17 @@ enum class CredType {
     UserPassPlainText,
     Ssh,
 }
+
+
+@Parcelize
+sealed class StorageConfiguration : Parcelable {
+    data object App : StorageConfiguration()
+    class Device(val path: String) : StorageConfiguration()
+
+    fun repoPath(): String {
+        return when (this) {
+            App -> AppPreferences.appStorageRepoPath
+            is Device -> this.path
+        }
+    }
+}

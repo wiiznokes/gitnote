@@ -11,9 +11,10 @@ import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
-import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.*
+import io.github.wiiznokes.gitnote.ui.model.Provider
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 
@@ -24,13 +25,13 @@ private const val TAG = "RemoteScreen"
 @Composable
 fun RemoteScreen(
     vm: InitViewModel,
-    repoState: NewRepoState,
+    storageConfig: StorageConfiguration,
     onInitSuccess: () -> Unit,
     onBackClick: () -> Unit
 ) {
 
     val navController: NavController<RemoteDestination> =
-        rememberNavController(startDestination = SelectProvider(repoState))
+        rememberNavController(startDestination = GenerateNewKeys(provider = Provider.GitHub, url = "git@github.com:wiiznokes/repo_test.git"))
 
     NavBackHandler(navController)
 
@@ -47,14 +48,12 @@ fun RemoteScreen(
                     if (provider != null) {
                         navController.navigate(
                             SelectSetupAutomatically(
-                                repoState = remoteDestination.repoState,
                                 provider = provider
                             )
                         )
                     } else {
                         navController.navigate(
                             EnterUrl(
-                                repoState = remoteDestination.repoState,
                                 provider = null
                             )
                         )
@@ -67,7 +66,6 @@ fun RemoteScreen(
                 onAutomatically = {
                     navController.navigate(
                         AuthorizeGitNote(
-                            repoState = remoteDestination.repoState,
                             provider = remoteDestination.provider,
                         )
                     )
@@ -75,7 +73,6 @@ fun RemoteScreen(
                 onManually = {
                     navController.navigate(
                         EnterUrl(
-                            repoState = remoteDestination.repoState,
                             provider = remoteDestination.provider,
                         )
                     )
@@ -87,7 +84,6 @@ fun RemoteScreen(
                 onSucess = {
                     navController.navigate(
                         PickRepo(
-                            repoState = remoteDestination.repoState,
                             provider = remoteDestination.provider,
                         )
                     )
@@ -103,7 +99,6 @@ fun RemoteScreen(
                         onUrl = { url ->
                             navController.navigate(
                                 SelectGenerateNewKeys(
-                                    repoState = remoteDestination.repoState,
                                     provider = remoteDestination.provider,
                                     url = url
                                 )
@@ -116,7 +111,6 @@ fun RemoteScreen(
                         onUrl = { url ->
                             navController.navigate(
                                 SelectGenerateNewKeys(
-                                    repoState = remoteDestination.repoState,
                                     provider = remoteDestination.provider,
                                     url = url
                                 )
@@ -135,7 +129,6 @@ fun RemoteScreen(
                 onGenerate = {
                     navController.navigate(
                         GenerateNewKeys(
-                            repoState = remoteDestination.repoState,
                             provider = remoteDestination.provider,
                             url = remoteDestination.url
                         )
@@ -144,7 +137,6 @@ fun RemoteScreen(
                 onCustom = {
                     navController.navigate(
                         LoadKeysFromDevice(
-                            repoState = remoteDestination.repoState,
                             provider = remoteDestination.provider,
                             url = remoteDestination.url
                         )
@@ -157,7 +149,11 @@ fun RemoteScreen(
                 if (remoteDestination.provider != null) {
                     GenerateNewKeysWithProviderScreen(
                         onBackClick = { navController.pop() },
-                        provider = remoteDestination.provider
+                        onSuccess = onInitSuccess,
+                        vm = vm,
+                        provider = remoteDestination.provider,
+                        url = remoteDestination.url,
+                        storageConfig = storageConfig
                     )
                 } else {
                     GenerateNewKeysScreen(

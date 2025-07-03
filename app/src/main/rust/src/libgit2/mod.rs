@@ -42,10 +42,9 @@ fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
             git2::Cred::userpass_plaintext(&username, &password)
         }
         Cred::Ssh {
-            username,
             private_key,
             public_key,
-        } => git2::Cred::ssh_key_from_memory(username, Some(public_key), private_key, None),
+        } => git2::Cred::ssh_key_from_memory("", Some(public_key), private_key, None),
     }
 }
 

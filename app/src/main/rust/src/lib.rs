@@ -3,15 +3,17 @@ use std::fmt::Display;
 use anyhow::anyhow;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
-use jni::sys::{jint, jstring};
+use jni::sys::{jint, jobject, jstring};
 
 use crate::callback::ProgressCB;
+use crate::key_gen::gen_keys;
 use crate::utils::install_panic_hook;
 
 #[macro_use]
 extern crate log;
 #[macro_use]
 mod utils;
+mod key_gen;
 mod libgit2;
 
 #[cfg(test)]
@@ -115,7 +117,6 @@ pub enum Cred {
         password: String,
     },
     Ssh {
-        username: String,
         private_key: String,
         public_key: String,
     },
@@ -135,7 +136,7 @@ impl Cred {
         let class_name: String = env.get_string(&class_name_jstring)?.into();
 
         match class_name.as_str() {
-            "com.example.UserPassPlainText" => {
+            "io.github.wiiznokes.gitnote.ui.model.Cred$UserPassPlainText" => {
                 let username_obj: JString = env
                     .get_field(cred_obj, "username", "Ljava/lang/String;")?
                     .l()?
@@ -148,13 +149,9 @@ impl Cred {
                 let username: String = env.get_string(&username_obj)?.into();
                 let password: String = env.get_string(&password_obj)?.into();
 
-                Ok(Cred::UserPassPlainText { username, password })
+                Ok(Some(Cred::UserPassPlainText { username, password }))
             }
-            "com.example.Ssh" => {
-                let username_obj: JString = env
-                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
+            "io.github.wiiznokes.gitnote.ui.model.Cred$Ssh" => {
                 let private_key_obj: JString = env
                     .get_field(cred_obj, "privateKey", "Ljava/lang/String;")?
                     .l()?
@@ -164,15 +161,13 @@ impl Cred {
                     .l()?
                     .into();
 
-                let username: String = env.get_string(&username_obj)?.into();
                 let private_key: String = env.get_string(&private_key_obj)?.into();
                 let public_key: String = env.get_string(&public_key_obj)?.into();
 
-                Ok(Cred::Ssh {
-                    username,
+                Ok(Some(Cred::Ssh {
                     private_key,
                     public_key,
-                })
+                }))
             }
             other => Err(anyhow!("Unknown class name: {}", other)),
         }
@@ -221,7 +216,13 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     let repo_path: String = env.get_string(&repo_path).unwrap().into();
     let remote_url: String = env.get_string(&remote_url).unwrap().into();
 
-    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    let cred = match Cred::from_jni(&mut env, &cred) {
+        Ok(cred) => cred,
+        Err(e) => {
+            error!("Cred::from_jni: {e}");
+            panic!()
+        }
+    };
 
     let cb = ProgressCB::new(&mut env, progress_callback);
 
@@ -360,4 +361,35 @@ fn get_timestamps_jni<'local, 'a>(
     }
 
     Ok(())
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generateSshKeysLib<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+) -> jobject {
+    let keys = match gen_keys() {
+        Ok(keys) => keys,
+        Err(e) => {
+            error!("can't gen keys: {e}");
+            return std::ptr::null_mut();
+        }
+    };
+
+    let public_jstring = env.new_string(&keys.public).unwrap();
+    let private_jstring = env.new_string(&keys.private).unwrap();
+
+    let pair_class = env.find_class("kotlin/Pair").unwrap();
+
+    let pair_obj = env
+        .new_object(
+            &pair_class,
+            "(Ljava/lang/Object;Ljava/lang/Object;)V",
+            &[(&public_jstring).into(), (&private_jstring).into()],
+        )
+        .unwrap();
+
+    pair_obj.into_raw()
 }
