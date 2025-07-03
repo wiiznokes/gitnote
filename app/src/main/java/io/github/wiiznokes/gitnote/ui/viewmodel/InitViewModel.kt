@@ -14,6 +14,9 @@ import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
+import io.github.wiiznokes.gitnote.provider.Provider
+import io.github.wiiznokes.gitnote.provider.RepoInfo
+import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import kotlinx.coroutines.CoroutineScope
@@ -22,13 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
@@ -205,15 +201,10 @@ class InitViewModel : ViewModel() {
         return true
     }
 
-    private val clientId = "Ov23li8EPatIAsWPt9QT"
-
-    // storing this secret in the repo is "ok"
-    // the only risk is github app reputation and quotas
-    // it would require a server to not store it here
-    private val clientSecret = "12f3f4742855deaafb45e798bcc635608b9d6fe6"
+    var provider: Provider? = null
 
     fun getLaunchOAuthScreenIntent(): Intent {
-        val authUrl = "https://github.com/login/oauth/authorize?client_id=$clientId&scope=repo"
+        val authUrl = provider!!.getLaunchOAuthScreenUrl()
         return Intent(Intent.ACTION_VIEW, authUrl.toUri())
     }
 
@@ -235,7 +226,7 @@ class InitViewModel : ViewModel() {
 
             _authState.emit(AuthState.GetAccessToken)
             token = try {
-                exchangeCodeForAccessToken(code)
+                provider!!.exchangeCodeForAccessToken(code)
             } catch (e: Exception) {
                 Log.e(TAG, "exchangeCodeForAccessToken: ${e.message}, $e")
                 _authState.emit(AuthState.Error)
@@ -245,7 +236,7 @@ class InitViewModel : ViewModel() {
             _authState.emit(AuthState.FetchRepos)
 
             repos = try {
-                fetchUserRepos(token = token)
+                provider!!.fetchUserRepos(token = token)
             } catch (e: Exception) {
                 Log.e(TAG, "fetchUserRepos: ${e.message}, $e")
                 _authState.emit(AuthState.Error)
@@ -254,7 +245,7 @@ class InitViewModel : ViewModel() {
             _authState.emit(AuthState.GetUserInfo)
 
             userInfo = try {
-                getUserInfo(token = token)
+                provider!!.getUserInfo(token = token)
             } catch (e: Exception) {
                 Log.e(TAG, "getUserInfo: ${e.message}, $e")
                 _authState.emit(AuthState.Error)
@@ -266,74 +257,6 @@ class InitViewModel : ViewModel() {
         }
     }
 
-    private fun exchangeCodeForAccessToken(code: String): String {
-
-        val url = URL("https://github.com/login/oauth/access_token")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Accept", "application/json")
-        connection.doOutput = true
-
-        val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
-        connection.outputStream.use {
-            it.write(body.toByteArray(Charsets.UTF_8))
-        }
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-        val json = JSONObject(response)
-        val accessToken = json.getString("access_token")
-
-        return accessToken
-    }
-
-    data class RepoInfo(
-        val name: String,
-        val owner: String,
-        val url: String,
-        val lastModifiedTimeMillis: Long,
-    ) {
-        val fullRepoName = "$owner/$name"
-    }
-
-    private fun fetchUserRepos(token: String): List<RepoInfo> {
-        val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-
-
-        val repos = mutableListOf<RepoInfo>()
-
-
-        val jsonArray = JSONArray(response)
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-        for (i in 0 until jsonArray.length()) {
-            val repo = jsonArray.getJSONObject(i)
-            val name = repo.getString("name")
-            val owner = repo.getJSONObject("owner").getString("login")
-            val url = repo.getString("ssh_url")
-            val updatedAt = repo.getString("updated_at")
-            val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
-
-            repos.add(
-                RepoInfo(
-                    owner = owner,
-                    name = name,
-                    url = url,
-                    lastModifiedTimeMillis = timeMillis
-                )
-            )
-        }
-
-
-        repos.sortWith(compareByDescending { it.lastModifiedTimeMillis })
-
-        return repos
-    }
 
     private val _authState2: MutableStateFlow<AuthState2> = MutableStateFlow(AuthState2.Idle)
     val authState2: StateFlow<AuthState2> = _authState2.asStateFlow()
@@ -350,7 +273,7 @@ class InitViewModel : ViewModel() {
 
             _authState2.emit(AuthState2.AddDeployKey)
             try {
-                addDeployKey(
+                provider!!.addDeployKeyToRepo(
                     token = token,
                     publicKey = publicKey,
                     fullRepoName = repoName
@@ -363,9 +286,8 @@ class InitViewModel : ViewModel() {
 
             cloneRepo(
                 storageConfig = storageConfig,
-                repoUrl = "git@github.com:$repoName.git",
+                repoUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
-                    username = "git",
                     publicKey = publicKey,
                     privateKey = privateKey
                 ),
@@ -389,7 +311,7 @@ class InitViewModel : ViewModel() {
 
             _authState2.emit(AuthState2.CreateRepo)
             try {
-                createNewRepoOnRemoteGithub(
+                provider!!.createNewRepo(
                     token = token,
                     repoName = repoName
                 )
@@ -403,7 +325,7 @@ class InitViewModel : ViewModel() {
 
             _authState2.emit(AuthState2.AddDeployKey)
             try {
-                addDeployKey(
+                provider!!.addDeployKeyToRepo(
                     token = token,
                     publicKey = publicKey,
                     fullRepoName = repoName
@@ -416,9 +338,8 @@ class InitViewModel : ViewModel() {
 
             cloneRepo(
                 storageConfig = storageConfig,
-                repoUrl = "git@github.com:$repoName.git",
+                repoUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
-                    username = "git",
                     publicKey = publicKey,
                     privateKey = privateKey
                 ),
@@ -432,98 +353,6 @@ class InitViewModel : ViewModel() {
         }
     }
 
-    fun createNewRepoOnRemoteGithub(
-        token: String,
-        repoName: String,
-        description: String = "",
-        isPrivate: Boolean = true
-    ): Boolean {
-        val url = URL("https://api.github.com/user/repos")
-        val connection = url.openConnection() as HttpURLConnection
-
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.doOutput = true
-
-        val jsonBody = JSONObject().apply {
-            put("name", repoName)
-            put("description", description)
-            put("private", isPrivate)
-        }
-
-        connection.outputStream.use { os ->
-            os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-        }
-
-        val responseCode = connection.responseCode
-
-        return if (responseCode in 200..299) {
-            println("Repo created successfully")
-            true
-        } else {
-            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-            Log.e(TAG, "Failed to create repo: HTTP $responseCode $error")
-            false
-        }
-
-    }
-
-    data class UserInfo(
-        val username: String,
-        val name: String,
-        val email: String,
-    )
-
-    fun getUserInfo(token: String): UserInfo {
-        val url = URL("https://api.github.com/user")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "GET"
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-
-        val responseCode = connection.responseCode
-        if (responseCode !in 200..299) {
-            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-            throw Exception("Failed to fetch user info: HTTP $responseCode $error")
-        }
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-        val json = JSONObject(response)
-        return UserInfo(
-            username = json.getString("login"),
-            name = json.optString("name", ""),
-            email = json.optString("email", ""),
-        )
-    }
-
-
-    fun addDeployKey(token: String, publicKey: String, fullRepoName: String) {
-        val url = URL("https://api.github.com/repos/$fullRepoName/keys")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.doOutput = true
-
-        val jsonBody = JSONObject().apply {
-            put("title", "GitNote")
-            put("key", publicKey)
-            put("read_only", false)
-        }
-
-        connection.outputStream.use { os ->
-            os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
-        }
-
-        val responseCode = connection.responseCode
-        if (responseCode !in 200..299) {
-            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-            throw Exception("Failed to add deploy key: HTTP $responseCode $error")
-        }
-    }
 }
 
 

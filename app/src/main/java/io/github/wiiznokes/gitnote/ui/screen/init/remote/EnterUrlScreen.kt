@@ -13,8 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.model.Provider
 
 private fun isUrlCorrect(url: String): Boolean {
     return url.contains(" ") || url.isEmpty()
@@ -23,7 +23,6 @@ private fun isUrlCorrect(url: String): Boolean {
 @Composable
 fun EnterUrlWithProviderScreen(
     onBackClick: () -> Unit,
-    provider: Provider,
     onUrl: (String) -> Unit
 ) {
     AppPage(

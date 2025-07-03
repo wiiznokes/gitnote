@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.ClipEntry
@@ -21,7 +20,6 @@ import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
-import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.CloneState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
@@ -34,7 +32,6 @@ fun GenerateNewKeysWithProviderScreen(
     onBackClick: () -> Unit,
     vm: InitViewModel,
     storageConfig: StorageConfiguration,
-    provider: Provider,
     url: String,
     onSuccess: () -> Unit
 ) {

@@ -13,7 +13,6 @@ import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.*
-import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
@@ -44,65 +43,37 @@ fun RemoteScreen(
         when (remoteDestination) {
             is SelectProvider -> SelectProviderScreen(
                 onBackClick = onBackClick,
-                onProviderSelected = { provider ->
-                    if (provider != null) {
-                        navController.navigate(
-                            SelectSetupAutomatically(
-                                provider = provider
-                            )
-                        )
+                vm = vm,
+                onProviderSelected = {
+                    if (vm.provider != null) {
+                        navController.navigate(SelectSetupAutomatically)
                     } else {
-                        navController.navigate(
-                            EnterUrl(
-                                provider = null
-                            )
-                        )
+                        navController.navigate(EnterUrl)
                     }
                 }
             )
 
             is SelectSetupAutomatically -> SelectSetupAutomaticallyScreen(
                 onBackClick = { navController.pop() },
-                onAutomatically = {
-                    navController.navigate(
-                        AuthorizeGitNote(
-                            provider = remoteDestination.provider,
-                        )
-                    )
-                },
-                onManually = {
-                    navController.navigate(
-                        EnterUrl(
-                            provider = remoteDestination.provider,
-                        )
-                    )
-                }
+                onAutomatically = { navController.navigate(AuthorizeGitNote) },
+                onManually = { navController.navigate(EnterUrl) }
             )
 
             is AuthorizeGitNote -> AuthorizeGitNoteScreen(
                 onBackClick = { navController.pop() },
                 vm = vm,
-                onSuccess = {
-                    navController.navigate(
-                        PickRepo(
-                            provider = remoteDestination.provider,
-                        )
-                    )
-                }
+                onSuccess = { navController.navigate(PickRepo) }
 
             )
+
             is EnterUrl -> {
 
-                if (remoteDestination.provider != null) {
+                if (vm.provider != null) {
                     EnterUrlWithProviderScreen(
                         onBackClick = { navController.pop() },
-                        provider = remoteDestination.provider,
                         onUrl = { url ->
                             navController.navigate(
-                                SelectGenerateNewKeys(
-                                    provider = remoteDestination.provider,
-                                    url = url
-                                )
+                                SelectGenerateNewKeys(url = url)
                             )
                         }
                     )
@@ -111,16 +82,14 @@ fun RemoteScreen(
                         onBackClick = { navController.pop() },
                         onUrl = { url ->
                             navController.navigate(
-                                SelectGenerateNewKeys(
-                                    provider = remoteDestination.provider,
-                                    url = url
-                                )
+                                SelectGenerateNewKeys(url = url)
                             )
                         }
                     )
                 }
 
             }
+
             is PickRepo -> PickRepoScreen(
                 onBackClick = { navController.pop() },
                 onSuccess = onInitSuccess,
@@ -133,29 +102,19 @@ fun RemoteScreen(
                 onGenerate = {
                     navController.navigate(
                         GenerateNewKeys(
-                            provider = remoteDestination.provider,
                             url = remoteDestination.url
                         )
                     )
                 },
-                onCustom = {
-                    navController.navigate(
-                        LoadKeysFromDevice(
-                            provider = remoteDestination.provider,
-                            url = remoteDestination.url
-                        )
-                    )
-                }
             )
 
             is GenerateNewKeys -> {
 
-                if (remoteDestination.provider != null) {
+                if (vm.provider != null) {
                     GenerateNewKeysWithProviderScreen(
                         onBackClick = { navController.pop() },
                         onSuccess = onInitSuccess,
                         vm = vm,
-                        provider = remoteDestination.provider,
                         url = remoteDestination.url,
                         storageConfig = storageConfig,
                     )
@@ -166,10 +125,6 @@ fun RemoteScreen(
                 }
 
             }
-            is LoadKeysFromDevice -> LoadKeysFromDeviceScreen(
-                onBackClick = { navController.pop() },
-                onNext = { }
-            )
         }
 
     }

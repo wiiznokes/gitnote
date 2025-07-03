@@ -3,10 +3,10 @@ package io.github.wiiznokes.gitnote.data
 import android.content.Context
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
+import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
-import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
@@ -104,7 +104,7 @@ class AppPreferences(
         }
     }
 
-    val provider = enumPreference("provider", Provider.GitHub)
+    val provider = enumPreference("provider", ProviderType.GitHub)
 
     val sortType = enumPreference("sortType", SortType.Modification)
 

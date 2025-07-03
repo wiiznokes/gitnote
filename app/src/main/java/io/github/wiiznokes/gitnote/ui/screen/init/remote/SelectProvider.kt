@@ -5,14 +5,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import io.github.wiiznokes.gitnote.provider.GithubProvider
+import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.model.Provider
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 
 
 @Composable
 fun SelectProviderScreen(
     onBackClick: () -> Unit,
-    onProviderSelected: (Provider?) -> Unit,
+    vm: InitViewModel,
+    onProviderSelected: () -> Unit,
 ) {
 
     AppPage(
@@ -22,10 +25,15 @@ fun SelectProviderScreen(
         onBackClick = onBackClick,
     ) {
 
-        Provider.entries.forEach {
+        ProviderType.entries.forEach {
             Button(
                 onClick = {
-                    onProviderSelected(it)
+                    when (it) {
+                        ProviderType.GitHub -> {
+                            vm.provider = GithubProvider()
+                        }
+                    }
+                    onProviderSelected()
                 }
             ) {
                 Text(text = it.name)
@@ -34,7 +42,8 @@ fun SelectProviderScreen(
 
         Button(
             onClick = {
-                onProviderSelected(null)
+                vm.provider = null
+                onProviderSelected()
             }
         ) {
             Text(text = "Custom")
