@@ -373,6 +373,19 @@ sealed class AuthState {
     data object Error : AuthState()
 
     fun isClickable(): Boolean = this is Idle || this is Error
+
+    fun isLoading(): Boolean = this is GetAccessToken || this is FetchRepos || this is GetUserInfo
+
+    fun message(): String {
+        return when (this) {
+            Error -> "Error"
+            FetchRepos -> "Fetching repositories"
+            GetAccessToken -> "Getting the access token"
+            GetUserInfo -> "Getting user information"
+            Idle -> ""
+            Success -> "Success"
+        }
+    }
 }
 
 sealed class AuthStep2 {
@@ -383,8 +396,19 @@ sealed class AuthStep2 {
     data object Error : AuthStep2()
 
     fun isClickable(): Boolean = this is Idle || this is Error
-}
 
+    fun isLoading(): Boolean = this is CreateRepo || this is AddDeployKey
+
+    fun message(): String {
+        return when (this) {
+            AddDeployKey -> "Adding deploy key to the repository"
+            CreateRepo -> "Creating the repository"
+            Error -> "Error"
+            Idle -> ""
+            Success -> "Success"
+        }
+    }
+}
 
 
 sealed class CloneState {
@@ -395,5 +419,16 @@ sealed class CloneState {
 
 
     fun isClickable(): Boolean = this is Idle || this is Error
+
+    fun isLoading(): Boolean = this is Cloning
+
+    fun message(): String {
+        return when (this) {
+            is Cloning -> "$percent %"
+            Error -> "Error"
+            Idle -> ""
+            Success -> "Success"
+        }
+    }
 
 }
