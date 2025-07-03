@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote
 
-import android.app.ComponentCaller
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavBackHandler
 import dev.olshevski.navigation.reimagined.navigate
@@ -18,19 +16,16 @@ import dev.olshevski.navigation.reimagined.popAll
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
-import io.github.wiiznokes.gitnote.data.StorageConfig
 import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
-import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
 import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
