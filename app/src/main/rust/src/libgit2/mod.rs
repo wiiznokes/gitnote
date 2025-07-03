@@ -4,11 +4,11 @@ use std::{
 };
 
 use git2::{
-    CertificateCheckStatus, Cred, FetchOptions, IndexAddOption, Progress, PushOptions,
+    CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions,
     RemoteCallbacks, Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
-use crate::{Creeds, Error, ProgressCB};
+use crate::{Cred, Error, ProgressCB};
 
 mod merge;
 
@@ -36,19 +36,32 @@ pub fn open_repo(repo_path: &str) -> Result<(), Error> {
     Ok(())
 }
 
+fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
+    match cred {
+        Cred::UserPassPlainText { username, password } => {
+            git2::Cred::userpass_plaintext(&username, &password)
+        }
+        Cred::Ssh {
+            username,
+            private_key,
+            public_key,
+        } => git2::Cred::ssh_key_from_memory(username, Some(public_key), private_key, None),
+    }
+}
+
 pub fn clone_repo(
     repo_path: &str,
     remote_url: &str,
-    creeds: Option<Creeds>,
+    cred: Option<Cred>,
     mut cb: ProgressCB,
 ) -> Result<(), Error> {
     let mut callbacks = RemoteCallbacks::new();
 
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
-    if let Some(creeds) = creeds {
+    if let Some(cred) = cred {
         callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&creeds.username, &creeds.password)
+            credential_helper(&cred)
         });
     }
 
@@ -121,7 +134,7 @@ pub fn commit_all(username: &str, message: &str) -> Result<(), Error> {
     .map_err(|e| Error::git2(e, "commit"))
 }
 
-pub fn push(creeds: Option<Creeds>) -> Result<(), Error> {
+pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -135,9 +148,9 @@ pub fn push(creeds: Option<Creeds>) -> Result<(), Error> {
 
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
-    if let Some(creeds) = creeds {
+    if let Some(cred) = cred {
         callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&creeds.username, &creeds.password)
+            credential_helper(&cred)
         });
     }
 
@@ -151,7 +164,7 @@ pub fn push(creeds: Option<Creeds>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn pull(creeds: Option<Creeds>) -> Result<(), Error> {
+pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -163,9 +176,9 @@ pub fn pull(creeds: Option<Creeds>) -> Result<(), Error> {
 
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
-    if let Some(creeds) = creeds {
+    if let Some(cred) = cred {
         callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            Cred::userpass_plaintext(&creeds.username, &creeds.password)
+            credential_helper(&cred)
         });
     }
 

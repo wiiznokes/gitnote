@@ -177,6 +177,8 @@ fun MainSettingsScreen(
         SettingsSection(
             title = stringResource(R.string.repository)
         ) {
+
+            /*
             val userName by vm.prefs.userName.getAsState()
             StringSettings(
                 title = stringResource(R.string.username),
@@ -205,6 +207,7 @@ fun MainSettingsScreen(
                 showFullText = false,
                 keyboardType = KeyboardType.Password
             )
+            */
 
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
             StringSettings(

@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use anyhow::anyhow;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jint, jstring};
@@ -12,6 +13,9 @@ extern crate log;
 #[macro_use]
 mod utils;
 mod libgit2;
+
+#[cfg(test)]
+mod test;
 
 const OK: jint = 0;
 
@@ -105,9 +109,74 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepo
     OK
 }
 
-pub struct Creeds {
-    pub username: String,
-    pub password: String,
+pub enum Cred {
+    UserPassPlainText {
+        username: String,
+        password: String,
+    },
+    Ssh {
+        username: String,
+        private_key: String,
+        public_key: String,
+    },
+}
+
+impl Cred {
+    pub fn from_jni(env: &mut JNIEnv, cred_obj: &JObject) -> anyhow::Result<Option<Self>> {
+        if cred_obj.is_null() {
+            return Ok(None);
+        }
+
+        let class = env.get_object_class(cred_obj)?;
+        let class_name_jstring: JString = env
+            .call_method(class, "getName", "()Ljava/lang/String;", &[])?
+            .l()?
+            .into();
+        let class_name: String = env.get_string(&class_name_jstring)?.into();
+
+        match class_name.as_str() {
+            "com.example.UserPassPlainText" => {
+                let username_obj: JString = env
+                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+                let password_obj: JString = env
+                    .get_field(cred_obj, "password", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let username: String = env.get_string(&username_obj)?.into();
+                let password: String = env.get_string(&password_obj)?.into();
+
+                Ok(Cred::UserPassPlainText { username, password })
+            }
+            "com.example.Ssh" => {
+                let username_obj: JString = env
+                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+                let private_key_obj: JString = env
+                    .get_field(cred_obj, "privateKey", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+                let public_key_obj: JString = env
+                    .get_field(cred_obj, "publicKey", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let username: String = env.get_string(&username_obj)?.into();
+                let private_key: String = env.get_string(&private_key_obj)?.into();
+                let public_key: String = env.get_string(&public_key_obj)?.into();
+
+                Ok(Cred::Ssh {
+                    username,
+                    private_key,
+                    public_key,
+                })
+            }
+            other => Err(anyhow!("Unknown class name: {}", other)),
+        }
+    }
 }
 
 mod callback {
@@ -146,26 +215,18 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     _class: JClass<'local>,
     repo_path: JString<'local>,
     remote_url: JString<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
+    cred: JString<'local>,
     progress_callback: JObject<'local>,
 ) -> jint {
     let repo_path: String = env.get_string(&repo_path).unwrap().into();
     let remote_url: String = env.get_string(&remote_url).unwrap().into();
 
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
-    };
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
 
     let cb = ProgressCB::new(&mut env, progress_callback);
 
     unwrap_or_log!(
-        libgit2::clone_repo(&repo_path, &remote_url, creeds, cb),
+        libgit2::clone_repo(&repo_path, &remote_url, cred, cb),
         "clone_repo"
     );
 
@@ -203,21 +264,10 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAl
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
-    _progress_callback: JObject<'local>,
+    cred: JString<'local>,
 ) -> jint {
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
-    };
-
-    unwrap_or_log!(libgit2::push(creeds), "push");
-
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::push(cred), "push");
     OK
 }
 
@@ -225,21 +275,10 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
-    _progress_callback: JObject<'local>,
+    cred: JString<'local>,
 ) -> jint {
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
-    };
-
-    unwrap_or_log!(libgit2::pull(creeds), "pull");
-
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::pull(cred), "pull");
     OK
 }
 

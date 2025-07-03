@@ -54,7 +54,6 @@ import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
 import io.github.wiiznokes.gitnote.ui.viewmodel.CloneState
@@ -62,6 +61,7 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import kotlinx.coroutines.launch
 
 
+/*
 @Composable
 private fun OpenLinkButton(
     text: String,
@@ -434,3 +434,4 @@ private fun InitGroupExplication(
         content()
     }
 }
+*/

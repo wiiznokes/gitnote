@@ -4,7 +4,8 @@ import android.content.Context
 import android.os.Parcelable
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.ui.model.Cred
+import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
@@ -51,23 +52,49 @@ class AppPreferences(
     }
 
     val remoteUrl = stringPreference("remoteUrl", "")
-    val userName = stringPreference("userName", "")
-    val password = stringPreference(
-        "password",
-        ""
-    )
 
-    suspend fun gitCreed(): GitCreed? {
-        val userName = this.userName.get()
-        val password = this.password.get()
+    val credType = enumPreference("credType", CredType.None)
 
-        return if (userName.isEmpty() or password.isEmpty()) {
-            null
-        } else {
-            GitCreed(
-                userName = userName,
-                password = password
+    val username = stringPreference("username", "")
+
+    suspend fun usernameOrDefault(): String =
+        username.get().let { if (it.isNotEmpty()) it else DEFAULT_USERNAME }
+
+    val userPassUsername = stringPreference("userPassUsername", "")
+    val userPassPassword = stringPreference("userPassPassword", "")
+
+    val privateKey = stringPreference("privateKey", "")
+    val publicKey = stringPreference("publicKey", "")
+
+    suspend fun cred(): Cred? {
+        return when (credType.get()) {
+            CredType.None -> null
+            CredType.UserPassPlainText -> {
+                Cred.UserPassPlainText(
+                    username = userPassUsername.get(),
+                    password = userPassPassword.get()
+                )
+            }
+            CredType.Ssh -> Cred.Ssh(
+                privateKey = this.privateKey.get(),
+                publicKey = this.publicKey.get()
             )
+        }
+    }
+
+    suspend fun updateCred(cred: Cred?) {
+        when (cred) {
+            is Cred.Ssh -> {
+                credType.update(CredType.Ssh)
+                privateKey.update(cred.privateKey)
+                publicKey.update(cred.publicKey)
+            }
+            is Cred.UserPassPlainText -> {
+                credType.update(CredType.UserPassPlainText)
+                userPassUsername.update(cred.username)
+                userPassPassword.update(cred.password)
+            }
+            null -> credType.update(CredType.None)
         }
     }
 

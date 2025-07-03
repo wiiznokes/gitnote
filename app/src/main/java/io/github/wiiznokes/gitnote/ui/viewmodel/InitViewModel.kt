@@ -10,7 +10,7 @@ import io.github.wiiznokes.gitnote.data.RepoState
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.ui.model.Cred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -120,7 +120,7 @@ class InitViewModel : ViewModel() {
     fun cloneRepo(
         repoState: NewRepoState,
         repoUrl: String,
-        gitCreed: GitCreed? = null,
+        cred: Cred? = null,
         onSuccess: () -> Unit
     ) {
 
@@ -134,7 +134,7 @@ class InitViewModel : ViewModel() {
             gitManager.cloneRepo(
                 repoPath = repoState.repoPath(),
                 repoUrl = repoUrl,
-                creed = gitCreed,
+                cred = cred,
                 progressCallback = {
                     _cloneState.tryEmit(CloneState.Cloning(it))
                 }
@@ -150,10 +150,7 @@ class InitViewModel : ViewModel() {
             prefs.initRepo(repoState)
             prefs.remoteUrl.update(repoUrl)
 
-            gitCreed?.let {
-                prefs.userName.update(it.userName)
-                prefs.password.update(it.password)
-            }
+            prefs.updateCred(cred)
 
             CoroutineScope(Dispatchers.IO).launch {
                 storageManager.updateDatabase()

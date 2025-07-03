@@ -7,7 +7,6 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
@@ -37,18 +36,18 @@ class StorageManager {
     suspend fun updateDatabaseAndRepo(): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
 
-        val creed = prefs.gitCreed()
+        val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
 
         if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(creed).onFailure {
+            gitManager.pull(cred).onFailure {
                 uiHelper.makeToast(it.message)
             }
         }
 
         // todo: maybe async this call
         gitManager.commitAll(
-            GitCreed.usernameOrDefault(creed),
+            prefs.usernameOrDefault(),
             "commit from gitnote to update the repo of the app"
         ).onFailure {
             uiHelper.makeToast(it.message)
@@ -56,7 +55,7 @@ class StorageManager {
 
         if (remoteUrl.isNotEmpty()) {
             // todo: maybe async this call
-            gitManager.push(creed).onFailure {
+            gitManager.push(cred).onFailure {
                 uiHelper.makeToast(it.message)
             }
         }
@@ -271,11 +270,11 @@ class StorageManager {
         f: suspend () -> Result<T>
     ): Result<T> {
 
-        val creed = prefs.gitCreed()
+        val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
 
         gitManager.commitAll(
-            GitCreed.usernameOrDefault(creed),
+            prefs.usernameOrDefault(),
             "commit from gitnote, before doing a change"
         ).onFailure {
             return failure(it)
@@ -294,7 +293,7 @@ class StorageManager {
         )
 
         if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(creed).onFailure {
+            gitManager.pull(cred).onFailure {
                 it.printStackTrace()
             }
         }
@@ -303,13 +302,13 @@ class StorageManager {
             return failure(it)
         }
 
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed), commitMessage).onFailure {
+        gitManager.commitAll(prefs.usernameOrDefault(), commitMessage).onFailure {
             return failure(it)
         }
 
 
         if (remoteUrl.isNotEmpty()) {
-            gitManager.push(creed).onFailure {
+            gitManager.push(cred).onFailure {
                 it.printStackTrace()
             }
         }

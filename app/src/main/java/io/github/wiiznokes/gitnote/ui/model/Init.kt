@@ -29,18 +29,20 @@ enum class Provider : ProviderLink {
 }
 
 @Parcelize
-data class GitCreed(
-    val userName: String,
-    val password: String,
-) : Parcelable {
+sealed class Cred: Parcelable {
+    data class UserPassPlainText(
+        val username: String,
+        val password: String
+    ) : Cred()
 
-    companion object {
-        fun usernameOrDefault(creed: GitCreed?): String =
-            creed?.userName ?: AppPreferences.DEFAULT_USERNAME
-    }
-
-    override fun toString(): String =
-        "GitCreed(userName=${userName}, password=${"*".repeat(password.length)})"
-
+    data class Ssh(
+        val privateKey: String,
+        val publicKey: String
+    ) : Cred()
 }
 
+enum class CredType {
+    None,
+    UserPassPlainText,
+    Ssh,
+}

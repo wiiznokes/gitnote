@@ -46,7 +46,7 @@ class TestGitManager {
             gitManager.cloneRepo(
                 repoPath = repoPath,
                 repoUrl = "https://github.com/wiiznokes/repo_test.git",
-                creed = creed,
+                cred = creed,
                 progressCallback = {}
             ).getOrThrow()
 
