@@ -9,7 +9,15 @@ import java.util.Locale
 import java.util.TimeZone
 
 
-class GithubProvider : Provider {
+class GithubProvider(
+
+) : Provider {
+
+    override val createRepoLink: String = "https://github.com/new"
+
+    override fun deployKeyLink(repo: String): String =
+        "https://github.com/$repo/settings/keys/new"
+
     private val clientId = "Ov23li8EPatIAsWPt9QT"
 
     // storing this secret in the repo is "ok"

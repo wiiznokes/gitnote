@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +18,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.SetupButton
+import io.github.wiiznokes.gitnote.ui.component.SetupLine
+import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
@@ -26,19 +28,32 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "GenerateNewKeysWithProviderScreen"
 
+private fun extractUserRepo(url: String): String? {
+    val regex = Regex("""(?:git@|ssh://git@)[\w.-]+[:/](.+?)(?:\.git)?$""")
+    val match = regex.find(url)
+    return match?.groups?.get(1)?.value
+}
+
 @Composable
-fun GenerateNewKeysWithProviderScreen(
+fun GenerateNewKeysScreen(
     onBackClick: () -> Unit,
     vm: InitViewModel,
     storageConfig: StorageConfiguration,
     url: String,
     onSuccess: () -> Unit
 ) {
+
+
+    val cloneState = vm.initState.collectAsState().value
+
+    val provider = vm.provider
+
     AppPage(
         title = "",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
+        onBackClickEnabled = cloneState.isClickable()
     ) {
 
         val publicKey = rememberSaveable { mutableStateOf("") }
@@ -51,99 +66,98 @@ fun GenerateNewKeysWithProviderScreen(
             privateKey.value = private
         }
 
-        SelectionContainer {
-            Text(publicKey.value)
-        }
+        SetupPage(
+            title = "In order to access this repository, this public key must be copied as a deploy key"
+        ) {
 
-        val clipboardManager = LocalClipboard.current
-
-        Button(
-            onClick = {
-                val data = ClipData(
-                    ClipDescription(
-                        "public ssh key",
-                        arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                    ),
-                    ClipData.Item(publicKey.value)
+            SetupLine(
+                text = "1. Copy the key"
+            ) {
+                Text(
+                    text = publicKey.value
                 )
 
-                vm.viewModelScope.launch {
-                    clipboardManager.setClipEntry(ClipEntry(data))
-                }
-            }
-        ) {
-            Text("Copy key")
-        }
 
-        Button(
-            onClick = {
-                val (public, private) = generateSshKeysLib()
-                publicKey.value = public
-                privateKey.value = private
-            }
-        ) {
-            Text("Regenerate key")
-        }
+                val clipboardManager = LocalClipboard.current
 
+                SetupButton(
+                    text = "Copy Key",
+                    onClick = {
+                        val data = ClipData(
+                            ClipDescription(
+                                "public ssh key",
+                                arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                            ),
+                            ClipData.Item(publicKey.value)
+                        )
 
-        val uriHandler = LocalUriHandler.current
-
-        Button(
-            onClick = {
-                // todo: change the link
-                uriHandler.openUri(url)
-            }
-        ) {
-            Text("Open deploy key webpage")
-        }
-
-
-        val cloneState = vm.initState.collectAsState().value
-
-
-        Button(
-            onClick = {
-                vm.cloneRepo(
-                    storageConfig = storageConfig,
-                    repoUrl = url,
-                    cred = Cred.Ssh(
-                        username = "git",
-                        publicKey = publicKey.value,
-                        privateKey = privateKey.value,
-                    ),
-                    onSuccess = onSuccess
+                        vm.viewModelScope.launch {
+                            clipboardManager.setClipEntry(ClipEntry(data))
+                        }
+                    }
                 )
 
-            },
-            enabled = cloneState.isClickable()
+                SetupButton(
+                    text = "Regenerate Key",
+                    onClick = {
+                        val (public, private) = generateSshKeysLib()
+                        publicKey.value = public
+                        privateKey.value = private
+                    }
+                )
+            }
+        }
+
+
+        if (provider != null) {
+            SetupLine(
+                text = "2. Open webpage, and paste the deploy key. Make sure it is given Write Access."
+            ) {
+                val uriHandler = LocalUriHandler.current
+
+                SetupButton(
+                    text = "Open deploy key webpage",
+                    onClick = {
+                        val fullRepoName = extractUserRepo(url)
+                        if (fullRepoName == null) {
+                            Log.e(TAG, "can't parse full repo name: $url")
+                        } else {
+                            uriHandler.openUri(provider.deployKeyLink(fullRepoName))
+                        }
+                    }
+                )
+            }
+        } else {
+            SetupLine(
+                text = "2. Add the public key to the git provider."
+            ) {
+
+            }
+        }
+
+
+        SetupLine(
+            text = "3. Try Cloning"
         ) {
-            Text("Clone repo")
+
+            SetupButton(
+                text = if (cloneState.isLoading()) {
+                    cloneState.message()
+                } else "Clone Repo",
+                onClick = {
+                    vm.cloneRepo(
+                        storageConfig = storageConfig,
+                        repoUrl = url,
+                        cred = Cred.Ssh(
+                            username = "git",
+                            publicKey = publicKey.value,
+                            privateKey = privateKey.value,
+                        ),
+                        onSuccess = onSuccess
+                    )
+                },
+                enabled = cloneState.isClickable()
+            )
         }
-
-
-        if (cloneState.isLoading()) {
-            Text(text = cloneState.message())
-        }
-    }
-}
-
-@Composable
-fun GenerateNewKeysScreen(
-    onBackClick: () -> Unit,
-
-    ) {
-    AppPage(
-        title = "",
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        onBackClick = onBackClick,
-    ) {
-
-        Text("key")
-        Button(onClick = {}) { Text("Copy key") }
-        Button(onClick = {}) { Text("Regenerate key") }
-
-
-        Button(onClick = {}) { Text("Clone repo") }
     }
 }

@@ -22,6 +22,10 @@ data class UserInfo(
 
 interface Provider {
 
+    val createRepoLink: String
+
+    fun deployKeyLink(repo: String): String
+
     fun getLaunchOAuthScreenUrl(): String
 
     fun exchangeCodeForAccessToken(code: String): String

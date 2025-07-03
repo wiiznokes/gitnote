@@ -23,7 +23,6 @@ import io.github.wiiznokes.gitnote.ui.component.AppPage
 fun SelectGenerateNewKeysScreen(
     onBackClick: () -> Unit,
     onGenerate: () -> Unit,
-//    onCustom: () -> Unit,
 ) {
 
     AppPage(
@@ -40,13 +39,5 @@ fun SelectGenerateNewKeysScreen(
         ) {
             Text(text = "Generate new keys")
         }
-
-//        Button(
-//            onClick = {
-//                onCustom()
-//            },
-//        ) {
-//            Text(text = "Provide Custom SSH keys")
-//        }
     }
 }

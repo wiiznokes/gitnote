@@ -1,73 +1,86 @@
 package io.github.wiiznokes.gitnote.ui.screen.init.remote
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.NextButton
+import io.github.wiiznokes.gitnote.ui.component.SetupLine
+import io.github.wiiznokes.gitnote.ui.component.SetupPage
+import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+
+private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
 
 private fun isUrlCorrect(url: String): Boolean {
-    return url.contains(" ") || url.isEmpty()
+    return sshGitRegex.matches(url)
 }
 
 @Composable
 fun EnterUrlWithProviderScreen(
+    vm: InitViewModel,
     onBackClick: () -> Unit,
-    onUrl: (String) -> Unit
+    onUrl: (String) -> Unit,
 ) {
+
+    val provider = vm.provider!!
+
     AppPage(
-        title = "",
-        horizontalAlignment = Alignment.CenterHorizontally,
+        title = "Url",
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
     ) {
 
+        SetupPage {
+            SetupLine(
+                text = "1. Go to the website, create a repo and copy its git clone URL. Choose the SSH method"
+            ) {
+                val uriHandler = LocalUriHandler.current
 
-        Button(
-            onClick = {
-
+                Button(
+                    modifier = Modifier.fillMaxSize(),
+                    onClick = { uriHandler.openUri(provider.createRepoLink) }
+                ) {
+                    Text("Create repo")
+                    SimpleIcon(
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    )
+                }
             }
-        ) {
-            Text("open create repo page")
-        }
 
-        val url = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue())
-        }
+            val url = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                mutableStateOf(TextFieldValue())
+            }
 
-        OutlinedTextField(
-            value = url.value,
-            onValueChange = {
-                url.value = it
-            },
-            label = {
-                Text(text = stringResource(R.string.clone_step_url_label))
-            },
-            singleLine = true,
-            isError = !isUrlCorrect(url.value.text),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Uri
+            SetupLine(
+                text = "2. Enter the Git clone URL"
+            ) {
+                UrlTextField(url = url)
+            }
+
+            NextButton(
+                text = "Next",
+                onClick = {
+                    onUrl(url.value.text)
+                },
+                enabled = isUrlCorrect(url.value.text)
             )
-        )
-
-
-        Button(
-            onClick = {
-                onUrl(url.value.text)
-            },
-            enabled = isUrlCorrect(url.value.text)
-        ) {
-            Text(text = "Next")
         }
 
     }
@@ -79,40 +92,54 @@ fun EnterUrlScreen(
     onUrl: (String) -> Unit
 ) {
     AppPage(
-        title = "",
+        title = "Url",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
     ) {
 
-        val url = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue())
-        }
+        SetupPage {
+            val url = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                mutableStateOf(TextFieldValue())
+            }
 
-        OutlinedTextField(
-            value = url.value,
-            onValueChange = {
-                url.value = it
-            },
-            label = {
-                Text(text = stringResource(R.string.clone_step_url_label))
-            },
-            singleLine = true,
-            isError = !isUrlCorrect(url.value.text),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Uri
+            SetupLine(
+                text = "1. Enter the Git clone URL"
+            ) {
+                UrlTextField(url = url)
+            }
+
+            NextButton(
+                text = "Next",
+                onClick = {
+                    onUrl(url.value.text)
+                },
+                enabled = isUrlCorrect(url.value.text)
             )
-        )
-
-
-        Button(
-            onClick = {
-                onUrl(url.value.text)
-            },
-            enabled = isUrlCorrect(url.value.text)
-        ) {
-            Text(text = "Next")
         }
-
     }
+}
+
+@Composable
+private fun UrlTextField(url: MutableState<TextFieldValue>) {
+
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxSize(),
+        value = url.value,
+        onValueChange = {
+            url.value = it
+        },
+        label = {
+            Text(text = stringResource(R.string.clone_step_url_label))
+        },
+        placeholder = {
+            Text(text = "git@github.com:wiiznokes/gitnote.git")
+        },
+        singleLine = true,
+        isError = !isUrlCorrect(url.value.text),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Uri
+        )
+    )
 }

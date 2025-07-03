@@ -12,7 +12,13 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
-import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.*
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.AuthorizeGitNote
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.EnterUrl
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.GenerateNewKeys
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.PickRepo
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenerateNewKeys
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvider
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
@@ -71,6 +77,7 @@ fun RemoteScreen(
                 if (vm.provider != null) {
                     EnterUrlWithProviderScreen(
                         onBackClick = { navController.pop() },
+                        vm = vm,
                         onUrl = { url ->
                             navController.navigate(
                                 SelectGenerateNewKeys(url = url)
@@ -108,25 +115,14 @@ fun RemoteScreen(
                 },
             )
 
-            is GenerateNewKeys -> {
-
-                if (vm.provider != null) {
-                    GenerateNewKeysWithProviderScreen(
-                        onBackClick = { navController.pop() },
-                        onSuccess = onInitSuccess,
-                        vm = vm,
-                        url = remoteDestination.url,
-                        storageConfig = storageConfig,
-                    )
-                } else {
-                    GenerateNewKeysScreen(
-                        onBackClick = { navController.pop() },
-                    )
-                }
-
-            }
+            is GenerateNewKeys -> GenerateNewKeysScreen(
+                onBackClick = { navController.pop() },
+                onSuccess = onInitSuccess,
+                vm = vm,
+                url = remoteDestination.url,
+                storageConfig = storageConfig,
+            )
         }
-
     }
 }
 
