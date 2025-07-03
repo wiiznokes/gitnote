@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +62,7 @@ private fun SetupTitle(
         modifier = Modifier
             ,
         text = title,
-        fontSize = 24.sp,
+        fontSize = 20.sp,
         fontWeight = FontWeight.Bold
     )
 }
@@ -85,6 +88,7 @@ fun SetupButton(
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    link: Boolean = false,
 ) {
     Button(
         modifier = Modifier
@@ -92,6 +96,14 @@ fun SetupButton(
         onClick = onClick,
         enabled = enabled
     ) {
-        Text(text = text)
+        if (link) {
+            Text(text = text)
+            Spacer(Modifier.width(5.dp))
+            SimpleIcon(
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+            )
+        } else {
+            Text(text = text)
+        }
     }
 }

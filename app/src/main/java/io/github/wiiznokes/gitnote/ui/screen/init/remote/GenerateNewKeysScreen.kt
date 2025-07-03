@@ -3,8 +3,15 @@ package io.github.wiiznokes.gitnote.ui.screen.init.remote
 import android.content.ClipData
 import android.content.ClipDescription
 import android.util.Log
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,9 +19,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.component.AppPage
@@ -49,7 +58,7 @@ fun GenerateNewKeysScreen(
     val provider = vm.provider
 
     AppPage(
-        title = "",
+        title = "SSH keys",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
@@ -73,9 +82,20 @@ fun GenerateNewKeysScreen(
             SetupLine(
                 text = "1. Copy the key"
             ) {
-                Text(
-                    text = publicKey.value
-                )
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    tonalElevation = 4.dp,
+                    shadowElevation = 4.dp,
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .horizontalScroll(rememberScrollState()),
+                        text = publicKey.value,
+                        maxLines = 1
+                    )
+                }
 
 
                 val clipboardManager = LocalClipboard.current
@@ -106,58 +126,60 @@ fun GenerateNewKeysScreen(
                     }
                 )
             }
-        }
 
 
-        if (provider != null) {
+
+            if (provider != null) {
+                SetupLine(
+                    text = "2. Open webpage, and paste the deploy key. Make sure it is given Write Access."
+                ) {
+                    val uriHandler = LocalUriHandler.current
+
+                    SetupButton(
+                        text = "Open deploy key webpage",
+                        onClick = {
+                            val fullRepoName = extractUserRepo(url)
+                            if (fullRepoName == null) {
+                                Log.e(TAG, "can't parse full repo name: $url")
+                            } else {
+                                uriHandler.openUri(provider.deployKeyLink(fullRepoName))
+                            }
+                        },
+                        link = true
+                    )
+                }
+            } else {
+                SetupLine(
+                    text = "2. Add the public key to the git provider."
+                ) {
+
+                }
+            }
+
+
             SetupLine(
-                text = "2. Open webpage, and paste the deploy key. Make sure it is given Write Access."
+                text = "3. Try Cloning..."
             ) {
-                val uriHandler = LocalUriHandler.current
 
                 SetupButton(
-                    text = "Open deploy key webpage",
+                    text = if (cloneState.isLoading()) {
+                        cloneState.message()
+                    } else "Clone Repo",
                     onClick = {
-                        val fullRepoName = extractUserRepo(url)
-                        if (fullRepoName == null) {
-                            Log.e(TAG, "can't parse full repo name: $url")
-                        } else {
-                            uriHandler.openUri(provider.deployKeyLink(fullRepoName))
-                        }
-                    }
+                        vm.cloneRepo(
+                            storageConfig = storageConfig,
+                            repoUrl = url,
+                            cred = Cred.Ssh(
+                                username = "git",
+                                publicKey = publicKey.value,
+                                privateKey = privateKey.value,
+                            ),
+                            onSuccess = onSuccess
+                        )
+                    },
+                    enabled = cloneState.isClickable()
                 )
             }
-        } else {
-            SetupLine(
-                text = "2. Add the public key to the git provider."
-            ) {
-
-            }
-        }
-
-
-        SetupLine(
-            text = "3. Try Cloning"
-        ) {
-
-            SetupButton(
-                text = if (cloneState.isLoading()) {
-                    cloneState.message()
-                } else "Clone Repo",
-                onClick = {
-                    vm.cloneRepo(
-                        storageConfig = storageConfig,
-                        repoUrl = url,
-                        cred = Cred.Ssh(
-                            username = "git",
-                            publicKey = publicKey.value,
-                            privateKey = privateKey.value,
-                        ),
-                        onSuccess = onSuccess
-                    )
-                },
-                enabled = cloneState.isClickable()
-            )
         }
     }
 }

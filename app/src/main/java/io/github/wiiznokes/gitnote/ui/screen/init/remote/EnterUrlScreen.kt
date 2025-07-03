@@ -3,9 +3,6 @@ package io.github.wiiznokes.gitnote.ui.screen.init.remote
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +18,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.NextButton
+import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
-import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 
 private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
@@ -53,15 +50,12 @@ fun EnterUrlWithProviderScreen(
             ) {
                 val uriHandler = LocalUriHandler.current
 
-                Button(
-                    modifier = Modifier.fillMaxSize(),
-                    onClick = { uriHandler.openUri(provider.createRepoLink) }
-                ) {
-                    Text("Create repo")
-                    SimpleIcon(
-                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-                    )
-                }
+                SetupButton(
+                    text = "Create repo",
+                    onClick = { uriHandler.openUri(provider.createRepoLink) },
+                    link = true
+
+                )
             }
 
             val url = rememberSaveable(stateSaver = TextFieldValue.Saver) {
