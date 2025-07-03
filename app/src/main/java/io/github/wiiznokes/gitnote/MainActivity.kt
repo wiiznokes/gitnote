@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -129,10 +130,12 @@ class MainActivity : ComponentActivity() {
         val uri = intent.data ?: return
         if (uri.scheme == "gitnote-identity" && uri.host == "register-callback") {
             val code = uri.getQueryParameter("code")
-            Log.d(TAG, "code = $code")
+
+            if (code != null) {
+                val vm: InitViewModel by viewModels()
+                vm.onReceiveCode(code)
+            }
         }
-
-
     }
 
     override fun onDestroy() {

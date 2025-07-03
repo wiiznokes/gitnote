@@ -1,6 +1,9 @@
 package io.github.wiiznokes.gitnote.ui.viewmodel
 
 
+import android.content.Intent
+import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
@@ -17,6 +20,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
@@ -193,6 +203,94 @@ class InitViewModel : ViewModel() {
         return true
     }
 
+    private val clientId = "Ov23li8EPatIAsWPt9QT"
+
+    // storing this secret in the repo is "ok"
+    // the only risk is github app reputation and quotas
+    // it would require a server to not store it here
+    private val clientSecret = "12f3f4742855deaafb45e798bcc635608b9d6fe6"
+
+    fun getLaunchOAuthScreenIntent(): Intent {
+        val authUrl = "https://github.com/login/oauth/authorize?client_id=$clientId&scope=repo"
+        return Intent(Intent.ACTION_VIEW, authUrl.toUri())
+    }
+
+    fun onReceiveCode(code: String) {
+        exchangeCodeForAccessToken(code)
+    }
+
+    private fun exchangeCodeForAccessToken(code: String) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val url = URL("https://github.com/login/oauth/access_token")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Accept", "application/json")
+                connection.doOutput = true
+
+                val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
+                connection.outputStream.use {
+                    it.write(body.toByteArray(Charsets.UTF_8))
+                }
+
+                val response = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(response)
+                val accessToken = json.getString("access_token")
+
+                Log.d("OAuth", "Access Token: $accessToken")
+
+                // Optional: save token securely and fetch user info
+                fetchUserRepos(accessToken)
+
+            } catch (e: Exception) {
+                Log.e("OAuth", "Error exchanging code: ${e.message}", e)
+            }
+        }
+    }
+
+    data class RepoInfo(
+        val name: String,
+        val url: String,
+        val lastModifiedTimeMillis: Long,
+    )
+
+    private fun fetchUserRepos(token: String) {
+        val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.setRequestProperty("Authorization", "token $token")
+        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+
+        val response = connection.inputStream.bufferedReader().use { it.readText() }
+        Log.d("OAuth", "Repo list: $response")
+
+        val repos = mutableListOf<RepoInfo>()
+
+        try {
+            val jsonArray = JSONArray(response)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            for (i in 0 until jsonArray.length()) {
+                val repo = jsonArray.getJSONObject(i)
+                val name = repo.getString("name")
+                val owner = repo.getJSONObject("owner").getString("login")
+                val url = repo.getString("html_url")
+                val updatedAt = repo.getString("updated_at")
+                val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
+
+                repos.add(RepoInfo(name = "$owner/$name", url = url, lastModifiedTimeMillis = timeMillis))
+            }
+        } catch (e: Exception) {
+            Log.e("OAuth", "Failed to parse repos: ${e.message}", e)
+        }
+
+        repos.sortWith(compareByDescending { it.lastModifiedTimeMillis })
+
+        for (repo in repos) {
+            Log.d(TAG, "$repo")
+        }
+    }
 }
 
 sealed class CloneState {

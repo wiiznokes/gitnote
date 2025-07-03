@@ -81,6 +81,7 @@ fun RemoteScreen(
 
             is AuthorizeGitNote -> AuthorizeGitNoteScreen(
                 onBackClick = { navController.pop() },
+                vm = vm,
                 onSuccess = {
                     navController.navigate(
                         PickRepo(
