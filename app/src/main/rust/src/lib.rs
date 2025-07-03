@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Display};
+use std::str::FromStr;
 use std::sync::OnceLock;
 
 use anyhow::anyhow;
@@ -60,15 +61,26 @@ impl Display for Error {
     }
 }
 
+// https://github.com/libgit2/libgit2/pull/7056
 static HOME_PATH: OnceLock<String> = OnceLock::new();
 fn apply_ssh_workaround() {
     let home = HOME_PATH.get().unwrap();
-    unsafe {
-        std::env::set_var("HOME", home);
-    }
 
-    let _ = std::fs::create_dir_all(format!("{home}/.ssh"));
-    let _ = std::fs::File::create(format!("{home}/.ssh/known_hosts"));
+    let c_path = std::ffi::CString::from_str(home).expect("CString::new failed");
+
+    unsafe {
+        libgit2_sys::git_libgit2_opts(
+            libgit2_sys::GIT_OPT_SET_HOMEDIR as std::ffi::c_int,
+            c_path.as_ptr(),
+        )
+    };
+
+    if let Err(e) = std::fs::create_dir_all(format!("{home}/.ssh")) {
+        error!("{e}");
+    }
+    if let Err(e) = std::fs::File::create(format!("{home}/.ssh/known_hosts")) {
+        error!("{e}");
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -77,12 +89,12 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<
     _class: JClass<'local>,
     home_path: JString<'local>,
 ) -> jint {
-    // https://github.com/libgit2/libgit2/pull/7056
     let home_path: String = env
         .get_string(&home_path)
         .expect("Couldn't get java string!")
         .into();
-    HOME_PATH.set(home_path).unwrap();
+
+    HOME_PATH.set(home_path.clone()).unwrap();
 
     install_panic_hook();
 

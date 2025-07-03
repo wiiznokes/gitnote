@@ -272,6 +272,7 @@ dependencies = [
  "anyhow",
  "git2",
  "jni",
+ "libgit2-sys",
  "log",
  "rand_core",
  "ssh-key",

@@ -18,3 +18,4 @@ rand_core = { version = "0.6", features = ["std"] }
 ssh-key = { version = "0.6", default-features = false, features = ["alloc", "ed25519"] }
 anyhow = "1"
 zeroize = "1"
+libgit2-sys = "0.18"
