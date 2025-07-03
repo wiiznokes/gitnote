@@ -91,8 +91,9 @@ class AppPreferences(
         when (cred) {
             is Cred.Ssh -> {
                 credType.update(CredType.Ssh)
-                privateKey.update(cred.privateKey)
+                sshUsername.update(cred.username)
                 publicKey.update(cred.publicKey)
+                privateKey.update(cred.privateKey)
             }
             is Cred.UserPassPlainText -> {
                 credType.update(CredType.UserPassPlainText)

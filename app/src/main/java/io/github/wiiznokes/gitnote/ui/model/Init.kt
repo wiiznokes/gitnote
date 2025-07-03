@@ -33,19 +33,19 @@ sealed class Cred: Parcelable {
     data class UserPassPlainText(
         val username: String,
         val password: String
-    ) : Cred()
+    ) : Cred() {
+        override fun toString(): String {
+            return "UserPassPlainText(username=$username, password=${"*".repeat(password.length)})"
+        }
+    }
 
     data class Ssh(
         val username: String,
         val publicKey: String,
         val privateKey: String,
-    ) : Cred()
-
-
-    override fun toString(): String {
-        return when  (this) {
-            is Ssh -> "UserPassPlainText(username=$username, publicKey=$publicKey, privateKeyLen=${privateKey.length})"
-            is UserPassPlainText -> "UserPassPlainText(username=$username, password=${"*".repeat(password.length)})"
+    ) : Cred() {
+        override fun toString(): String {
+            return "Ssh(username=$username, publicKey=$publicKey, privateKeyLen=${privateKey.length})"
         }
     }
 }
