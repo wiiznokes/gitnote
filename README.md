@@ -40,5 +40,4 @@ Because all apps which integrate git on Android either separate the note title f
 # Current limitation
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
-- Rotation change will break ssl state. Workaround: restart the app
 - Conflict will make the app crash
