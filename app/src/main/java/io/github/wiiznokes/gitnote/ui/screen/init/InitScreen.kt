@@ -2,6 +2,9 @@ package io.github.wiiznokes.gitnote.ui.screen.init
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -18,16 +21,23 @@ import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModelFactory
+import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.StateFlow
 
 private const val TAG = "InitScreen"
 
 @Composable
 fun InitScreen(
-    vm: InitViewModel,
+    mainVm: MainViewModel,
     startDestination: InitDestination,
     onInitSuccess: () -> Unit,
+    authFlow: StateFlow<String>
 ) {
 
+
+    val factory = remember { InitViewModelFactory(authFlow) }
+    val vm: InitViewModel = viewModel(factory = factory)
 
     val navController =
         rememberNavController(startDestination = startDestination)
@@ -43,10 +53,10 @@ fun InitScreen(
 
             InitDestination.Main -> MainScreen(
                 vm = vm,
+                mainVm = mainVm,
                 navController = navController,
                 onInitSuccess = onInitSuccess,
             )
-
 
             is InitDestination.FileExplorer -> {
 
@@ -71,7 +81,7 @@ fun InitScreen(
 
                         when (initDestination.newRepoSource) {
                             NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
-                            NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
+                            NewRepoSource.Open -> mainVm.openRepo(repoState, onInitSuccess)
                             NewRepoSource.Clone -> {
                                 vm.checkPathForClone(repoState.repoPath()).onSuccess {
                                     navController.navigate(

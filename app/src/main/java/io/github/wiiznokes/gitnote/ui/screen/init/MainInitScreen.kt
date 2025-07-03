@@ -32,6 +32,7 @@ import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
 
@@ -44,6 +45,7 @@ private sealed class StorageChooser {
 @Composable
 fun MainScreen(
     vm: InitViewModel,
+    mainVm: MainViewModel,
     navController: NavController<InitDestination>,
     onInitSuccess: () -> Unit
 ) {
@@ -141,7 +143,7 @@ fun MainScreen(
                     val repoState = StorageConfiguration.App
                     when (storageChooser.source) {
                         NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
-                        NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
+                        NewRepoSource.Open -> mainVm.openRepo(repoState, onInitSuccess)
                         NewRepoSource.Clone -> navController.navigate(
                             InitDestination.Remote(
                                 repoState

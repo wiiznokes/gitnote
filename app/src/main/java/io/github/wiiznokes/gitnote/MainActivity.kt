@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavBackHandler
 import dev.olshevski.navigation.reimagined.navigate
@@ -25,7 +25,11 @@ import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
 import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -35,18 +39,19 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    val vm: InitViewModel by viewModels()
+    val authFlow: MutableStateFlow<String> = MutableStateFlow("")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
 
-
         setContent {
+
+
+            val vm: MainViewModel = viewModel()
 
             val theme by vm.prefs.theme.getAsState()
             val dynamicColor by vm.prefs.dynamicColor.getAsState()
-
 
 
             GitNoteTheme(
@@ -96,8 +101,9 @@ class MainActivity : ComponentActivity() {
                     when (destination) {
                         is Destination.Init -> {
                             InitScreen(
-                                vm = vm,
                                 startDestination = destination.initDestination,
+                                mainVm = vm,
+                                authFlow = authFlow,
                                 onInitSuccess = {
                                     navController.popUpTo(
                                         inclusive = true
@@ -132,8 +138,9 @@ class MainActivity : ComponentActivity() {
             val code = uri.getQueryParameter("code")
 
             if (code != null) {
-                Log.d(TAG, "ViewModel in onNewIntent: ${vm.hashCode()}")
-                vm.onReceiveCode(code)
+                CoroutineScope(Dispatchers.Default).launch {
+                    authFlow.emit(code)
+                }
             }
         }
     }
@@ -146,6 +153,3 @@ class MainActivity : ComponentActivity() {
         appModule.gitManager.shutdown()
     }
 }
-
-
-

@@ -5,13 +5,10 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.ViewModelProvider
 import io.github.wiiznokes.gitnote.MyApp
-import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
-import io.github.wiiznokes.gitnote.data.StorageConfig
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
-import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.provider.GithubProvider
@@ -30,10 +27,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.Result.Companion.failure
-import kotlin.Result.Companion.success
 
-class InitViewModel : ViewModel() {
+
+class InitViewModelFactory(private val flow: StateFlow<String>) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(InitViewModel::class.java)) {
+            return InitViewModel(flow) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class InitViewModel(val authFlow: StateFlow<String>) : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
@@ -59,6 +65,14 @@ class InitViewModel : ViewModel() {
     lateinit var userInfo: UserInfo
         private set
 
+    init {
+
+        CoroutineScope(Dispatchers.Default).launch {
+            authFlow.collect {
+                onReceiveCode(it)
+            }
+        }
+    }
 
     private fun prepareLocalStorageRepoPath() {
         val folder = NodeFs.Folder.fromPath(AppPreferences.appStorageRepoPath)
@@ -96,40 +110,6 @@ class InitViewModel : ViewModel() {
 
     }
 
-    private suspend fun openRepoSuspend(storageConfig: StorageConfiguration): Result<Unit> {
-
-        if (!NodeFs.Folder.fromPath(storageConfig.repoPath()).exist()) {
-            val msg = uiHelper.getString(R.string.error_path_not_directory)
-            uiHelper.makeToast(msg)
-            return failure(Exception(msg))
-        }
-
-        gitManager.openRepo(storageConfig.repoPath()).onFailure {
-            uiHelper.makeToast(it.message)
-            return failure(it)
-        }
-
-        prefs.initRepo(storageConfig)
-
-        // yes, there can be pending file not committed
-        // but they will be committed in the updateDatabaseAndRepo function
-        // anyway
-        CoroutineScope(Dispatchers.IO).launch {
-            storageManager.updateDatabase()
-        }
-
-        return success(Unit)
-    }
-
-    fun openRepo(repoState: StorageConfiguration, onSuccess: () -> Unit) {
-
-        CoroutineScope(Dispatchers.IO).launch {
-            openRepoSuspend(repoState).onSuccess {
-                onSuccess()
-            }
-        }
-
-    }
 
 
     fun checkPathForClone(repoPath: String): Result<Unit> {
@@ -181,38 +161,6 @@ class InitViewModel : ViewModel() {
         }
     }
 
-    suspend fun tryInit(): Boolean {
-
-        if (!prefs.isInit.get()) {
-            return false
-        }
-
-        val storageConfig = when (prefs.storageConfig.get()) {
-            StorageConfig.App -> {
-                StorageConfiguration.App
-            }
-
-            StorageConfig.Device -> {
-                if (!StoragePermissionHelper.isPermissionGranted()) {
-                    return false
-                }
-                val repoPath = try {
-                    prefs.repoPath()
-                } catch (_: Exception) {
-                    return false
-                }
-                StorageConfiguration.Device(repoPath)
-            }
-        }
-
-        openRepoSuspend(storageConfig).onFailure {
-            CoroutineScope(Dispatchers.IO).launch {
-                storageManager.closeRepo()
-            }
-            return false
-        }
-        return true
-    }
 
     fun setProvider(provider: ProviderType?) {
         this.provider = when (provider) {
