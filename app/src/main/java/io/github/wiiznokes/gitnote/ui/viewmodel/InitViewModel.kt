@@ -216,37 +216,43 @@ class InitViewModel : ViewModel() {
     }
 
     fun onReceiveCode(code: String) {
-        exchangeCodeForAccessToken(code)
-    }
-
-    private fun exchangeCodeForAccessToken(code: String) {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val url = URL("https://github.com/login/oauth/access_token")
-                val connection = url.openConnection() as HttpURLConnection
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Accept", "application/json")
-                connection.doOutput = true
+                val accessToken = exchangeCodeForAccessToken(code)
 
-                val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
-                connection.outputStream.use {
-                    it.write(body.toByteArray(Charsets.UTF_8))
+                Log.d(TAG, "Access Token: $accessToken")
+
+                val repos = fetchUserRepos(accessToken)
+                for (repo in repos) {
+                    Log.d(TAG, "$repo")
                 }
 
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                val accessToken = json.getString("access_token")
-
-                Log.d("OAuth", "Access Token: $accessToken")
-
-                // Optional: save token securely and fetch user info
-                fetchUserRepos(accessToken)
-
+                createNewRepo(token = accessToken, repoName = "repo_test2")
             } catch (e: Exception) {
-                Log.e("OAuth", "Error exchanging code: ${e.message}", e)
+                Log.e(TAG, "${e.message}")
             }
         }
+    }
+
+    private fun exchangeCodeForAccessToken(code: String): String {
+
+        val url = URL("https://github.com/login/oauth/access_token")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Accept", "application/json")
+        connection.doOutput = true
+
+        val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
+        connection.outputStream.use {
+            it.write(body.toByteArray(Charsets.UTF_8))
+        }
+
+        val response = connection.inputStream.bufferedReader().use { it.readText() }
+        val json = JSONObject(response)
+        val accessToken = json.getString("access_token")
+
+        return accessToken
     }
 
     data class RepoInfo(
@@ -255,41 +261,81 @@ class InitViewModel : ViewModel() {
         val lastModifiedTimeMillis: Long,
     )
 
-    private fun fetchUserRepos(token: String) {
+    private fun fetchUserRepos(token: String): List<RepoInfo> {
         val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
         val connection = url.openConnection() as HttpURLConnection
         connection.setRequestProperty("Authorization", "token $token")
         connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
         val response = connection.inputStream.bufferedReader().use { it.readText() }
-        Log.d("OAuth", "Repo list: $response")
+
 
         val repos = mutableListOf<RepoInfo>()
 
-        try {
-            val jsonArray = JSONArray(response)
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-            for (i in 0 until jsonArray.length()) {
-                val repo = jsonArray.getJSONObject(i)
-                val name = repo.getString("name")
-                val owner = repo.getJSONObject("owner").getString("login")
-                val url = repo.getString("html_url")
-                val updatedAt = repo.getString("updated_at")
-                val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
+        val jsonArray = JSONArray(response)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
 
-                repos.add(RepoInfo(name = "$owner/$name", url = url, lastModifiedTimeMillis = timeMillis))
-            }
-        } catch (e: Exception) {
-            Log.e("OAuth", "Failed to parse repos: ${e.message}", e)
+        for (i in 0 until jsonArray.length()) {
+            val repo = jsonArray.getJSONObject(i)
+            val name = repo.getString("name")
+            val owner = repo.getJSONObject("owner").getString("login")
+            val url = repo.getString("html_url")
+            val updatedAt = repo.getString("updated_at")
+            val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
+
+            repos.add(
+                RepoInfo(
+                    name = "$owner/$name",
+                    url = url,
+                    lastModifiedTimeMillis = timeMillis
+                )
+            )
         }
+
 
         repos.sortWith(compareByDescending { it.lastModifiedTimeMillis })
 
-        for (repo in repos) {
-            Log.d(TAG, "$repo")
+        return repos
+    }
+
+    fun createNewRepo(
+        token: String,
+        repoName: String,
+        description: String = "",
+        isPrivate: Boolean = true
+    ): Boolean {
+        val url = URL("https://api.github.com/user/repos")
+        val connection = url.openConnection() as HttpURLConnection
+
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Authorization", "token $token")
+        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
+
+        val jsonBody = JSONObject().apply {
+            put("name", repoName)
+            put("description", description)
+            put("private", isPrivate)
         }
+
+        connection.outputStream.use { os ->
+            os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
+        }
+
+        val responseCode = connection.responseCode
+
+        return if (responseCode in 200..299) {
+            // Repo created successfully
+            true
+        } else {
+            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
+            Log.e(TAG, "Failed to create repo: HTTP $responseCode $error")
+            false
+        }
+
     }
 }
 
