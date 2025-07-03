@@ -12,6 +12,7 @@ import io.github.wiiznokes.gitnote.data.StorageConfig
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
+import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import kotlinx.coroutines.CoroutineScope
@@ -219,16 +220,33 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val accessToken = exchangeCodeForAccessToken(code)
+                val token = exchangeCodeForAccessToken(code)
 
-                Log.d(TAG, "Access Token: $accessToken")
+                Log.d(TAG, "Access Token: $token")
 
-                val repos = fetchUserRepos(accessToken)
+                val repos = fetchUserRepos(token = token)
                 for (repo in repos) {
                     Log.d(TAG, "$repo")
                 }
 
-                createNewRepo(token = accessToken, repoName = "repo_test2")
+
+                //createNewRepo(token = token, repoName = "repo_test2")
+
+                val repoTest = repos.find {
+                    it.fullRepoName == "wiiznokes/repo_test"
+                }!!
+
+                val info = getUserInfo(token = token)
+                Log.d(TAG, "$info")
+
+                val (pub, priv) = generateSshKeysLib()
+
+                addDeployKey(token = token, publicKey = pub, fullRepoName = repoTest.fullRepoName)
+
+                val cred = Cred.Ssh(username = "git", publicKey = pub, privateKey = priv)
+
+                cloneRepo(StorageConfiguration.App, repoTest.url, cred, onSuccess = { println("clone successful")})
+
             } catch (e: Exception) {
                 Log.e(TAG, "${e.message}")
             }
@@ -256,7 +274,7 @@ class InitViewModel : ViewModel() {
     }
 
     data class RepoInfo(
-        val name: String,
+        val fullRepoName: String,
         val url: String,
         val lastModifiedTimeMillis: Long,
     )
@@ -281,13 +299,13 @@ class InitViewModel : ViewModel() {
             val repo = jsonArray.getJSONObject(i)
             val name = repo.getString("name")
             val owner = repo.getJSONObject("owner").getString("login")
-            val url = repo.getString("html_url")
+            val url = repo.getString("ssh_url")
             val updatedAt = repo.getString("updated_at")
             val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
 
             repos.add(
                 RepoInfo(
-                    name = "$owner/$name",
+                    fullRepoName = "$owner/$name",
                     url = url,
                     lastModifiedTimeMillis = timeMillis
                 )
@@ -328,7 +346,7 @@ class InitViewModel : ViewModel() {
         val responseCode = connection.responseCode
 
         return if (responseCode in 200..299) {
-            // Repo created successfully
+            println("Repo created successfully")
             true
         } else {
             val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
@@ -336,6 +354,76 @@ class InitViewModel : ViewModel() {
             false
         }
 
+    }
+
+    data class UserInfo(
+        val name: String,
+        val email: String,
+        val username: String,
+    )
+
+    fun getUserInfo(token: String): UserInfo? {
+        val url = URL("https://api.github.com/user")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "token $token")
+        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+
+        return try {
+            val responseCode = connection.responseCode
+            if (responseCode !in 200..299) {
+                val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
+                println("Failed to fetch user info: HTTP $responseCode $error")
+                null
+            } else {
+                val response = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(response)
+                UserInfo(
+                    name = json.optString("name", ""),
+                    email = json.optString("email", ""),
+                    username = json.getString("login")
+                )
+            }
+        } catch (e: Exception) {
+            println("Error fetching user info: ${e.message}")
+            null
+        }
+    }
+
+
+    fun addDeployKey(token: String, publicKey: String, fullRepoName: String): Boolean {
+        val url = URL("https://api.github.com/repos/$fullRepoName/keys")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Authorization", "token $token")
+        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
+
+        val jsonBody = JSONObject().apply {
+            put("title", "GitNote")
+            put("key", publicKey)
+            put("read_only", false)
+        }
+
+        connection.outputStream.use { os ->
+            os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
+        }
+
+        return try {
+            val responseCode = connection.responseCode
+            if (responseCode in 200..299) {
+                println("Deploy key added successfully")
+                true
+            } else {
+                val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
+                println("Failed to add deploy key: HTTP $responseCode $error")
+                false
+            }
+        } catch (e: Exception) {
+            println("Error adding deploy key: ${e.message}")
+            false
+        }
     }
 }
 
