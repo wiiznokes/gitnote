@@ -21,6 +21,9 @@ import io.github.wiiznokes.gitnote.provider.RepoInfo
 import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthState
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthStep2
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.CloneState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,14 +45,8 @@ class InitViewModel : ViewModel() {
         private const val TAG = "InitViewModel"
     }
 
-    private val _cloneState: MutableStateFlow<CloneState> = MutableStateFlow(CloneState.Idle)
-    val cloneState: StateFlow<CloneState> = _cloneState.asStateFlow()
-
-    private val _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
-
-    private val _authStep2: MutableStateFlow<AuthStep2> = MutableStateFlow(AuthStep2.Idle)
-    val authStep2: StateFlow<AuthStep2> = _authStep2.asStateFlow()
+    private val _initState: MutableStateFlow<InitState> = MutableStateFlow(InitState.Idle)
+    val initState: StateFlow<InitState> = _initState.asStateFlow()
 
     var provider: Provider? = null
         private set
@@ -156,23 +153,20 @@ class InitViewModel : ViewModel() {
                 prepareLocalStorageRepoPath()
             }
 
-            _cloneState.emit(CloneState.Cloning(0))
+            _initState.emit(CloneState.Cloning(0))
 
             gitManager.cloneRepo(
                 repoPath = storageConfig.repoPath(),
                 repoUrl = repoUrl,
                 cred = cred,
                 progressCallback = {
-                    _cloneState.tryEmit(CloneState.Cloning(it))
+                    _initState.tryEmit(CloneState.Cloning(it))
                 }
             ).onFailure {
                 uiHelper.makeToast(it.message)
-                _cloneState.emit(CloneState.Error)
+                _initState.emit(CloneState.Error)
                 return@launch
             }
-
-
-            _cloneState.emit(CloneState.Success)
 
             prefs.initRepo(storageConfig)
             prefs.remoteUrl.update(repoUrl)
@@ -204,7 +198,7 @@ class InitViewModel : ViewModel() {
                 }
                 val repoPath = try {
                     prefs.repoPath()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     return false
                 }
                 StorageConfiguration.Device(repoPath)
@@ -237,36 +231,36 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            _authState.emit(AuthState.GetAccessToken)
+            _initState.emit(AuthState.GetAccessToken)
             token = try {
                 provider!!.exchangeCodeForAccessToken(code)
             } catch (e: Exception) {
                 Log.e(TAG, "exchangeCodeForAccessToken: ${e.message}, $e")
-                _authState.emit(AuthState.Error)
+                _initState.emit(AuthState.Error)
                 return@launch
             }
 
-            _authState.emit(AuthState.FetchRepos)
+            _initState.emit(AuthState.FetchRepos)
 
             repos = try {
                 provider!!.fetchUserRepos(token = token)
             } catch (e: Exception) {
                 Log.e(TAG, "fetchUserRepos: ${e.message}, $e")
-                _authState.emit(AuthState.Error)
+                _initState.emit(AuthState.Error)
                 return@launch
             }
-            _authState.emit(AuthState.GetUserInfo)
+            _initState.emit(AuthState.GetUserInfo)
 
             userInfo = try {
                 provider!!.getUserInfo(token = token)
             } catch (e: Exception) {
                 Log.e(TAG, "getUserInfo: ${e.message}, $e")
-                _authState.emit(AuthState.Error)
+                _initState.emit(AuthState.Error)
                 return@launch
             }
 
             Log.d(TAG, "emit: Success")
-            _authState.emit(AuthState.Success)
+            _initState.emit(AuthState.Success)
         }
     }
 
@@ -279,7 +273,7 @@ class InitViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO).launch {
             val (publicKey, privateKey) = generateSshKeysLib()
 
-            _authStep2.emit(AuthStep2.AddDeployKey)
+            _initState.emit(AuthStep2.AddDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
                     token = token,
@@ -288,7 +282,7 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
-                _authStep2.emit(AuthStep2.Error)
+                _initState.emit(AuthStep2.Error)
                 return@launch
             }
 
@@ -300,9 +294,6 @@ class InitViewModel : ViewModel() {
                     privateKey = privateKey
                 ),
                 onSuccess = {
-                    viewModelScope.launch {
-                        _authStep2.emit(AuthStep2.Success)
-                    }
                     onSuccess()
                 }
             )
@@ -317,7 +308,7 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            _authStep2.emit(AuthStep2.CreateRepo)
+            _initState.emit(AuthStep2.CreateRepo)
             try {
                 provider!!.createNewRepo(
                     token = token,
@@ -325,13 +316,13 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "createNewRepoOnRemoteGithub: ${e.message}, $e")
-                _authStep2.emit(AuthStep2.Error)
+                _initState.emit(AuthStep2.Error)
                 return@launch
             }
 
             val (publicKey, privateKey) = generateSshKeysLib()
 
-            _authStep2.emit(AuthStep2.AddDeployKey)
+            _initState.emit(AuthStep2.AddDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
                     token = token,
@@ -340,7 +331,7 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
-                _authStep2.emit(AuthStep2.Error)
+                _initState.emit(AuthStep2.Error)
                 return@launch
             }
 
@@ -352,9 +343,6 @@ class InitViewModel : ViewModel() {
                     privateKey = privateKey
                 ),
                 onSuccess = {
-                    viewModelScope.launch {
-                        _authStep2.emit(AuthStep2.Success)
-                    }
                     onSuccess()
                 }
             )
@@ -364,71 +352,72 @@ class InitViewModel : ViewModel() {
 }
 
 
-sealed class AuthState {
-    data object Idle : AuthState()
-    data object GetAccessToken : AuthState()
-    data object FetchRepos : AuthState()
-    data object GetUserInfo : AuthState()
-    data object Success : AuthState()
-    data object Error : AuthState()
+sealed class InitState {
+    data object Idle: InitState()
 
-    fun isClickable(): Boolean = this is Idle || this is Error
+    open fun isClickable() : Boolean = true
+    open fun isLoading(): Boolean = false
+    open fun message(): String = ""
 
-    fun isLoading(): Boolean = this is GetAccessToken || this is FetchRepos || this is GetUserInfo
+    sealed class AuthState: InitState() {
+        data object Idle : AuthState()
+        data object GetAccessToken : AuthState()
+        data object FetchRepos : AuthState()
+        data object GetUserInfo : AuthState()
+        data object Success : AuthState()
+        data object Error : AuthState()
 
-    fun message(): String {
-        return when (this) {
-            Error -> "Error"
-            FetchRepos -> "Fetching repositories"
-            GetAccessToken -> "Getting the access token"
-            GetUserInfo -> "Getting user information"
-            Idle -> ""
-            Success -> "Success"
-        }
-    }
-}
+        override fun isClickable(): Boolean = this is Idle || this is Error || this is Success
+        override fun isLoading(): Boolean = this is GetAccessToken || this is FetchRepos || this is GetUserInfo
 
-sealed class AuthStep2 {
-    data object Idle : AuthStep2()
-    data object CreateRepo : AuthStep2()
-    data object AddDeployKey : AuthStep2()
-    data object Success : AuthStep2()
-    data object Error : AuthStep2()
-
-    fun isClickable(): Boolean = this is Idle || this is Error
-
-    fun isLoading(): Boolean = this is CreateRepo || this is AddDeployKey
-
-    fun message(): String {
-        return when (this) {
-            AddDeployKey -> "Adding deploy key to the repository"
-            CreateRepo -> "Creating the repository"
-            Error -> "Error"
-            Idle -> ""
-            Success -> "Success"
-        }
-    }
-}
-
-
-sealed class CloneState {
-    data object Idle : CloneState()
-    data class Cloning(val percent: Int) : CloneState()
-    data object Success : CloneState()
-    data object Error : CloneState()
-
-
-    fun isClickable(): Boolean = this is Idle || this is Error
-
-    fun isLoading(): Boolean = this is Cloning
-
-    fun message(): String {
-        return when (this) {
-            is Cloning -> "$percent %"
-            Error -> "Error"
-            Idle -> ""
-            Success -> "Success"
+        override fun message(): String {
+            return when (this) {
+                Error -> "Error"
+                FetchRepos -> "Fetching repositories"
+                GetAccessToken -> "Getting the access token"
+                GetUserInfo -> "Getting user information"
+                Idle -> ""
+                Success -> "Success"
+            }
         }
     }
 
+    sealed class AuthStep2: InitState() {
+        data object Idle : AuthStep2()
+        data object CreateRepo : AuthStep2()
+        data object AddDeployKey : AuthStep2()
+        data object Error : AuthStep2()
+
+        override fun isClickable(): Boolean = this is Idle || this is Error
+        override fun isLoading(): Boolean = this is CreateRepo || this is AddDeployKey
+
+        override fun message(): String {
+            return when (this) {
+                AddDeployKey -> "Adding deploy key to the repository"
+                CreateRepo -> "Creating the repository"
+                Error -> "Error"
+                Idle -> ""
+            }
+        }
+    }
+
+
+    sealed class CloneState: InitState() {
+        data object Idle : CloneState()
+        data class Cloning(val percent: Int) : CloneState()
+        data object Error : CloneState()
+
+
+        override fun isClickable(): Boolean = this is Idle || this is Error
+        override fun isLoading(): Boolean = this is Cloning
+
+        override fun message(): String {
+            return when (this) {
+                is Cloning -> "$percent %"
+                Error -> "Error"
+                Idle -> ""
+            }
+        }
+
+    }
 }

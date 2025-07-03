@@ -68,16 +68,12 @@ fun PickRepoScreen(
         val nameText = name.value.text
 
         val filteredRepos = remember(nameText, vm.repos) {
-            val new = vm.repos.filter { it.name.contains(nameText) }
+            val new = vm.repos.filter { it.name.contains(nameText, ignoreCase = true) }
 
-            if (nameText.isEmpty()) {
-                selected.value = Selected.None
-            } else if (new.isEmpty()) {
+            if (new.isEmpty()) {
                 selected.value = Selected.Create
-            } else if (new.size == 1) {
-                selected.value = Selected.Index(1)
             } else {
-                selected.value = Selected.None
+                selected.value = Selected.Index(0)
             }
             new
         }
@@ -190,6 +186,8 @@ fun PickRepoScreen(
         }
 
 
+        val authStep2State = vm.initState.collectAsState().value
+
         Button(
             modifier = Modifier
                 .width(250.dp),
@@ -215,13 +213,19 @@ fun PickRepoScreen(
                 }
 
             },
-            enabled = selected.value !is Selected.None && vm.authStep2.collectAsState().value.isClickable(),
+            enabled = selected.value !is Selected.None && authStep2State.isClickable(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ),
         ) {
-            Text(text = "Next")
+            Text(
+                text = if (!authStep2State.isLoading()) {
+                    "Next"
+                } else {
+                    authStep2State.message()
+                }
+            )
         }
     }
 }

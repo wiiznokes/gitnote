@@ -21,7 +21,6 @@ import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.viewmodel.CloneState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import kotlinx.coroutines.launch
 
@@ -99,7 +98,7 @@ fun GenerateNewKeysWithProviderScreen(
         }
 
 
-        val cloneState = vm.cloneState.collectAsState().value
+        val cloneState = vm.initState.collectAsState().value
 
 
         Button(
@@ -122,8 +121,8 @@ fun GenerateNewKeysWithProviderScreen(
         }
 
 
-        if (cloneState is CloneState.Cloning) {
-            Text(text = "${cloneState.percent} %")
+        if (cloneState.isLoading()) {
+            Text(text = cloneState.message())
         }
     }
 }

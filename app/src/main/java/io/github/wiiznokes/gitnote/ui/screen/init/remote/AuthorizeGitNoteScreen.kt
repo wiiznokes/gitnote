@@ -2,7 +2,6 @@ package io.github.wiiznokes.gitnote.ui.screen.init.remote
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -16,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.viewmodel.AuthState
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 
 private const val TAG = "AuthorizeGitNoteScreen"
@@ -35,7 +34,7 @@ fun AuthorizeGitNoteScreen(
     ) {
         val ctx = LocalContext.current
 
-        val authState = vm.authState.collectAsState().value
+        val authState = vm.initState.collectAsState().value
         LaunchedEffect(authState) {
             Log.d(TAG, "LaunchedEffect: $authState, hash=${vm.hashCode()}")
             if (authState is AuthState.Success) {
@@ -48,21 +47,17 @@ fun AuthorizeGitNoteScreen(
                 val intent = vm.getLaunchOAuthScreenIntent()
                 ctx.startActivity(intent)
             },
-            enabled = authState.isClickable()
+            enabled = authState.isClickable() && authState != AuthState.Success
         ) {
-            Text(text = "Authorize Gitnote")
-        }
-
-        if (authState.isLoading()) {
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            if (authState == AuthState.Success) {
+                Text(text = authState.message())
+            } else if (!authState.isLoading()) {
+                Text(text = "Authorize Gitnote")
+            } else {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(authState.message())
+                Text(text = authState.message())
             }
         }
-
     }
 }
