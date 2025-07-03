@@ -36,9 +36,18 @@ sealed class Cred: Parcelable {
     ) : Cred()
 
     data class Ssh(
+        val username: String,
+        val publicKey: String,
         val privateKey: String,
-        val publicKey: String
     ) : Cred()
+
+
+    override fun toString(): String {
+        return when  (this) {
+            is Ssh -> "UserPassPlainText(username=$username, publicKey=$publicKey, privateKeyLen=${privateKey.length})"
+            is UserPassPlainText -> "UserPassPlainText(username=$username, password=${"*".repeat(password.length)})"
+        }
+    }
 }
 
 enum class CredType {

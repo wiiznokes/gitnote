@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
@@ -37,14 +38,13 @@ fun GenerateNewKeysWithProviderScreen(
     ) {
 
         val publicKey = rememberSaveable { mutableStateOf("") }
-        var privateKey = ""
+        var privateKey = rememberSaveable { mutableStateOf("") }
 
         LaunchedEffect(true) {
             val (public, private) = generateSshKeysLib()
-            Log.d(TAG, private)
             Log.d(TAG, public)
             publicKey.value = public
-            privateKey = private
+            privateKey.value = private
         }
 
 
@@ -54,7 +54,7 @@ fun GenerateNewKeysWithProviderScreen(
             onClick = {
                 val (public, private) = generateSshKeysLib()
                 publicKey.value = public
-                privateKey = private
+                privateKey.value = private
             }
         ) {
             Text("Regenerate key")
@@ -73,8 +73,9 @@ fun GenerateNewKeysWithProviderScreen(
                     storageConfig = storageConfig,
                     repoUrl = url,
                     cred = Cred.Ssh(
-                        privateKey = privateKey,
-                        publicKey = publicKey.value
+                        username = "git",
+                        publicKey = publicKey.value,
+                        privateKey = privateKey.value,
                     ),
                     onSuccess = onSuccess
                 )

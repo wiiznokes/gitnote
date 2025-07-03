@@ -66,8 +66,9 @@ class AppPreferences(
     val userPassUsername = stringPreference("userPassUsername", "")
     val userPassPassword = stringPreference("userPassPassword", "")
 
-    val privateKey = stringPreference("privateKey", "")
+    val sshUsername = stringPreference("sshUsername", "")
     val publicKey = stringPreference("publicKey", "")
+    val privateKey = stringPreference("privateKey", "")
 
     suspend fun cred(): Cred? {
         return when (credType.get()) {
@@ -79,8 +80,9 @@ class AppPreferences(
                 )
             }
             CredType.Ssh -> Cred.Ssh(
+                username = this.sshUsername.get(),
+                publicKey = this.publicKey.get(),
                 privateKey = this.privateKey.get(),
-                publicKey = this.publicKey.get()
             )
         }
     }

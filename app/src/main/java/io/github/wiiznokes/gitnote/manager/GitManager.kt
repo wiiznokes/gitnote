@@ -128,6 +128,7 @@ class GitManager {
         progressCallback: (Int) -> Unit
     ): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "clone repo: $repoPath, $repoUrl, $cred")
+
         if (isRepoInitialized) throw GitException(GitExceptionType.RepoAlreadyInit)
 
         actualCb = progressCallback
@@ -234,7 +235,9 @@ class GitManager {
 
 }
 
-private external fun initLib(): Int
+private external fun initLib(
+    homePath: String = MyApp.appModule.context.filesDir.toPath().toString()
+): Int
 
 private external fun createRepoLib(repoPath: String): Int
 

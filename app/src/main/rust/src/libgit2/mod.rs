@@ -4,8 +4,8 @@ use std::{
 };
 
 use git2::{
-    CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions,
-    RemoteCallbacks, Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
+    CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
+    Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
 use crate::{Cred, Error, ProgressCB};
@@ -42,9 +42,10 @@ fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
             git2::Cred::userpass_plaintext(&username, &password)
         }
         Cred::Ssh {
+            username,
             private_key,
             public_key,
-        } => git2::Cred::ssh_key_from_memory("", Some(public_key), private_key, None),
+        } => git2::Cred::ssh_key_from_memory(username, Some(public_key), private_key, None),
     }
 }
 
@@ -59,9 +60,8 @@ pub fn clone_repo(
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            credential_helper(&cred)
-        });
+        callbacks
+            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
 
     callbacks.transfer_progress(|stats: Progress| {
@@ -148,9 +148,8 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            credential_helper(&cred)
-        });
+        callbacks
+            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
 
     let mut push_opts = PushOptions::new();
@@ -176,9 +175,8 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks.credentials(move |_url, _username_from_url, _allowed_types| {
-            credential_helper(&cred)
-        });
+        callbacks
+            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
 
     let mut fetch_options = FetchOptions::new();
