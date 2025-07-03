@@ -85,8 +85,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-//                    else Destination.Init(InitDestination.Main)
-                    else Destination.Init(InitDestination.Remote(StorageConfiguration.App))
+                    else Destination.Init(InitDestination.Main)
+//                    else Destination.Init(InitDestination.Remote(StorageConfiguration.App))
                 }
 
 

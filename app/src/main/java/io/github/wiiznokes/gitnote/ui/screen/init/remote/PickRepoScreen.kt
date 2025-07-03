@@ -62,7 +62,7 @@ fun PickRepoScreen(
         }
 
         val name = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(TextFieldValue("e"))
+            mutableStateOf(TextFieldValue(""))
         }
 
         val nameText = name.value.text

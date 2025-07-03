@@ -217,63 +217,14 @@ class InitViewModel : ViewModel() {
         return Intent(Intent.ACTION_VIEW, authUrl.toUri())
     }
 
-//    var repos = listOf<RepoInfo>()
-//        private set
-
-    var repos = listOf<RepoInfo>(
-        RepoInfo(
-            name = "test1",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test2",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test3",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test4",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test5",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test6",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-        RepoInfo(
-            name = "test7",
-            owner = "wiiz",
-            url = "",
-            0
-        ),
-
-        )
+    var repos = listOf<RepoInfo>()
         private set
 
     private var token = String()
 
-//    lateinit var userInfo: UserInfo
-//        private set
-
-     var userInfo: UserInfo = UserInfo(username = "wiiz", name = "", email = "")
+    lateinit var userInfo: UserInfo
         private set
+
 
     private val _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()

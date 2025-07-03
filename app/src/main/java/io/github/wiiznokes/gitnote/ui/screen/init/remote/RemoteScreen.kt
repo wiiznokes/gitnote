@@ -30,11 +30,8 @@ fun RemoteScreen(
     onBackClick: () -> Unit
 ) {
 
-//    val navController: NavController<RemoteDestination> =
-//        rememberNavController(startDestination = AuthorizeGitNote(provider = Provider.GitHub))
-
     val navController: NavController<RemoteDestination> =
-        rememberNavController(startDestination = PickRepo(provider = Provider.GitHub))
+        rememberNavController(startDestination = SelectProvider)
 
     NavBackHandler(navController)
 
