@@ -1,7 +1,10 @@
 package io.github.wiiznokes.gitnote.ui.screen.init.remote
 
+import android.content.ClipData
+import android.content.ClipDescription
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,6 +14,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
@@ -18,6 +25,7 @@ import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.CloneState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import kotlinx.coroutines.launch
 
 private const val TAG = "GenerateNewKeysWithProviderScreen"
 
@@ -47,9 +55,30 @@ fun GenerateNewKeysWithProviderScreen(
             privateKey.value = private
         }
 
+        SelectionContainer {
+            Text(publicKey.value)
+        }
 
-        Text(publicKey.value)
-        Button(onClick = {}) { Text("Copy key") }
+        val clipboardManager = LocalClipboard.current
+
+        Button(
+            onClick = {
+                val data = ClipData(
+                    ClipDescription(
+                        "public ssh key",
+                        arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                    ),
+                    ClipData.Item(publicKey.value)
+                )
+
+                vm.viewModelScope.launch {
+                    clipboardManager.setClipEntry(ClipEntry(data))
+                }
+            }
+        ) {
+            Text("Copy key")
+        }
+
         Button(
             onClick = {
                 val (public, private) = generateSshKeysLib()
@@ -61,7 +90,16 @@ fun GenerateNewKeysWithProviderScreen(
         }
 
 
-        Button(onClick = {}) { Text("Open deploy key webpage") }
+        val uriHandler = LocalUriHandler.current
+
+        Button(
+            onClick = {
+                // todo: change the link
+                uriHandler.openUri(url)
+            }
+        ) {
+            Text("Open deploy key webpage")
+        }
 
 
         val cloneState = vm.cloneState.collectAsState().value
