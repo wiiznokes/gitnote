@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
@@ -33,7 +32,6 @@ import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 
 
@@ -142,7 +140,7 @@ fun MainScreen(
 
                     val repoState = StorageConfiguration.App
                     when (storageChooser.source) {
-                        NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
+                        NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
                         NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
                         NewRepoSource.Clone -> navController.navigate(
                             InitDestination.Remote(

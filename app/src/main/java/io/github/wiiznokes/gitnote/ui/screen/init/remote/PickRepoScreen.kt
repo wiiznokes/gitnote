@@ -198,7 +198,7 @@ fun PickRepoScreen(
                 val selected = selected.value
 
                 if (selected is Selected.Create) {
-                    vm.createNewRepoOnRemote(
+                    vm.createRepoAutomatic(
                         repoName = "${vm.userInfo.username}/$nameText",
                         storageConfig = storageConfig,
                         onSuccess = onSuccess
@@ -207,7 +207,7 @@ fun PickRepoScreen(
 
                     val repoInfo = filteredRepos[selected.index]
 
-                    vm.cloneRepoFromAutomatic(
+                    vm.cloneRepoAutomatic(
                         repoName = repoInfo.fullRepoName,
                         storageConfig = storageConfig,
                         onSuccess = onSuccess,
@@ -215,7 +215,7 @@ fun PickRepoScreen(
                 }
 
             },
-            enabled = selected.value !is Selected.None && vm.authState2.collectAsState().value.isClickable(),
+            enabled = selected.value !is Selected.None && vm.authStep2.collectAsState().value.isClickable(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary

@@ -28,11 +28,7 @@ fun SelectProviderScreen(
         ProviderType.entries.forEach {
             Button(
                 onClick = {
-                    when (it) {
-                        ProviderType.GitHub -> {
-                            vm.provider = GithubProvider()
-                        }
-                    }
+                    vm.setProvider(it)
                     onProviderSelected()
                 }
             ) {
@@ -42,7 +38,7 @@ fun SelectProviderScreen(
 
         Button(
             onClick = {
-                vm.provider = null
+                vm.setProvider(null)
                 onProviderSelected()
             }
         ) {

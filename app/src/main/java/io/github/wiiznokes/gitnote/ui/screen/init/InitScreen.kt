@@ -2,7 +2,6 @@ package io.github.wiiznokes.gitnote.ui.screen.init
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -19,7 +18,6 @@ import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 
 private const val TAG = "InitScreen"
 
@@ -72,7 +70,7 @@ fun InitScreen(
                         val repoState = StorageConfiguration.Device(path)
 
                         when (initDestination.newRepoSource) {
-                            NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
+                            NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
                             NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
                             NewRepoSource.Clone -> {
                                 vm.checkPathForClone(repoState.repoPath()).onSuccess {

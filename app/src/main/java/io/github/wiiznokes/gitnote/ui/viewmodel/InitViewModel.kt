@@ -14,7 +14,9 @@ import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.helper.UiHelper
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
+import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
+import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.provider.RepoInfo
 import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
@@ -40,13 +42,34 @@ class InitViewModel : ViewModel() {
         private const val TAG = "InitViewModel"
     }
 
+    private val _cloneState: MutableStateFlow<CloneState> = MutableStateFlow(CloneState.Idle)
+    val cloneState: StateFlow<CloneState> = _cloneState.asStateFlow()
+
+    private val _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Idle)
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    private val _authStep2: MutableStateFlow<AuthStep2> = MutableStateFlow(AuthStep2.Idle)
+    val authStep2: StateFlow<AuthStep2> = _authStep2.asStateFlow()
+
+    var provider: Provider? = null
+        private set
+
+    var repos = listOf<RepoInfo>()
+        private set
+
+    private var token = String()
+
+    lateinit var userInfo: UserInfo
+        private set
+
+
     private fun prepareLocalStorageRepoPath() {
         val folder = NodeFs.Folder.fromPath(AppPreferences.appStorageRepoPath)
         folder.delete()
         folder.create()
     }
 
-    fun createRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
+    fun createLocalRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -120,10 +143,6 @@ class InitViewModel : ViewModel() {
         return result
     }
 
-    private val _cloneState: MutableStateFlow<CloneState> = MutableStateFlow(CloneState.Idle)
-    val cloneState: StateFlow<CloneState>
-        get() = _cloneState.asStateFlow()
-
 
     fun cloneRepo(
         storageConfig: StorageConfiguration,
@@ -153,7 +172,7 @@ class InitViewModel : ViewModel() {
             }
 
 
-            _cloneState.emit(CloneState.Cloned)
+            _cloneState.emit(CloneState.Success)
 
             prefs.initRepo(storageConfig)
             prefs.remoteUrl.update(repoUrl)
@@ -201,24 +220,18 @@ class InitViewModel : ViewModel() {
         return true
     }
 
-    var provider: Provider? = null
+    fun setProvider(provider: ProviderType?) {
+        this.provider = when (provider) {
+            ProviderType.GitHub -> GithubProvider()
+            null -> null
+        }
+    }
 
     fun getLaunchOAuthScreenIntent(): Intent {
         val authUrl = provider!!.getLaunchOAuthScreenUrl()
         return Intent(Intent.ACTION_VIEW, authUrl.toUri())
     }
 
-    var repos = listOf<RepoInfo>()
-        private set
-
-    private var token = String()
-
-    lateinit var userInfo: UserInfo
-        private set
-
-
-    private val _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun onReceiveCode(code: String) {
 
@@ -257,12 +270,7 @@ class InitViewModel : ViewModel() {
         }
     }
 
-
-    private val _authState2: MutableStateFlow<AuthState2> = MutableStateFlow(AuthState2.Idle)
-    val authState2: StateFlow<AuthState2> = _authState2.asStateFlow()
-
-
-    fun cloneRepoFromAutomatic(
+    fun cloneRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
@@ -271,7 +279,7 @@ class InitViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO).launch {
             val (publicKey, privateKey) = generateSshKeysLib()
 
-            _authState2.emit(AuthState2.AddDeployKey)
+            _authStep2.emit(AuthStep2.AddDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
                     token = token,
@@ -280,7 +288,7 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
-                _authState2.emit(AuthState2.Error)
+                _authStep2.emit(AuthStep2.Error)
                 return@launch
             }
 
@@ -293,7 +301,7 @@ class InitViewModel : ViewModel() {
                 ),
                 onSuccess = {
                     viewModelScope.launch {
-                        _authState2.emit(AuthState2.Success)
+                        _authStep2.emit(AuthStep2.Success)
                     }
                     onSuccess()
                 }
@@ -301,7 +309,7 @@ class InitViewModel : ViewModel() {
         }
     }
 
-    fun createNewRepoOnRemote(
+    fun createRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
@@ -309,7 +317,7 @@ class InitViewModel : ViewModel() {
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            _authState2.emit(AuthState2.CreateRepo)
+            _authStep2.emit(AuthStep2.CreateRepo)
             try {
                 provider!!.createNewRepo(
                     token = token,
@@ -317,13 +325,13 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "createNewRepoOnRemoteGithub: ${e.message}, $e")
-                _authState2.emit(AuthState2.Error)
+                _authStep2.emit(AuthStep2.Error)
                 return@launch
             }
 
             val (publicKey, privateKey) = generateSshKeysLib()
 
-            _authState2.emit(AuthState2.AddDeployKey)
+            _authStep2.emit(AuthStep2.AddDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
                     token = token,
@@ -332,7 +340,7 @@ class InitViewModel : ViewModel() {
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
-                _authState2.emit(AuthState2.Error)
+                _authStep2.emit(AuthStep2.Error)
                 return@launch
             }
 
@@ -345,7 +353,7 @@ class InitViewModel : ViewModel() {
                 ),
                 onSuccess = {
                     viewModelScope.launch {
-                        _authState2.emit(AuthState2.Success)
+                        _authStep2.emit(AuthStep2.Success)
                     }
                     onSuccess()
                 }
@@ -353,17 +361,6 @@ class InitViewModel : ViewModel() {
         }
     }
 
-}
-
-
-sealed class AuthState2 {
-    data object Idle : AuthState2()
-    data object CreateRepo : AuthState2()
-    data object AddDeployKey : AuthState2()
-    data object Success : AuthState2()
-    data object Error : AuthState2()
-
-    fun isClickable(): Boolean = this is Idle || this is Error
 }
 
 
@@ -374,12 +371,26 @@ sealed class AuthState {
     data object GetUserInfo : AuthState()
     data object Success : AuthState()
     data object Error : AuthState()
+
+    fun isClickable(): Boolean = this is Idle || this is Error
 }
+
+sealed class AuthStep2 {
+    data object Idle : AuthStep2()
+    data object CreateRepo : AuthStep2()
+    data object AddDeployKey : AuthStep2()
+    data object Success : AuthStep2()
+    data object Error : AuthStep2()
+
+    fun isClickable(): Boolean = this is Idle || this is Error
+}
+
+
 
 sealed class CloneState {
     data object Idle : CloneState()
     data class Cloning(val percent: Int) : CloneState()
-    data object Cloned : CloneState()
+    data object Success : CloneState()
     data object Error : CloneState()
 
 
