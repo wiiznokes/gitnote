@@ -31,7 +31,7 @@ fun RemoteScreen(
 ) {
 
     val navController: NavController<RemoteDestination> =
-        rememberNavController(startDestination = GenerateNewKeys(provider = Provider.GitHub, url = "git@github.com:wiiznokes/repo_test.git"))
+        rememberNavController(startDestination = AuthorizeGitNote(provider = Provider.GitHub))
 
     NavBackHandler(navController)
 
@@ -81,7 +81,7 @@ fun RemoteScreen(
 
             is AuthorizeGitNote -> AuthorizeGitNoteScreen(
                 onBackClick = { navController.pop() },
-                onSucess = {
+                onSuccess = {
                     navController.navigate(
                         PickRepo(
                             provider = remoteDestination.provider,

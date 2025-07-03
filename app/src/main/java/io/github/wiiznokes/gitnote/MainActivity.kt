@@ -1,5 +1,7 @@
 package io.github.wiiznokes.gitnote
 
+import android.app.ComponentCaller
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -34,9 +36,9 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate")
 
 
         setContent {
@@ -120,6 +122,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d(TAG, "onNewIntent $intent")
+
+        val uri = intent.data ?: return
+        if (uri.scheme == "gitnote-identity" && uri.host == "register-callback") {
+            val code = uri.getQueryParameter("code")
+            Log.d(TAG, "code = $code")
+        }
+
+
+    }
 
     override fun onDestroy() {
         super.onDestroy()
