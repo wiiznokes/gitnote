@@ -5,7 +5,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel

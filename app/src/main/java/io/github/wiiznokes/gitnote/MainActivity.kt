@@ -139,9 +139,12 @@ class MainActivity : ComponentActivity() {
             val code = uri.getQueryParameter("code")
 
             if (code != null) {
+                Log.d(TAG, "received code from intent, sending it...")
                 CoroutineScope(Dispatchers.Default).launch {
                     authFlow.emit(code)
                 }
+            } else {
+                Log.w(TAG, "code is null")
             }
         }
     }

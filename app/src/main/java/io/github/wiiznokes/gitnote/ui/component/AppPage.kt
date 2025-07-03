@@ -48,6 +48,7 @@ fun AppPage(
     Scaffold(
         modifier = Modifier
             .imePadding(),
+        contentWindowInsets = contentWindowInsets,
         topBar = {
             TopAppBar(
                 actions = actions,
@@ -76,21 +77,27 @@ fun AppPage(
                 )
             )
         },
-        bottomBar = bottomBar,
     ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .conditional(!disableVerticalScroll) {
-                    verticalScroll(rememberScrollState())
-                },
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
         ) {
-            content()
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .conditional(!disableVerticalScroll) {
+                        verticalScroll(rememberScrollState())
+                    },
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment
+            ) {
+                content()
 
+            }
+            bottomBar()
+        }
     }
 }
