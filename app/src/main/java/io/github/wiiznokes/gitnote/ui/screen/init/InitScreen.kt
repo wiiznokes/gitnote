@@ -25,12 +25,11 @@ private const val TAG = "InitScreen"
 
 @Composable
 fun InitScreen(
+    vm: InitViewModel,
     startDestination: InitDestination,
     onInitSuccess: () -> Unit,
 ) {
-    val vm = viewModel<InitViewModel>(
-        factory = viewModelFactory { InitViewModel() }
-    )
+
 
     val navController =
         rememberNavController(startDestination = startDestination)
@@ -45,6 +44,7 @@ fun InitScreen(
         when (initDestination) {
 
             InitDestination.Main -> MainScreen(
+                vm = vm,
                 navController = navController,
                 onInitSuccess = onInitSuccess,
             )

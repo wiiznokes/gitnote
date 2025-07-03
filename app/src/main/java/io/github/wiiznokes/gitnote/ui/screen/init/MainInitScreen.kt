@@ -45,12 +45,11 @@ private sealed class StorageChooser {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    vm: InitViewModel,
     navController: NavController<InitDestination>,
     onInitSuccess: () -> Unit
 ) {
-    val vm = viewModel<InitViewModel>(
-        factory = viewModelFactory { InitViewModel() }
-    )
+
 
     val showStorageChooser: MutableState<StorageChooser> =
         remember { mutableStateOf(StorageChooser.UnExpanded) }

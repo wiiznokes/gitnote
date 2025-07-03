@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
@@ -216,40 +217,101 @@ class InitViewModel : ViewModel() {
         return Intent(Intent.ACTION_VIEW, authUrl.toUri())
     }
 
+//    var repos = listOf<RepoInfo>()
+//        private set
+
+    var repos = listOf<RepoInfo>(
+        RepoInfo(
+            name = "test1",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test2",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test3",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test4",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test5",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test6",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+        RepoInfo(
+            name = "test7",
+            owner = "wiiz",
+            url = "",
+            0
+        ),
+
+        )
+        private set
+
+    private var token = String()
+
+//    lateinit var userInfo: UserInfo
+//        private set
+
+     var userInfo: UserInfo = UserInfo(username = "wiiz", name = "", email = "")
+        private set
+
+    private val _authState: MutableStateFlow<AuthState> = MutableStateFlow(AuthState.Idle)
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
     fun onReceiveCode(code: String) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val token = exchangeCodeForAccessToken(code)
 
-                Log.d(TAG, "Access Token: $token")
-
-                val repos = fetchUserRepos(token = token)
-                for (repo in repos) {
-                    Log.d(TAG, "$repo")
-                }
-
-
-                //createNewRepo(token = token, repoName = "repo_test2")
-
-                val repoTest = repos.find {
-                    it.fullRepoName == "wiiznokes/repo_test"
-                }!!
-
-                val info = getUserInfo(token = token)
-                Log.d(TAG, "$info")
-
-                val (pub, priv) = generateSshKeysLib()
-
-                addDeployKey(token = token, publicKey = pub, fullRepoName = repoTest.fullRepoName)
-
-                val cred = Cred.Ssh(username = "git", publicKey = pub, privateKey = priv)
-
-                cloneRepo(StorageConfiguration.App, repoTest.url, cred, onSuccess = { println("clone successful")})
-
+            _authState.emit(AuthState.GetAccessToken)
+            token = try {
+                exchangeCodeForAccessToken(code)
             } catch (e: Exception) {
-                Log.e(TAG, "${e.message}")
+                Log.e(TAG, "exchangeCodeForAccessToken: ${e.message}, $e")
+                _authState.emit(AuthState.Error)
+                return@launch
             }
+
+            _authState.emit(AuthState.FetchRepos)
+
+            repos = try {
+                fetchUserRepos(token = token)
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchUserRepos: ${e.message}, $e")
+                _authState.emit(AuthState.Error)
+                return@launch
+            }
+            _authState.emit(AuthState.GetUserInfo)
+
+            userInfo = try {
+                getUserInfo(token = token)
+            } catch (e: Exception) {
+                Log.e(TAG, "getUserInfo: ${e.message}, $e")
+                _authState.emit(AuthState.Error)
+                return@launch
+            }
+
+            Log.d(TAG, "emit: Success")
+            _authState.emit(AuthState.Success)
         }
     }
 
@@ -274,10 +336,13 @@ class InitViewModel : ViewModel() {
     }
 
     data class RepoInfo(
-        val fullRepoName: String,
+        val name: String,
+        val owner: String,
         val url: String,
         val lastModifiedTimeMillis: Long,
-    )
+    ) {
+        val fullRepoName = "$owner/$name"
+    }
 
     private fun fetchUserRepos(token: String): List<RepoInfo> {
         val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
@@ -305,7 +370,8 @@ class InitViewModel : ViewModel() {
 
             repos.add(
                 RepoInfo(
-                    fullRepoName = "$owner/$name",
+                    owner = owner,
+                    name = name,
                     url = url,
                     lastModifiedTimeMillis = timeMillis
                 )
@@ -318,7 +384,104 @@ class InitViewModel : ViewModel() {
         return repos
     }
 
-    fun createNewRepo(
+    private val _authState2: MutableStateFlow<AuthState2> = MutableStateFlow(AuthState2.Idle)
+    val authState2: StateFlow<AuthState2> = _authState2.asStateFlow()
+
+
+    fun cloneRepoFromAutomatic(
+        repoName: String,
+        storageConfig: StorageConfiguration,
+        onSuccess: () -> Unit
+    ) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val (publicKey, privateKey) = generateSshKeysLib()
+
+            _authState2.emit(AuthState2.AddDeployKey)
+            try {
+                addDeployKey(
+                    token = token,
+                    publicKey = publicKey,
+                    fullRepoName = repoName
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "addDeployKey: ${e.message}, $e")
+                _authState2.emit(AuthState2.Error)
+                return@launch
+            }
+
+            cloneRepo(
+                storageConfig = storageConfig,
+                repoUrl = "git@github.com:$repoName.git",
+                cred = Cred.Ssh(
+                    username = "git",
+                    publicKey = publicKey,
+                    privateKey = privateKey
+                ),
+                onSuccess = {
+                    viewModelScope.launch {
+                        _authState2.emit(AuthState2.Success)
+                    }
+                    onSuccess()
+                }
+            )
+        }
+    }
+
+    fun createNewRepoOnRemote(
+        repoName: String,
+        storageConfig: StorageConfiguration,
+        onSuccess: () -> Unit
+    ) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            _authState2.emit(AuthState2.CreateRepo)
+            try {
+                createNewRepoOnRemoteGithub(
+                    token = token,
+                    repoName = repoName
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "createNewRepoOnRemoteGithub: ${e.message}, $e")
+                _authState2.emit(AuthState2.Error)
+                return@launch
+            }
+
+            val (publicKey, privateKey) = generateSshKeysLib()
+
+            _authState2.emit(AuthState2.AddDeployKey)
+            try {
+                addDeployKey(
+                    token = token,
+                    publicKey = publicKey,
+                    fullRepoName = repoName
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "addDeployKey: ${e.message}, $e")
+                _authState2.emit(AuthState2.Error)
+                return@launch
+            }
+
+            cloneRepo(
+                storageConfig = storageConfig,
+                repoUrl = "git@github.com:$repoName.git",
+                cred = Cred.Ssh(
+                    username = "git",
+                    publicKey = publicKey,
+                    privateKey = privateKey
+                ),
+                onSuccess = {
+                    viewModelScope.launch {
+                        _authState2.emit(AuthState2.Success)
+                    }
+                    onSuccess()
+                }
+            )
+        }
+    }
+
+    fun createNewRepoOnRemoteGithub(
         token: String,
         repoName: String,
         description: String = "",
@@ -357,41 +520,35 @@ class InitViewModel : ViewModel() {
     }
 
     data class UserInfo(
+        val username: String,
         val name: String,
         val email: String,
-        val username: String,
     )
 
-    fun getUserInfo(token: String): UserInfo? {
+    fun getUserInfo(token: String): UserInfo {
         val url = URL("https://api.github.com/user")
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "GET"
         connection.setRequestProperty("Authorization", "token $token")
         connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
-        return try {
-            val responseCode = connection.responseCode
-            if (responseCode !in 200..299) {
-                val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-                println("Failed to fetch user info: HTTP $responseCode $error")
-                null
-            } else {
-                val response = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(response)
-                UserInfo(
-                    name = json.optString("name", ""),
-                    email = json.optString("email", ""),
-                    username = json.getString("login")
-                )
-            }
-        } catch (e: Exception) {
-            println("Error fetching user info: ${e.message}")
-            null
+        val responseCode = connection.responseCode
+        if (responseCode !in 200..299) {
+            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
+            throw Exception("Failed to fetch user info: HTTP $responseCode $error")
         }
+
+        val response = connection.inputStream.bufferedReader().use { it.readText() }
+        val json = JSONObject(response)
+        return UserInfo(
+            username = json.getString("login"),
+            name = json.optString("name", ""),
+            email = json.optString("email", ""),
+        )
     }
 
 
-    fun addDeployKey(token: String, publicKey: String, fullRepoName: String): Boolean {
+    fun addDeployKey(token: String, publicKey: String, fullRepoName: String) {
         val url = URL("https://api.github.com/repos/$fullRepoName/keys")
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
@@ -410,21 +567,33 @@ class InitViewModel : ViewModel() {
             os.write(jsonBody.toString().toByteArray(Charsets.UTF_8))
         }
 
-        return try {
-            val responseCode = connection.responseCode
-            if (responseCode in 200..299) {
-                println("Deploy key added successfully")
-                true
-            } else {
-                val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-                println("Failed to add deploy key: HTTP $responseCode $error")
-                false
-            }
-        } catch (e: Exception) {
-            println("Error adding deploy key: ${e.message}")
-            false
+        val responseCode = connection.responseCode
+        if (responseCode !in 200..299) {
+            val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
+            throw Exception("Failed to add deploy key: HTTP $responseCode $error")
         }
     }
+}
+
+
+sealed class AuthState2 {
+    data object Idle : AuthState2()
+    data object CreateRepo : AuthState2()
+    data object AddDeployKey : AuthState2()
+    data object Success : AuthState2()
+    data object Error : AuthState2()
+
+    fun isClickable(): Boolean = this is Idle || this is Error
+}
+
+
+sealed class AuthState {
+    data object Idle : AuthState()
+    data object GetAccessToken : AuthState()
+    data object FetchRepos : AuthState()
+    data object GetUserInfo : AuthState()
+    data object Success : AuthState()
+    data object Error : AuthState()
 }
 
 sealed class CloneState {

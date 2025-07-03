@@ -18,11 +18,13 @@ import dev.olshevski.navigation.reimagined.popAll
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.MyApp.Companion.appModule
+import io.github.wiiznokes.gitnote.data.StorageConfig
 import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
 import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
@@ -37,15 +39,15 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
     }
 
+
+    val vm: InitViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
 
 
         setContent {
-            val vm = viewModel<InitViewModel>(
-                factory = viewModelFactory { InitViewModel() }
-            )
 
             val theme by vm.prefs.theme.getAsState()
             val dynamicColor by vm.prefs.dynamicColor.getAsState()
@@ -82,7 +84,9 @@ class MainActivity : ComponentActivity() {
                                 //AppDestination.Settings(SettingsDestination.Main)
                             )
                         }
-                    } else Destination.Init(InitDestination.Main)
+                    }
+//                    else Destination.Init(InitDestination.Main)
+                    else Destination.Init(InitDestination.Remote(StorageConfiguration.App))
                 }
 
 
@@ -97,6 +101,7 @@ class MainActivity : ComponentActivity() {
                     when (destination) {
                         is Destination.Init -> {
                             InitScreen(
+                                vm = vm,
                                 startDestination = destination.initDestination,
                                 onInitSuccess = {
                                     navController.popUpTo(
@@ -132,7 +137,7 @@ class MainActivity : ComponentActivity() {
             val code = uri.getQueryParameter("code")
 
             if (code != null) {
-                val vm: InitViewModel by viewModels()
+                Log.d(TAG, "ViewModel in onNewIntent: ${vm.hashCode()}")
                 vm.onReceiveCode(code)
             }
         }
