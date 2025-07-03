@@ -26,15 +26,18 @@ fun AuthorizeGitNoteScreen(
     vm: InitViewModel,
     onSuccess: () -> Unit,
 ) {
+
+    val authState = vm.initState.collectAsState().value
+
     AppPage(
         title = "Authorize Gitnote",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
+        onBackClickEnabled = authState.isClickable()
     ) {
         val ctx = LocalContext.current
 
-        val authState = vm.initState.collectAsState().value
         LaunchedEffect(authState) {
             Log.d(TAG, "LaunchedEffect: $authState, hash=${vm.hashCode()}")
             if (authState is AuthState.Success) {

@@ -28,6 +28,7 @@ import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    val authFlow: MutableStateFlow<String> = MutableStateFlow("")
+    val authFlow: MutableSharedFlow<String> = MutableSharedFlow(replay = 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

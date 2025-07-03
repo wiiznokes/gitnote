@@ -35,6 +35,7 @@ fun AppPage(
     title: String,
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     onBackClick: (() -> Unit)? = null,
+    onBackClickEnabled: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     disableVerticalScroll: Boolean = false,
@@ -61,7 +62,8 @@ fun AppPage(
                 navigationIcon = {
                     onBackClick?.let {
                         IconButton(
-                            onClick = it
+                            onClick = it,
+                            enabled = onBackClickEnabled
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,

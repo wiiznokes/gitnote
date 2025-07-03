@@ -49,11 +49,15 @@ fun PickRepoScreen(
     storageConfig: StorageConfiguration,
     onSuccess: () -> Unit
 ) {
+
+    val authStep2State = vm.initState.collectAsState().value
+
     AppPage(
         title = "Select or Create a Repository",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
         onBackClick = onBackClick,
+        onBackClickEnabled = authStep2State.isClickable(),
         disableVerticalScroll = true
     ) {
 
@@ -186,7 +190,6 @@ fun PickRepoScreen(
         }
 
 
-        val authStep2State = vm.initState.collectAsState().value
 
         Button(
             modifier = Modifier

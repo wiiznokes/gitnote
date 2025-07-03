@@ -24,12 +24,13 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.CloneState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class InitViewModelFactory(private val flow: StateFlow<String>) : ViewModelProvider.Factory {
+class InitViewModelFactory(private val flow: SharedFlow<String>) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(InitViewModel::class.java)) {
@@ -39,7 +40,7 @@ class InitViewModelFactory(private val flow: StateFlow<String>) : ViewModelProvi
     }
 }
 
-class InitViewModel(val authFlow: StateFlow<String>) : ViewModel() {
+class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
@@ -69,6 +70,7 @@ class InitViewModel(val authFlow: StateFlow<String>) : ViewModel() {
 
         CoroutineScope(Dispatchers.Default).launch {
             authFlow.collect {
+                Log.d(TAG, "received $it")
                 onReceiveCode(it)
             }
         }

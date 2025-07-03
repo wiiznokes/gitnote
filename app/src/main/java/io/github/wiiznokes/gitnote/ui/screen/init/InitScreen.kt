@@ -23,6 +23,7 @@ import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModelFactory
 import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 private const val TAG = "InitScreen"
@@ -32,7 +33,7 @@ fun InitScreen(
     mainVm: MainViewModel,
     startDestination: InitDestination,
     onInitSuccess: () -> Unit,
-    authFlow: StateFlow<String>
+    authFlow: SharedFlow<String>
 ) {
 
 
