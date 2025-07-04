@@ -57,7 +57,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && make -C app/src/main/rust build
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && make -C app/src/main/rust DEBUG=0 build
           ./gradlew assembleRelease
 
           mkdir -p packages
