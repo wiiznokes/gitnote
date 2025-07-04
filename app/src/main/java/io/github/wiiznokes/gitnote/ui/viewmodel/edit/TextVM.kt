@@ -64,6 +64,7 @@ open class TextVM() : ViewModel() {
         val v: TextFieldValue,
         val flagDoNotRemove: Boolean = false,
     )
+
     private val history = mutableListOf<HistoryItem>()
 
     private val _historyManager: MutableStateFlow<History> =
@@ -156,33 +157,34 @@ open class TextVM() : ViewModel() {
 
         fun isSimilar(v1: HistoryItem, v2: HistoryItem, firstPass: Boolean): IsSimilarResult {
 
-            if (v2.flagDoNotRemove) {
+            if (v1.flagDoNotRemove) {
                 return IsSimilarResult.No
             }
 
             if (firstPass) {
-                if ((v1.v.selection.start - v2.v.selection.start).absoluteValue > 1
-                    || (v1.v.selection.end - v2.v.selection.end).absoluteValue > 1)
+                if ((v2.v.selection.start - v1.v.selection.start).absoluteValue > 1
+                    || (v2.v.selection.end - v1.v.selection.end).absoluteValue > 1
+                )
                     return IsSimilarResult.FlagDoNotRemove
+
+
+                if (v2.v.text.endsWith(".")) {
+                    return IsSimilarResult.No
+                }
+
+                if (!v2.v.text.endsWith(". ") && v2.v.text.endsWith(" ")) {
+                    return IsSimilarResult.No
+                }
+
+                if (v2.v.text.endsWith("-")) {
+                    return IsSimilarResult.No
+                }
             }
 
-
-            if (v1.v.text.endsWith(".")) {
+            if (v2.v.text.endsWith("\n")) {
                 return IsSimilarResult.No
             }
-
-            if (!v1.v.text.endsWith(". ") && v1.v.text.endsWith(" ")) {
-                return IsSimilarResult.No
-            }
-
-            if (v1.v.text.endsWith("\n")) {
-                return IsSimilarResult.No
-            }
-            if (v1.v.text.endsWith("-")) {
-                return IsSimilarResult.No
-            }
-
-            if ((v1.v.text.length - v2.v.text.length).absoluteValue >= 10)
+            if ((v2.v.text.length - v1.v.text.length).absoluteValue >= 10)
                 return IsSimilarResult.No
 
             return IsSimilarResult.Yes
@@ -191,6 +193,7 @@ open class TextVM() : ViewModel() {
         history.add(HistoryItem(v.copy()))
 
         fun cleanHistory() {
+
             // we don't want to remove the last and first index of the history
             // [_,a,ab] -> the size is 3, "a" will be removed
             if (history.size < 3) return
@@ -198,13 +201,19 @@ open class TextVM() : ViewModel() {
             var last = history.size - 1
             val secondLast = last - 1
 
-            when (isSimilar(history[last], history[secondLast], true)) {
+            when (isSimilar(history[secondLast], history[last], true)) {
                 IsSimilarResult.Yes -> {
-                    if (isSimilar(history[secondLast - 1], history[secondLast], false) == IsSimilarResult.Yes) {
+                    if (isSimilar(
+                            history[secondLast - 1],
+                            history[secondLast],
+                            false
+                        ) == IsSimilarResult.Yes
+                    ) {
                         history.removeAt(secondLast)
                     }
                 }
-                IsSimilarResult.No -> { }
+
+                IsSimilarResult.No -> {}
                 IsSimilarResult.FlagDoNotRemove -> {
                     history[last] = history[last].copy(flagDoNotRemove = true)
                 }
