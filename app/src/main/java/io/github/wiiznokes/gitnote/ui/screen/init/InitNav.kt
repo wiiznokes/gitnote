@@ -2,8 +2,6 @@ package io.github.wiiznokes.gitnote.ui.screen.init
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
@@ -15,21 +13,20 @@ import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
-import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModelFactory
 import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 
 private const val TAG = "InitScreen"
 
 @Composable
-fun InitScreen(
+fun InitNav(
     mainVm: MainViewModel,
     startDestination: InitDestination,
     onInitSuccess: () -> Unit,
@@ -37,8 +34,14 @@ fun InitScreen(
 ) {
 
 
-    val factory = remember { InitViewModelFactory(authFlow) }
-    val vm: InitViewModel = viewModel(factory = factory)
+    val vm: InitViewModel = viewModel(
+        factory = viewModelFactory {
+            InitViewModel(
+                authFlow = authFlow
+            )
+        },
+
+    )
 
     val navController =
         rememberNavController(startDestination = startDestination)
@@ -52,7 +55,7 @@ fun InitScreen(
     ) { initDestination ->
         when (initDestination) {
 
-            InitDestination.Main -> MainScreen(
+            InitDestination.Main -> NewRepoMethodScreen(
                 vm = vm,
                 mainVm = mainVm,
                 navController = navController,
@@ -73,17 +76,17 @@ fun InitScreen(
                             InitDestination.FileExplorer(
                                 title = initDestination.title,
                                 path = it,
-                                newRepoSource = initDestination.newRepoSource
+                                newRepoMethod = initDestination.newRepoMethod
                             )
                         )
                     },
                     onFinish = { path ->
                         val repoState = StorageConfiguration.Device(path)
 
-                        when (initDestination.newRepoSource) {
-                            NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
-                            NewRepoSource.Open -> mainVm.openRepo(repoState, onInitSuccess)
-                            NewRepoSource.Clone -> {
+                        when (initDestination.newRepoMethod) {
+                            NewRepoMethod.Create -> vm.createLocalRepo(repoState, onInitSuccess)
+                            NewRepoMethod.Open -> mainVm.openRepo(repoState, onInitSuccess)
+                            NewRepoMethod.Clone -> {
                                 vm.checkPathForClone(repoState.repoPath()).onSuccess {
                                     navController.navigate(
                                         InitDestination.Remote(repoState)

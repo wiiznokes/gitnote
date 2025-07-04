@@ -22,14 +22,13 @@ import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
-import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
+import io.github.wiiznokes.gitnote.ui.screen.init.InitNav
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -47,7 +46,6 @@ class MainActivity : ComponentActivity() {
         Log.d(TAG, "onCreate")
 
         setContent {
-
 
             val vm: MainViewModel = viewModel()
 
@@ -79,15 +77,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
 
-                        } else {
-                            Destination.App(
-                                AppDestination.Grid
-                                //AppDestination.Settings(SettingsDestination.Main)
-                            )
-                        }
+                        } else Destination.App(AppDestination.Grid)
                     }
                     else Destination.Init(InitDestination.Main)
-//                    else Destination.Init(InitDestination.Remote(StorageConfiguration.App))
                 }
 
 
@@ -101,7 +93,7 @@ class MainActivity : ComponentActivity() {
                 ) { destination ->
                     when (destination) {
                         is Destination.Init -> {
-                            InitScreen(
+                            InitNav(
                                 startDestination = destination.initDestination,
                                 mainVm = vm,
                                 authFlow = authFlow,

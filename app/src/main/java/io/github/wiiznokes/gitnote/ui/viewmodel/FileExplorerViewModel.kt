@@ -36,7 +36,7 @@ class FileExplorerViewModel(val path: String?) : ViewModel() {
 
         val foldersList = runBlocking {
             currentDir.filterMapNodeFs {
-                if (it is NodeFs.Folder) it else null
+                it as? NodeFs.Folder
             }
         }
 

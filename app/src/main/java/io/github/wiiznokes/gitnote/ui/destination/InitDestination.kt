@@ -16,7 +16,7 @@ sealed interface InitDestination : Parcelable {
     data class FileExplorer(
         val title: String,
         val path: String?,
-        val newRepoSource: NewRepoSource,
+        val newRepoMethod: NewRepoMethod,
     ) : InitDestination
 
     @Parcelize
@@ -24,7 +24,7 @@ sealed interface InitDestination : Parcelable {
 
 }
 
-enum class NewRepoSource {
+enum class NewRepoMethod {
     Create,
     Open,
     Clone;
