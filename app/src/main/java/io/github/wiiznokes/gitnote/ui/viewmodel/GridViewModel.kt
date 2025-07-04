@@ -276,7 +276,7 @@ class GridViewModel : ViewModel() {
 
             DrawerFolderModel(
                 noteCount = noteCount,
-                lastModifiedTimeMillis = max(lastModifiedTimeMillis, folder.lastModifiedTimeMillis),
+                lastModifiedTimeMillis = lastModifiedTimeMillis,
                 noteFolder = folder
             )
         }
