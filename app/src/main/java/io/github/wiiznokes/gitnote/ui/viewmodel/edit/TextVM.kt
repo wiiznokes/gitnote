@@ -157,7 +157,7 @@ open class TextVM() : ViewModel() {
 
         fun isSimilar(v1: HistoryItem, v2: HistoryItem, firstPass: Boolean): IsSimilarResult {
 
-            if (v1.flagDoNotRemove) {
+            if (v2.flagDoNotRemove) {
                 return IsSimilarResult.No
             }
 
@@ -198,8 +198,8 @@ open class TextVM() : ViewModel() {
             // [_,a,ab] -> the size is 3, "a" will be removed
             if (history.size < 3) return
 
+            val secondLast = history.size - 2
             var last = history.size - 1
-            val secondLast = last - 1
 
             when (isSimilar(history[secondLast], history[last], true)) {
                 IsSimilarResult.Yes -> {
