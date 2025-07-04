@@ -52,13 +52,9 @@ fun AuthorizeGitNoteScreen(
             },
             enabled = authState.isClickable() && authState != AuthState.Success
         ) {
-            if (authState == AuthState.Success) {
-                Text(text = authState.message())
-            } else if (!authState.isLoading()) {
+             if (!authState.isLoading()) {
                 Text(text = "Authorize Gitnote")
             } else {
-                CircularProgressIndicator()
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(text = authState.message())
             }
         }
