@@ -5,7 +5,7 @@ import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.util.toResult
+import io.github.wiiznokes.gitnote.utils.toResult
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths

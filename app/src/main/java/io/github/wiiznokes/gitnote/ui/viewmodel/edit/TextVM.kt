@@ -21,6 +21,7 @@ import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import io.github.wiiznokes.gitnote.utils.endsWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +61,12 @@ open class TextVM() : ViewModel() {
     private val _content = mutableStateOf(TextFieldValue())
     val content: State<TextFieldValue> get() = _content
 
-    private val history = mutableListOf<TextFieldValue>()
+    private data class HistoryItem(
+        val v: TextFieldValue,
+        val flagDoNotRemove: Boolean = false,
+    )
+
+    private val history = mutableListOf<HistoryItem>()
 
     private val _historyManager: MutableStateFlow<History> =
         MutableStateFlow(History(index = 0, size = 1))
@@ -89,7 +95,7 @@ open class TextVM() : ViewModel() {
         )
 
         _content.value = textFieldValue.copy()
-        history.add(textFieldValue)
+        history.add(HistoryItem(textFieldValue))
 
         Log.d(TAG, "init: $previousNote, $editType")
     }
@@ -112,9 +118,15 @@ open class TextVM() : ViewModel() {
         )
 
         _content.value = textFieldValue.copy()
-        history.add(textFieldValue)
+        history.add(HistoryItem(textFieldValue))
 
         Log.d(TAG, "init saved: $previousNote, $editType")
+    }
+
+    enum class IsSimilarResult {
+        Yes,
+        No,
+        FlagDoNotRemove
     }
 
     // https://medium.com/androiddevelopers/effective-state-management-for-textfield-in-compose-d6e5b070fbe5
@@ -129,12 +141,11 @@ open class TextVM() : ViewModel() {
     // todo: report this to google
     open fun onValueChange(v: TextFieldValue) {
 
-        // don't bloat history with different selection
-        if (content.value.text == v.text) {
+        if (history.size == 1 && content.value.text == v.text) {
             _content.value = v.copy()
+            history[0] = HistoryItem(v.copy())
             return
         }
-
         _content.value = v.copy()
 
         val historyManager = historyManager.value
@@ -145,42 +156,72 @@ open class TextVM() : ViewModel() {
             i--
         }
 
-        fun isSimilar(v1: TextFieldValue, v2: TextFieldValue): Boolean {
+        fun isSimilar(v1: HistoryItem, v2: HistoryItem, firstPass: Boolean): IsSimilarResult {
 
-            if (v1.text.endsWith(".")) {
-                return false
+            if (v2.flagDoNotRemove) {
+                return IsSimilarResult.No
             }
 
-            if (!v1.text.endsWith(". ") && v1.text.endsWith(" ")) {
-                return false
+            if (firstPass) {
+                if ((v2.v.selection.start - v1.v.selection.start).absoluteValue > 1
+                    || (v2.v.selection.end - v1.v.selection.end).absoluteValue > 1
+                ) {
+                    return IsSimilarResult.FlagDoNotRemove
+                }
+
+                if (v2.v.text.endsWith(".", startIndex = v2.v.selection.max)) {
+                    return IsSimilarResult.No
+                }
+
+                if (!v2.v.text.endsWith(
+                        ". ",
+                        startIndex = v2.v.selection.max
+                    ) && v2.v.text.endsWith(" ", startIndex = v2.v.selection.max)
+                ) {
+                    return IsSimilarResult.No
+                }
+
+                if (v2.v.text.endsWith("-", startIndex = v2.v.selection.max)) {
+                    return IsSimilarResult.No
+                }
             }
 
-            if (v1.text.endsWith("\n")) {
-                return false
+            if (v2.v.text.endsWith("\n", startIndex = v2.v.selection.max)) {
+                return IsSimilarResult.No
             }
-            if (v1.text.endsWith("-")) {
-                return false
+            if ((v2.v.text.length - v1.v.text.length).absoluteValue >= 10) {
+                return IsSimilarResult.No
             }
 
-            if ((v1.text.length - v2.text.length).absoluteValue >= 10)
-                return false
-
-            return true
+            return IsSimilarResult.Yes
         }
 
-        history.add(v)
+        history.add(HistoryItem(v.copy()))
 
         fun cleanHistory() {
+
             // we don't want to remove the last and first index of the history
             // [_,a,ab] -> the size is 3, "a" will be removed
             if (history.size < 3) return
 
+            val secondLast = history.size - 2
             var last = history.size - 1
-            val secondLast = last - 1
 
-            if (isSimilar(history[last], history[secondLast])) {
-                if (isSimilar(history[secondLast - 1], history[secondLast])) {
-                    history.removeAt(secondLast)
+            when (isSimilar(history[secondLast], history[last], true)) {
+                IsSimilarResult.Yes -> {
+                    if (isSimilar(
+                            history[secondLast - 1],
+                            history[secondLast],
+                            false
+                        ) == IsSimilarResult.Yes
+                    ) {
+                        history.removeAt(secondLast)
+                    }
+                }
+
+                IsSimilarResult.No -> {}
+                IsSimilarResult.FlagDoNotRemove -> {
+                    history[last] = history[last].copy(flagDoNotRemove = true)
                 }
             }
         }
@@ -208,7 +249,7 @@ open class TextVM() : ViewModel() {
                 )
             )
         }
-        _content.value = history[historyManager.index - 1].copy()
+        _content.value = history[historyManager.index - 1].v.copy()
     }
 
     fun redo() {
@@ -221,7 +262,7 @@ open class TextVM() : ViewModel() {
                 )
             )
         }
-        _content.value = history[historyManager.index + 1].copy()
+        _content.value = history[historyManager.index + 1].v.copy()
     }
 
     fun setReadOnlyMode(value: Boolean) {

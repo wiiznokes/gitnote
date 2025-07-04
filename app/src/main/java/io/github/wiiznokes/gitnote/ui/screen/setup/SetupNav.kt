@@ -16,8 +16,8 @@ import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.setup.remote.RemoteScreen
-import io.github.wiiznokes.gitnote.ui.util.crossFade
-import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.utils.crossFade
+import io.github.wiiznokes.gitnote.ui.utils.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharedFlow

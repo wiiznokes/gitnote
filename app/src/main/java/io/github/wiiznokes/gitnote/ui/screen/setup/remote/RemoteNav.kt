@@ -20,7 +20,7 @@ import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenera
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvider
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.utils.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
 

@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.util
+package io.github.wiiznokes.gitnote.ui.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration

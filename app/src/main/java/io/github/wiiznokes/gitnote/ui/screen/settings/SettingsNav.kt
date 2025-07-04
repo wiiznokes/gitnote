@@ -12,7 +12,7 @@ import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
-import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.utils.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 
 

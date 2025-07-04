@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.util
+package io.github.wiiznokes.gitnote.ui.utils
 
 import io.github.wiiznokes.gitnote.data.room.Note
 import java.util.Vector
