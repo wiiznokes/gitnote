@@ -15,7 +15,7 @@ import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.EditScreen
 import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
-import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsScreen
+import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsNav
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
 
@@ -66,7 +66,7 @@ fun AppScreen(
                 }
             )
 
-            is AppDestination.Settings -> SettingsScreen(
+            is AppDestination.Settings -> SettingsNav(
                 onBackClick = { navController.pop() },
                 destination = it.settingsDestination,
                 onStorageFailure = onStorageFailure

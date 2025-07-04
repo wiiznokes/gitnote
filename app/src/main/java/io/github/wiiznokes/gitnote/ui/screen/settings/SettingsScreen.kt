@@ -1,103 +1,299 @@
 package io.github.wiiznokes.gitnote.ui.screen.settings
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ContentTransform
-import androidx.compose.material3.ExperimentalMaterial3Api
+import android.content.ClipData
+import android.content.ClipDescription
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.olshevski.navigation.reimagined.AnimatedNavHost
-import dev.olshevski.navigation.reimagined.NavAction
-import dev.olshevski.navigation.reimagined.NavTransitionScope
-import dev.olshevski.navigation.reimagined.NavTransitionSpec
-import dev.olshevski.navigation.reimagined.pop
-import dev.olshevski.navigation.reimagined.rememberNavController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewModelScope
+import dev.olshevski.navigation.reimagined.NavController
+import dev.olshevski.navigation.reimagined.navigate
+import io.github.wiiznokes.gitnote.BuildConfig
+import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.DefaultSettingsRow
+import io.github.wiiznokes.gitnote.ui.component.MultipleChoiceSettings
+import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
+import io.github.wiiznokes.gitnote.ui.component.SettingsSection
+import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.component.StringSettings
+import io.github.wiiznokes.gitnote.ui.component.ToggleableSettings
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
-import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
+import io.github.wiiznokes.gitnote.ui.model.SortOrder
+import io.github.wiiznokes.gitnote.ui.model.SortType
+import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 
-
-// https://github.com/ReVanced/revanced-manager-compose/blob/dev/app/src/main/java/app/revanced/manager/ui/screen/settings/AboutSettingsScreen.kt
-// https://github.com/ReVanced/revanced-manager-compose/blob/dev/app/src/main/java/app/revanced/manager/ui/screen/settings/LicensesScreen.kt
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    destination: SettingsDestination,
     onBackClick: () -> Unit,
-    onStorageFailure: () -> Unit,
+    navController: NavController<SettingsDestination>,
+    onCloseRepo: () -> Unit,
+    vm: SettingsViewModel
 ) {
 
-    val navController =
-        rememberNavController(startDestination = destination)
-
-    BackHandler {
-        if (navController.backstack.entries.size <= 1) {
-            onBackClick()
-        } else {
-            navController.pop()
-        }
-    }
-
-
-    val vm: SettingsViewModel = viewModel()
-
-
-    AnimatedNavHost(
-        controller = navController,
-        transitionSpec = SettingsNavTransitionSpec
+    AppPage(
+        title = stringResource(id = R.string.settings),
+        onBackClick = onBackClick,
     ) {
-        when (it) {
-            SettingsDestination.Libraries -> {
-                LibrariesScreen(
-                    onBackClick = {
-                        navController.pop()
-                    }
-                )
-            }
 
-            SettingsDestination.Logs -> {
-                LogsScreen(
-                    onBackClick = {
-                        navController.pop()
-                    },
-                    vm = vm
-                )
-            }
+        SettingsSection(
+            title = stringResource(R.string.user_interface)
+        ) {
 
-            SettingsDestination.Main -> {
-                MainSettingsScreen(
-                    onBackClick = onBackClick,
-                    navController = navController,
-                    onCloseRepo = onStorageFailure,
-                    vm = vm
-                )
-            }
+            val theme by vm.prefs.theme.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.theme),
+                subtitle = theme.toString(),
+                startIcon = Icons.Default.Palette,
+                options = Theme.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.theme.update(it) }
+                }
+            )
 
-            SettingsDestination.FolderFilters -> {
-                FolderFiltersScreen(
-                    onBackClick = {
-                        navController.pop()
-                    },
-                    vm = vm
-                )
-            }
+
+            val dynamicColor by vm.prefs.dynamicColor.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.dynamic_colors),
+                checked = dynamicColor,
+                onCheckedChange = {
+                    vm.update { vm.prefs.dynamicColor.update(it) }
+                }
+            )
+
         }
-    }
-}
 
-private object SettingsNavTransitionSpec : NavTransitionSpec<SettingsDestination> {
+        SettingsSection(
+            title = stringResource(R.string.grid)
+        ) {
 
-    override fun NavTransitionScope.getContentTransform(
-        action: NavAction,
-        from: SettingsDestination,
-        to: SettingsDestination
-    ): ContentTransform {
+            val sortType by vm.prefs.sortType.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.sort_type),
+                subtitle = sortType.toString(),
+                options = SortType.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.sortType.update(it) }
+                }
+            )
 
-        return when (from) {
-            SettingsDestination.FolderFilters -> slide(backWard = true)
-            SettingsDestination.Libraries -> slide(backWard = true)
-            SettingsDestination.Logs -> slide(backWard = true)
-            SettingsDestination.Main -> slide()
+            val sortOrder by vm.prefs.sortOrder.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.sort_order),
+                subtitle = sortOrder.toString(),
+                options = SortOrder.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.sortOrder.update(it) }
+                }
+            )
+
+            val noteMinWidth by vm.prefs.noteMinWidth.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.minimal_note_width),
+                subtitle = noteMinWidth.toString(),
+                options = NoteMinWidth.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.noteMinWidth.update(it) }
+                }
+            )
+
+            val showFullNoteHeight by vm.prefs.showFullNoteHeight.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.show_long_notes),
+                checked = showFullNoteHeight,
+                onCheckedChange = {
+                    vm.update { vm.prefs.showFullNoteHeight.update(it) }
+                }
+            )
+
+            val rememberLastOpenedFolder by vm.prefs.rememberLastOpenedFolder.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.remember_last_opened_folder),
+                checked = rememberLastOpenedFolder,
+                onCheckedChange = {
+                    vm.update { vm.prefs.rememberLastOpenedFolder.update(it) }
+                }
+            )
+
+            val showFullPathOfNotes by vm.prefs.showFullPathOfNotes.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.show_the_full_notes_path),
+                subtitle = stringResource(R.string.show_the_full_notes_path_subtitle),
+                checked = showFullPathOfNotes,
+                onCheckedChange = {
+                    vm.update { vm.prefs.showFullPathOfNotes.update(it) }
+                }
+            )
+
+            /*
+            DefaultSettingsRow(
+                title = stringResource(R.string.folder_filters),
+                subTitle = stringResource(R.string.folder_filters_subtitle)
+            ) {
+                navController.navigate(SettingsDestination.FolderFilters)
+            }
+             */
+        }
+
+        SettingsSection(
+            title = stringResource(R.string.edit)
+        ) {
+            val defaultExtension by vm.prefs.defaultExtension.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.default_note_extension),
+                subtitle = defaultExtension,
+                options = FileExtension.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.defaultExtension.update(it.text) }
+                }
+            )
+
+            /*
+            val showLinesNumber by vm.prefs.showLinesNumber.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.show_lines_number),
+                checked = showLinesNumber
+            ) {
+                vm.update { vm.prefs.showLinesNumber.update(it) }
+            }
+             */
+        }
+
+        SettingsSection(
+            title = stringResource(R.string.repository)
+        ) {
+
+            val remoteUrl by vm.prefs.remoteUrl.getAsState()
+            StringSettings(
+                title = stringResource(R.string.remote_url),
+                subtitle = remoteUrl.ifEmpty { stringResource(id = R.string.none) },
+                stringValue = remoteUrl,
+                onChange = {
+                    vm.update { vm.prefs.remoteUrl.update(it) }
+                },
+                endContent = {
+                    val uriHandler = LocalUriHandler.current
+                    Button(
+                        onClick = {
+                            try {
+                                uriHandler.openUri(remoteUrl)
+                            } catch (_: Exception) {
+                                vm.uiHelper.makeToast(vm.uiHelper.getString(R.string.error_invalid_link))
+                            }
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        )
+
+                    }
+                },
+                showFullText = false,
+                keyboardType = KeyboardType.Uri
+            )
+
+            val expanded = rememberSaveable {
+                mutableStateOf(false)
+            }
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.close_repository),
+                startIcon = Icons.AutoMirrored.Filled.Logout,
+                onClick = {
+                    expanded.value = true
+                }
+            )
+
+            RequestConfirmationDialog(
+                expanded = expanded,
+                text = stringResource(R.string.close_repository_confirmation),
+                onConfirmation = {
+                    vm.closeRepo()
+                    onCloseRepo()
+                }
+            )
+        }
+
+        SettingsSection(
+            title = stringResource(R.string.about),
+            isLast = true
+        ) {
+            val version =
+                "${BuildConfig.VERSION_NAME}-${BuildConfig.BUILD_TYPE}-${
+                    BuildConfig.GIT_HASH.substring(
+                        0..6
+                    )
+                }"
+            val clipboardManager = LocalClipboard.current
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.version),
+                subTitle = version,
+                onClick = {
+                    val data = ClipData(
+                        ClipDescription(
+                            "version of gitnote",
+                            arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                        ),
+                        ClipData.Item(version)
+                    )
+
+                    vm.viewModelScope.launch {
+                        clipboardManager.setClipEntry(ClipEntry(data))
+                    }
+                }
+            )
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.show_logs),
+                startIcon = Icons.AutoMirrored.Filled.Article,
+                onClick = {
+                    navController.navigate(SettingsDestination.Logs)
+                }
+            )
+
+            val uriHandler = LocalUriHandler.current
+            DefaultSettingsRow(
+                title = stringResource(R.string.report_an_issue),
+                startIcon = Icons.Default.BugReport,
+                onClick = {
+                    uriHandler.openUri("https://github.com/wiiznokes/gitnote/issues")
+                }
+            )
+            DefaultSettingsRow(
+                title = stringResource(R.string.source_code),
+                startIcon = Icons.Default.Code,
+                onClick = {
+                    uriHandler.openUri("https://github.com/wiiznokes/gitnote")
+                }
+            )
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.libraries),
+                startIcon = Icons.AutoMirrored.Filled.MenuBook,
+                onClick = {
+                    navController.navigate(SettingsDestination.Libraries)
+                }
+            )
         }
     }
 }

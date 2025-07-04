@@ -30,16 +30,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class InitViewModelFactory(private val flow: SharedFlow<String>) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(InitViewModel::class.java)) {
-            return InitViewModel(flow) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
-
 class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
