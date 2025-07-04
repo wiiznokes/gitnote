@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init
+package io.github.wiiznokes.gitnote.ui.screen.setup
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
@@ -12,31 +12,28 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
-import io.github.wiiznokes.gitnote.ui.destination.InitDestination
+import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.screen.init.remote.RemoteScreen
+import io.github.wiiznokes.gitnote.ui.screen.setup.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.util.crossFade
 import io.github.wiiznokes.gitnote.ui.util.slide
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
 
-private const val TAG = "InitScreen"
+private const val TAG = "SetupNav"
 
 @Composable
-fun InitNav(
-    mainVm: MainViewModel,
-    startDestination: InitDestination,
-    onInitSuccess: () -> Unit,
+fun SetupNav(
+    startDestination: SetupDestination,
+    onSetupSuccess: () -> Unit,
     authFlow: SharedFlow<String>
 ) {
 
-
-    val vm: InitViewModel = viewModel(
+    val vm: SetupViewModel = viewModel(
         factory = viewModelFactory {
-            InitViewModel(
+            SetupViewModel(
                 authFlow = authFlow
             )
         },
@@ -52,44 +49,43 @@ fun InitNav(
     AnimatedNavHost(
         controller = navController,
         transitionSpec = InitNavTransitionSpec
-    ) { initDestination ->
-        when (initDestination) {
+    ) { setupDestination ->
+        when (setupDestination) {
 
-            InitDestination.Main -> NewRepoMethodScreen(
+            SetupDestination.Main -> NewRepoMethodScreen(
                 vm = vm,
-                mainVm = mainVm,
                 navController = navController,
-                onInitSuccess = onInitSuccess,
+                onSetupSuccess = onSetupSuccess,
             )
 
-            is InitDestination.FileExplorer -> {
+            is SetupDestination.FileExplorer -> {
 
 
                 FileExplorerScreen(
-                    path = initDestination.path?.let {
+                    path = setupDestination.path?.let {
                         it.ifEmpty {
                             null
                         }
                     },
                     onDirectoryClick = {
                         navController.navigate(
-                            InitDestination.FileExplorer(
-                                title = initDestination.title,
+                            SetupDestination.FileExplorer(
+                                title = setupDestination.title,
                                 path = it,
-                                newRepoMethod = initDestination.newRepoMethod
+                                newRepoMethod = setupDestination.newRepoMethod
                             )
                         )
                     },
                     onFinish = { path ->
-                        val repoState = StorageConfiguration.Device(path)
+                        val storageConfig = StorageConfiguration.Device(path)
 
-                        when (initDestination.newRepoMethod) {
-                            NewRepoMethod.Create -> vm.createLocalRepo(repoState, onInitSuccess)
-                            NewRepoMethod.Open -> mainVm.openRepo(repoState, onInitSuccess)
+                        when (setupDestination.newRepoMethod) {
+                            NewRepoMethod.Create -> vm.createLocalRepo(storageConfig, onSetupSuccess)
+                            NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
                             NewRepoMethod.Clone -> {
-                                vm.checkPathForClone(repoState.repoPath()).onSuccess {
+                                vm.checkPathForClone(storageConfig.repoPath()).onSuccess {
                                     navController.navigate(
-                                        InitDestination.Remote(repoState)
+                                        SetupDestination.Remote(storageConfig)
                                     )
                                 }
                             }
@@ -97,17 +93,17 @@ fun InitNav(
                     },
                     onBackClick = {
                         navController.popUpTo(inclusive = false) {
-                            it !is InitDestination.FileExplorer
+                            it !is SetupDestination.FileExplorer
                         }
                     },
-                    title = initDestination.title
+                    title = setupDestination.title
                 )
             }
 
-            is InitDestination.Remote -> RemoteScreen(
+            is SetupDestination.Remote -> RemoteScreen(
                 vm = vm,
-                storageConfig = initDestination.storageConfig,
-                onInitSuccess = onInitSuccess,
+                storageConfig = setupDestination.storageConfig,
+                onInitSuccess = onSetupSuccess,
                 onBackClick = {
                     navController.pop()
                 }
@@ -116,41 +112,41 @@ fun InitNav(
     }
 }
 
-private object InitNavTransitionSpec : NavTransitionSpec<InitDestination> {
+private object InitNavTransitionSpec : NavTransitionSpec<SetupDestination> {
 
 
     override fun NavTransitionScope.getContentTransform(
         action: NavAction,
-        from: InitDestination,
-        to: InitDestination
+        from: SetupDestination,
+        to: SetupDestination
     ): ContentTransform {
 
         return when (from) {
-            is InitDestination.FileExplorer -> {
+            is SetupDestination.FileExplorer -> {
                 when (to) {
-                    is InitDestination.FileExplorer -> {
+                    is SetupDestination.FileExplorer -> {
                         //val toParent = (from.path?.length ?: 0) > (to.path?.length ?: 0)
                         crossFade()
                     }
 
-                    InitDestination.Main -> slide(backWard = true)
-                    is InitDestination.Remote -> slide()
+                    SetupDestination.Main -> slide(backWard = true)
+                    is SetupDestination.Remote -> slide()
                 }
             }
 
-            InitDestination.Main -> {
+            SetupDestination.Main -> {
                 when (to) {
-                    is InitDestination.FileExplorer -> slide()
-                    InitDestination.Main -> crossFade()
-                    is InitDestination.Remote -> slide()
+                    is SetupDestination.FileExplorer -> slide()
+                    SetupDestination.Main -> crossFade()
+                    is SetupDestination.Remote -> slide()
                 }
             }
 
-            is InitDestination.Remote -> {
+            is SetupDestination.Remote -> {
                 when (to) {
-                    is InitDestination.FileExplorer -> slide(backWard = true)
-                    InitDestination.Main -> slide(backWard = true)
-                    is InitDestination.Remote -> crossFade()
+                    is SetupDestination.FileExplorer -> slide(backWard = true)
+                    SetupDestination.Main -> slide(backWard = true)
+                    is SetupDestination.Remote -> crossFade()
                 }
             }
         }

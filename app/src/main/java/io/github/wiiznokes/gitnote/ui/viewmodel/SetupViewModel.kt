@@ -5,8 +5,8 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import io.github.wiiznokes.gitnote.MyApp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.UiHelper
@@ -29,18 +29,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+private const val TAG = "SetupViewModel"
 
-class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
+class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
     val uiHelper: UiHelper = MyApp.appModule.uiHelper
 
     private val storageManager = MyApp.appModule.storageManager
-
-    companion object {
-        private const val TAG = "InitViewModel"
-    }
 
     private val _initState: MutableStateFlow<InitState> = MutableStateFlow(InitState.Idle)
     val initState: StateFlow<InitState> = _initState.asStateFlow()
@@ -93,9 +90,31 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
             prefs.initRepo(storageConfig)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                storageManager.updateDatabase()
+            storageManager.updateDatabase()
+
+            onSuccess()
+        }
+
+    }
+
+    fun openRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+            if (!NodeFs.Folder.fromPath(storageConfig.repoPath()).exist()) {
+                val msg = uiHelper.getString(R.string.error_path_not_directory)
+                uiHelper.makeToast(msg)
+                return@launch
             }
+
+            gitManager.openRepo(storageConfig.repoPath()).onFailure {
+                uiHelper.makeToast(it.message)
+                return@launch
+                prefs.initRepo(storageConfig)
+            }
+
+            prefs.initRepo(storageConfig)
+
+            storageManager.updateDatabaseAndRepo()
 
             onSuccess()
         }
@@ -115,7 +134,7 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
     fun cloneRepo(
         storageConfig: StorageConfiguration,
-        repoUrl: String,
+        remoteUrl: String,
         cred: Cred? = null,
         onSuccess: () -> Unit
     ) {
@@ -129,7 +148,7 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
             gitManager.cloneRepo(
                 repoPath = storageConfig.repoPath(),
-                repoUrl = repoUrl,
+                repoUrl = remoteUrl,
                 cred = cred,
                 progressCallback = {
                     _initState.tryEmit(CloneState.Cloning(it))
@@ -141,13 +160,11 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
             }
 
             prefs.initRepo(storageConfig)
-            prefs.remoteUrl.update(repoUrl)
+            prefs.remoteUrl.update(remoteUrl)
 
             prefs.updateCred(cred)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                storageManager.updateDatabase()
-            }
+            storageManager.updateDatabase()
 
             onSuccess()
         }
@@ -228,7 +245,7 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
             cloneRepo(
                 storageConfig = storageConfig,
-                repoUrl = provider!!.sshCloneUrlFromRepoName(repoName),
+                remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
                     publicKey = publicKey,
                     privateKey = privateKey
@@ -277,7 +294,7 @@ class InitViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
 
             cloneRepo(
                 storageConfig = storageConfig,
-                repoUrl = provider!!.sshCloneUrlFromRepoName(repoName),
+                remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
                     publicKey = publicKey,
                     privateKey = privateKey

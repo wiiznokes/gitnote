@@ -1,10 +1,8 @@
-package io.github.wiiznokes.gitnote.ui.screen.init.remote
+package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import android.content.ClipData
 import android.content.ClipDescription
 import android.util.Log
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +30,7 @@ import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 import kotlinx.coroutines.launch
 
 private const val TAG = "GenerateNewKeysWithProviderScreen"
@@ -46,7 +44,7 @@ private fun extractUserRepo(url: String): String? {
 @Composable
 fun GenerateNewKeysScreen(
     onBackClick: () -> Unit,
-    vm: InitViewModel,
+    vm: SetupViewModel,
     storageConfig: StorageConfiguration,
     url: String,
     onSuccess: () -> Unit
@@ -168,7 +166,7 @@ fun GenerateNewKeysScreen(
                     onClick = {
                         vm.cloneRepo(
                             storageConfig = storageConfig,
-                            repoUrl = url,
+                            remoteUrl = url,
                             cred = Cred.Ssh(
                                 username = "git",
                                 publicKey = publicKey.value,

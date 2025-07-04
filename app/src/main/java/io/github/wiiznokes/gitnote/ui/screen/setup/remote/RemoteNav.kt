@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init.remote
+package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
@@ -21,7 +21,7 @@ import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvid
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.util.slide
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
 
 private const val TAG = "RemoteScreen"
@@ -29,7 +29,7 @@ private const val TAG = "RemoteScreen"
 
 @Composable
 fun RemoteScreen(
-    vm: InitViewModel,
+    vm: SetupViewModel,
     storageConfig: StorageConfiguration,
     onInitSuccess: () -> Unit,
     onBackClick: () -> Unit

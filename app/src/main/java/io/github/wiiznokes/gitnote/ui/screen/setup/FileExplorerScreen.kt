@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init
+package io.github.wiiznokes.gitnote.ui.screen.setup
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

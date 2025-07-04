@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init.remote
+package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button

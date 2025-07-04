@@ -12,13 +12,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
+private const val TAG = "StorageManager"
 
 class StorageManager {
 
-
-    companion object {
-        private const val TAG = "StorageManager"
-    }
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val db: RepoDatabase = MyApp.appModule.repoDatabase
@@ -39,18 +36,19 @@ class StorageManager {
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
 
-        if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(cred).onFailure {
-                uiHelper.makeToast(it.message)
-            }
-        }
 
-        // todo: maybe async this call
+
         gitManager.commitAll(
             prefs.usernameOrDefault(),
             "commit from gitnote to update the repo of the app"
         ).onFailure {
             uiHelper.makeToast(it.message)
+        }
+
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(cred).onFailure {
+                uiHelper.makeToast(it.message)
+            }
         }
 
         if (remoteUrl.isNotEmpty()) {
@@ -279,6 +277,13 @@ class StorageManager {
         ).onFailure {
             return failure(it)
         }
+
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(cred).onFailure {
+                it.printStackTrace()
+            }
+        }
+
         updateDatabaseWithoutLocker().onFailure {
             return failure(it)
         }
@@ -292,20 +297,9 @@ class StorageManager {
             }
         )
 
-        if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(cred).onFailure {
-                it.printStackTrace()
-            }
-        }
-
-        updateDatabaseWithoutLocker().onFailure {
-            return failure(it)
-        }
-
         gitManager.commitAll(prefs.usernameOrDefault(), commitMessage).onFailure {
             return failure(it)
         }
-
 
         if (remoteUrl.isNotEmpty()) {
             gitManager.push(cred).onFailure {

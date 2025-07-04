@@ -7,20 +7,20 @@ import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import kotlinx.parcelize.Parcelize
 
 
-sealed interface InitDestination : Parcelable {
+sealed interface SetupDestination : Parcelable {
 
     @Parcelize
-    data object Main : InitDestination
+    data object Main : SetupDestination
 
     @Parcelize
     data class FileExplorer(
         val title: String,
         val path: String?,
         val newRepoMethod: NewRepoMethod,
-    ) : InitDestination
+    ) : SetupDestination
 
     @Parcelize
-    data class Remote(val storageConfig: StorageConfiguration) : InitDestination
+    data class Remote(val storageConfig: StorageConfiguration) : SetupDestination
 
 }
 
