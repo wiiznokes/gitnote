@@ -286,14 +286,6 @@ fun SettingsScreen(
                     uriHandler.openUri("https://github.com/wiiznokes/gitnote")
                 }
             )
-
-            DefaultSettingsRow(
-                title = stringResource(R.string.libraries),
-                startIcon = Icons.AutoMirrored.Filled.MenuBook,
-                onClick = {
-                    navController.navigate(SettingsDestination.Libraries)
-                }
-            )
         }
     }
 }

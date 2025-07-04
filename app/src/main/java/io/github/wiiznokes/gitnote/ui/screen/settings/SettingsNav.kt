@@ -47,13 +47,6 @@ fun SettingsNav(
         transitionSpec = SettingsNavTransitionSpec
     ) {
         when (it) {
-            SettingsDestination.Libraries -> {
-                LibrariesScreen(
-                    onBackClick = {
-                        navController.pop()
-                    }
-                )
-            }
 
             SettingsDestination.Logs -> {
                 LogsScreen(
@@ -95,7 +88,6 @@ private object SettingsNavTransitionSpec : NavTransitionSpec<SettingsDestination
 
         return when (from) {
             SettingsDestination.FolderFilters -> slide(backWard = true)
-            SettingsDestination.Libraries -> slide(backWard = true)
             SettingsDestination.Logs -> slide(backWard = true)
             SettingsDestination.Main -> slide()
         }
