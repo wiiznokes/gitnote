@@ -76,10 +76,6 @@ class GridViewModel : ViewModel() {
         Log.d(TAG, "init")
 
         CoroutineScope(Dispatchers.IO).launch {
-            storageManager.updateDatabaseAndRepo()
-        }
-
-        CoroutineScope(Dispatchers.IO).launch {
             allNotes.collect { allNotes ->
                 selectedNotes.value.filter { selectedNote ->
                     allNotes.contains(selectedNote)
@@ -280,7 +276,7 @@ class GridViewModel : ViewModel() {
 
             DrawerFolderModel(
                 noteCount = noteCount,
-                lastModifiedTimeMillis = max(lastModifiedTimeMillis, folder.lastModifiedTimeMillis),
+                lastModifiedTimeMillis = lastModifiedTimeMillis,
                 noteFolder = folder
             )
         }

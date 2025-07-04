@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.init.remote
+package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
@@ -7,13 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
 
 @Composable
 fun SelectProviderScreen(
     onBackClick: () -> Unit,
-    vm: InitViewModel,
+    vm: SetupViewModel,
     onProviderSelected: () -> Unit,
 ) {
 

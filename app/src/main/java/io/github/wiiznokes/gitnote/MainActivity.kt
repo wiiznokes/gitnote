@@ -20,9 +20,9 @@ import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.Destination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
-import io.github.wiiznokes.gitnote.ui.destination.InitDestination
+import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
-import io.github.wiiznokes.gitnote.ui.screen.init.InitNav
+import io.github.wiiznokes.gitnote.ui.screen.setup.SetupNav
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
                         } else Destination.App(AppDestination.Grid)
                     }
-                    else Destination.Init(InitDestination.Main)
+                    else Destination.Setup(SetupDestination.Main)
                 }
 
 
@@ -92,16 +92,15 @@ class MainActivity : ComponentActivity() {
                     controller = navController
                 ) { destination ->
                     when (destination) {
-                        is Destination.Init -> {
-                            InitNav(
-                                startDestination = destination.initDestination,
-                                mainVm = vm,
+                        is Destination.Setup -> {
+                            SetupNav(
+                                startDestination = destination.setupDestination,
                                 authFlow = authFlow,
-                                onInitSuccess = {
+                                onSetupSuccess = {
                                     navController.popUpTo(
                                         inclusive = true
                                     ) {
-                                        it is Destination.Init
+                                        it is Destination.Setup
                                     }
                                     navController.navigate(Destination.App(AppDestination.Grid))
                                 }
@@ -113,7 +112,7 @@ class MainActivity : ComponentActivity() {
                             appDestination = destination.appDestination,
                             onStorageFailure = {
                                 navController.popAll()
-                                navController.navigate(Destination.Init(InitDestination.Main))
+                                navController.navigate(Destination.Setup(SetupDestination.Main))
                             }
                         )
                     }

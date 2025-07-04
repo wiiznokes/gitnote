@@ -5,5 +5,7 @@ use super::*;
 fn timestamp() {
     open_repo("../../../../../repo_test").unwrap();
 
-    let _res = get_timestamps();
+    let res = get_timestamps();
+
+    dbg!(&res);
 }

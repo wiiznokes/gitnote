@@ -21,7 +21,7 @@ interface RepoDatabaseDao {
         clearDatabase()
 
         val rootFs = NodeFs.Folder.fromPath(rootPath)
-        val rootFolder = NoteFolder(
+        val rootFolder = NoteFolder.new(
             relativePath = "",
         )
         insertNoteFolder(rootFolder)
@@ -55,7 +55,7 @@ interface RepoDatabaseDao {
                         if (nodeFs.isHidden() || nodeFs.isSym()) {
                             return@forEachNodeFs
                         }
-                        val noteFolder = NoteFolder(
+                        val noteFolder = NoteFolder.new(
                             relativePath = nodeFs.path.substring(startIndex = rootLength),
                         )
                         //Log.d(TAG, "add noteFolder: $noteFolder")
