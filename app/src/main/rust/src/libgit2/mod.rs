@@ -283,7 +283,7 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
 
                 if is_modified {
                     // Store commit time
-                    file_timestamps.insert(file_path.clone(), commit.time().seconds());
+                    file_timestamps.insert(file_path.clone(), commit.time().seconds() * 1000);
                     break;
                 }
             }
