@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.screen.settings
+package io.github.wiiznokes.gitnote.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,9 +26,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.ui.component.BaseDialog
-import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
-import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 
 
 private val padding = 10.dp
