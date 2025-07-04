@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.about.libraries)
     // for room
     alias(libs.plugins.ksp)
     // for compose navigation
@@ -167,9 +166,6 @@ dependencies {
     implementation(libs.runtime.compose)
     implementation(libs.compose.activity)
     implementation(libs.datastore.preferences)
-    //implementation(libs.work.runtime.ktx)
-    //implementation(libs.splash.screen)
-
 
     val composeBom = platform(libs.compose.bom)
 
@@ -179,15 +175,10 @@ dependencies {
     implementation(libs.compose.material)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
-    //implementation(libs.compose.constraintlayout)
 
     // Compose Debug
     implementation(libs.compose.ui.preview)
     debugImplementation(libs.androidx.ui.tooling)
-
-    // Accompanist
-    //implementation(libs.accompanist.permissions)
-
 
     // Room
     implementation(libs.room.runtime)
@@ -197,9 +188,6 @@ dependencies {
 
     // Compose Navigation
     implementation(libs.reimagined.navigation)
-
-    // Licenses
-    implementation(libs.about.libraries)
 
     // Markdown to HTML
     implementation(libs.richtext.commonmark)
