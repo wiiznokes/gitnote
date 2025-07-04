@@ -39,4 +39,5 @@ jobs:
       - name: Compile
         run: |
           # we must set the bin path of the ndk in PATH because some cmake file will not find some tools
-          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleDebug
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && make -C app/src/main/rust build
+          ./gradlew assembleDebug

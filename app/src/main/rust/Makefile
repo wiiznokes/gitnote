@@ -21,7 +21,7 @@ ifeq ($(OS),Windows_NT)
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
 else
-	export PATH := ${HOME}/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
+	# export PATH := ${HOME}/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
