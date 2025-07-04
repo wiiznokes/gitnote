@@ -23,7 +23,7 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] grid view
 - [x] tree view
 - [x] edit view
-- [x] private repo with https
+- [x] private repo with SSH
 - [x] remote sync
 - [x] time based sort
 
