@@ -1,17 +1,25 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
+use std::str::FromStr;
+use std::sync::OnceLock;
 
+use anyhow::anyhow;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
-use jni::sys::{jint, jstring};
+use jni::sys::{jint, jobject, jstring};
 
 use crate::callback::ProgressCB;
+use crate::key_gen::gen_keys;
 use crate::utils::install_panic_hook;
 
 #[macro_use]
 extern crate log;
 #[macro_use]
 mod utils;
+mod key_gen;
 mod libgit2;
+
+#[cfg(test)]
+mod test;
 
 const OK: jint = 0;
 
@@ -53,11 +61,47 @@ impl Display for Error {
     }
 }
 
+// https://github.com/libgit2/libgit2/pull/7056
+static HOME_PATH: OnceLock<String> = OnceLock::new();
+fn apply_ssh_workaround(clone: bool) {
+    let home = HOME_PATH.get().unwrap();
+
+    if clone {
+        unsafe {
+            std::env::set_var("HOME", home);
+        }
+    } else {
+        let c_path = std::ffi::CString::from_str(home).expect("CString::new failed");
+
+        unsafe {
+            libgit2_sys::git_libgit2_opts(
+                libgit2_sys::GIT_OPT_SET_HOMEDIR as std::ffi::c_int,
+                c_path.as_ptr(),
+            )
+        };
+    }
+
+    if let Err(e) = std::fs::create_dir_all(format!("{home}/.ssh")) {
+        error!("{e}");
+    }
+    if let Err(e) = std::fs::File::create(format!("{home}/.ssh/known_hosts")) {
+        error!("{e}");
+    }
+}
+
 #[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib(
-    _env: JNIEnv,
-    _class: JClass,
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    home_path: JString<'local>,
 ) -> jint {
+    let home_path: String = env
+        .get_string(&home_path)
+        .expect("Couldn't get java string!")
+        .into();
+
+    HOME_PATH.set(home_path.clone()).unwrap();
+
     install_panic_hook();
 
     android_logger::init_once(
@@ -105,9 +149,99 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepo
     OK
 }
 
-pub struct Creeds {
-    pub username: String,
-    pub password: String,
+pub enum Cred {
+    UserPassPlainText {
+        username: String,
+        password: String,
+    },
+    Ssh {
+        username: String,
+        public_key: String,
+        private_key: String,
+    },
+}
+
+impl Debug for Cred {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UserPassPlainText {
+                username,
+                password: _password,
+            } => f
+                .debug_struct("UserPassPlainText")
+                .field("username", username)
+                .finish(),
+            Self::Ssh {
+                username,
+                public_key,
+                private_key: _private_key,
+            } => f
+                .debug_struct("Ssh")
+                .field("username", username)
+                .field("public_key", public_key)
+                .finish(),
+        }
+    }
+}
+
+impl Cred {
+    pub fn from_jni(env: &mut JNIEnv, cred_obj: &JObject) -> anyhow::Result<Option<Self>> {
+        if cred_obj.is_null() {
+            return Ok(None);
+        }
+
+        let class = env.get_object_class(cred_obj)?;
+        let class_name_jstring: JString = env
+            .call_method(class, "getName", "()Ljava/lang/String;", &[])?
+            .l()?
+            .into();
+        let class_name: String = env.get_string(&class_name_jstring)?.into();
+
+        match class_name.as_str() {
+            "io.github.wiiznokes.gitnote.ui.model.Cred$UserPassPlainText" => {
+                let username_obj: JString = env
+                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+                let password_obj: JString = env
+                    .get_field(cred_obj, "password", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let username: String = env.get_string(&username_obj)?.into();
+                let password: String = env.get_string(&password_obj)?.into();
+
+                Ok(Some(Cred::UserPassPlainText { username, password }))
+            }
+            "io.github.wiiznokes.gitnote.ui.model.Cred$Ssh" => {
+                let username_key_obj: JString = env
+                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let public_key_obj: JString = env
+                    .get_field(cred_obj, "publicKey", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let private_key_obj: JString = env
+                    .get_field(cred_obj, "privateKey", "Ljava/lang/String;")?
+                    .l()?
+                    .into();
+
+                let username: String = env.get_string(&username_key_obj)?.into();
+                let public_key: String = env.get_string(&public_key_obj)?.into();
+                let private_key: String = env.get_string(&private_key_obj)?.into();
+
+                Ok(Some(Cred::Ssh {
+                    username,
+                    public_key,
+                    private_key,
+                }))
+            }
+            other => Err(anyhow!("Unknown class name: {}", other)),
+        }
+    }
 }
 
 mod callback {
@@ -146,26 +280,25 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     _class: JClass<'local>,
     repo_path: JString<'local>,
     remote_url: JString<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
+    cred: JString<'local>,
     progress_callback: JObject<'local>,
 ) -> jint {
+    apply_ssh_workaround(true);
     let repo_path: String = env.get_string(&repo_path).unwrap().into();
     let remote_url: String = env.get_string(&remote_url).unwrap().into();
 
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
+    let cred = match Cred::from_jni(&mut env, &cred) {
+        Ok(cred) => cred,
+        Err(e) => {
+            error!("Cred::from_jni: {e}");
+            panic!()
+        }
     };
 
     let cb = ProgressCB::new(&mut env, progress_callback);
 
     unwrap_or_log!(
-        libgit2::clone_repo(&repo_path, &remote_url, creeds, cb),
+        libgit2::clone_repo(&repo_path, &remote_url, cred, cb),
         "clone_repo"
     );
 
@@ -203,21 +336,11 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAl
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
-    _progress_callback: JObject<'local>,
+    cred: JString<'local>,
 ) -> jint {
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
-    };
-
-    unwrap_or_log!(libgit2::push(creeds), "push");
-
+    apply_ssh_workaround(false);
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::push(cred), "push");
     OK
 }
 
@@ -225,21 +348,11 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    username: JString<'local>,
-    password: JString<'local>,
-    _progress_callback: JObject<'local>,
+    cred: JString<'local>,
 ) -> jint {
-    let creeds = if !username.is_null() && !password.is_null() {
-        let username: String = env.get_string(&username).unwrap().into();
-        let password: String = env.get_string(&password).unwrap().into();
-
-        Some(Creeds { username, password })
-    } else {
-        None
-    };
-
-    unwrap_or_log!(libgit2::pull(creeds), "pull");
-
+    apply_ssh_workaround(false);
+    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    unwrap_or_log!(libgit2::pull(cred), "pull");
     OK
 }
 
@@ -321,4 +434,35 @@ fn get_timestamps_jni<'local, 'a>(
     }
 
     Ok(())
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generateSshKeysLib<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+) -> jobject {
+    let keys = match gen_keys() {
+        Ok(keys) => keys,
+        Err(e) => {
+            error!("can't gen keys: {e}");
+            return std::ptr::null_mut();
+        }
+    };
+
+    let public_jstring = env.new_string(&keys.public).unwrap();
+    let private_jstring = env.new_string(&keys.private).unwrap();
+
+    let pair_class = env.find_class("kotlin/Pair").unwrap();
+
+    let pair_obj = env
+        .new_object(
+            &pair_class,
+            "(Ljava/lang/Object;Ljava/lang/Object;)V",
+            &[(&public_jstring).into(), (&private_jstring).into()],
+        )
+        .unwrap();
+
+    pair_obj.into_raw()
 }

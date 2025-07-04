@@ -26,8 +26,13 @@ import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.DefaultSettingsRow
+import io.github.wiiznokes.gitnote.ui.component.MultipleChoiceSettings
 import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
+import io.github.wiiznokes.gitnote.ui.component.SettingsSection
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.component.StringSettings
+import io.github.wiiznokes.gitnote.ui.component.ToggleableSettings
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
@@ -177,34 +182,6 @@ fun MainSettingsScreen(
         SettingsSection(
             title = stringResource(R.string.repository)
         ) {
-            val userName by vm.prefs.userName.getAsState()
-            StringSettings(
-                title = stringResource(R.string.username),
-                subtitle = userName.ifEmpty { stringResource(id = R.string.none) },
-                stringValue = userName,
-                onChange = {
-                    vm.update { vm.prefs.userName.update(it) }
-                },
-                showFullText = false,
-            )
-
-            val password by vm.prefs.password.getAsState()
-
-            StringSettings(
-                title = stringResource(R.string.password),
-                subtitle = password.let {
-                    if (it.isEmpty())
-                        stringResource(id = R.string.none)
-                    else
-                        "*".repeat(it.length)
-                },
-                stringValue = password,
-                onChange = {
-                    vm.update { vm.prefs.password.update(it) }
-                },
-                showFullText = false,
-                keyboardType = KeyboardType.Password
-            )
 
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
             StringSettings(
@@ -220,7 +197,7 @@ fun MainSettingsScreen(
                         onClick = {
                             try {
                                 uriHandler.openUri(remoteUrl)
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 vm.uiHelper.makeToast(vm.uiHelper.getString(R.string.error_invalid_link))
                             }
                         }

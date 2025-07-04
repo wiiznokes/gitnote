@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -24,8 +25,12 @@ import io.github.wiiznokes.gitnote.ui.screen.app.AppScreen
 import io.github.wiiznokes.gitnote.ui.screen.init.InitScreen
 import io.github.wiiznokes.gitnote.ui.theme.GitNoteTheme
 import io.github.wiiznokes.gitnote.ui.theme.Theme
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -35,18 +40,19 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    val authFlow: MutableSharedFlow<String> = MutableSharedFlow(replay = 0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        Log.d(TAG, "onCreate")
 
         setContent {
-            val vm = viewModel<InitViewModel>(
-                factory = viewModelFactory { InitViewModel() }
-            )
+
+
+            val vm: MainViewModel = viewModel()
 
             val theme by vm.prefs.theme.getAsState()
             val dynamicColor by vm.prefs.dynamicColor.getAsState()
-
 
 
             GitNoteTheme(
@@ -79,7 +85,9 @@ class MainActivity : ComponentActivity() {
                                 //AppDestination.Settings(SettingsDestination.Main)
                             )
                         }
-                    } else Destination.Init(InitDestination.Main)
+                    }
+                    else Destination.Init(InitDestination.Main)
+//                    else Destination.Init(InitDestination.Remote(StorageConfiguration.App))
                 }
 
 
@@ -95,6 +103,8 @@ class MainActivity : ComponentActivity() {
                         is Destination.Init -> {
                             InitScreen(
                                 startDestination = destination.initDestination,
+                                mainVm = vm,
+                                authFlow = authFlow,
                                 onInitSuccess = {
                                     navController.popUpTo(
                                         inclusive = true
@@ -120,6 +130,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Log.d(TAG, "onNewIntent $intent")
+
+        val uri = intent.data ?: return
+        if (uri.scheme == "gitnote-identity" && uri.host == "register-callback") {
+            val code = uri.getQueryParameter("code")
+
+            if (code != null) {
+                Log.d(TAG, "received code from intent, sending it...")
+                CoroutineScope(Dispatchers.Default).launch {
+                    authFlow.emit(code)
+                }
+            } else {
+                Log.w(TAG, "code is null")
+            }
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -129,6 +157,3 @@ class MainActivity : ComponentActivity() {
         appModule.gitManager.shutdown()
     }
 }
-
-
-

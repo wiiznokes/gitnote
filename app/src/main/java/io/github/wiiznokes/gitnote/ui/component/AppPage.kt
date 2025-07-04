@@ -35,6 +35,7 @@ fun AppPage(
     title: String,
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     onBackClick: (() -> Unit)? = null,
+    onBackClickEnabled: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     disableVerticalScroll: Boolean = false,
@@ -47,6 +48,7 @@ fun AppPage(
     Scaffold(
         modifier = Modifier
             .imePadding(),
+        contentWindowInsets = contentWindowInsets,
         topBar = {
             TopAppBar(
                 actions = actions,
@@ -61,7 +63,8 @@ fun AppPage(
                 navigationIcon = {
                     onBackClick?.let {
                         IconButton(
-                            onClick = it
+                            onClick = it,
+                            enabled = onBackClickEnabled
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -74,21 +77,27 @@ fun AppPage(
                 )
             )
         },
-        bottomBar = bottomBar,
     ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .conditional(!disableVerticalScroll) {
-                    verticalScroll(rememberScrollState())
-                },
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
         ) {
-            content()
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .conditional(!disableVerticalScroll) {
+                        verticalScroll(rememberScrollState())
+                    },
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment
+            ) {
+                content()
 
+            }
+            bottomBar()
+        }
     }
 }

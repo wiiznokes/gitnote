@@ -1,6 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.init
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,18 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.data.NewRepoState
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.destination.InitDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoSource
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import io.github.wiiznokes.gitnote.ui.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
 
@@ -44,15 +44,17 @@ private sealed class StorageChooser {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    vm: InitViewModel,
+    mainVm: MainViewModel,
     navController: NavController<InitDestination>,
     onInitSuccess: () -> Unit
 ) {
-    val vm = viewModel<InitViewModel>(
-        factory = viewModelFactory { InitViewModel() }
-    )
+
 
     val showStorageChooser: MutableState<StorageChooser> =
         remember { mutableStateOf(StorageChooser.UnExpanded) }
+
+
 
 
     AppPage(
@@ -60,6 +62,8 @@ fun MainScreen(
         verticalArrangement = Arrangement.spacedBy(80.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+
 
         Button(
             onClick = {
@@ -71,10 +75,23 @@ fun MainScreen(
             )
         }
 
+        val (permissionLauncher, permissionName) = createPermissionLauncher(
+            vm = vm,
+            navController = navController,
+            title = NewRepoSource.Open.getExplorerTitle(),
+            newRepoSource = NewRepoSource.Open
+        )
 
         Button(
             onClick = {
-                showStorageChooser.value = StorageChooser.Expanded(NewRepoSource.Open)
+                requestPermissionOrNavigate(
+                    vm = vm,
+                    permissionLauncher = permissionLauncher,
+                    permissionName = permissionName,
+                    navController = navController,
+                    title = NewRepoSource.Open.getExplorerTitle(),
+                    newRepoSource = NewRepoSource.Open
+                )
             }
         ) {
             Text(
@@ -123,10 +140,10 @@ fun MainScreen(
                 onClick = {
                     closeSheet()
 
-                    val repoState = NewRepoState.AppStorage
+                    val repoState = StorageConfiguration.App
                     when (storageChooser.source) {
-                        NewRepoSource.Create -> vm.createRepo(repoState, onInitSuccess)
-                        NewRepoSource.Open -> vm.openRepo(repoState, onInitSuccess)
+                        NewRepoSource.Create -> vm.createLocalRepo(repoState, onInitSuccess)
+                        NewRepoSource.Open -> mainVm.openRepo(repoState, onInitSuccess)
                         NewRepoSource.Clone -> navController.navigate(
                             InitDestination.Remote(
                                 repoState
@@ -147,42 +164,27 @@ fun MainScreen(
                     .align(Alignment.CenterHorizontally),
             ) {
 
-                val storagePermissionHelper = remember {
-                    StoragePermissionHelper()
-                }
-                val (contract, permissionName) = storagePermissionHelper.permissionContract()
+                val (permissionLauncher, permissionName) = createPermissionLauncher(
+                    vm = vm,
+                    navController = navController,
+                    title = storageChooser.source.getExplorerTitle(),
+                    newRepoSource = storageChooser.source
+                )
 
-                val permissionLauncher = rememberLauncherForActivityResult(contract = contract) {
-                    if (it) {
-                        navController.navigate(
-                            InitDestination.FileExplorer(
-                                title = storageChooser.source.getExplorerTitle(),
-                                path = vm.prefs.repoPathSafely(),
-                                newRepoSource = storageChooser.source,
-                            )
-                        )
-                    } else {
-                        vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
-                    }
-                }
                 Button(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
                         closeSheet()
 
-                        if (!StoragePermissionHelper.isPermissionGranted()) {
-                            permissionLauncher.launch(permissionName)
-                        } else {
-                            navController.navigate(
-                                InitDestination.FileExplorer(
-                                    title = storageChooser.source.getExplorerTitle(),
-                                    path = vm.prefs.repoPathSafely(),
-                                    newRepoSource = storageChooser.source,
-                                )
-                            )
-                        }
-
+                        requestPermissionOrNavigate(
+                            vm = vm,
+                            permissionLauncher = permissionLauncher,
+                            permissionName = permissionName,
+                            navController = navController,
+                            title = storageChooser.source.getExplorerTitle(),
+                            newRepoSource = storageChooser.source
+                        )
                     }
                 ) {
                     Text(text = stringResource(R.string.use_device_storage))
@@ -199,5 +201,55 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(20.dp))
         }
 
+    }
+}
+
+@Composable
+fun createPermissionLauncher(
+    vm: InitViewModel,
+    navController: NavController<InitDestination>,
+    title: String,
+    newRepoSource: NewRepoSource
+) : Pair<ActivityResultLauncher<String>, String> {
+    val storagePermissionHelper = remember {
+        StoragePermissionHelper()
+    }
+    val (contract, permissionName) = storagePermissionHelper.permissionContract()
+
+    val permissionLauncher = rememberLauncherForActivityResult(contract = contract) {
+        if (it) {
+            navController.navigate(
+                InitDestination.FileExplorer(
+                    title = title,
+                    path = vm.prefs.repoPathSafely(),
+                    newRepoSource = newRepoSource,
+                )
+            )
+        } else {
+            vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
+        }
+    }
+
+    return permissionLauncher to permissionName
+}
+
+fun requestPermissionOrNavigate(
+    vm: InitViewModel,
+    permissionLauncher: ActivityResultLauncher<String>,
+    permissionName: String,
+    navController: NavController<InitDestination>,
+    title: String,
+    newRepoSource: NewRepoSource
+) {
+    if (!StoragePermissionHelper.isPermissionGranted()) {
+        permissionLauncher.launch(permissionName)
+    } else {
+        navController.navigate(
+            InitDestination.FileExplorer(
+                title = title,
+                path = vm.prefs.repoPathSafely(),
+                newRepoSource = newRepoSource,
+            )
+        )
     }
 }

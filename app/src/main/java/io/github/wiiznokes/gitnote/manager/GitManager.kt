@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.annotation.Keep
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.ui.model.Cred
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -19,7 +19,6 @@ enum class GitExceptionType {
     InitLib,
     RepoAlreadyInit,
     RepoNotInit,
-    WrongPath,
     Other
 }
 
@@ -117,7 +116,7 @@ class GitManager {
      */
     @Keep
     fun progressCb(progress: Int) {
-        if (actualCb!= null) {
+        if (actualCb != null) {
             actualCb?.invoke(progress)
         }
     }
@@ -125,10 +124,11 @@ class GitManager {
     suspend fun cloneRepo(
         repoPath: String,
         repoUrl: String,
-        creed: GitCreed?,
+        cred: Cred?,
         progressCallback: (Int) -> Unit
     ): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "clone repo: $repoPath, $repoUrl, $creed")
+        Log.d(TAG, "clone repo: $repoPath, $repoUrl, $cred")
+
         if (isRepoInitialized) throw GitException(GitExceptionType.RepoAlreadyInit)
 
         actualCb = progressCallback
@@ -136,8 +136,7 @@ class GitManager {
         val res = cloneRepoLib(
             repoPath = repoPath,
             remoteUrl = repoUrl,
-            username = creed?.userName,
-            password = creed?.password,
+            cred = cred,
             progressCallback = this
         )
 
@@ -181,13 +180,10 @@ class GitManager {
 
     }
 
-    suspend fun push(creed: GitCreed?): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "push: $creed")
+    suspend fun push(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "push: $cred")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
-        val res = pushLib(
-            username = creed?.userName,
-            password = creed?.password,
-        )
+        val res = pushLib(cred)
 
         if (res < 0) {
             Log.d(TAG, "push: $res")
@@ -199,14 +195,11 @@ class GitManager {
 
     }
 
-    suspend fun pull(creed: GitCreed?): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "pull: $creed")
+    suspend fun pull(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "pull: $cred")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
 
-        val res = pullLib(
-            username = creed?.userName,
-            password = creed?.password,
-        )
+        val res = pullLib(cred)
 
         if (res < 0) {
             throw Exception(uiHelper.getString(R.string.error_pull_repo, res.toString()))
@@ -242,7 +235,9 @@ class GitManager {
 
 }
 
-private external fun initLib(): Int
+private external fun initLib(
+    homePath: String = MyApp.appModule.context.filesDir.toPath().toString()
+): Int
 
 private external fun createRepoLib(repoPath: String): Int
 
@@ -251,8 +246,7 @@ private external fun openRepoLib(repoPath: String): Int
 private external fun cloneRepoLib(
     repoPath: String,
     remoteUrl: String,
-    username: String?,
-    password: String?,
+    cred: Cred?,
     progressCallback: GitManager
 ): Int
 
@@ -260,16 +254,8 @@ private external fun cloneRepoLib(
 private external fun lastCommitLib(): String?
 
 private external fun commitAllLib(username: String, message: String): Int
-private external fun pushLib(
-    username: String?, password: String?,
-    progressCallback: ((Int) -> Unit)? = null
-): Int
-
-
-private external fun pullLib(
-    username: String?, password: String?,
-    progressCallback: ((Int) -> Unit)? = null
-): Int
+private external fun pushLib(cred: Cred?): Int
+private external fun pullLib(cred: Cred?): Int
 
 private external fun freeLib()
 
@@ -279,3 +265,5 @@ private external fun closeRepoLib()
 private external fun isChangeLib(): Int
 
 private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
+
+external fun generateSshKeysLib(): Pair<String, String>
