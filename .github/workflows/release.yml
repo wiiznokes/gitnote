@@ -32,13 +32,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-          submodules: recursive
-
-      # - name: Build Libgit2
-      #   run: |
-      #     cd app/libgit2-android
-      #     ANDROID_API=34 ANDROID_ABI=arm64-v8a BUILD_ALL=1 INSTALL_NDK=1 ./build.sh
-      #     ANDROID_API=34 ANDROID_ABI=x86_64 BUILD_ALL=1 CLEAN=1 ./build.sh
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -64,7 +57,8 @@ jobs:
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && ./gradlew assembleRelease
+          export PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && make -C app/src/main/rust DEBUG=0 build
+          ./gradlew assembleRelease
 
           mkdir -p packages
           # warning: do not use github.event syntax here
