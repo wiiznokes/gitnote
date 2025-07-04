@@ -21,7 +21,7 @@ private const val TAG = "DatabaseSchema"
 )
 data class NoteFolder(
     val relativePath: String,
-    val id: Int = RepoDatabase.generateUid(),
+    val id: Int,
 ) {
 
     companion object {
@@ -73,12 +73,9 @@ data class NoteFolder(
 data class Note(
     val relativePath: String,
     val content: String,
-    val lastModifiedTimeMillis: Long = Instant.now().toEpochMilli(),
-    val id: Int = RepoDatabase.generateUid()
+    val lastModifiedTimeMillis: Long,
+    val id: Int
 ) : Parcelable, Serializable {
-
-//    override fun toString(): String =
-//        "Note(relativePath=$relativePath, id=$id, content=$content)"
 
     companion object {
         fun new(
