@@ -129,12 +129,11 @@ open class TextVM() : ViewModel() {
     // todo: report this to google
     open fun onValueChange(v: TextFieldValue) {
 
-        // don't bloat history with different selection
-        if (content.value.text == v.text) {
+        if (history.size == 1 && content.value.text == v.text) {
             _content.value = v.copy()
+            history[0] = v.copy()
             return
         }
-
         _content.value = v.copy()
 
         val historyManager = historyManager.value
