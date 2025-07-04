@@ -16,8 +16,8 @@ import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.screen.app.edit.EditScreen
 import io.github.wiiznokes.gitnote.ui.screen.app.grid.GridScreen
 import io.github.wiiznokes.gitnote.ui.screen.settings.SettingsNav
-import io.github.wiiznokes.gitnote.ui.util.crossFade
-import io.github.wiiznokes.gitnote.ui.util.slide
+import io.github.wiiznokes.gitnote.ui.utils.crossFade
+import io.github.wiiznokes.gitnote.ui.utils.slide
 
 
 private const val TAG = "AppScreen"

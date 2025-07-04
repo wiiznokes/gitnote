@@ -18,8 +18,8 @@ import io.github.wiiznokes.gitnote.ui.model.SortOrder.Descending
 import io.github.wiiznokes.gitnote.ui.model.SortType.AlphaNumeric
 import io.github.wiiznokes.gitnote.ui.model.SortType.Modification
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
-import io.github.wiiznokes.gitnote.ui.util.fuzzySort
-import io.github.wiiznokes.gitnote.ui.util.mapAndCombine
+import io.github.wiiznokes.gitnote.ui.utils.fuzzySort
+import io.github.wiiznokes.gitnote.utils.mapAndCombine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

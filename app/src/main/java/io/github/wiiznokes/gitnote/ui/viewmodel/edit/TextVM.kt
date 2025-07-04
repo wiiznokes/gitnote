@@ -21,6 +21,7 @@ import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+import io.github.wiiznokes.gitnote.utils.endsWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -164,28 +165,33 @@ open class TextVM() : ViewModel() {
             if (firstPass) {
                 if ((v2.v.selection.start - v1.v.selection.start).absoluteValue > 1
                     || (v2.v.selection.end - v1.v.selection.end).absoluteValue > 1
-                )
+                ) {
                     return IsSimilarResult.FlagDoNotRemove
+                }
 
-
-                if (v2.v.text.endsWith(".")) {
+                if (v2.v.text.endsWith(".", startIndex = v2.v.selection.max)) {
                     return IsSimilarResult.No
                 }
 
-                if (!v2.v.text.endsWith(". ") && v2.v.text.endsWith(" ")) {
+                if (!v2.v.text.endsWith(
+                        ". ",
+                        startIndex = v2.v.selection.max
+                    ) && v2.v.text.endsWith(" ", startIndex = v2.v.selection.max)
+                ) {
                     return IsSimilarResult.No
                 }
 
-                if (v2.v.text.endsWith("-")) {
+                if (v2.v.text.endsWith("-", startIndex = v2.v.selection.max)) {
                     return IsSimilarResult.No
                 }
             }
 
-            if (v2.v.text.endsWith("\n")) {
+            if (v2.v.text.endsWith("\n", startIndex = v2.v.selection.max)) {
                 return IsSimilarResult.No
             }
-            if ((v2.v.text.length - v1.v.text.length).absoluteValue >= 10)
+            if ((v2.v.text.length - v1.v.text.length).absoluteValue >= 10) {
                 return IsSimilarResult.No
+            }
 
             return IsSimilarResult.Yes
         }

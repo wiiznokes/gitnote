@@ -35,7 +35,7 @@ import io.github.wiiznokes.gitnote.ui.component.NextButton
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
-import io.github.wiiznokes.gitnote.util.contains
+import io.github.wiiznokes.gitnote.utils.contains
 
 
 sealed class Selected {

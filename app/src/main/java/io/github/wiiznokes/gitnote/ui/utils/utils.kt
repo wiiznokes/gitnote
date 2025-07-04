@@ -1,4 +1,4 @@
-package io.github.wiiznokes.gitnote.ui.util
+package io.github.wiiznokes.gitnote.ui.utils
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -8,8 +8,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.transform
 
 @Composable
 fun Modifier.conditional(
@@ -35,13 +33,3 @@ fun slide(backWard: Boolean = false) = slideInHorizontally(
     }
 )
 
-/**
- * This is similar to the map function, but the flow that was
- * mapped is also included in the result:
- *  flow1.mapAndCombine(f(flow1) -> flow3)
- *  will return: flow(1, 3)
- */
-inline fun <T, R> Flow<T>.mapAndCombine(crossinline transform: suspend (value: T) -> R): Flow<Pair<T, R>> =
-    transform { value ->
-        return@transform emit(Pair(value, transform(value)))
-    }
