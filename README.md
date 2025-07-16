@@ -4,12 +4,12 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/logo_wide_dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/logo_wide_light.svg">
-  <img alt="GitNote" height="128" src="assets/logo_wide_light.svg">
+  <img alt="GitNote" width="50%" src="assets/logo_wide_light.svg">
 </picture>
 </h1>
 
-[![f-droid page](https://f-droid.org/badge/get-it-on.svg)](https://f-droid.org/en/packages/io.github.wiiznokes.gitnote)
-[![IzzyOnDroid page](https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png)](https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote)
+<a href="https://f-droid.org/en/packages/io.github.wiiznokes.gitnote/"><img src="https://f-droid.org/badge/get-it-on.svg" alt="F-Droid Badge" height="50"></a>
+<a href="https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote"><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid Badge" height="50"></a>
 
 </div>
 
