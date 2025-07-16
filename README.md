@@ -1,12 +1,17 @@
-<p align="left">
-  <img align="left" src="assets/app_icon.svg" alt="app icon" width="90px" />
-  <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
-</p>
+<div align="center">
+
+<h1>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo_wide_dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/logo_wide_light.svg">
+  <img alt="GitNote" width="50%" src="assets/logo_wide_light.svg">
+</picture>
+</h1>
 
 <a href="https://f-droid.org/en/packages/io.github.wiiznokes.gitnote/"><img src="https://f-droid.org/badge/get-it-on.svg" alt="F-Droid Badge" height="50"></a>
 <a href="https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote"><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid Badge" height="50"></a>
 
-<br/>
+</div>
 
 _Supported Android versions: 11 to 15_
 
