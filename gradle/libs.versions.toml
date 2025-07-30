@@ -4,7 +4,7 @@ kotlin = "2.2.0"
 
 # https://github.com/google/ksp/releases
 # sync with the kotlin version
-ksp = "2.1.21-2.0.1"
+ksp = "2.2.0-2.0.2"
 
 ktx-lifecycle = "2.9.2"
 room = "2.7.2"
