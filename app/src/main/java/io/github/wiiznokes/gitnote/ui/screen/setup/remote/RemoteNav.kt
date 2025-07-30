@@ -51,7 +51,7 @@ fun RemoteScreen(
         when (remoteDestination) {
             is SelectProvider -> SelectProviderScreen(
                 onBackClick = onBackClick,
-                vm = vm,
+                setProvider = { vm.setProvider(it) },
                 onProviderSelected = {
                     if (vm.provider != null) {
                         navController.navigate(SelectSetupAutomatically)
