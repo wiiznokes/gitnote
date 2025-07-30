@@ -13,7 +13,7 @@
 
 </div>
 
-_Supported Android versions: 11 to 15_
+_Supported Android versions: 11 to 16_
 
 Android note app which integrate Git. You can use this app with other desktop editors.
 

@@ -61,7 +61,7 @@ class AppPreferences(
     val username = stringPreference("username", "")
 
     suspend fun usernameOrDefault(): String =
-        username.get().let { if (it.isNotEmpty()) it else DEFAULT_USERNAME }
+        username.get().let { it.ifEmpty { DEFAULT_USERNAME } }
 
     val userPassUsername = stringPreference("userPassUsername", "")
     val userPassPassword = stringPreference("userPassPassword", "")
