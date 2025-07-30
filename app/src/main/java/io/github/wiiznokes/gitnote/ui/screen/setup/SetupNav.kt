@@ -12,8 +12,8 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
-import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
+import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.setup.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.utils.crossFade
@@ -38,7 +38,7 @@ fun SetupNav(
             )
         },
 
-    )
+        )
 
     val navController =
         rememberNavController(startDestination = startDestination)
@@ -53,13 +53,15 @@ fun SetupNav(
         when (setupDestination) {
 
             SetupDestination.Main -> NewRepoMethodScreen(
-                vm = vm,
-                navController = navController,
+                createLocalRepo = vm::createLocalRepo,
+                openRepo = vm::openRepo,
+                makeToast = vm.uiHelper::makeToast,
+                repoPath = vm.prefs.repoPathSafely(),
+                navigate = navController::navigate,
                 onSetupSuccess = onSetupSuccess,
             )
 
             is SetupDestination.FileExplorer -> {
-
 
                 FileExplorerScreen(
                     path = setupDestination.path?.let {
@@ -80,7 +82,11 @@ fun SetupNav(
                         val storageConfig = StorageConfiguration.Device(path)
 
                         when (setupDestination.newRepoMethod) {
-                            NewRepoMethod.Create -> vm.createLocalRepo(storageConfig, onSetupSuccess)
+                            NewRepoMethod.Create -> vm.createLocalRepo(
+                                storageConfig,
+                                onSetupSuccess
+                            )
+
                             NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
                             NewRepoMethod.Clone -> {
                                 vm.checkPathForClone(storageConfig.repoPath()).onSuccess {
