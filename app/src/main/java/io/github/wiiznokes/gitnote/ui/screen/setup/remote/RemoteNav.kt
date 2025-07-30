@@ -102,9 +102,12 @@ fun RemoteScreen(
 
             is PickRepo -> PickRepoScreen(
                 onBackClick = { navController.pop() },
-                onSuccess = onInitSuccess,
+                authStep2State = vm.initState.collectAsState().value,
                 vm = vm,
+                userInfo = vm.userInfo,
+                repos = vm.repos,
                 storageConfig = storageConfig,
+                onSuccess = onInitSuccess,
             )
 
             is SelectGenerateNewKeys -> SelectGenerateNewKeysScreen(
