@@ -20,19 +20,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.olshevski.navigation.reimagined.NavController
-import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
+import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 import kotlinx.coroutines.launch
-
 
 
 private const val TAG = "NewRepoMethodScreen"
@@ -40,8 +37,11 @@ private const val TAG = "NewRepoMethodScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewRepoMethodScreen(
-    vm: SetupViewModel,
-    navController: NavController<SetupDestination>,
+    createLocalRepo: (StorageConfiguration, () -> Unit) -> Unit,
+    openRepo: (StorageConfiguration, () -> Unit) -> Unit,
+    makeToast: (String) -> Unit,
+    repoPath: String,
+    navigate: (SetupDestination) -> Unit,
     onSetupSuccess: () -> Unit
 ) {
 
@@ -59,15 +59,15 @@ fun NewRepoMethodScreen(
     val permissionLauncher = rememberLauncherForActivityResult(contract = contract) {
         if (it) {
             val newRepoMethod = newRepoMethod.value!!
-            navController.navigate(
+            navigate(
                 SetupDestination.FileExplorer(
                     title = newRepoMethod.getExplorerTitle(),
-                    path = vm.prefs.repoPathSafely(),
+                    path = repoPath,
                     newRepoMethod = newRepoMethod,
                 )
             )
         } else {
-            vm.uiHelper.makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
+            makeToast(MyApp.appModule.context.getString(R.string.error_need_storage_permission))
         }
     }
 
@@ -97,10 +97,10 @@ fun NewRepoMethodScreen(
                 if (!StoragePermissionHelper.isPermissionGranted()) {
                     permissionLauncher.launch(permissionName)
                 } else {
-                    navController.navigate(
+                    navigate(
                         SetupDestination.FileExplorer(
                             title = newRepoMethod.getExplorerTitle(),
-                            path = vm.prefs.repoPathSafely(),
+                            path = repoPath,
                             newRepoMethod = newRepoMethod,
                         )
                     )
@@ -155,9 +155,9 @@ fun NewRepoMethodScreen(
 
                     val storageConfig = StorageConfiguration.App
                     when (newRepoMethod.value!!) {
-                        NewRepoMethod.Create -> vm.createLocalRepo(storageConfig, onSetupSuccess)
-                        NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
-                        NewRepoMethod.Clone -> navController.navigate(SetupDestination.Remote(storageConfig))
+                        NewRepoMethod.Create -> createLocalRepo(storageConfig, onSetupSuccess)
+                        NewRepoMethod.Open -> openRepo(storageConfig, onSetupSuccess)
+                        NewRepoMethod.Clone -> navigate(SetupDestination.Remote(storageConfig))
                     }
                 }
             ) {
@@ -182,10 +182,10 @@ fun NewRepoMethodScreen(
                             permissionLauncher.launch(permissionName)
                         } else {
                             val newRepoMethod = newRepoMethod.value!!
-                            navController.navigate(
+                            navigate(
                                 SetupDestination.FileExplorer(
                                     title = newRepoMethod.getExplorerTitle(),
-                                    path = vm.prefs.repoPathSafely(),
+                                    path = repoPath,
                                     newRepoMethod = newRepoMethod,
                                 )
                             )
@@ -207,4 +207,18 @@ fun NewRepoMethodScreen(
         }
 
     }
+}
+
+@Preview
+@Composable
+private fun NewRepoMethodScreenPreview() {
+
+    NewRepoMethodScreen(
+        createLocalRepo = { _, _ -> },
+        openRepo = { _, _ -> },
+        makeToast = {},
+        repoPath = "test",
+        navigate = {},
+        onSetupSuccess = {}
+    )
 }
