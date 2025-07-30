@@ -79,7 +79,7 @@ fun RemoteScreen(
                 if (vm.provider != null) {
                     EnterUrlWithProviderScreen(
                         onBackClick = { navController.pop() },
-                        vm = vm,
+                        provider = vm.provider!!,
                         onUrl = { url ->
                             navController.navigate(
                                 SelectGenerateNewKeys(url = url)
