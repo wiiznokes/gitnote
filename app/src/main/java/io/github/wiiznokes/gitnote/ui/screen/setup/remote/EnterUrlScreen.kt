@@ -15,13 +15,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.provider.GithubProvider
+import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.NextButton
 import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
-import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
 private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
 
@@ -31,12 +33,10 @@ private fun isUrlCorrect(url: String): Boolean {
 
 @Composable
 fun EnterUrlWithProviderScreen(
-    vm: SetupViewModel,
     onBackClick: () -> Unit,
+    provider: Provider,
     onUrl: (String) -> Unit,
 ) {
-
-    val provider = vm.provider!!
 
     AppPage(
         title = "Url",
@@ -135,5 +135,16 @@ private fun UrlTextField(url: MutableState<TextFieldValue>) {
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Uri
         )
+    )
+}
+
+@Preview
+@Composable
+private fun EnterUrlWithProviderScreenPreview() {
+
+    EnterUrlWithProviderScreen(
+        onBackClick = {},
+        provider = GithubProvider(),
+        onUrl = {}
     )
 }
