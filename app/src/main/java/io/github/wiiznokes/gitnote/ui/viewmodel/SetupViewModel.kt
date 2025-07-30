@@ -34,31 +34,29 @@ private const val TAG = "SetupViewModel"
 
 interface SetupViewModelI {
 
-    fun launch(f: suspend () -> Unit)
+    fun launch(f: suspend () -> Unit) {}
 
     fun cloneRepo(
         storageConfig: StorageConfiguration,
         remoteUrl: String,
         cred: Cred? = null,
         onSuccess: () -> Unit
-    )
-}
+    ) {}
 
-class SetupViewModelMock: SetupViewModelI {
-    override fun launch(f: suspend () -> Unit) {
-
-    }
-
-    override fun cloneRepo(
+    fun createRepoAutomatic(
+        repoName: String,
         storageConfig: StorageConfiguration,
-        remoteUrl: String,
-        cred: Cred?,
         onSuccess: () -> Unit
-    ) {
+    ) {}
 
-    }
-
+    fun cloneRepoAutomatic(
+        repoName: String,
+        storageConfig: StorageConfiguration,
+        onSuccess: () -> Unit
+    ) {}
 }
+
+class SetupViewModelMock: SetupViewModelI
 
 class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewModelI {
 
@@ -252,7 +250,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         }
     }
 
-    fun cloneRepoAutomatic(
+    override fun cloneRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
@@ -288,7 +286,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         }
     }
 
-    fun createRepoAutomatic(
+    override fun createRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
