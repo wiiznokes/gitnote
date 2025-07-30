@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,18 +23,20 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SetupPage(
     title: String? = null,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     content: @Composable ColumnScope.() -> Unit
 ) {
 
     Column(
         modifier = Modifier
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 10.dp),
+        horizontalAlignment = horizontalAlignment,
     ) {
         if (title != null) {
             SetupTitle(
                 title = title
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(20.dp))
         }
         content()
     }
@@ -48,7 +51,7 @@ fun SetupLine(
 
     Column(
         modifier = Modifier
-            .padding(vertical = 5.dp)
+            .padding(bottom = 18.dp)
     ) {
         Text(text = text)
         content()
@@ -63,8 +66,8 @@ private fun SetupTitle(
         modifier = Modifier
             ,
         text = title,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = 17.sp,
+        fontWeight = FontWeight.SemiBold
     )
 }
 

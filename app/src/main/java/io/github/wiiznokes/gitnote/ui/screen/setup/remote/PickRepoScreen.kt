@@ -26,10 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.provider.RepoInfo
 import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.component.AppPage
@@ -60,7 +62,7 @@ fun PickRepoScreen(
 ) {
 
     AppPage(
-        title = "Select or Create a Repository",
+        title = stringResource(R.string.select_or_create_repo),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
         onBackClick = onBackClick,
@@ -107,10 +109,10 @@ fun PickRepoScreen(
                     name.value = it
                 },
                 placeholder = {
-                    Text(text = "Search or Create a Repo")
+                    Text(text = stringResource(R.string.search_or_create_a_repo))
                 },
                 label = {
-                    Text(text = "Name")
+                    Text(text = stringResource(R.string.name))
                 },
                 singleLine = true,
             )
@@ -153,12 +155,13 @@ fun PickRepoScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = Icons.Default.Add,
-                                    contentDescription = "Create new repo",
+                                    contentDescription = "Create new repository",
                                     tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
+                                val repoName = "${userInfo.username}/$nameText"
                                 Text(
-                                    text = "Create private repo ${userInfo.username}/$nameText",
+                                    text = stringResource(R.string.create_private_repo, repoName),
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
                             }
@@ -205,7 +208,7 @@ fun PickRepoScreen(
 
             NextButton(
                 text = if (!authStep2State.isLoading()) {
-                    "Next"
+                    stringResource(R.string.next)
                 } else {
                     authStep2State.message()
                 },

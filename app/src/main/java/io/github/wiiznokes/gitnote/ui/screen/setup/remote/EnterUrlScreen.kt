@@ -39,22 +39,21 @@ fun EnterUrlWithProviderScreen(
 ) {
 
     AppPage(
-        title = "Url",
+        title = stringResource(R.string.clone_url),
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
     ) {
 
         SetupPage {
             SetupLine(
-                text = "1. Go to the website, create a repo and copy its git clone URL. Choose the SSH method"
+                text = stringResource(R.string.url_explain_create_remote_repo)
             ) {
                 val uriHandler = LocalUriHandler.current
 
                 SetupButton(
-                    text = "Create repo",
+                    text = "1. " + stringResource(R.string.open_link_create_repo),
                     onClick = { uriHandler.openUri(provider.createRepoLink) },
                     link = true
-
                 )
             }
 
@@ -63,13 +62,13 @@ fun EnterUrlWithProviderScreen(
             }
 
             SetupLine(
-                text = "2. Enter the Git clone URL"
+                text = "2. " + stringResource(R.string.url_explain_enter_url)
             ) {
                 UrlTextField(url = url)
             }
 
             NextButton(
-                text = "Next",
+                text = stringResource(R.string.next),
                 onClick = {
                     onUrl(url.value.text)
                 },
@@ -86,7 +85,7 @@ fun EnterUrlScreen(
     onUrl: (String) -> Unit
 ) {
     AppPage(
-        title = "Url",
+        title = "URL",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
@@ -98,13 +97,13 @@ fun EnterUrlScreen(
             }
 
             SetupLine(
-                text = "1. Enter the Git clone URL"
+                text = "1. " + stringResource(R.string.url_explain_enter_url)
             ) {
                 UrlTextField(url = url)
             }
 
             NextButton(
-                text = "Next",
+                text = stringResource(R.string.next),
                 onClick = {
                     onUrl(url.value.text)
                 },
@@ -145,6 +144,16 @@ private fun EnterUrlWithProviderScreenPreview() {
     EnterUrlWithProviderScreen(
         onBackClick = {},
         provider = GithubProvider(),
+        onUrl = {}
+    )
+}
+
+@Preview
+@Composable
+private fun EnterUrlScreenPreview() {
+
+    EnterUrlScreen(
+        onBackClick = {},
         onUrl = {}
     )
 }

@@ -84,7 +84,7 @@ fun NewRepoMethodScreen(
             }
         ) {
             Text(
-                text = stringResource(R.string.create_repo)
+                text = stringResource(R.string.create_local_repo)
             )
         }
 
@@ -120,7 +120,7 @@ fun NewRepoMethodScreen(
             }
         ) {
             Text(
-                text = stringResource(R.string.clone_repo)
+                text = stringResource(R.string.clone_remote_repo)
             )
         }
     }

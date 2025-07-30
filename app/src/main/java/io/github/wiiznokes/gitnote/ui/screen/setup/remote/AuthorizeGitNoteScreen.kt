@@ -9,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthState
@@ -26,7 +28,7 @@ fun AuthorizeGitNoteScreen(
 ) {
 
     AppPage(
-        title = "Authorize Gitnote",
+        title = stringResource(R.string.authorize_gitnote),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
@@ -50,7 +52,7 @@ fun AuthorizeGitNoteScreen(
             enabled = authState.isClickable() && authState != AuthState.Success
         ) {
              if (!authState.isLoading()) {
-                Text(text = "Authorize Gitnote")
+                Text(text = stringResource(R.string.authorize_gitnote))
             } else {
                 Text(text = authState.message())
             }

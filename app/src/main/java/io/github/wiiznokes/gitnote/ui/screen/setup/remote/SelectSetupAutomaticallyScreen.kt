@@ -5,8 +5,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.SetupPage
 
 @Composable
 fun SelectSetupAutomaticallyScreen(
@@ -16,26 +19,32 @@ fun SelectSetupAutomaticallyScreen(
 
     ) {
     AppPage(
-        title = "How do you want to do this?",
+        title = stringResource(R.string.setup_selection),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
     ) {
 
-        Button(
-            onClick = {
-                onAutomatically()
-            }
+        SetupPage(
+            stringResource(R.string.how_do_you_want_to_do_this),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Setup Automatically")
-        }
 
-        Button(
-            onClick = {
-                onManually()
+            Button(
+                onClick = {
+                    onAutomatically()
+                }
+            ) {
+                Text(text = stringResource(R.string.setup_automatically))
             }
-        ) {
-            Text(text = "Let me do it manually")
+
+            Button(
+                onClick = {
+                    onManually()
+                }
+            ) {
+                Text(text = stringResource(R.string.setup_manually))
+            }
         }
     }
 }

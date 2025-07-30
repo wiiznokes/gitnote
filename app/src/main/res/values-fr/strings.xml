@@ -77,9 +77,9 @@
     <string name="grid">Grille</string>
     <string name="about">À propos</string>
     <string name="app_page_choose_method">Choisir la méthode</string>
-    <string name="create_repo">Créer un dépôt local</string>
+    <string name="create_local_repo">Créer un dépôt local</string>
     <string name="open_repo">Ouvrir un dépôt local</string>
-    <string name="clone_repo">Cloner un dépôt distant</string>
+    <string name="clone_remote_repo">Cloner un dépôt distant</string>
     <string name="use_app_storage">Utiliser la mémoire de l\'app</string>
     <string name="error_need_storage_permission">L\'application a besoin de cette permission pour accéder au stockage</string>
     <string name="use_device_storage">Utiliser la mémoire de l\'appareil</string>
@@ -125,4 +125,34 @@
 
     <string name="read_only_mode_activate">Activer la lecture seule</string>
     <string name="read_only_mode_deactive">Desactiver la lecture seule</string>
+    <string name="authorize_gitnote">Autoriser Gitnote</string>
+    <string name="clone_url">Clone URL</string>
+    <string name="url_explain_create_remote_repo">"Allez sur la page Web, créez un référentiel et copiez son URL. Choisissez celui avec SSH "</string>
+    <string name="url_explain_enter_url">Entrez l\'URL de clonage</string>
+    <string name="open_link_create_repo">Créer le référentiel</string>
+    <string name="next">Suivant</string>
+    <string name="ssh_keys_title">Clés SSH</string>
+    <string name="ssh_keys_setup_title">Pour accéder au référentiel, la clé publique doit être copiée comme une clé de déploiment</string>
+    <string name="copy_the_key">Copier la clé</string>
+    <string name="copy_key">Copier la clé</string>
+    <string name="regenerate_key">Régénérer la clé</string>
+    <string name="paste_deploy_key">Ouvrez la page web et collez la clé de déploiement. Assurez-vous qu\'elle dispose d\'un accès en écriture.</string>
+    <string name="open_deploy_key_webpage">Ouvrir la page Web de la clé de déploiement</string>
+    <string name="paste_deploy_key_no_provider">Ajoutez la clé publique au fournisseur git</string>
+    <string name="try_cloning">Essayez de cloner…</string>
+    <string name="clone_repo">Cloner le référentiel</string>
+    <string name="select_or_create_repo">Sélectionner ou créer un référentiel</string>
+    <string name="search_or_create_a_repo">Rechercher ou créer un référentiel</string>
+    <string name="name">Nom</string>
+    <string name="create_private_repo">Créer un dépôt privé %1$s</string>
+    <string name="we_need_ssh_keys_to_authenticate">Besoin de clés SSH pour s\'authentifier</string>
+    <string name="generate_new_keys">Générer de nouvelles clés</string>
+    <string name="git_hosting_provider">Fournisseur d\'hébergement Git</string>
+    <string name="select_a_git_hosting_provider">Sélectionnez un fournisseur d\'hébergement Git</string>
+    <string name="setup_selection">Sélection de la configuration</string>
+    <string name="how_do_you_want_to_do_this">Comment voulez-vous faire ça ?</string>
+    <string name="setup_automatically">Configuration automatique</string>
+    <string name="setup_manually">Laisse-moi le faire manuellement</string>
+    <string name="loading">Chargement…</string>
+    <string name="logs">Journaux</string>
 </resources>

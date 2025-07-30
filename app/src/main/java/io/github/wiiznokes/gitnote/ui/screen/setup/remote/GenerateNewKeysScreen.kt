@@ -20,8 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
@@ -55,7 +57,7 @@ fun GenerateNewKeysScreen(
 ) {
 
     AppPage(
-        title = "SSH keys",
+        title = stringResource(R.string.ssh_keys_title),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
@@ -73,11 +75,11 @@ fun GenerateNewKeysScreen(
         }
 
         SetupPage(
-            title = "In order to access this repository, this public key must be copied as a deploy key"
+            title = stringResource(R.string.ssh_keys_setup_title)
         ) {
 
             SetupLine(
-                text = "1. Copy the key"
+                text = "1. " + stringResource(R.string.copy_the_key)
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -98,7 +100,7 @@ fun GenerateNewKeysScreen(
                 val clipboardManager = LocalClipboard.current
 
                 SetupButton(
-                    text = "Copy Key",
+                    text = stringResource(R.string.copy_key),
                     onClick = {
                         val data = ClipData(
                             ClipDescription(
@@ -115,7 +117,7 @@ fun GenerateNewKeysScreen(
                 )
 
                 SetupButton(
-                    text = "Regenerate Key",
+                    text = stringResource(R.string.regenerate_key),
                     onClick = {
                         val (public, private) = generateSshKeys()
                         publicKey.value = public
@@ -128,12 +130,12 @@ fun GenerateNewKeysScreen(
 
             if (provider != null) {
                 SetupLine(
-                    text = "2. Open webpage, and paste the deploy key. Make sure it is given Write Access."
+                    text = "2. " + stringResource(R.string.paste_deploy_key)
                 ) {
                     val uriHandler = LocalUriHandler.current
 
                     SetupButton(
-                        text = "Open deploy key webpage",
+                        text = stringResource(R.string.open_deploy_key_webpage),
                         onClick = {
                             val fullRepoName = extractUserRepo(url)
                             if (fullRepoName == null) {
@@ -147,7 +149,7 @@ fun GenerateNewKeysScreen(
                 }
             } else {
                 SetupLine(
-                    text = "2. Add the public key to the git provider."
+                    text = "2. " + stringResource(R.string.paste_deploy_key_no_provider)
                 ) {
 
                 }
@@ -155,19 +157,18 @@ fun GenerateNewKeysScreen(
 
 
             SetupLine(
-                text = "3. Try Cloning..."
+                text = "3. " + stringResource(R.string.try_cloning)
             ) {
 
                 SetupButton(
                     text = if (cloneState.isLoading()) {
                         cloneState.message()
-                    } else "Clone Repo",
+                    } else stringResource(R.string.clone_repo),
                     onClick = {
                         vm.cloneRepo(
                             storageConfig = storageConfig,
                             remoteUrl = url,
                             cred = Cred.Ssh(
-                                username = "git",
                                 publicKey = publicKey.value,
                                 privateKey = privateKey.value,
                             ),
@@ -191,7 +192,7 @@ private fun GenerateNewKeysScreenPreview() {
         storageConfig = StorageConfiguration.App,
         url = "url",
         vm = SetupViewModelMock(),
-        generateSshKeys = { "" to "" },
+        generateSshKeys = { "aaaaaaaaaaaabbbbbbbbbbbbb" to "aaaaaaaaaaaabbbbbbbbbbbbb" },
         onSuccess = {}
     )
 
