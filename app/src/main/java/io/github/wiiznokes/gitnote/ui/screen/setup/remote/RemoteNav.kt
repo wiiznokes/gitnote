@@ -12,6 +12,7 @@ import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.AuthorizeGitNote
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.EnterUrl
@@ -119,10 +120,13 @@ fun RemoteScreen(
 
             is GenerateNewKeys -> GenerateNewKeysScreen(
                 onBackClick = { navController.pop() },
-                onSuccess = onInitSuccess,
-                vm = vm,
-                url = remoteDestination.url,
+                cloneState = vm.initState.collectAsState().value,
+                provider = vm.provider,
                 storageConfig = storageConfig,
+                url = remoteDestination.url,
+                vm = vm,
+                generateSshKeys = ::generateSshKeysLib,
+                onSuccess = onInitSuccess,
             )
         }
     }

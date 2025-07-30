@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
@@ -31,7 +32,35 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "SetupViewModel"
 
-class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
+interface SetupViewModelI {
+
+    fun launch(f: suspend () -> Unit)
+
+    fun cloneRepo(
+        storageConfig: StorageConfiguration,
+        remoteUrl: String,
+        cred: Cred? = null,
+        onSuccess: () -> Unit
+    )
+}
+
+class SetupViewModelMock: SetupViewModelI {
+    override fun launch(f: suspend () -> Unit) {
+
+    }
+
+    override fun cloneRepo(
+        storageConfig: StorageConfiguration,
+        remoteUrl: String,
+        cred: Cred?,
+        onSuccess: () -> Unit
+    ) {
+
+    }
+
+}
+
+class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewModelI {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val gitManager = MyApp.appModule.gitManager
@@ -109,7 +138,6 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
             gitManager.openRepo(storageConfig.repoPath()).onFailure {
                 uiHelper.makeToast(it.message)
                 return@launch
-                prefs.initRepo(storageConfig)
             }
 
             prefs.initRepo(storageConfig)
@@ -131,11 +159,14 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel() {
         return result
     }
 
+    override fun launch(f: suspend () -> Unit) {
+        viewModelScope.launch { f() }
+    }
 
-    fun cloneRepo(
+    override fun cloneRepo(
         storageConfig: StorageConfiguration,
         remoteUrl: String,
-        cred: Cred? = null,
+        cred: Cred?,
         onSuccess: () -> Unit
     ) {
 

@@ -13,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -21,17 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
-import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
+import io.github.wiiznokes.gitnote.provider.GithubProvider
+import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
-import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
-import kotlinx.coroutines.launch
+import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModelI
+import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModelMock
 
 private const val TAG = "GenerateNewKeysWithProviderScreen"
 
@@ -44,16 +45,14 @@ private fun extractUserRepo(url: String): String? {
 @Composable
 fun GenerateNewKeysScreen(
     onBackClick: () -> Unit,
-    vm: SetupViewModel,
+    cloneState: InitState,
+    provider: Provider?,
     storageConfig: StorageConfiguration,
     url: String,
-    onSuccess: () -> Unit
+    vm: SetupViewModelI,
+    generateSshKeys: () -> Pair<String, String>,
+    onSuccess: () -> Unit,
 ) {
-
-
-    val cloneState = vm.initState.collectAsState().value
-
-    val provider = vm.provider
 
     AppPage(
         title = "SSH keys",
@@ -64,10 +63,10 @@ fun GenerateNewKeysScreen(
     ) {
 
         val publicKey = rememberSaveable { mutableStateOf("") }
-        var privateKey = rememberSaveable { mutableStateOf("") }
+        val privateKey = rememberSaveable { mutableStateOf("") }
 
         LaunchedEffect(true) {
-            val (public, private) = generateSshKeysLib()
+            val (public, private) = generateSshKeys()
             Log.d(TAG, public)
             publicKey.value = public
             privateKey.value = private
@@ -109,7 +108,7 @@ fun GenerateNewKeysScreen(
                             ClipData.Item(publicKey.value)
                         )
 
-                        vm.viewModelScope.launch {
+                        vm.launch {
                             clipboardManager.setClipEntry(ClipEntry(data))
                         }
                     }
@@ -118,7 +117,7 @@ fun GenerateNewKeysScreen(
                 SetupButton(
                     text = "Regenerate Key",
                     onClick = {
-                        val (public, private) = generateSshKeysLib()
+                        val (public, private) = generateSshKeys()
                         publicKey.value = public
                         privateKey.value = private
                     }
@@ -180,4 +179,20 @@ fun GenerateNewKeysScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun GenerateNewKeysScreenPreview() {
+    GenerateNewKeysScreen(
+        onBackClick = {},
+        cloneState = InitState.CloneState.Idle,
+        provider = GithubProvider(),
+        storageConfig = StorageConfiguration.App,
+        url = "url",
+        vm = SetupViewModelMock(),
+        generateSshKeys = { "" to "" },
+        onSuccess = {}
+    )
+
 }
