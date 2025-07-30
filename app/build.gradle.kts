@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.time.LocalDate
@@ -130,18 +131,18 @@ android {
             applicationIdSuffix = ".debug"
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 
     ksp {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
+    kotlin {
+        compilerOptions {
+            // set the target JVM bytecode
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
+
     buildFeatures {
         buildConfig = true
         compose = true
@@ -155,6 +156,7 @@ android {
 }
 
 kotlin {
+    // set what version of the jdk will be use to compile the code
     jvmToolchain(21)
 }
 
