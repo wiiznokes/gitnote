@@ -5,15 +5,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
 
 @Composable
 fun SelectProviderScreen(
     onBackClick: () -> Unit,
-    vm: SetupViewModel,
+    setProvider: (ProviderType?) -> Unit,
     onProviderSelected: () -> Unit,
 ) {
 
@@ -27,7 +27,7 @@ fun SelectProviderScreen(
         ProviderType.entries.forEach {
             Button(
                 onClick = {
-                    vm.setProvider(it)
+                    setProvider(it)
                     onProviderSelected()
                 }
             ) {
@@ -37,11 +37,21 @@ fun SelectProviderScreen(
 
         Button(
             onClick = {
-                vm.setProvider(null)
+                setProvider(null)
                 onProviderSelected()
             }
         ) {
             Text(text = "Custom")
         }
     }
+}
+
+@Preview
+@Composable
+private fun SelectProviderScreenPreview() {
+    SelectProviderScreen(
+        onBackClick = {},
+        setProvider = {},
+        onProviderSelected = {}
+    )
 }
