@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -67,9 +68,10 @@ fun RemoteScreen(
 
             is AuthorizeGitNote -> AuthorizeGitNoteScreen(
                 onBackClick = { navController.pop() },
-                vm = vm,
-                onSuccess = { navController.navigate(PickRepo) }
-
+                authState = vm.initState.collectAsState().value,
+                onSuccess = { navController.navigate(PickRepo) },
+                getLaunchOAuthScreenIntent = { vm.getLaunchOAuthScreenIntent() },
+                vmHashCode = vm.hashCode()
             )
 
             is EnterUrl -> {
