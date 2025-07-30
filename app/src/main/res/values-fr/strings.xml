@@ -155,4 +155,5 @@
     <string name="setup_manually">Laisse-moi le faire manuellement</string>
     <string name="loading">Chargement…</string>
     <string name="logs">Journaux</string>
+    <string name="extension">Extension: %1$s</string>
 </resources>

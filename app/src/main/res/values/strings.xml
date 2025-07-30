@@ -145,5 +145,6 @@
     <string name="setup_manually">Let me do it manually</string>
     <string name="loading">Loading…</string>
     <string name="logs">Logs</string>
+    <string name="extension">Extension: %1$s</string>
 
 </resources>

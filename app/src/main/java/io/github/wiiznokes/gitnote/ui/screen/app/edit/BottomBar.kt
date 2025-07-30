@@ -27,11 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
 
 val bottomBarHeight = 50.dp
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +85,11 @@ fun DefaultRow(
 
         if (bottomSheetExpanded.value) {
             ModalBottomSheet(onDismissRequest = { bottomSheetExpanded.value = false }) {
-                Text("Extension: ${vm.previousNote.fileExtension().text}")
+                Text(
+                    modifier = Modifier
+                        .padding(10.dp),
+                    text = stringResource(R.string.extension, vm.previousNote.fileExtension().text)
+                )
             }
         }
 
