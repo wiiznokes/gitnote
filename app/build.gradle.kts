@@ -38,7 +38,7 @@ android {
     ndkVersion = "27.2.12479018"
 
     namespace = "io.github.wiiznokes.gitnote"
-    compileSdk = 35
+    compileSdk = 36
     
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
