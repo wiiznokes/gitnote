@@ -21,7 +21,9 @@ ifeq ($(OS),Windows_NT)
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
 else
-	# export PATH := ${HOME}/Android/Sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
+	ifneq ($(GITHUB_ACTIONS),true)
+		export PATH := ${HOME}/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
+	endif
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
@@ -37,7 +39,13 @@ ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 endif
 
 
+build_install: build cp_to_jni
 
+build_zip: build zip_openssl_build_all
+
+unzip_openssl_prebuild:
+	unzip openssl-prebuild/x86_64/install.zip
+	unzip openssl-prebuild/aarch64/install.zip
 
 build:
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
@@ -47,11 +55,6 @@ else
 	cargo build ${ARGS} --target=x86_64-linux-android
 	cargo build ${ARGS} --target=aarch64-linux-android
 endif
-	make cp_to_jni
-
-unzip:
-	unzip openssl-prebuild/x86_64/install.zip
-	unzip openssl-prebuild/aarch64/install.zip
 
 cp_to_jni:
 	mkdir -p ../jniLibs/x86_64
@@ -59,6 +62,19 @@ cp_to_jni:
 	mkdir -p ../jniLibs/arm64-v8a
 	cp target/aarch64-linux-android/${TARGET_PREFIX}/libgit_wrapper.so ../jniLibs/arm64-v8a/
 
+zip_openssl_build_all:
+	just zip_openssl_build x86_64
+	just zip_openssl_build aarch64
+
+
+fix:
+	cargo clippy --workspace --all-features --fix --allow-dirty --allow-staged
+
+fmt:
+	cargo fmt --all
+
+test:
+	cargo test  -- --ignored --nocapture
 
 clean:
 	cargo clean
