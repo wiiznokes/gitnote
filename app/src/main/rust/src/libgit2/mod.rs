@@ -1,6 +1,5 @@
 use std::{
-    collections::HashMap,
-    sync::{LazyLock, Mutex},
+    collections::HashMap, str::FromStr, sync::{LazyLock, Mutex, OnceLock}
 };
 
 use git2::{
@@ -19,6 +18,39 @@ const REMOTE: &str = "origin";
 const BRANCH: &str = "main";
 
 static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
+
+// https://github.com/libgit2/libgit2/pull/7056
+static HOME_PATH: OnceLock<String> = OnceLock::new();
+
+fn apply_ssh_workaround(clone: bool) {
+    let home = HOME_PATH.get().unwrap();
+
+    if clone {
+        unsafe {
+            std::env::set_var("HOME", home);
+        }
+    } else {
+        let c_path = std::ffi::CString::from_str(home).expect("CString::new failed");
+
+        unsafe {
+            libgit2_sys::git_libgit2_opts(
+                libgit2_sys::GIT_OPT_SET_HOMEDIR as std::ffi::c_int,
+                c_path.as_ptr(),
+            )
+        };
+    }
+
+    if let Err(e) = std::fs::create_dir_all(format!("{home}/.ssh")) {
+        error!("{e}");
+    }
+    if let Err(e) = std::fs::File::create(format!("{home}/.ssh/known_hosts")) {
+        error!("{e}");
+    }
+}
+
+pub fn init_lib(home_path: String) {
+    let _ = HOME_PATH.set(home_path.clone());
+}
 
 pub fn create_repo(repo_path: &str) -> Result<(), Error> {
     let repo = Repository::init(repo_path).map_err(|e| Error::git2(e, "Repository::init"))?;
@@ -55,6 +87,7 @@ pub fn clone_repo(
     cred: Option<Cred>,
     mut cb: ProgressCB,
 ) -> Result<(), Error> {
+    apply_ssh_workaround(true);
     let mut callbacks = RemoteCallbacks::new();
 
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
@@ -134,6 +167,7 @@ pub fn commit_all(username: &str, message: &str) -> Result<(), Error> {
 }
 
 pub fn push(cred: Option<Cred>) -> Result<(), Error> {
+    apply_ssh_workaround(false);
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -163,6 +197,7 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
 }
 
 pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
+    apply_ssh_workaround(false);
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -237,7 +272,7 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
     let mut file_paths = Vec::new();
     tree.walk(TreeWalkMode::PreOrder, |root, entry| {
         if let Some(name) = entry.name() {
-            let full_path = format!("{}{}", root, name);
+            let full_path = format!("{root}{name}");
             if entry.kind() == Some(git2::ObjectType::Blob) {
                 file_paths.push(full_path);
             }

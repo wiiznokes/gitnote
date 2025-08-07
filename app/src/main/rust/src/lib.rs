@@ -1,6 +1,4 @@
 use std::fmt::{Debug, Display};
-use std::str::FromStr;
-use std::sync::OnceLock;
 
 use anyhow::anyhow;
 use jni::JNIEnv;
@@ -61,34 +59,6 @@ impl Display for Error {
     }
 }
 
-// https://github.com/libgit2/libgit2/pull/7056
-static HOME_PATH: OnceLock<String> = OnceLock::new();
-fn apply_ssh_workaround(clone: bool) {
-    let home = HOME_PATH.get().unwrap();
-
-    if clone {
-        unsafe {
-            std::env::set_var("HOME", home);
-        }
-    } else {
-        let c_path = std::ffi::CString::from_str(home).expect("CString::new failed");
-
-        unsafe {
-            libgit2_sys::git_libgit2_opts(
-                libgit2_sys::GIT_OPT_SET_HOMEDIR as std::ffi::c_int,
-                c_path.as_ptr(),
-            )
-        };
-    }
-
-    if let Err(e) = std::fs::create_dir_all(format!("{home}/.ssh")) {
-        error!("{e}");
-    }
-    if let Err(e) = std::fs::File::create(format!("{home}/.ssh/known_hosts")) {
-        error!("{e}");
-    }
-}
-
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<'local>(
     mut env: JNIEnv<'local>,
@@ -100,7 +70,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<
         .expect("Couldn't get java string!")
         .into();
 
-    HOME_PATH.set(home_path.clone()).unwrap();
+    libgit2::init_lib(home_path);
 
     install_panic_hook();
 
@@ -283,7 +253,6 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
     cred: JString<'local>,
     progress_callback: JObject<'local>,
 ) -> jint {
-    apply_ssh_workaround(true);
     let repo_path: String = env.get_string(&repo_path).unwrap().into();
     let remote_url: String = env.get_string(&remote_url).unwrap().into();
 
@@ -338,7 +307,6 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<
     _class: JClass<'local>,
     cred: JString<'local>,
 ) -> jint {
-    apply_ssh_workaround(false);
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
     unwrap_or_log!(libgit2::push(cred), "push");
     OK
@@ -350,7 +318,6 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     _class: JClass<'local>,
     cred: JString<'local>,
 ) -> jint {
-    apply_ssh_workaround(false);
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
     unwrap_or_log!(libgit2::pull(cred), "pull");
     OK

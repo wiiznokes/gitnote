@@ -20,6 +20,6 @@ fn gen_keys() {
     let public_ssh = public_key.to_openssh().unwrap();
     let private_key = private_key.to_openssh(ssh_key::LineEnding::LF).unwrap();
 
-    println!("Public Key: {}", public_ssh);
+    println!("Public Key: {public_ssh}");
     println!("Secret Key: {}", private_key.as_str());
 }
