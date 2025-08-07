@@ -7,12 +7,14 @@ It simpler to build on Linux. You will need need to install
 - [Rust](https://www.rust-lang.org/tools/install)
 - install the necessary targets: `rustup target add x86_64-linux-android aarch64-linux-android`
 - perl
+- make
 
-Then, just open Android studio and execute the task `cargoBuild`. You only need to re-execute it if you modify the rust part. All C libraries are vendored by crates (openssl, libgit2, openssh).
+Go to `app/src/main/rust`, and call `make build_install`.
+Don't forget to set `NDK_PATH` to the bin directory of the current ndk used by the app.
+If you want to make a release build, set `DEBUG` to 0.
+All C libraries are vendored by crates (openssl, libgit2, openssh).
 
 You can now build the project like a regular Android app.
-
-And i think that's it (open an issue if not).
 
 ### Windows
 
@@ -25,7 +27,7 @@ To do that,
 0. Add the ndk bin path to PATH
 1. open a git bash shell
 2. `cd app/src/main/rust`
-3. `make unzip`. This will unzip the openssl pre-build
-4. `make build` (you can add `DEBUG=0` for a release build). This will also copy the build artifacts to the jni folders
+3. `make unzip_openssl_prebuild`
+4. `make build_install` (you can add `DEBUG=0` for a release build). This will also copy the build artifacts to the jni folders
 
 Et voilà!

@@ -59,7 +59,7 @@ jobs:
           echo $KEY_BASE64 | base64 --decode > app/key.jks
           wget "https://dl.google.com/android/repository/android-ndk-r27d-linux.zip" > /dev/null 2>&1
           unzip ./android-ndk-r27d-linux.zip > /dev/null 2>&1
-          export PATH="$(pwd)/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" && make -C app/src/main/rust DEBUG=0 build_install
+          make NDK_PATH="$(pwd)/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
           ./gradlew assembleRelease
 
           mkdir -p packages
