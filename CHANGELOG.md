@@ -5,6 +5,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+
+## [25.08]
+
+### Changed
+
+- new rust backend for libgit2
+- ssh support and strong github integration (list repos, create a new one)
+
+
 ## [24.08]
 
 - delete folder (#42)
