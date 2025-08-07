@@ -35,20 +35,29 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      - name: Install Rust toolchain
+      - name: Read versions from files
+        id: versions
         run: |
-          rustup update
-          rustup target add aarch64-linux-android x86_64-linux-android
+            echo "rust=$(cat app/src/main/rust/RUST_VERSION)" >> $GITHUB_OUTPUT
+            echo "ndk=$(cat app/src/main/rust/RUST_VERSION)" >> $GITHUB_OUTPUT
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.versions.outputs.rust }}
+          targets: aarch64-linux-android, x86_64-linux-android
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "./app/src/main/rust/"
 
-      - name: Build apk
+      - name: Compile Rust lib
         run: |
-          wget "https://dl.google.com/android/repository/android-ndk-r27d-linux.zip" > /dev/null 2>&1
-          unzip ./android-ndk-r27d-linux.zip > /dev/null 2>&1
-          make NDK_PATH="$(pwd)/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+          wget -q "https://dl.google.com/android/repository/android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
+          unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
+          make NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+
+      - name: Build App
+        run: |
           ./gradlew assembleNightly
 
           mkdir -p packages
