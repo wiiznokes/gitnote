@@ -40,16 +40,28 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      - name: Install Rust toolchain
+      - name: Read versions from files
+        id: versions
         run: |
-          rustup update
-          rustup target add aarch64-linux-android x86_64-linux-android
+            echo "rust=$(cat app/src/main/rust/RUST_VERSION)" >> $GITHUB_OUTPUT
+            echo "ndk=$(cat app/src/main/rust/NDK_VERSION)" >> $GITHUB_OUTPUT
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.versions.outputs.rust }}
+          targets: aarch64-linux-android, x86_64-linux-android
 
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "./app/src/main/rust/"
 
-      - name: Retrieve the secret and decode it to a file and Build apk
+      - name: Compile Rust lib
+        run: |
+          wget -q "https://dl.google.com/android/repository/android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
+          unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip" -d /opt
+          make NDK_PATH="/opt/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+
+      - name: Retrieve the secret and decode it to a file and Build App
         env:
           KEY_BASE64: ${{ secrets.KEY_BASE64 }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -57,9 +69,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-          wget "https://dl.google.com/android/repository/android-ndk-r27d-linux.zip" > /dev/null 2>&1
-          unzip ./android-ndk-r27d-linux.zip > /dev/null 2>&1
-          make NDK_PATH="$(pwd)/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+          
           ./gradlew assembleRelease
 
           mkdir -p packages
