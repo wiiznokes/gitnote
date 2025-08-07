@@ -83,8 +83,8 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun GitNoteTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean,
+    dynamicColor: Boolean,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -92,7 +92,6 @@ fun GitNoteTheme(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-                dynamicDarkColorScheme(context)
             } else {
                 if (darkTheme) DarkColors else LightColors
             }

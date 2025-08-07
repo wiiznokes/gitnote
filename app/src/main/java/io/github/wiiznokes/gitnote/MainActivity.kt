@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
 
             GitNoteTheme(
-                darkTheme = theme == Theme.SYSTEM && isSystemInDarkTheme() || theme == Theme.DARK,
+                darkTheme = (theme == Theme.SYSTEM && isSystemInDarkTheme()) || theme == Theme.DARK,
                 dynamicColor = dynamicColor
             ) {
 
