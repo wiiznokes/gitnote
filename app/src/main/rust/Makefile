@@ -1,5 +1,5 @@
 DEBUG ?= 1
-
+NDK_PATH ?= ${HOME}/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin
 
 ifeq ($(DEBUG),0)
 	ARGS := --release
@@ -21,9 +21,7 @@ ifeq ($(OS),Windows_NT)
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
 else
-	ifneq ($(GITHUB_ACTIONS),true)
-		export PATH := ${HOME}/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin:$(PATH)
-	endif
+	export PATH := ${NDK_PATH}:$(PATH)
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
