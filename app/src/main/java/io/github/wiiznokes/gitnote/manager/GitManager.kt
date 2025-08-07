@@ -210,13 +210,17 @@ class GitManager {
     }
 
 
-    suspend fun closeRepo() = safelyAccessLibGit2 {
+    fun closeRepoWithoutLock() {
         if (isRepoInitialized) closeRepoLib()
         isRepoInitialized = false
     }
 
+    suspend fun closeRepo() = safelyAccessLibGit2 {
+        closeRepoWithoutLock()
+    }
+
     suspend fun shutdown() = safelyAccessLibGit2 {
-        closeRepo()
+        closeRepoWithoutLock()
         if (isLibInitialized) freeLib()
         isLibInitialized = false
     }
