@@ -56,10 +56,8 @@ class GitManager {
     private val locker = Mutex()
     private var isRepoInitialized = false
     private var isLibInitialized = false
-    private var job: Deferred<Unit>? = null
 
     private suspend fun <T> safelyAccessLibGit2(f: suspend () -> T): Result<T> = locker.withLock {
-
         try {
             if (!isLibInitialized) {
                 val res = initLib()
@@ -69,18 +67,10 @@ class GitManager {
                 }
                 isLibInitialized = true
             }
-
-            val deferredValue = CompletableDeferred<T>()
-            coroutineScope {
-                job = async { deferredValue.complete(f()) }
-                job?.await()
-                success(deferredValue.await())
-            }
+           success(f())
         } catch (e: Exception) {
             e.printStackTrace()
             failure(e)
-        } finally {
-            job = null
         }
     }
 
@@ -220,14 +210,12 @@ class GitManager {
     }
 
 
-    fun closeRepo() {
-        job?.cancel()
+    suspend fun closeRepo() = safelyAccessLibGit2 {
         if (isRepoInitialized) closeRepoLib()
         isRepoInitialized = false
     }
 
-    fun shutdown() {
-        job?.cancel()
+    suspend fun shutdown() = safelyAccessLibGit2 {
         closeRepo()
         if (isLibInitialized) freeLib()
         isLibInitialized = false
