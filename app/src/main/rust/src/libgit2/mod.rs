@@ -1,5 +1,9 @@
 use std::{
-    collections::HashMap, str::FromStr, sync::{LazyLock, Mutex, OnceLock}
+    collections::HashMap,
+    fs,
+    path::Path,
+    str::FromStr,
+    sync::{LazyLock, Mutex, OnceLock},
 };
 
 use git2::{
@@ -49,7 +53,34 @@ fn apply_ssh_workaround(clone: bool) {
 }
 
 pub fn init_lib(home_path: String) {
+    info!("home_path: {home_path}");
     let _ = HOME_PATH.set(home_path.clone());
+
+    unsafe {
+        std::env::set_var("HOME", &home_path);
+    }
+
+    let git_config_path = Path::new(&home_path).join(".gitconfig");
+
+    let git_config_content = "[safe]\n\tdirectory = *";
+
+    match fs::exists(&git_config_path) {
+        Ok(true) => {}
+        Ok(false) => {
+            if let Err(e) = fs::create_dir_all(git_config_path.parent().unwrap()) {
+                error!("gitconfig: {e}");
+            }
+
+            if let Err(e) = fs::write(&git_config_path, git_config_content) {
+                error!("gitconfig: {e}");
+            } else {
+                debug!("successfully written the gitconfig file")
+            }
+        }
+        Err(e) => {
+            error!("gitconfig: {e}");
+        }
+    }
 }
 
 pub fn create_repo(repo_path: &str) -> Result<(), Error> {
