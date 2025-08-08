@@ -1,0 +1,10 @@
+Aplikace pro poznámky pro Android s reálnými soubory. Lze synchronizovat s poskytovateli git, jako je Github.
+
+* vytvoření/otevření/klonování repozitářů
+* fuzzy vyhledávání (globální a z konkrétní složky)
+* mřížkové zobrazení
+* stromové zobrazení
+* editační zobrazení
+* soukromé repozitáře s SSH
+* vzdálená synchronizace
+* řazení podle času
