@@ -1,0 +1,1 @@
+Udělejte si poznámku pomocí rozhraní git
