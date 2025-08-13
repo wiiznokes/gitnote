@@ -54,7 +54,7 @@ jobs:
         run: |
           wget -q "https://dl.google.com/android/repository/android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
           unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
-          make SOURCE_DATE_EPOCH=0 NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+          make NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
 
       - name: Build App
         run: |
