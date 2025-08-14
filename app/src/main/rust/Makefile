@@ -1,8 +1,6 @@
 DEBUG ?= 1
 NDK_PATH ?= ${HOME}/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin
 
-SOURCE_DATE_EPOCH ?= 0
-
 ifeq ($(DEBUG),0)
 	ARGS := --release
 endif
