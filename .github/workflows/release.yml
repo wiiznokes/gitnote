@@ -58,8 +58,8 @@ jobs:
       - name: Compile Rust lib
         run: |
           wget -q "https://dl.google.com/android/repository/android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
-          unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip" -d /opt
-          make NDK_PATH="/opt/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+          unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
+          make SOURCE_DATE_EPOCH=0 NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
 
       - name: Retrieve the secret and decode it to a file and Build App
         env:
