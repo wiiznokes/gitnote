@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="README.md">English</a> | <a href="README_RU.md">Русский</a>
+</p>
+<br>
 <p align="left">
   <img align="left" src="assets/app_icon.svg" alt="app icon" width="90px" />
   <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
