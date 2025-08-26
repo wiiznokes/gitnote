@@ -1,3 +1,5 @@
+[English](README.md) | [Русский](README_RU.md)
+
 <p align="left">
   <img align="left" src="assets/app_icon.svg" alt="иконка приложения" width="90px" />
   <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
