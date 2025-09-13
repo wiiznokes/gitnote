@@ -364,7 +364,6 @@ open class TextVM() : ViewModel() {
                 return@launch
             }
 
-            uiHelper.makeToast(uiHelper.getString(R.string.success_note_update))
         }
         return success(newNote)
     }
@@ -409,7 +408,6 @@ open class TextVM() : ViewModel() {
                 uiHelper.makeToast(it.message)
                 return@launch
             }
-            uiHelper.makeToast(uiHelper.getString(R.string.success_note_create))
         }
 
         return success(note)

@@ -163,11 +163,6 @@ class GridViewModel : ViewModel() {
             val currentSelectedNotes = selectedNotes.value
             unselectAllNotes()
             storageManager.deleteNotes(currentSelectedNotes)
-            uiHelper.makeToast(
-                uiHelper.getQuantityString(
-                    R.plurals.success_notes_delete, currentSelectedNotes.size
-                )
-            )
         }
     }
 
@@ -175,14 +170,12 @@ class GridViewModel : ViewModel() {
         selectNote(note, false)
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNote(note)
-            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_notes_delete, 1))
         }
     }
 
     fun deleteFolder(noteFolder: NoteFolder) {
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNoteFolder(noteFolder)
-            uiHelper.makeToast(uiHelper.getQuantityString(R.plurals.success_noteFolders_delete, 1))
         }
     }
 
