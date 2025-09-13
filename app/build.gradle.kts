@@ -60,14 +60,7 @@ android {
         )
 
         androidResources {
-            localeFilters += (
-                listOf(
-                    "en",
-                    "fr",
-                    "cs",
-                    "ru-rRU"
-                )
-            )
+            generateLocaleConfig = true
         }
 
         vectorDrawables.useSupportLibrary = true
