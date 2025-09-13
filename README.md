@@ -47,3 +47,7 @@ Because all apps which integrate git on Android either separate the note title f
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
 - Conflict will make the app crash
+
+## Contributing
+
+See [this file](./CONTRIBUTING.md).
