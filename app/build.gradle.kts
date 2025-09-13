@@ -63,7 +63,9 @@ android {
             localeFilters += (
                 listOf(
                     "en",
-                    "fr"
+                    "fr",
+                    "cs",
+                    "ru-rRU"
                 )
             )
         }

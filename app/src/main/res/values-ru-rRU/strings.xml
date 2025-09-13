@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">GitNote</string>
     <string name="system_theme">Системная</string>
     <string name="light_theme">Светлая</string>
     <string name="dark_theme">Тёмная</string>
