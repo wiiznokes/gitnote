@@ -65,7 +65,6 @@
     <string name="grid">Сетка</string>
     <string name="about">О приложении</string>
     <string name="app_page_choose_method">Выберите способ</string>
-    <string name="create_repo">Создать локальный репозиторий</string>
     <string name="open_repo">Открыть локальный репозиторий</string>
     <string name="clone_repo">Клонировать удалённый репозиторий</string>
     <string name="use_app_storage">Использовать хранилище приложения</string>
