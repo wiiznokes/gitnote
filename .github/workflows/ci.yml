@@ -48,9 +48,9 @@ jobs:
           unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
           make NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" -C app/src/main/rust build_install
 
-      - name: Build App
+      - name: Build App and run unit tests
         run: |
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug lintDebug testDebugUnitTest --stacktrace
 
       
         
