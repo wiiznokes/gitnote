@@ -79,7 +79,7 @@ fun LogsScreen(
     }
 
     val logState: MutableState<String> = remember {
-        mutableStateOf("Loading...")
+        mutableStateOf(vm.uiHelper.getString(R.string.loading))
     }
 
 
@@ -94,7 +94,7 @@ fun LogsScreen(
     }
 
     AppPage(
-        title = "Logs",
+        title = stringResource(R.string.logs),
         onBackClick = onBackClick,
         disableVerticalScroll = true,
         actions = {

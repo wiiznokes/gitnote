@@ -1,0 +1,7 @@
+set windows-powershell := true
+
+zip_openssl_build arch:
+    rm -rf openssl-prebuild/{{ arch }}/*
+    cp -r target/{{ arch }}-linux-android/release/build/openssl-sys-*/out/openssl-build/install openssl-prebuild/{{ arch }}
+    zip -r install.zip openssl-prebuild/{{ arch }}/install
+    mv install.zip openssl-prebuild/{{ arch }}

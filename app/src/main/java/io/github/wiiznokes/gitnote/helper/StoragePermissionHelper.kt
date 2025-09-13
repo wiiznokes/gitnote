@@ -9,6 +9,7 @@ import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContract
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper.Companion.isPermissionGranted
+import androidx.core.net.toUri
 
 
 class StoragePermissionHelper {
@@ -29,7 +30,7 @@ class StoragePermissionHelper {
 class RequestManageStorageContract(private val forceLaunch: Boolean = false) :
     ActivityResultContract<String, Boolean>() {
     override fun createIntent(context: Context, input: String): Intent {
-        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        val uri = "package:${BuildConfig.APPLICATION_ID}".toUri()
         return Intent(
             Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
             uri

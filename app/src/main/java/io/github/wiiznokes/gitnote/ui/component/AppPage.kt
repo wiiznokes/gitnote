@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.wiiznokes.gitnote.ui.util.conditional
+import io.github.wiiznokes.gitnote.ui.utils.conditional
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,10 +35,11 @@ fun AppPage(
     title: String,
     titleStyle: TextStyle = MaterialTheme.typography.titleLarge,
     onBackClick: (() -> Unit)? = null,
+    onBackClickEnabled: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     disableVerticalScroll: Boolean = false,
-    contentWindowInsets: WindowInsets = WindowInsets.safeContent,
+    contentWindowInsets: WindowInsets = WindowInsets.safeDrawing,
     actions: @Composable RowScope.() -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
@@ -47,6 +48,7 @@ fun AppPage(
     Scaffold(
         modifier = Modifier
             .imePadding(),
+        contentWindowInsets = contentWindowInsets,
         topBar = {
             TopAppBar(
                 actions = actions,
@@ -61,7 +63,8 @@ fun AppPage(
                 navigationIcon = {
                     onBackClick?.let {
                         IconButton(
-                            onClick = it
+                            onClick = it,
+                            enabled = onBackClickEnabled
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -74,21 +77,27 @@ fun AppPage(
                 )
             )
         },
-        bottomBar = bottomBar,
     ) { paddingValues ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .conditional(!disableVerticalScroll) {
-                    verticalScroll(rememberScrollState())
-                },
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment
         ) {
-            content()
-        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .conditional(!disableVerticalScroll) {
+                        verticalScroll(rememberScrollState())
+                    },
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment
+            ) {
+                content()
 
+            }
+            bottomBar()
+        }
     }
 }

@@ -5,6 +5,37 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [25.08]
+
+### Changed
+
+- new rust backend for libgit2
+- ssh support and strong github integration (list repos, create a new one)
+
+## [25.07]
+
+### Added
+
+- markdown dedicated editor
+
+## [25.07]
+
+### Added
+
+- izzy support
+
+## [25.06]
+
+### Added
+
+- read only mode with markdown rendering
+
+## [25.05]
+
+### Added
+
+- f-droid support
+
 ## [24.08]
 
 - delete folder (#42)

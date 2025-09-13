@@ -34,7 +34,7 @@
     <string name="username">Username</string>
     <string name="remote_url">Remote url</string>
     <string name="close_repository">Close repository</string>
-    <string name="close_repository_confirmation">Do you really want to close the repo?</string>
+    <string name="close_repository_confirmation">Do you really want to close the repository?</string>
     <string name="version">Version</string>
     <string name="show_logs">Show logs</string>
     <string name="report_an_issue">Report an issue</string>
@@ -55,9 +55,9 @@
     <string name="error_push_repo">Can\'t push: %1$s</string>
     <string name="error_commit_repo">can\'t commit: %1$s</string>
     <string name="error_commit_file_change">can\'t know if there is files change: %1$s</string>
-    <string name="error_clone_repo">can\'t clone repo: %1$s</string>
-    <string name="error_open_repo">can\'t open repo: %1$s</string>
-    <string name="error_create_repo">Can\'t create repo: %1$s</string>
+    <string name="error_clone_repo">can\'t clone repository: %1$s</string>
+    <string name="error_open_repo">can\'t open repository: %1$s</string>
+    <string name="error_create_repo">Can\'t create repository: %1$s</string>
     <string name="error_write_file">Can\'t write file: %1$s</string>
     <string name="error_invalid_name">Name is invalid</string>
     <string name="error_invalid_extension">Extension is invalid</string>
@@ -66,9 +66,9 @@
     <string name="grid">Grid</string>
     <string name="about">About</string>
     <string name="app_page_choose_method">Choose method</string>
-    <string name="create_repo">Create local repository</string>
+    <string name="create_local_repo">Create local repository</string>
     <string name="open_repo">Open local repository</string>
-    <string name="clone_repo">Clone remote repository</string>
+    <string name="clone_remote_repo">Clone remote repository</string>
     <string name="use_app_storage">Use app storage</string>
     <string name="error_need_storage_permission">The application needs this permission to access the storage</string>
     <string name="use_device_storage">Use device storage</string>
@@ -78,11 +78,11 @@
     <string name="clone_repo_explorer">Clone repository in this folder</string>
     <string name="quick_links">Quick links</string>
     <string name="quick_links_home_page">Home page</string>
-    <string name="quick_links_create_repo">Create repo</string>
+    <string name="quick_links_create_repo">Create repository</string>
     <string name="quick_links_create_token">Create Token</string>
     <string name="quick_links_see_repos">See repos</string>
     <string name="app_page_clone_repository">Clone repository</string>
-    <string name="where_repo_is_cloned">Path where the repo will be cloned</string>
+    <string name="where_repo_is_cloned">Path where the repository will be cloned</string>
     <string name="clone_step_url">1. Enter the repository url (https)</string>
     <string name="clone_step_url_label">url</string>
     <string name="with_credentials">With credentials</string>
@@ -114,5 +114,37 @@
 
     <string name="read_only_mode_activate">Activate read only mode</string>
     <string name="read_only_mode_deactive">Deactivate read only mode</string>
+    <string name="authorize_gitnote">Authorize Gitnote</string>
+    <string name="clone_url">Clone URL</string>
+    <string name="url_explain_create_remote_repo">Go to the website, create a repository and copy its git clone URL. Choose the SSH method</string>
+    <string name="url_explain_enter_url">Enter the Git clone URL</string>
+    <string name="open_link_create_repo">Create repository</string>
+    <string name="next">Next</string>
+    <string name="ssh_keys_title">SSH keys</string>
+    <string name="ssh_keys_setup_title">In order to access this repository, this public key must be copied as a deploy key</string>
+    <string name="copy_the_key">Copy the key</string>
+    <string name="copy_key">Copy Key</string>
+    <string name="regenerate_key">Regenerate Key</string>
+    <string name="paste_deploy_key">Open webpage, and paste the deploy key. Make sure it is given Write Access</string>
+    <string name="open_deploy_key_webpage">Open deploy key webpage</string>
+    <string name="paste_deploy_key_no_provider">Add the public key to the git provider</string>
+    <string name="try_cloning">Try Cloning…</string>
+    <string name="clone_repo">Clone Repository</string>
+    <string name="select_or_create_repo">Select or Create a Repository</string>
+    <string name="search_or_create_a_repo">Search or Create a Repository</string>
+    <string name="name">Name</string>
+    <string name="create_private_repo">Create private repo %1$s</string>
+    <string name="we_need_ssh_keys_to_authenticate">Need SSH keys to authenticate</string>
+    <string name="generate_new_keys">Generate new keys</string>
+    <string name="custom">Custom</string>
+    <string name="git_hosting_provider">Git Hosting Provider</string>
+    <string name="select_a_git_hosting_provider">Select a Git Hosting Provider</string>
+    <string name="setup_selection">Setup Selection</string>
+    <string name="how_do_you_want_to_do_this">How do you want to do this?</string>
+    <string name="setup_automatically">Setup Automatically</string>
+    <string name="setup_manually">Let me do it manually</string>
+    <string name="loading">Loading…</string>
+    <string name="logs">Logs</string>
+    <string name="extension">Extension: %1$s</string>
 
 </resources>

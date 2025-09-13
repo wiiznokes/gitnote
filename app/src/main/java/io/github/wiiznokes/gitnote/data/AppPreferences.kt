@@ -1,17 +1,17 @@
 package io.github.wiiznokes.gitnote.data
 
 import android.content.Context
-import android.os.Parcelable
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.provider.ProviderType
+import io.github.wiiznokes.gitnote.ui.model.Cred
+import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
-import io.github.wiiznokes.gitnote.ui.model.Provider
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.SortType
+import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import kotlinx.coroutines.runBlocking
-import kotlinx.parcelize.Parcelize
 import kotlin.io.path.pathString
 
 class AppPreferences(
@@ -27,15 +27,19 @@ class AppPreferences(
     val dynamicColor = booleanPreference("dynamicColor", true)
     val theme = enumPreference("theme", Theme.SYSTEM)
 
+    val isInit = booleanPreference("isInit", false)
     val databaseCommit = stringPreference("")
 
     private val repoPath = stringPreference("repoPath")
 
     suspend fun repoPath(): String {
-        return when (repoState.get()) {
-            RepoState.NoRepo -> throw Exception("calling repoPath function with no repo initialized")
-            RepoState.AppStorage -> appStorageRepoPath
-            RepoState.DeviceStorage -> repoPath.get()
+        if (!isInit.get()) {
+            throw Exception("calling repoPath function with no repo initialized")
+        }
+
+        return when (storageConfig.get()) {
+            StorageConfig.App -> appStorageRepoPath
+            StorageConfig.Device -> repoPath.get()
         }
     }
 
@@ -51,27 +55,56 @@ class AppPreferences(
     }
 
     val remoteUrl = stringPreference("remoteUrl", "")
-    val userName = stringPreference("userName", "")
-    val password = stringPreference(
-        "password",
-        ""
-    )
 
-    suspend fun gitCreed(): GitCreed? {
-        val userName = this.userName.get()
-        val password = this.password.get()
+    val credType = enumPreference("credType", CredType.None)
 
-        return if (userName.isEmpty() or password.isEmpty()) {
-            null
-        } else {
-            GitCreed(
-                userName = userName,
-                password = password
+    val username = stringPreference("username", "")
+
+    suspend fun usernameOrDefault(): String =
+        username.get().let { it.ifEmpty { DEFAULT_USERNAME } }
+
+    val userPassUsername = stringPreference("userPassUsername", "")
+    val userPassPassword = stringPreference("userPassPassword", "")
+
+    val sshUsername = stringPreference("sshUsername", "")
+    val publicKey = stringPreference("publicKey", "")
+    val privateKey = stringPreference("privateKey", "")
+
+    suspend fun cred(): Cred? {
+        return when (credType.get()) {
+            CredType.None -> null
+            CredType.UserPassPlainText -> {
+                Cred.UserPassPlainText(
+                    username = userPassUsername.get(),
+                    password = userPassPassword.get()
+                )
+            }
+            CredType.Ssh -> Cred.Ssh(
+                username = this.sshUsername.get(),
+                publicKey = this.publicKey.get(),
+                privateKey = this.privateKey.get(),
             )
         }
     }
 
-    val provider = enumPreference("provider", Provider.GitHub)
+    suspend fun updateCred(cred: Cred?) {
+        when (cred) {
+            is Cred.Ssh -> {
+                credType.update(CredType.Ssh)
+                sshUsername.update(cred.username)
+                publicKey.update(cred.publicKey)
+                privateKey.update(cred.privateKey)
+            }
+            is Cred.UserPassPlainText -> {
+                credType.update(CredType.UserPassPlainText)
+                userPassUsername.update(cred.username)
+                userPassPassword.update(cred.password)
+            }
+            null -> credType.update(CredType.None)
+        }
+    }
+
+    val provider = enumPreference("provider", ProviderType.GitHub)
 
     val sortType = enumPreference("sortType", SortType.Modification)
 
@@ -94,26 +127,27 @@ class AppPreferences(
         )
     )
 
+    val storageConfig = enumPreference("storageConfig", StorageConfig.App)
 
-    val repoState = enumPreference("repoState", RepoState.NoRepo)
+    suspend fun initRepo(storageConfig: StorageConfiguration) {
+        databaseCommit.update("")
+        isInit.update(true)
 
-    suspend fun initRepo(repoState: NewRepoState) {
-        when (repoState) {
-            NewRepoState.AppStorage -> {
-                this.repoState.update(RepoState.AppStorage)
+        when (storageConfig) {
+            StorageConfiguration.App -> {
+                this.storageConfig.update(StorageConfig.App)
             }
 
-            is NewRepoState.DeviceStorage -> {
-                this.repoState.update(RepoState.DeviceStorage)
-                this.repoPath.update(repoState.path)
+            is StorageConfiguration.Device -> {
+                this.storageConfig.update(StorageConfig.Device)
+                repoPath.update(storageConfig.path)
             }
         }
         lastOpenedFolder.update("")
     }
 
     suspend fun closeRepo() {
-        repoState.update(RepoState.NoRepo)
-        databaseCommit.update("")
+        isInit.update(false)
     }
 
     val isReadOnlyModeActive = booleanPreference("isReadOnlyModeActive", false)
@@ -121,21 +155,8 @@ class AppPreferences(
 }
 
 
-enum class RepoState {
-    NoRepo,
-    AppStorage,
-    DeviceStorage
+enum class StorageConfig {
+    App,
+    Device
 }
 
-@Parcelize
-sealed class NewRepoState : Parcelable {
-    data object AppStorage : NewRepoState()
-    class DeviceStorage(val path: String) : NewRepoState()
-
-    fun repoPath(): String {
-        return when (this) {
-            AppStorage -> AppPreferences.appStorageRepoPath
-            is DeviceStorage -> this.path
-        }
-    }
-}

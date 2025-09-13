@@ -1,9 +1,10 @@
 package io.github.wiiznokes.gitnote.manager
 
 import android.util.Log
+import androidx.annotation.Keep
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
+import io.github.wiiznokes.gitnote.ui.model.Cred
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -18,7 +19,6 @@ enum class GitExceptionType {
     InitLib,
     RepoAlreadyInit,
     RepoNotInit,
-    WrongPath,
     Other
 }
 
@@ -56,29 +56,21 @@ class GitManager {
     private val locker = Mutex()
     private var isRepoInitialized = false
     private var isLibInitialized = false
-    private var job: Deferred<Unit>? = null
 
     private suspend fun <T> safelyAccessLibGit2(f: suspend () -> T): Result<T> = locker.withLock {
-
         try {
             if (!isLibInitialized) {
-                if (initLib() < 0) {
+                val res = initLib()
+                Log.d(TAG, "res on init = $res")
+                if (res < 0) {
                     throw GitException(GitExceptionType.InitLib)
                 }
                 isLibInitialized = true
             }
-
-            val deferredValue = CompletableDeferred<T>()
-            coroutineScope {
-                job = async { deferredValue.complete(f()) }
-                job?.await()
-                success(deferredValue.await())
-            }
+           success(f())
         } catch (e: Exception) {
             e.printStackTrace()
             failure(e)
-        } finally {
-            job = null
         }
     }
 
@@ -107,25 +99,38 @@ class GitManager {
         isRepoInitialized = true
     }
 
+    private var actualCb: ((Int) -> Unit)? = null
+
+    /**
+     * This function is called from native code
+     */
+    @Keep
+    fun progressCb(progress: Int) {
+        if (actualCb != null) {
+            actualCb?.invoke(progress)
+        }
+    }
+
     suspend fun cloneRepo(
         repoPath: String,
         repoUrl: String,
-        creed: GitCreed?,
+        cred: Cred?,
         progressCallback: (Int) -> Unit
     ): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "clone repo: $repoPath, $repoUrl, $creed")
+        Log.d(TAG, "clone repo: $repoPath, $repoUrl, $cred")
+
         if (isRepoInitialized) throw GitException(GitExceptionType.RepoAlreadyInit)
 
+        actualCb = progressCallback
 
         val res = cloneRepoLib(
             repoPath = repoPath,
             remoteUrl = repoUrl,
-            username = creed?.userName,
-            password = creed?.password,
-            // cause error because of proguard
-            // https://stackoverflow.com/questions/77936218/how-to-tell-proguard-to-not-remove-a-lamda-function-parameter
-            //progressCallback = progressCallback
+            cred = cred,
+            progressCallback = this
         )
+
+        actualCb = null
 
         if (res < 0) {
             throw GitException(uiHelper.getString(R.string.error_clone_repo, res))
@@ -165,13 +170,10 @@ class GitManager {
 
     }
 
-    suspend fun push(creed: GitCreed?): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "push: $creed")
+    suspend fun push(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "push: $cred")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
-        val res = pushLib(
-            username = creed?.userName,
-            password = creed?.password,
-        )
+        val res = pushLib(cred)
 
         if (res < 0) {
             Log.d(TAG, "push: $res")
@@ -183,37 +185,51 @@ class GitManager {
 
     }
 
-    suspend fun pull(creed: GitCreed?): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "pull: $creed")
+    suspend fun pull(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "pull: $cred")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
 
-        val res = pullLib(
-            username = creed?.userName,
-            password = creed?.password,
-        )
+        val res = pullLib(cred)
 
         if (res < 0) {
             throw Exception(uiHelper.getString(R.string.error_pull_repo, res.toString()))
         }
     }
 
+    suspend fun getTimestamps(): Result<HashMap<String, Long>> = safelyAccessLibGit2 {
+        Log.d(TAG, "getTimestamps")
 
-    fun closeRepo() {
-        job?.cancel()
+        val h: HashMap<String, Long> = HashMap()
+
+        val res = getTimestampsLib(h)
+
+        if (res < 0) {
+            throw Exception("getTimestampsLib error $res")
+        }
+        h
+    }
+
+
+    fun closeRepoWithoutLock() {
         if (isRepoInitialized) closeRepoLib()
         isRepoInitialized = false
     }
 
-    fun shutdown() {
-        job?.cancel()
-        closeRepo()
+    suspend fun closeRepo() = safelyAccessLibGit2 {
+        closeRepoWithoutLock()
+    }
+
+    suspend fun shutdown() = safelyAccessLibGit2 {
+        closeRepoWithoutLock()
         if (isLibInitialized) freeLib()
         isLibInitialized = false
     }
 
 }
 
-private external fun initLib(): Int
+private external fun initLib(
+    homePath: String = MyApp.appModule.context.filesDir.toPath().toString()
+): Int
 
 private external fun createRepoLib(repoPath: String): Int
 
@@ -222,25 +238,16 @@ private external fun openRepoLib(repoPath: String): Int
 private external fun cloneRepoLib(
     repoPath: String,
     remoteUrl: String,
-    username: String?,
-    password: String?,
-    progressCallback: ((Int) -> Unit)? = null
+    cred: Cred?,
+    progressCallback: GitManager
 ): Int
 
 
 private external fun lastCommitLib(): String?
 
 private external fun commitAllLib(username: String, message: String): Int
-private external fun pushLib(
-    username: String?, password: String?,
-    progressCallback: ((Int) -> Unit)? = null
-): Int
-
-
-private external fun pullLib(
-    username: String?, password: String?,
-    progressCallback: ((Int) -> Unit)? = null
-): Int
+private external fun pushLib(cred: Cred?): Int
+private external fun pullLib(cred: Cred?): Int
 
 private external fun freeLib()
 
@@ -249,4 +256,6 @@ private external fun closeRepoLib()
 
 private external fun isChangeLib(): Int
 
+private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
 
+external fun generateSshKeysLib(): Pair<String, String>

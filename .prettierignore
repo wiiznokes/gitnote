@@ -1,14 +1,10 @@
 
-# Gradle
-.gradle
+
 gradle/*
 !gradle/libs.version.toml
 gradlew
 gradlew.bat
 
-# App
-app/.cxx
-app/build
 app/schemas
 app/proguard-rules.pro
 
@@ -19,4 +15,6 @@ app/proguard-rules.pro
 !.vscode/settings.json
 
 
-libgit2-android
+
+target/
+app/src/main/rust/openssl-prebuild/*/install

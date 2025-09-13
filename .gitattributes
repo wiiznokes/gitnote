@@ -3,3 +3,5 @@
 /app/src/main/jniLibs/** filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
 gradle/wrapper/gradle-wrapper.jar filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.graphite filter=lfs diff=lfs merge=lfs -text

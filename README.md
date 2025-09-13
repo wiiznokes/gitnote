@@ -1,18 +1,20 @@
-<p align="center">
-  <a href="README.md">English</a> | <a href="README_RU.md">Русский</a>
-</p>
-<br>
-<p align="left">
-  <img align="left" src="assets/app_icon.svg" alt="app icon" width="90px" />
-  <h1 style="display: inline-block; margin-left: 12px; vertical-align: middle;">GitNote</h1>
-</p>
+<div align="center">
 
-<a href="https://f-droid.org/en/packages/io.github.wiiznokes.gitnote/"><img src="https://f-droid.org/badge/get-it-on.svg" alt="F-Droid Badge" height="50"></a>
-<a href="https://apt.izzysoft.de/packages/io.github.wiiznokes.gitnote"><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="IzzyOnDroid Badge" height="50"></a>
+<h1>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo_wide_dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/logo_wide_light.svg">
+  <img alt="GitNote" width="50%" src="assets/logo_wide_light.svg">
+</picture>
+</h1>
 
-<br/>
+</div>
 
-_Supported Android versions: 11 to 15_
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/wiiznokes/gitnote.svg?logo=github&label=GitHub&cacheSeconds=3600)](https://github.com/wiiznokes/gitnote/releases/latest)
+[![F-Droid](https://img.shields.io/f-droid/v/io.github.wiiznokes.gitnote?logo=f-droid&label=F-Droid&cacheSeconds=3600)](https://f-droid.org/packages/io.github.wiiznokes.gitnote)
+[![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/io.github.wiiznokes.gitnote)](https://apt.izzysoft.de/fdroid/index/apk/io.github.wiiznokes.gitnote)
+
+_Supported Android versions: 11 to 16_
 
 Android note app which integrate Git. You can use this app with other desktop editors.
 
@@ -27,7 +29,7 @@ Because all apps which integrate git on Android either separate the note title f
 - [x] grid view
 - [x] tree view
 - [x] edit view
-- [x] private repo with https
+- [x] private repo with SSH
 - [x] remote sync
 - [x] time based sort
 
@@ -44,5 +46,4 @@ Because all apps which integrate git on Android either separate the note title f
 # Current limitation
 
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
-- Rotation change will break ssl state. Workaround: restart the app
 - Conflict will make the app crash

@@ -18,8 +18,8 @@ import io.github.wiiznokes.gitnote.ui.model.SortOrder.Descending
 import io.github.wiiznokes.gitnote.ui.model.SortType.AlphaNumeric
 import io.github.wiiznokes.gitnote.ui.model.SortType.Modification
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
-import io.github.wiiznokes.gitnote.ui.util.fuzzySort
-import io.github.wiiznokes.gitnote.ui.util.mapAndCombine
+import io.github.wiiznokes.gitnote.ui.utils.fuzzySort
+import io.github.wiiznokes.gitnote.utils.mapAndCombine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 class GridViewModel : ViewModel() {
 
@@ -73,10 +74,6 @@ class GridViewModel : ViewModel() {
 
     init {
         Log.d(TAG, "init")
-
-        CoroutineScope(Dispatchers.IO).launch {
-            storageManager.updateDatabaseAndRepo()
-        }
 
         CoroutineScope(Dispatchers.IO).launch {
             allNotes.collect { allNotes ->
@@ -270,11 +267,35 @@ class GridViewModel : ViewModel() {
         }
     }.combine(notes) { folders, notes ->
         folders.map { folder ->
+
+            val (noteCount, lastModifiedTimeMillis) = notes
+                .filter { it.parentPath().startsWith(folder.relativePath) }
+                .fold(Pair(0, Long.MIN_VALUE)) { (count, max), note ->
+                    (count + 1) to max(max, note.lastModifiedTimeMillis)
+                }
+
             DrawerFolderModel(
-                noteCount = notes.count {
-                    it.parentPath().startsWith(folder.relativePath)
-                }, noteFolder = folder
+                noteCount = noteCount,
+                lastModifiedTimeMillis = lastModifiedTimeMillis,
+                noteFolder = folder
             )
+        }
+    }.let { folders ->
+        combine(
+            folders, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()
+        ) { folders, sortType, sortOrder ->
+
+            when (sortType) {
+                Modification -> when (sortOrder) {
+                    Ascending -> folders.sortedByDescending { it.lastModifiedTimeMillis }
+                    Descending -> folders.sortedBy { it.lastModifiedTimeMillis }
+                }
+
+                AlphaNumeric -> when (sortOrder) {
+                    Ascending -> folders.sortedBy { it.noteFolder.fullName() }
+                    Descending -> folders.sortedByDescending { it.noteFolder.fullName() }
+                }
+            }
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()

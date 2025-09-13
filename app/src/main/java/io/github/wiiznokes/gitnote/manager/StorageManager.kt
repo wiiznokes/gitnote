@@ -7,19 +7,15 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
-import io.github.wiiznokes.gitnote.ui.model.GitCreed
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
+private const val TAG = "StorageManager"
 
 class StorageManager {
 
-
-    companion object {
-        private const val TAG = "StorageManager"
-    }
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val db: RepoDatabase = MyApp.appModule.repoDatabase
@@ -37,26 +33,27 @@ class StorageManager {
     suspend fun updateDatabaseAndRepo(): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
 
-        val creed = prefs.gitCreed()
+        val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
 
-        if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(creed).onFailure {
-                uiHelper.makeToast(it.message)
-            }
-        }
 
-        // todo: maybe async this call
+
         gitManager.commitAll(
-            GitCreed.usernameOrDefault(creed),
+            prefs.usernameOrDefault(),
             "commit from gitnote to update the repo of the app"
         ).onFailure {
             uiHelper.makeToast(it.message)
         }
 
         if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(cred).onFailure {
+                uiHelper.makeToast(it.message)
+            }
+        }
+
+        if (remoteUrl.isNotEmpty()) {
             // todo: maybe async this call
-            gitManager.push(creed).onFailure {
+            gitManager.push(cred).onFailure {
                 uiHelper.makeToast(it.message)
             }
         }
@@ -90,7 +87,9 @@ class StorageManager {
         val repoPath = prefs.repoPath()
         Log.d(TAG, "repoPath = $repoPath")
 
-        dao.clearAndInit(repoPath)
+        val timestamps = gitManager.getTimestamps().getOrThrow()
+
+        dao.clearAndInit(repoPath, timestamps)
         prefs.databaseCommit.update(fsCommit)
 
         return success(Unit)
@@ -269,15 +268,22 @@ class StorageManager {
         f: suspend () -> Result<T>
     ): Result<T> {
 
-        val creed = prefs.gitCreed()
+        val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
 
         gitManager.commitAll(
-            GitCreed.usernameOrDefault(creed),
+            prefs.usernameOrDefault(),
             "commit from gitnote, before doing a change"
         ).onFailure {
             return failure(it)
         }
+
+        if (remoteUrl.isNotEmpty()) {
+            gitManager.pull(cred).onFailure {
+                it.printStackTrace()
+            }
+        }
+
         updateDatabaseWithoutLocker().onFailure {
             return failure(it)
         }
@@ -291,23 +297,12 @@ class StorageManager {
             }
         )
 
-        if (remoteUrl.isNotEmpty()) {
-            gitManager.pull(creed).onFailure {
-                it.printStackTrace()
-            }
-        }
-
-        updateDatabaseWithoutLocker().onFailure {
+        gitManager.commitAll(prefs.usernameOrDefault(), commitMessage).onFailure {
             return failure(it)
         }
 
-        gitManager.commitAll(GitCreed.usernameOrDefault(creed), commitMessage).onFailure {
-            return failure(it)
-        }
-
-
         if (remoteUrl.isNotEmpty()) {
-            gitManager.push(creed).onFailure {
+            gitManager.push(cred).onFailure {
                 it.printStackTrace()
             }
         }

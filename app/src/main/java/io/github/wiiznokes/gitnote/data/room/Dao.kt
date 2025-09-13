@@ -16,12 +16,12 @@ interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
-    suspend fun clearAndInit(rootPath: String) {
+    suspend fun clearAndInit(rootPath: String, timestamps: HashMap<String, Long>) {
         Log.d(TAG, "clearAndInit")
         clearDatabase()
 
         val rootFs = NodeFs.Folder.fromPath(rootPath)
-        val rootFolder = NoteFolder(
+        val rootFolder = NoteFolder.new(
             relativePath = "",
         )
         insertNoteFolder(rootFolder)
@@ -41,9 +41,10 @@ interface RepoDatabaseDao {
                             return@forEachNodeFs
                         }
 
+                        val relativePath = nodeFs.path.substring(startIndex = rootLength)
                         val note = Note.new(
-                            relativePath = nodeFs.path.substring(startIndex = rootLength),
-                            lastModifiedTimeMillis = nodeFs.lastModifiedTime().toMillis(),
+                            relativePath = relativePath,
+                            lastModifiedTimeMillis = timestamps.get(relativePath) ?: nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
                         insertNote(note)
@@ -54,7 +55,7 @@ interface RepoDatabaseDao {
                         if (nodeFs.isHidden() || nodeFs.isSym()) {
                             return@forEachNodeFs
                         }
-                        val noteFolder = NoteFolder(
+                        val noteFolder = NoteFolder.new(
                             relativePath = nodeFs.path.substring(startIndex = rootLength),
                         )
                         //Log.d(TAG, "add noteFolder: $noteFolder")

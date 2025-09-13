@@ -5,6 +5,6 @@ Android note app with real file. Can be sync with git providers such as Github
 * grid view
 * tree view
 * edit view
-* private repo with https
+* private repo with SSH
 * remote sync
 * time based sort

@@ -1,15 +1,14 @@
 [versions]
-agp = "8.10.0"
-kotlin = "2.1.21"
+agp = "8.12.0"
+kotlin = "2.2.0"
 
 # https://github.com/google/ksp/releases
 # sync with the kotlin version
-ksp = "2.1.21-2.0.1"
+ksp = "2.2.0-2.0.2"
 
-ktx-lifecycle = "2.9.0"
-room = "2.7.1"
-about-libraries = "12.1.2"
-richtext = "1.0.0-alpha02"
+ktx-lifecycle = "2.9.2"
+room = "2.7.2"
+richtext = "1.0.0-alpha03"
 
 [libraries]
 # AndroidX Core
@@ -17,23 +16,18 @@ androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" 
 runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
 runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
 compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-# https://stackoverflow.com/questions/64086421/proguard-and-preference-datastore
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.1" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.7" }
 
 # Compose
 # https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
 # compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.05.00" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.07.00" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
 compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-compose-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version = "1.1.1" }
-
-# Accompanist
-accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version = "0.34.0" }
 
 # Room
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -41,23 +35,19 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 # Markdown
-# markdown = { group = "org.jetbrains", name = "markdown", version = "0.6.1" }
 richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
 richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richtext" }
 
-
 # 3-party
-about-libraries = { group = "com.mikepenz", name = "aboutlibraries-compose-m3", version.ref = "about-libraries" }
 reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version = "1.5.0" }
 
 # Test
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.9.0" }
-test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.2.1" }
-androidx-runner = { group = "androidx.test", name = "runner", version = "1.6.2" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.10.2" }
+test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.3.0" }
+androidx-runner = { group = "androidx.test", name = "runner", version = "1.7.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "about-libraries" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
