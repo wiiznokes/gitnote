@@ -1,0 +1,116 @@
+<resources>
+    <string name="system_theme">Системная</string>
+    <string name="light_theme">Светлая</string>
+    <string name="dark_theme">Тёмная</string>
+    <string name="modification_sort_type">По изменению</string>
+    <string name="alpha_numeric_sort_type">По алфавиту и числам</string>
+    <string name="ascending_sort_order">По возрастанию</string>
+    <string name="descending_sort_order">По убыванию</string>
+    <string name="new_folder_label">Имя новой папки</string>
+    <string name="create_new_folder">Создать новую папку</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="save">Сохранить</string>
+    <string name="none">Нет</string>
+    <string name="settings">Настройки</string>
+    <string name="search_in_notes">Поиск в заметках</string>
+    <string name="user_interface">Интерфейс</string>
+    <string name="dynamic_colors">Динамические цвета</string>
+    <string name="sort_type">Тип сортировки</string>
+    <string name="sort_order">Порядок сортировки</string>
+    <string name="minimal_note_width">Минимальная ширина заметки</string>
+    <string name="show_long_notes">Показывать длинные заметки полностью</string>
+    <string name="remember_last_opened_folder">Запоминать последнюю открытую папку</string>
+    <string name="show_the_full_notes_path">Всегда показывать полный путь заметки</string>
+    <string name="show_the_full_notes_path_subtitle">По умолчанию путь отображается только если более двух заметок имеют одинаковое имя</string>
+    <string name="folder_filters">Фильтры папок</string>
+    <string name="folder_filters_subtitle">Задайте регулярные выражения для фильтрации папок репозитория</string>
+    <string name="edit">Редактировать</string>
+    <string name="default_note_extension">Расширение заметок по умолчанию</string>
+    <string name="show_lines_number">Показывать номера строк</string>
+    <string name="repository">Репозиторий</string>
+    <string name="password">Пароль</string>
+    <string name="username">Имя пользователя</string>
+    <string name="remote_url">Удалённый URL</string>
+    <string name="close_repository">Закрыть репозиторий</string>
+    <string name="close_repository_confirmation">Вы действительно хотите закрыть репозиторий?</string>
+    <string name="version">Версия</string>
+    <string name="show_logs">Показать логи</string>
+    <string name="report_an_issue">Сообщить о проблеме</string>
+    <string name="source_code">Исходный код</string>
+    <string name="libraries">Библиотеки</string>
+    <string name="copy_all_logs">Скопировать все логи</string>
+    <string name="note_name">Имя заметки</string>
+    <string name="delete_this_folder">Удалить эту папку</string>
+    <string name="theme">Тема</string>
+    <string name="delete_this_note">Удалить эту заметку</string>
+    <string name="select_multiple_notes">Выбрать несколько заметок</string>
+    <string name="error_invalid_link">Неверная ссылка, невозможно открыть</string>
+    <string name="error_file_already_exist">Файл уже существует</string>
+    <string name="error_create_file">Не удалось создать файл: %1$s</string>
+    <string name="error_delete_file">Не удалось удалить файл %1$s: %2$s</string>
+    <string name="error_create_folder">Не удалось создать папку: %1$s</string>
+    <string name="error_pull_repo">Не удалось выполнить pull: %1$s</string>
+    <string name="error_push_repo">Не удалось выполнить push: %1$s</string>
+    <string name="error_commit_repo">Не удалось выполнить commit: %1$s</string>
+    <string name="error_commit_file_change">Не удалось определить, есть ли изменения в файлах: %1$s</string>
+    <string name="error_clone_repo">Не удалось клонировать репозиторий: %1$s</string>
+    <string name="error_open_repo">Не удалось открыть репозиторий: %1$s</string>
+    <string name="error_create_repo">Не удалось создать репозиторий: %1$s</string>
+    <string name="error_write_file">Не удалось записать файл: %1$s</string>
+    <string name="error_invalid_name">Недопустимое имя</string>
+    <string name="error_invalid_extension">Недопустимое расширение</string>
+    <string name="error_folder_already_exist">Папка уже существует</string>
+    <string name="error_note_is_the_same">Нет изменений</string>
+    <string name="grid">Сетка</string>
+    <string name="about">О приложении</string>
+    <string name="app_page_choose_method">Выберите способ</string>
+    <string name="open_repo">Открыть локальный репозиторий</string>
+    <string name="clone_repo">Клонировать удалённый репозиторий</string>
+    <string name="use_app_storage">Использовать хранилище приложения</string>
+    <string name="error_need_storage_permission">Приложению необходимо это разрешение для доступа к хранилищу</string>
+    <string name="use_device_storage">Использовать хранилище устройства</string>
+    <string name="use_device_storage_info">Требуется разрешение на доступ ко всему хранилищу устройства. После этого вы сможете получить доступ к репозиторию с компьютера.</string>
+    <string name="create_repo_explorer">Создать репозиторий в этой папке</string>
+    <string name="open_repo_explorer">Открыть этот репозиторий</string>
+    <string name="clone_repo_explorer">Клонировать репозиторий в эту папку</string>
+    <string name="quick_links">Быстрые ссылки</string>
+    <string name="quick_links_home_page">Главная страница</string>
+    <string name="quick_links_create_repo">Создать репозиторий</string>
+    <string name="quick_links_create_token">Создать токен</string>
+    <string name="quick_links_see_repos">Просмотреть репозитории</string>
+    <string name="app_page_clone_repository">Клонировать репозиторий</string>
+    <string name="where_repo_is_cloned">Путь, куда будет клонирован репозиторий</string>
+    <string name="clone_step_url">1. Введите URL репозитория (https)</string>
+    <string name="clone_step_url_label">URL</string>
+    <string name="with_credentials">С учётными данными</string>
+    <string name="clone_step_username">2. Имя пользователя</string>
+    <string name="clone_step_username_label">Имя пользователя</string>
+    <string name="clone_step_password">3. Пароль (dev. токен)</string>
+    <string name="clone_step_password_label">Пароль</string>
+    <string name="clone_repo_button">Клонировать репозиторий</string>
+    <string name="error_path_not_directory">Путь не является директорией</string>
+    <string name="error_path_not_empty">Папка не пуста</string>
+    <string name="success_note_update">Заметка успешно обновлена</string>
+    <string name="success_note_create">Заметка успешно создана</string>
+    <string name="error_delete_folder">Не удалось удалить папку: %1$s</string>
+
+    <plurals name="delete_selected_notes">
+        <item quantity="one">Удалить выбранную заметку</item>
+        <item quantity="other">Удалить выбранные заметки</item>
+    </plurals>
+
+    <plurals name="success_notes_delete">
+        <item quantity="one">Заметка успешно удалена</item>
+        <item quantity="other">Заметки успешно удалены</item>
+    </plurals>
+
+    <plurals name="success_noteFolders_delete">
+        <item quantity="one">Папка успешно удалена</item>
+        <item quantity="other">Папки успешно удалены</item>
+    </plurals>
+
+    <string name="read_only_mode_activate">Включить режим только для чтения</string>
+    <string name="read_only_mode_deactive">Отключить режим только для чтения</string>
+
+</resources>
