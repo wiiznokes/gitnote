@@ -46,11 +46,14 @@ class GridViewModel : ViewModel() {
     val uiHelper = MyApp.appModule.uiHelper
 
     private val _query = MutableStateFlow("")
-    val query = _query
+    val query: StateFlow<String> = _query
+
+    val syncState = storageManager.syncState
 
     private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean>
-        get() = _isRefreshing.asStateFlow()
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+
 
     private val _currentNoteFolderRelativePath = MutableStateFlow(
         if (prefs.rememberLastOpenedFolder.getBlocking()) {

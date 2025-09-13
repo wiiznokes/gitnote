@@ -7,12 +7,29 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
 
 private const val TAG = "StorageManager"
+
+sealed interface SyncState {
+
+    object Ok : SyncState
+
+    object Error : SyncState
+
+    object Pull : SyncState
+
+    object Push : SyncState
+
+    fun isLoading(): Boolean {
+        return this is Pull || this is Push
+    }
+}
 
 class StorageManager {
 
@@ -26,8 +43,10 @@ class StorageManager {
 
     private val gitManager: GitManager = MyApp.appModule.gitManager
 
-
     private val locker = Mutex()
+
+    private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok)
+    val syncState: StateFlow<SyncState> = _syncState
 
 
     suspend fun updateDatabaseAndRepo(): Result<Unit> = locker.withLock {
@@ -46,17 +65,20 @@ class StorageManager {
         }
 
         if (remoteUrl.isNotEmpty()) {
+            _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
                 uiHelper.makeToast(it.message)
             }
         }
 
         if (remoteUrl.isNotEmpty()) {
+            _syncState.emit(SyncState.Push)
             // todo: maybe async this call
             gitManager.push(cred).onFailure {
                 uiHelper.makeToast(it.message)
             }
         }
+        _syncState.emit(SyncState.Ok)
 
         updateDatabaseWithoutLocker()
 
@@ -279,6 +301,7 @@ class StorageManager {
         }
 
         if (remoteUrl.isNotEmpty()) {
+            _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
                 it.printStackTrace()
             }
@@ -302,6 +325,7 @@ class StorageManager {
         }
 
         if (remoteUrl.isNotEmpty()) {
+            _syncState.emit(SyncState.Push)
             gitManager.push(cred).onFailure {
                 it.printStackTrace()
             }
@@ -309,6 +333,7 @@ class StorageManager {
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
+        _syncState.emit(SyncState.Ok)
         return success(payload)
     }
 }

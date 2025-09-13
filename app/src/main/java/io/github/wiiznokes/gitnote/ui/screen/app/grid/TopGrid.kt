@@ -3,6 +3,13 @@ package io.github.wiiznokes.gitnote.ui.screen.app.grid
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,10 +23,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,22 +47,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.manager.SyncState
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -172,40 +189,49 @@ private fun SearchBar(
         },
         trailingIcon = if (queryTextField.text.isEmpty()) {
             {
-                Box {
-                    val expanded = remember { mutableStateOf(false) }
-                    IconButton(
-                        onClick = {
-                            expanded.value = true
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    val syncState = vm.syncState.collectAsState()
+
+                    SyncStateIcon(syncState.value)
+
+                    Box {
+                        val expanded = remember { mutableStateOf(false) }
+                        IconButton(
+                            onClick = {
+                                expanded.value = true
+                            }
+                        ) {
+                            SimpleIcon(
+                                imageVector = Icons.Rounded.MoreVert,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                    ) {
-                        SimpleIcon(
-                            imageVector = Icons.Rounded.MoreVert,
-                            tint = MaterialTheme.colorScheme.onSurface
+
+                        val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
+
+                        CustomDropDown(
+                            expanded = expanded,
+                            options = listOf(
+                                CustomDropDownModel(
+                                    text = stringResource(R.string.settings),
+                                    onClick = onSettingsClick
+                                ),
+                                CustomDropDownModel(
+                                    text = if (readOnlyMode) stringResource(
+                                        R.string.read_only_mode_deactive
+                                    ) else stringResource(R.string.read_only_mode_activate),
+                                    onClick = {
+                                        vm.viewModelScope.launch {
+                                            vm.prefs.isReadOnlyModeActive.update(!readOnlyMode)
+                                        }
+                                    }
+                                ),
+                            )
                         )
                     }
-
-                    val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
-
-                    CustomDropDown(
-                        expanded = expanded,
-                        options = listOf(
-                            CustomDropDownModel(
-                                text = stringResource(R.string.settings),
-                                onClick = onSettingsClick
-                            ),
-                            CustomDropDownModel(
-                                text = if (readOnlyMode) stringResource(
-                                    R.string.read_only_mode_deactive
-                                ) else stringResource(R.string.read_only_mode_activate),
-                                onClick = {
-                                    vm.viewModelScope.launch {
-                                        vm.prefs.isReadOnlyModeActive.update(!readOnlyMode)
-                                    }
-                                }
-                            ),
-                        )
-                    )
                 }
             }
         } else {
@@ -304,5 +330,72 @@ private fun SelectableTopBar(
                 }
             }
         }
+    }
+}
+
+
+
+
+@Composable
+private fun SyncStateIcon(
+    state: SyncState
+) {
+    var modifier: Modifier = Modifier
+
+    if (state.isLoading()) {
+
+        val infiniteTransition = rememberInfiniteTransition()
+        val alpha = infiniteTransition.animateFloat(
+            initialValue = 0.3f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 500),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+
+        modifier = modifier.alpha(alpha.value)
+    }
+
+    when (state) {
+        is SyncState.Error -> {
+            Icon(
+                painter = painterResource(R.drawable.cloud_alert_24px),
+                contentDescription = "Sync Error",
+                modifier = modifier,
+            )
+        }
+
+        is SyncState.Ok -> {
+            var visible by remember { mutableStateOf(true) }
+
+            LaunchedEffect(Unit) {
+                delay(1000)
+                visible = false
+            }
+
+            AnimatedVisibility(
+                visible = visible,
+                exit = fadeOut(animationSpec = tween(durationMillis = 500))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudDone,
+                    contentDescription = "Sync Done",
+                    modifier = modifier,
+                )
+            }
+        }
+
+        is SyncState.Pull -> Icon(
+            imageVector = Icons.Default.CloudDownload,
+            contentDescription = "Pulling",
+            modifier = modifier,
+        )
+
+        is SyncState.Push -> Icon(
+            imageVector = Icons.Default.CloudUpload,
+            contentDescription = "Pushing",
+            modifier = modifier,
+        )
     }
 }
