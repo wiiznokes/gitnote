@@ -50,8 +50,15 @@ class GridViewModel : ViewModel() {
 
     val syncState = storageManager.syncState
 
+    fun consumeOkSyncState() {
+        viewModelScope.launch {
+            storageManager.consumeOkSyncState()
+        }
+    }
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
 
 
 

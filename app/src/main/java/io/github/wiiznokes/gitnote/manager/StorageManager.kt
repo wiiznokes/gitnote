@@ -18,7 +18,7 @@ private const val TAG = "StorageManager"
 
 sealed interface SyncState {
 
-    object Ok : SyncState
+    data class Ok(val isConsumed: Boolean) : SyncState
 
     object Error : SyncState
 
@@ -45,7 +45,7 @@ class StorageManager {
 
     private val locker = Mutex()
 
-    private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok)
+    private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
 
 
@@ -78,7 +78,7 @@ class StorageManager {
                 uiHelper.makeToast(it.message)
             }
         }
-        _syncState.emit(SyncState.Ok)
+        _syncState.emit(SyncState.Ok(false))
 
         updateDatabaseWithoutLocker()
 
@@ -333,7 +333,11 @@ class StorageManager {
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
-        _syncState.emit(SyncState.Ok)
+        _syncState.emit(SyncState.Ok(false))
         return success(payload)
+    }
+
+    suspend fun consumeOkSyncState() {
+        _syncState.emit(SyncState.Ok(true))
     }
 }

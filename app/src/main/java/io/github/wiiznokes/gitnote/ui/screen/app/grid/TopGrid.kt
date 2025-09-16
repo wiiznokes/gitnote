@@ -57,7 +57,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -195,7 +194,9 @@ private fun SearchBar(
 
                     val syncState = vm.syncState.collectAsState()
 
-                    SyncStateIcon(syncState.value)
+                    SyncStateIcon(syncState.value, {
+                        vm.consumeOkSyncState()
+                    })
 
                     Box {
                         val expanded = remember { mutableStateOf(false) }
@@ -338,7 +339,8 @@ private fun SelectableTopBar(
 
 @Composable
 private fun SyncStateIcon(
-    state: SyncState
+    state: SyncState,
+    onConsumeOkSyncState: () -> Unit
 ) {
     var modifier: Modifier = Modifier
 
@@ -367,11 +369,12 @@ private fun SyncStateIcon(
         }
 
         is SyncState.Ok -> {
-            var visible by remember { mutableStateOf(true) }
+            var visible by remember { mutableStateOf(!state.isConsumed) }
 
-            LaunchedEffect(Unit) {
+            LaunchedEffect(visible) {
                 delay(1000)
                 visible = false
+                onConsumeOkSyncState()
             }
 
             AnimatedVisibility(
