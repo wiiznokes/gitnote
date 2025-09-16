@@ -280,7 +280,7 @@ open class TextVM() : ViewModel() {
     fun save(onSuccess: () -> Unit = {}) {
 
         if (isPreviousNoteTheSame()) {
-            uiHelper.makeToast(uiHelper.getString(R.string.error_note_is_the_same))
+            Log.d(TAG, "No modification")
             onSuccess()
             return
         }
