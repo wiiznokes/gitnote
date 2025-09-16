@@ -142,10 +142,10 @@ kotlin {
 dependencies {
 
     // AndroidX Core
-    implementation(libs.androidx.ktx)
-    implementation(libs.runtime.ktx)
-    implementation(libs.runtime.compose)
-    implementation(libs.compose.activity)
+    implementation(libs.core.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.activity.compose)
     implementation(libs.datastore.preferences)
 
     val composeBom = platform(libs.compose.bom)
@@ -158,7 +158,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     // Compose Debug
-    implementation(libs.compose.ui.preview)
+    implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
 
     // Room
@@ -181,5 +181,5 @@ dependencies {
     androidTestImplementation(composeBom)
     androidTestImplementation(libs.test.junit.ktx)
     androidTestImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.test.runner)
 }

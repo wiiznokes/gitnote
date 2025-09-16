@@ -6,24 +6,34 @@ kotlin = "2.2.0"
 # sync with the kotlin version
 ksp = "2.2.0-2.0.2"
 
-ktx-lifecycle = "2.9.2"
+core-ktx = "1.16.0"
+lifecycle-runtime = "2.9.2"
+activity-compose = "1.10.1"
+datastore-preferences = "1.1.7"
+compose-bom = "2025.07.00"
 room = "2.7.2"
-richtext = "1.0.0-alpha03"
+compose-richtext = "1.0.0-alpha03"
+# todo: remove this dep and use the standard one
+reimagined-navigation = "1.5.0"
+
+kotlinx-coroutines-test = "1.10.2"
+test-junit-ktx = "1.3.0"
+androidx-test-runner = "1.7.0"
 
 [libraries]
 # AndroidX Core
-androidx-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "ktx-lifecycle" }
-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "ktx-lifecycle" }
-compose-activity = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.7" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime" }
+activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-preferences" }
 
 # Compose
 # https://central.sonatype.com/artifact/dev.chrisbanes.compose/compose-bom/versions
 # compose-bom-alpha = { group = "dev.chrisbanes.compose", name = "compose-bom", version = "2024.05.00-alpha03" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.07.00" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-ui = { group = "androidx.compose.ui", name = "ui" }
-compose-ui-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material = { group = "androidx.compose.material", name = "material" }
@@ -35,16 +45,16 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 # Markdown
-richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "richtext" }
-richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "richtext" }
+richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "compose-richtext" }
+richtext-ui-material3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "compose-richtext" }
 
 # 3-party
-reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version = "1.5.0" }
+reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version.ref = "reimagined-navigation" }
 
 # Test
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.10.2" }
-test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version = "1.3.0" }
-androidx-runner = { group = "androidx.test", name = "runner", version = "1.7.0" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
+test-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "test-junit-ktx" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidx-test-runner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
