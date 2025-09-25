@@ -418,7 +418,7 @@ open class TextVM() : ViewModel() {
     }
 
     private fun isPreviousNoteTheSame(): Boolean =
-        previousNote.nameWithoutExtension() == name.value.text
+        previousNote.nameWithoutExtension() == NameValidation.removeEndingWhiteSpace(name.value.text)
                 && previousNote.content == content.value.text
 
     override fun onCleared() {
