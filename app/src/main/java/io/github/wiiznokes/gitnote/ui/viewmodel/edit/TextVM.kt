@@ -205,7 +205,7 @@ open class TextVM() : ViewModel() {
             if (history.size < 3) return
 
             val secondLast = history.size - 2
-            var last = history.size - 1
+            val last = history.size - 1
 
             when (isSimilar(history[secondLast], history[last], true)) {
                 IsSimilarResult.Yes -> {
@@ -322,6 +322,9 @@ open class TextVM() : ViewModel() {
         content: String,
     ): Result<Note> {
 
+
+        val name = NameValidation.removeEndingWhiteSpace(name)
+
         if (!NameValidation.check(name)) {
             uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_name))
             return failure(DataFormatException("name invalid: $name"))
@@ -379,6 +382,7 @@ open class TextVM() : ViewModel() {
         id: Int
     ): Result<Note> {
 
+        val name = NameValidation.removeEndingWhiteSpace(name)
 
         if (!NameValidation.check(name)) {
             uiHelper.makeToast(uiHelper.getString(R.string.error_invalid_name))
