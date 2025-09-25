@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.app.edit
 
+import android.webkit.MimeTypeMap
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,7 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newEditViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newMarkDownVM
+import kotlin.text.startsWith
 
 
 private const val TAG = "EditScreen"
@@ -63,10 +65,19 @@ fun EditScreen(
     onFinished: () -> Unit,
 ) {
 
-    val vm = when (editParams.fileExtension()) {
+    val extension = editParams.fileExtension()
+    val vm = when (extension) {
         is FileExtension.Txt -> newEditViewModel(editParams)
         is FileExtension.Md -> newMarkDownVM(editParams)
-        is FileExtension.Other -> TODO()
+        is FileExtension.Other -> {
+            val mimeType = MimeTypeMap.getSingleton()
+                .getMimeTypeFromExtension(extension.text)
+            if (mimeType?.startsWith("text") == true) {
+                newEditViewModel(editParams)
+            } else {
+                throw Exception("file extension not supported, but present in the database?? $extension")
+            }
+        }
     }
 
     if (editParams is EditParams.Saved) {
