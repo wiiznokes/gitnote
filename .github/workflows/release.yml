@@ -43,8 +43,8 @@ jobs:
       - name: Read versions from files
         id: versions
         run: |
-            echo "rust=$(cat app/src/main/rust/RUST_VERSION)" >> $GITHUB_OUTPUT
-            echo "ndk=$(cat app/src/main/rust/NDK_VERSION)" >> $GITHUB_OUTPUT
+          echo "rust=$(cat app/src/main/rust/RUST_VERSION)" >> $GITHUB_OUTPUT
+          echo "ndk=$(cat app/src/main/rust/NDK_VERSION)" >> $GITHUB_OUTPUT
 
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -69,7 +69,7 @@ jobs:
           STORE_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo $KEY_BASE64 | base64 --decode > app/key.jks
-          
+
           ./gradlew assembleRelease
 
           mkdir -p packages
