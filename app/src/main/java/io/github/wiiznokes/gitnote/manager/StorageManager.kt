@@ -13,6 +13,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
 import kotlin.Result.Companion.success
+import kotlin.collections.HashMap
 
 private const val TAG = "StorageManager"
 
@@ -109,8 +110,8 @@ class StorageManager {
         val repoPath = prefs.repoPath()
         Log.d(TAG, "repoPath = $repoPath")
 
-        val timestamps = gitManager.getTimestamps().getOrThrow()
-
+//        val timestamps = gitManager.getTimestamps().getOrThrow()
+        val timestamps = HashMap<String, Long>(0)
         dao.clearAndInit(repoPath, timestamps)
         prefs.databaseCommit.update(fsCommit)
 
