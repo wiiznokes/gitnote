@@ -84,7 +84,6 @@ internal val topBarHeight = 80.dp
 fun GridScreen(
     onSettingsClick: () -> Unit,
     onEditClick: (Note, EditType) -> Unit,
-    onStorageFailure: () -> Unit,
 ) {
 
     val vm: GridViewModel = viewModel()

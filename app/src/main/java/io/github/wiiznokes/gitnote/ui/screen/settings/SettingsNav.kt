@@ -24,7 +24,7 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 fun SettingsNav(
     destination: SettingsDestination,
     onBackClick: () -> Unit,
-    onStorageFailure: () -> Unit,
+    onCloseRepo: () -> Unit,
 ) {
 
     val navController =
@@ -61,7 +61,7 @@ fun SettingsNav(
                 SettingsScreen(
                     onBackClick = onBackClick,
                     navController = navController,
-                    onCloseRepo = onStorageFailure,
+                    onCloseRepo = onCloseRepo,
                     vm = vm
                 )
             }

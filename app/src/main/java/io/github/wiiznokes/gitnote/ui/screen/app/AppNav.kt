@@ -25,7 +25,7 @@ private const val TAG = "AppScreen"
 @Composable
 fun AppScreen(
     appDestination: AppDestination,
-    onStorageFailure: () -> Unit,
+    onCloseRepo: () -> Unit,
 ) {
 
     val navController =
@@ -51,7 +51,6 @@ fun AppScreen(
                     onEditClick = { note, editType ->
                         navController.navigate(AppDestination.Edit(EditParams.Idle(note, editType)))
                     },
-                    onStorageFailure = onStorageFailure
                 )
             }
 
@@ -69,7 +68,7 @@ fun AppScreen(
             is AppDestination.Settings -> SettingsNav(
                 onBackClick = { navController.pop() },
                 destination = it.settingsDestination,
-                onStorageFailure = onStorageFailure
+                onCloseRepo = onCloseRepo
             )
         }
     }

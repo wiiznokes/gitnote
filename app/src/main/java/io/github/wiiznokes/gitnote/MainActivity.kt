@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
 
                         is Destination.App -> AppScreen(
                             appDestination = destination.appDestination,
-                            onStorageFailure = {
+                            onCloseRepo = {
                                 navController.popAll()
                                 navController.navigate(Destination.Setup(SetupDestination.Main))
                             }

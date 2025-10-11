@@ -279,9 +279,9 @@ class StorageManager {
     }
 
     suspend fun closeRepo() = locker.withLock {
+        prefs.closeRepo()
         gitManager.closeRepo()
         dao.clearDatabase()
-        prefs.closeRepo()
     }
 
 
