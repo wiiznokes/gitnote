@@ -125,23 +125,34 @@ interface RepoDatabaseDao {
             SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
         }
 
+
+        fun ftsEscape(query: String): String {
+
+            // todo: change this when FTS5 is supported by room https://issuetracker.google.com/issues/146824830
+            val specialChars: List<CharSequence> = listOf("\"", "*", "-", "(", ")", "<", ">", ":", "^", "~", "'", "AND", "OR", "NOT")
+
+            if (specialChars.any { query.contains(it) }) {
+                val escapedQuery = query.replace("\"", "\"\"")
+                return "\"$escapedQuery\" * "
+            } else {
+                return "$query*"
+            }
+        }
+
         val sql = """
-             SELECT Notes.*,
-                CASE 
-                    WHEN NotesFts.relativePath MATCH :query THEN 1
-                    WHEN NotesFts.content MATCH :query THEN 0
-                    ELSE -1
-                END AS matchPriority
+            SELECT Notes.*
             FROM Notes
             JOIN NotesFts ON NotesFts.rowid = Notes.rowid
             WHERE
                 Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
                 AND
                 NotesFts MATCH :query
-            ORDER BY matchPriority DESC, $sortColumn $order
+            ORDER BY $sortColumn $order
         """.trimIndent()
 
-        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, query))
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, ftsEscape(query)))
+
+
         return this.gridNotesRaw(query)
     }
 

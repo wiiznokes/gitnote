@@ -108,6 +108,7 @@ android {
 
         debug {
             applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("nightly")
         }
     }
 
