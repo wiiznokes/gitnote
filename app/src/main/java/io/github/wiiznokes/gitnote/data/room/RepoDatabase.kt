@@ -14,8 +14,8 @@ import kotlin.random.Random
 private const val TAG = "RepoDatabase"
 
 @Database(
-    entities = [NoteFolder::class, Note::class],
-    version = 1
+    entities = [NoteFolder::class, Note::class, NoteFts::class],
+    version = 2
 )
 abstract class RepoDatabase : RoomDatabase() {
 
@@ -40,7 +40,7 @@ abstract class RepoDatabase : RoomDatabase() {
                     klass = RepoDatabase::class.java,
                     name = TAG
                 )
-                .fallbackToDestructiveMigration(false)
+                .fallbackToDestructiveMigration(true)
                 .addCallback(onMigration)
                 .build()
         }

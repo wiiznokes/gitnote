@@ -37,7 +37,6 @@ import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
-import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -85,16 +84,6 @@ fun SettingsScreen(
         SettingsSection(
             title = stringResource(R.string.grid)
         ) {
-
-            val sortType by vm.prefs.sortType.getAsState()
-            MultipleChoiceSettings(
-                title = stringResource(R.string.sort_type),
-                subtitle = sortType.toString(),
-                options = SortType.entries,
-                onOptionClick = {
-                    vm.update { vm.prefs.sortType.update(it) }
-                }
-            )
 
             val sortOrder by vm.prefs.sortOrder.getAsState()
             MultipleChoiceSettings(

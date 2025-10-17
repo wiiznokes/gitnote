@@ -8,7 +8,6 @@ import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
-import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import kotlinx.coroutines.runBlocking
@@ -106,9 +105,8 @@ class AppPreferences(
 
     val provider = enumPreference("provider", ProviderType.GitHub)
 
-    val sortType = enumPreference("sortType", SortType.Modification)
 
-    val sortOrder = enumPreference("sortOrder", SortOrder.Ascending)
+    val sortOrder = enumPreference("sortOrder", SortOrder.MostRecent)
 
     val noteMinWidth = enumPreference("noteMinWidth", NoteMinWidth.Default)
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)

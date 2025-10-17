@@ -5,8 +5,12 @@ import android.webkit.MimeTypeMap
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Upsert
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
+import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import kotlinx.coroutines.flow.Flow
 
 private const val TAG = "Dao"
@@ -79,6 +83,69 @@ interface RepoDatabaseDao {
 
     @Query("SELECT * FROM Notes")
     fun allNotes(): Flow<List<Note>>
+
+
+    @RawQuery(observedEntities = [Note::class])
+    fun gridNotesRaw(query: SupportSQLiteQuery) : Flow<List<Note>>
+
+    fun gridNotes(
+        currentNoteFolderRelativePath: String,
+        sortOrder: SortOrder,
+    ) : Flow<List<Note>> {
+
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "relativePath" to "ASC"
+            SortOrder.ZA -> "relativePath" to "DESC"
+            SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
+            SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
+        }
+
+        val sql = """
+            SELECT *
+            FROM Notes 
+            WHERE relativePath LIKE :currentNoteFolderRelativePath || '%' 
+            ORDER BY $sortColumn $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.gridNotesRaw(query)
+    }
+
+
+    fun gridNotesWithQuery(
+        currentNoteFolderRelativePath: String,
+        sortOrder: SortOrder,
+        query: String,
+    ) : Flow<List<Note>> {
+
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "relativePath" to "ASC"
+            SortOrder.ZA -> "relativePath" to "DESC"
+            SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
+            SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
+        }
+
+        val sql = """
+             SELECT Notes.*,
+                CASE 
+                    WHEN NotesFts.relativePath MATCH :query THEN 1
+                    WHEN NotesFts.content MATCH :query THEN 0
+                    ELSE -1
+                END AS matchPriority
+            FROM Notes
+            JOIN NotesFts ON NotesFts.rowid = Notes.rowid
+            WHERE
+                Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
+                AND
+                NotesFts MATCH :query
+            ORDER BY matchPriority DESC, $sortColumn $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, query))
+        return this.gridNotesRaw(query)
+    }
+
+    //fun drawerFolders(): Flow<List<DrawerFolderModel>>
 
 
     @Upsert
