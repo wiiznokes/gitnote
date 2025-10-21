@@ -7,6 +7,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import io.github.wiiznokes.gitnote.MyApp
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
+import io.requery.android.database.sqlite.SQLiteDatabase
+import io.requery.android.database.sqlite.SQLiteDatabaseConfiguration
+import io.requery.android.database.sqlite.SQLiteFunction
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
@@ -42,6 +46,17 @@ abstract class RepoDatabase : RoomDatabase() {
                 )
                 .fallbackToDestructiveMigration(true)
                 .addCallback(onMigration)
+                .openHelperFactory { configuration ->
+                    val config = SQLiteDatabaseConfiguration(
+                        context.filesDir.toPath().resolve(TAG).toString(),
+                        SQLiteDatabase.OPEN_CREATE or SQLiteDatabase.OPEN_READWRITE
+                    )
+
+                    config.functions.add(SQLiteFunction("rank", 1, Rank))
+
+                    val options = RequerySQLiteOpenHelperFactory.ConfigurationOptions { config }
+                    RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
+                }
                 .build()
         }
     }

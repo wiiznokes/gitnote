@@ -11,7 +11,11 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
+import io.requery.android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.flow.Flow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
 
 private const val TAG = "Dao"
 
@@ -140,14 +144,14 @@ interface RepoDatabaseDao {
         }
 
         val sql = """
-            SELECT Notes.*
+            SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score
             FROM Notes
             JOIN NotesFts ON NotesFts.rowid = Notes.rowid
             WHERE
                 Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
                 AND
                 NotesFts MATCH :query
-            ORDER BY $sortColumn $order
+            ORDER BY score DESC, $sortColumn $order
         """.trimIndent()
 
         val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, ftsEscape(query)))
@@ -199,4 +203,41 @@ interface RepoDatabaseDao {
         removeAllNoteFolder()
         removeAllNote()
     }
+}
+
+object Rank: SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val blob = args.getBlob(0) ?: return
+
+        val buffer = ByteBuffer.wrap(blob).order(ByteOrder.nativeOrder())
+
+        val phraseCount = buffer.int
+        val columnCount = buffer.int
+
+        var score = 0.0
+
+        for (phrase in 0 until phraseCount) {
+            for (column in 0 until columnCount) {
+
+                val hitsThisRow = buffer.int
+                val hitsAllRows = buffer.int
+                val docsWithHits = buffer.int
+
+                val weight = when (column) {
+                    0 -> 2.0 // relativePath column
+                    else -> 1.0 // content or others
+                }
+
+                score += weight * hitsThisRow
+            }
+        }
+
+        result.set(score)
+    }
+
 }
