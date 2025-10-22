@@ -6,6 +6,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import io.github.wiiznokes.gitnote.MyApp
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import io.requery.android.database.sqlite.SQLiteDatabase
@@ -46,19 +47,29 @@ abstract class RepoDatabase : RoomDatabase() {
                 )
                 .fallbackToDestructiveMigration(true)
                 .addCallback(onMigration)
-                .openHelperFactory { configuration ->
+                .openHelperFactory(buildFactory(context.filesDir.toPath().resolve(TAG).toString()))
+                .build()
+        }
+
+        fun buildFactory(path: String): SupportSQLiteOpenHelper.Factory {
+            return object : SupportSQLiteOpenHelper.Factory {
+                override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
                     val config = SQLiteDatabaseConfiguration(
-                        context.filesDir.toPath().resolve(TAG).toString(),
+                        path,
                         SQLiteDatabase.OPEN_CREATE or SQLiteDatabase.OPEN_READWRITE
                     )
 
                     config.functions.add(SQLiteFunction("rank", 1, Rank))
+                    config.functions.add(SQLiteFunction("parentPath", 1, ParentPath))
+                    config.functions.add(SQLiteFunction("fullName", 1, FullName))
 
                     val options = RequerySQLiteOpenHelperFactory.ConfigurationOptions { config }
-                    RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
+                    return RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
                 }
-                .build()
+
+            }
         }
+
     }
 
 }

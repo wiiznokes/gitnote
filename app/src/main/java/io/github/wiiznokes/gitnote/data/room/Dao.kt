@@ -11,6 +11,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
+import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
 import io.requery.android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import java.nio.ByteBuffer
@@ -92,6 +93,7 @@ interface RepoDatabaseDao {
     @RawQuery(observedEntities = [Note::class])
     fun gridNotesRaw(query: SupportSQLiteQuery) : Flow<List<Note>>
 
+    // todo: duplicate ?
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
@@ -115,7 +117,7 @@ interface RepoDatabaseDao {
         return this.gridNotesRaw(query)
     }
 
-
+    // todo: duplicate ?
     fun gridNotesWithQuery(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
@@ -160,7 +162,60 @@ interface RepoDatabaseDao {
         return this.gridNotesRaw(query)
     }
 
-    //fun drawerFolders(): Flow<List<DrawerFolderModel>>
+
+    @RawQuery(observedEntities = [Note::class, NoteFolder::class])
+    fun gridDrawerFoldersRaw(query: SupportSQLiteQuery) : Flow<List<DrawerFolderModel>>
+
+    fun drawerFoldersSortByName(
+        currentNoteFolderRelativePath: String,
+        asc: Boolean,
+    ): Flow<List<DrawerFolderModel>> {
+
+        val order = if (asc) {
+            "ASC"
+        } else {
+            "DESC"
+        }
+
+        val sql = """
+            SELECT f.relativePath, f.id, COUNT(n.relativePath)
+            FROM NoteFolders AS f
+            LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
+            WHERE parentPath(f.relativePath) = :currentNoteFolderRelativePath
+            GROUP BY f.relativePath
+            ORDER BY fullName(f.relativePath) $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.gridDrawerFoldersRaw(query)
+    }
+
+    data class Testing(
+        val relativePath: String,
+        val id: Int,
+        val relativePathNote: String,
+    )
+
+    @RawQuery
+    fun debugQuery(query: SupportSQLiteQuery): List<Testing>
+
+    fun testing() {
+
+        val sql = """
+            SELECT f.relativePath, f.id, n.relativePath AS notePath
+            FROM NoteFolders AS f
+            LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
+            WHERE parentPath(f.relativePath) = ?
+            GROUP BY f.relativePath
+            ORDER BY f.relativePath ASC
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(""))
+        val results = this.debugQuery(query)
+
+        Log.d("SQL_DEBUG", results.joinToString("\n"))
+    }
+
 
 
     @Upsert
@@ -240,4 +295,32 @@ object Rank: SQLiteDatabase.Function {
         result.set(score)
     }
 
+}
+
+object ParentPath: SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val path = args.getString(0) ?: return
+
+        if (path == "") return
+
+        result.set(path.substringBeforeLast("/", missingDelimiterValue = ""))
+    }
+}
+
+object FullName: SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val path = args.getString(0) ?: return
+
+        result.set(path.substringAfterLast("/"))
+    }
 }

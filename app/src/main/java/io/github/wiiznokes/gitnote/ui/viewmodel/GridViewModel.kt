@@ -13,6 +13,7 @@ import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
+import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
 import io.github.wiiznokes.gitnote.utils.mapAndCombine
 import kotlinx.coroutines.CoroutineScope
@@ -274,8 +275,26 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     val drawerFolders = combine(
+        currentNoteFolderRelativePath,
+        prefs.sortOrder.getFlow(),
+    ) { currentNoteFolderRelativePath, sortOrder ->
+        Pair(currentNoteFolderRelativePath, sortOrder)
+    }.flatMapLatest { pair ->
+        val (currentNoteFolderRelativePath, sortOrder) = pair
+
+        when (sortOrder) {
+            SortOrder.AZ -> dao.drawerFoldersSortByName(currentNoteFolderRelativePath, true)
+            SortOrder.ZA -> dao.drawerFoldersSortByName(currentNoteFolderRelativePath, false)
+            SortOrder.MostRecent -> dao.drawerFoldersSortByName(currentNoteFolderRelativePath, true)
+            SortOrder.Oldest -> dao.drawerFoldersSortByName(currentNoteFolderRelativePath, true)
+        }
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+
+    val drawerFolders2 = combine(
         dao.allNoteFolders(), currentNoteFolderRelativePath
     ) { notesFolders, path ->
         notesFolders.filter {
@@ -292,7 +311,7 @@ class GridViewModel : ViewModel() {
 
             DrawerFolderModel(
                 noteCount = noteCount,
-                lastModifiedTimeMillis = lastModifiedTimeMillis,
+//                lastModifiedTimeMillis = lastModifiedTimeMillis,
                 noteFolder = folder
             )
         }

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.room.Embedded
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
@@ -66,9 +67,8 @@ import kotlinx.coroutines.launch
 private const val TAG = "DrawerScreen"
 
 data class DrawerFolderModel(
+    @Embedded val noteFolder: NoteFolder,
     val noteCount: Int,
-    val noteFolder: NoteFolder,
-    val lastModifiedTimeMillis: Long,
 )
 
 
