@@ -193,7 +193,7 @@ interface RepoDatabaseDao {
     data class Testing(
         val relativePath: String,
         val id: Int,
-        val relativePathNote: String,
+        val relativePathNote: String?,
     )
 
     @RawQuery

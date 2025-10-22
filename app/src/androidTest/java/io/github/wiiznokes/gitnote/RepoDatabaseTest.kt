@@ -16,6 +16,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TAG = "RepoDatabaseTest"
+
 @RunWith(AndroidJUnit4::class)
 class RepoDatabaseTest {
 
@@ -27,9 +29,10 @@ class RepoDatabaseTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
 
         // https://issuetracker.google.com/issues/454083281
-        db = Room.inMemoryDatabaseBuilder(
+        db = Room.databaseBuilder(
             context = context,
-            klass = RepoDatabase::class.java
+            klass = RepoDatabase::class.java,
+            name = TAG
         )
             .allowMainThreadQueries()
             .openHelperFactory(buildFactory(MEMORY_DB_PATH))
@@ -47,9 +50,13 @@ class RepoDatabaseTest {
     @Test
     fun testDrawerFoldersQuery() = runTest {
 
-        dao.insertNoteFolder(NoteFolder.new("notes"))
-        dao.insertNoteFolder(NoteFolder.new("notes/work"))
-        dao.insertNote(Note.new("notes/work/a.txt"))
+        dao.insertNoteFolder(NoteFolder.new(""))
+        dao.insertNoteFolder(NoteFolder.new("test1"))
+        dao.insertNoteFolder(NoteFolder.new("test1/test1.2"))
+
+
+        dao.insertNote(Note.new("test1/1-1.md"))
+        dao.insertNote(Note.new("test1/test1.2/1.2-1.md"))
 
         dao.testing()
 
