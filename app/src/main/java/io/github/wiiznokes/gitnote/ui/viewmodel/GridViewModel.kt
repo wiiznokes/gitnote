@@ -54,8 +54,7 @@ class GridViewModel : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-
-
+    
 
     private val _currentNoteFolderRelativePath = MutableStateFlow(
         if (prefs.rememberLastOpenedFolder.getBlocking()) {
@@ -240,12 +239,11 @@ class GridViewModel : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
     val drawerFolders = combine(
         currentNoteFolderRelativePath,
-        prefs.sortOrder.getFlow(),
+        prefs.sortOrderFolder.getFlow(),
     ) { currentNoteFolderRelativePath, sortOrder ->
         Pair(currentNoteFolderRelativePath, sortOrder)
     }.flatMapLatest { pair ->
         val (currentNoteFolderRelativePath, sortOrder) = pair
-
         dao.drawerFolders(currentNoteFolderRelativePath, sortOrder)
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()

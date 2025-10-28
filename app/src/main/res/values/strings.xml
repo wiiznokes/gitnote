@@ -18,6 +18,7 @@
     <string name="user_interface">User interface</string>
     <string name="dynamic_colors">Dynamic colors</string>
     <string name="sort_order">Sort Order</string>
+    <string name="sort_order_folder">Sort Order folder</string>
     <string name="minimal_note_width">Minimal width of a note</string>
     <string name="show_long_notes">Show long notes entirely</string>
     <string name="remember_last_opened_folder">Remember last opened folder</string>

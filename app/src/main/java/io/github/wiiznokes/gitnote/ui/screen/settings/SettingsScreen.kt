@@ -95,6 +95,16 @@ fun SettingsScreen(
                 }
             )
 
+            val sortOrderFolder by vm.prefs.sortOrderFolder.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.sort_order_folder),
+                subtitle = sortOrderFolder.toString(),
+                options = SortOrder.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.sortOrderFolder.update(it) }
+                }
+            )
+
             val noteMinWidth by vm.prefs.noteMinWidth.getAsState()
             MultipleChoiceSettings(
                 title = stringResource(R.string.minimal_note_width),

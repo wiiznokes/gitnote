@@ -107,6 +107,7 @@ class AppPreferences(
 
 
     val sortOrder = enumPreference("sortOrder", SortOrder.MostRecent)
+    val sortOrderFolder = enumPreference("sortOrderFolder", SortOrder.AZ)
 
     val noteMinWidth = enumPreference("noteMinWidth", NoteMinWidth.Default)
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
