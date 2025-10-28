@@ -52,11 +52,15 @@ class RepoDatabaseTest {
 
         dao.insertNoteFolder(NoteFolder.new(""))
         dao.insertNoteFolder(NoteFolder.new("test1"))
+        dao.insertNoteFolder(NoteFolder.new("test2"))
         dao.insertNoteFolder(NoteFolder.new("test1/test1.2"))
 
 
         dao.insertNote(Note.new("test1/1-1.md"))
+        dao.insertNote(Note.new("test1/1-2.md"))
         dao.insertNote(Note.new("test1/test1.2/1.2-1.md"))
+        dao.insertNote(Note.new("test2/2-1.md"))
+        dao.insertNote(Note.new("test1/1-3.md"))
 
         dao.testing()
 

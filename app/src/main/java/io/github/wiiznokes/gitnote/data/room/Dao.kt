@@ -166,24 +166,25 @@ interface RepoDatabaseDao {
     @RawQuery(observedEntities = [Note::class, NoteFolder::class])
     fun gridDrawerFoldersRaw(query: SupportSQLiteQuery) : Flow<List<DrawerFolderModel>>
 
-    fun drawerFoldersSortByName(
+    fun drawerFolders(
         currentNoteFolderRelativePath: String,
-        asc: Boolean,
+        sortOrder: SortOrder,
     ): Flow<List<DrawerFolderModel>> {
 
-        val order = if (asc) {
-            "ASC"
-        } else {
-            "DESC"
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "f.relativePath" to "ASC"
+            SortOrder.ZA -> "f.relativePath" to "DESC"
+            SortOrder.MostRecent -> "MAX(n.lastModifiedTimeMillis)" to "DESC"
+            SortOrder.Oldest -> "MAX(n.lastModifiedTimeMillis)" to "ASC"
         }
 
         val sql = """
-            SELECT f.relativePath, f.id, COUNT(n.relativePath)
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount
             FROM NoteFolders AS f
             LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
-            WHERE parentPath(f.relativePath) = :currentNoteFolderRelativePath
+            WHERE parentPath(f.relativePath) = ?
             GROUP BY f.relativePath
-            ORDER BY fullName(f.relativePath) $order
+            ORDER BY $sortColumn $order
         """.trimIndent()
 
         val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
@@ -193,7 +194,7 @@ interface RepoDatabaseDao {
     data class Testing(
         val relativePath: String,
         val id: Int,
-        val relativePathNote: String?,
+        val noteCount: Int,
     )
 
     @RawQuery
@@ -202,12 +203,12 @@ interface RepoDatabaseDao {
     fun testing() {
 
         val sql = """
-            SELECT f.relativePath, f.id, n.relativePath AS notePath
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount
             FROM NoteFolders AS f
             LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
             WHERE parentPath(f.relativePath) = ?
             GROUP BY f.relativePath
-            ORDER BY f.relativePath ASC
+            ORDER BY MAX(n.lastModifiedTimeMillis) DESC
         """.trimIndent()
 
         val query = SimpleSQLiteQuery(sql, arrayOf(""))
