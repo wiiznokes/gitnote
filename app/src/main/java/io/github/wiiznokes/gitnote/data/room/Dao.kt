@@ -79,16 +79,16 @@ interface RepoDatabaseDao {
     }
 
 
+
     @Query("SELECT * FROM NoteFolders WHERE relativePath = ''")
     suspend fun rootNoteFolder(): NoteFolder
 
-    @Query("SELECT * FROM NoteFolders")
-    fun allNoteFolders(): Flow<List<NoteFolder>>
-
-
-    @Query("SELECT * FROM Notes")
-    fun allNotes(): Flow<List<Note>>
-
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM Notes WHERE relativePath = :relativePath
+    )
+    """)
+    suspend fun isNoteExist(relativePath: String): Boolean
 
     @RawQuery(observedEntities = [Note::class])
     fun gridNotesRaw(query: SupportSQLiteQuery) : Flow<List<Note>>

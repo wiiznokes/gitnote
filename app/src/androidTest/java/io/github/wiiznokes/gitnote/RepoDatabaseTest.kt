@@ -64,5 +64,9 @@ class RepoDatabaseTest {
 
         dao.testing()
 
+
+        println(dao.isNoteExist("test1/1-1.md"))
+        println(dao.isNoteExist("test1/1-1.md2"))
+
     }
 }

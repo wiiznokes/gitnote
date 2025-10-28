@@ -54,7 +54,7 @@ class GridViewModel : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    
+
 
     private val _currentNoteFolderRelativePath = MutableStateFlow(
         if (prefs.rememberLastOpenedFolder.getBlocking()) {
@@ -73,16 +73,13 @@ class GridViewModel : ViewModel() {
         get() = _selectedNotes.asStateFlow()
 
 
-    private val allNotes = dao.allNotes()
-
-
     init {
         Log.d(TAG, "init")
 
         CoroutineScope(Dispatchers.IO).launch {
-            allNotes.collect { allNotes ->
+            gridNotes.collect {
                 selectedNotes.value.filter { selectedNote ->
-                    allNotes.contains(selectedNote)
+                    dao.isNoteExist(selectedNote.relativePath)
                 }.let { newSelectedNotes ->
                     _selectedNotes.emit(newSelectedNotes)
                 }
