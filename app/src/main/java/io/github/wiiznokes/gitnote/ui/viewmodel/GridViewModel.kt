@@ -79,22 +79,21 @@ class GridViewModel : ViewModel() {
 
     init {
         Log.d(TAG, "init")
+    }
 
-//        CoroutineScope(Dispatchers.IO).launch {
-//            gridNotes.collect {
-//                selectedNotes.value.filter { selectedNote ->
-//                    dao.isNoteExist(selectedNote.relativePath)
-//                }.let { newSelectedNotes ->
-//                    _selectedNotes.emit(newSelectedNotes)
-//                }
-//            }
-//        }
+    suspend fun refreshSelectedNotes() {
+        selectedNotes.value.filter { selectedNote ->
+            dao.isNoteExist(selectedNote.relativePath)
+        }.let { newSelectedNotes ->
+            _selectedNotes.emit(newSelectedNotes)
+        }
     }
 
     fun refresh() {
         CoroutineScope(Dispatchers.IO).launch {
             _isRefreshing.emit(true)
             storageManager.updateDatabaseAndRepo()
+            refreshSelectedNotes()
             _isRefreshing.emit(false)
         }
     }
