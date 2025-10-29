@@ -14,8 +14,6 @@
 [![F-Droid](https://img.shields.io/f-droid/v/io.github.wiiznokes.gitnote?logo=f-droid&label=F-Droid&cacheSeconds=3600)](https://f-droid.org/packages/io.github.wiiznokes.gitnote)
 [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/io.github.wiiznokes.gitnote)](https://apt.izzysoft.de/fdroid/index/apk/io.github.wiiznokes.gitnote)
 
-_Supported Android versions: 11 to 16_
-
 Android note app which integrate Git. You can use this app with other desktop editors.
 
 ## Why
@@ -38,6 +36,10 @@ Because all apps which integrate git on Android either separate the note title f
   <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/drawer.png" width="32%"  alt="drawer screen"/> 
   <img src="https://media.githubusercontent.com/media/wiiznokes/gitnote/master/assets/edit.png" width="32%"  alt="edit screen"/>
 </p>
+
+_Supported Android versions: 11 to 16_
+
+_Supported Architecture: `arm64-v8a`, `x86_64`_
 
 # Build
 
