@@ -15,6 +15,7 @@ extern crate log;
 mod utils;
 mod key_gen;
 mod libgit2;
+mod mime_types;
 
 #[cfg(test)]
 mod test;

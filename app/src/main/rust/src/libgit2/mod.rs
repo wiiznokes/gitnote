@@ -10,9 +10,8 @@ use git2::{
     CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
-use mime_guess::mime;
 
-use crate::{Cred, Error, ProgressCB};
+use crate::{Cred, Error, ProgressCB, mime_types::is_extension_supported};
 
 mod merge;
 
@@ -287,11 +286,6 @@ pub fn is_change() -> Result<bool, Error> {
     Ok(count > 0)
 }
 
-fn is_extension_supported(str: &str) -> bool {
-    let mimes = mime_guess::from_path(str);
-    mimes.iter().any(|mime| mime.type_() == mime::TEXT)
-}
-
 fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option<(String, i64)>> {
     // Use revwalk to find the last commit that touched this path
     let mut revwalk = repo.revwalk()?;
@@ -352,7 +346,9 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
     tree.walk(TreeWalkMode::PreOrder, |root, entry| {
         if entry.kind() == Some(git2::ObjectType::Blob)
             && let Some(name) = entry.name()
-            && is_extension_supported(name)
+            && let Some(extension) = Path::new(name).extension()
+            && let Some(extension) = extension.to_str()
+            && is_extension_supported(extension)
         {
             let path = format!("{root}{name}");
             if let Ok(Some((path, time))) = find_timestamp(repo, path) {
