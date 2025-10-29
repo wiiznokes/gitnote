@@ -199,7 +199,7 @@ class GridViewModel : ViewModel() {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val notes = combine(
+    val gridNotes = combine(
         currentNoteFolderRelativePath,
         prefs.sortOrder.getFlow(),
         query,
@@ -218,16 +218,10 @@ class GridViewModel : ViewModel() {
                 }
             }
         ).flow.cachedIn(viewModelScope)
-    }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
-    )
-
-    val gridNotes = combine(notes, selectedNotes) { notes, selectedNotes ->
-        notes.map { note ->
-            val name = note.nameWithoutExtension()
-
-            GridNote(
-                title = name, selected = selectedNotes.contains(note), note = note
+    }.combine(selectedNotes) { gridNotes, selectedNotes ->
+        gridNotes.map { gridNote ->
+            gridNote.copy(
+                selected = selectedNotes.contains(gridNote.note)
             )
         }
     }.stateIn(

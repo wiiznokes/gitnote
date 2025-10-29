@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.model
 
+import androidx.room.Embedded
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
@@ -34,7 +35,8 @@ enum class NoteMinWidth(val size: Int) {
 }
 
 data class GridNote(
+    @Embedded
     val note: Note,
-    val title: String,
-    val selected: Boolean,
+    val isUnique: Boolean,
+    val selected: Boolean = false,
 )

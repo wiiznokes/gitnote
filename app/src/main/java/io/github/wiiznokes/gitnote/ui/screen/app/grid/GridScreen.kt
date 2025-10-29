@@ -309,7 +309,8 @@ private fun GridView(
                             horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
-                                text = if (showFullPathOfNotes.value) gridNote.note.relativePath else gridNote.title,
+                                text = if (showFullPathOfNotes.value || !gridNote.isUnique) gridNote.note.relativePath else
+                                    gridNote.note.nameWithoutExtension(),
                                 modifier = Modifier.padding(bottom = 6.dp),
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.titleMedium.copy(

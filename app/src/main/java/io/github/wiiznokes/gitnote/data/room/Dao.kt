@@ -12,6 +12,7 @@ import androidx.room.Upsert
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
+import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
 import io.requery.android.database.sqlite.SQLiteDatabase
@@ -101,13 +102,12 @@ interface RepoDatabaseDao {
     suspend fun isNoteExist(relativePath: String): Boolean
 
     @RawQuery(observedEntities = [Note::class])
-    fun gridNotesRaw(query: SupportSQLiteQuery) : PagingSource<Int, Note>
+    fun gridNotesRaw(query: SupportSQLiteQuery) : PagingSource<Int, GridNote>
 
-    // todo: duplicate ?
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
-    ) : PagingSource<Int, Note> {
+    ) : PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "relativePath" to "ASC"
@@ -117,9 +117,17 @@ interface RepoDatabaseDao {
         }
 
         val sql = """
-            SELECT *
-            FROM Notes 
-            WHERE relativePath LIKE :currentNoteFolderRelativePath || '%' 
+            WITH notes_with_filename AS (
+                SELECT *, fullName(relativePath) AS fileName
+                FROM Notes
+                WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'
+            )
+            SELECT *,
+                   CASE 
+                       WHEN COUNT(*) OVER (PARTITION BY fileName) = 1 THEN 1
+                       ELSE 0
+                   END AS isUnique
+            FROM notes_with_filename
             ORDER BY $sortColumn $order
         """.trimIndent()
 
@@ -127,12 +135,11 @@ interface RepoDatabaseDao {
         return this.gridNotesRaw(query)
     }
 
-    // todo: duplicate ?
     fun gridNotesWithQuery(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
         query: String,
-    ) : PagingSource<Int, Note> {
+    ) : PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "relativePath" to "ASC"
@@ -140,7 +147,6 @@ interface RepoDatabaseDao {
             SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
             SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
         }
-
 
         fun ftsEscape(query: String): String {
 
@@ -156,13 +162,21 @@ interface RepoDatabaseDao {
         }
 
         val sql = """
-            SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score
-            FROM Notes
-            JOIN NotesFts ON NotesFts.rowid = Notes.rowid
-            WHERE
-                Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
-                AND
-                NotesFts MATCH :query
+            WITH notes_with_filename AS (
+                SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score, fullName(relativePath) as fileName
+                FROM Notes
+                JOIN NotesFts ON NotesFts.rowid = Notes.rowid
+                WHERE
+                    Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
+                    AND
+                    NotesFts MATCH :query
+            )
+            SELECT *,
+                   CASE 
+                       WHEN COUNT(*) OVER (PARTITION BY fileName) = 1 THEN 1
+                       ELSE 0
+                   END AS isUnique
+            FROM notes_with_filename
             ORDER BY score DESC, $sortColumn $order
         """.trimIndent()
 
