@@ -3,10 +3,10 @@
     <string name="system_theme">System</string>
     <string name="light_theme">Light</string>
     <string name="dark_theme">Dark</string>
-    <string name="modification_sort_type">Modification</string>
-    <string name="alpha_numeric_sort_type">Alpha numeric</string>
-    <string name="ascending_sort_order">Ascending</string>
-    <string name="descending_sort_order">Descending</string>
+    <string name="az_sort_order">A-Z</string>
+    <string name="za_sort_order">Z-A</string>
+    <string name="most_recent_sort_order">Most recent</string>
+    <string name="oldest_sort_order">Oldest</string>
     <string name="new_folder_label">New folder name</string>
     <string name="create_new_folder">Create new folder</string>
     <string name="yes">Yes</string>
@@ -17,8 +17,8 @@
     <string name="search_in_notes">Search in notes</string>
     <string name="user_interface">User interface</string>
     <string name="dynamic_colors">Dynamic colors</string>
-    <string name="sort_type">Sort type</string>
     <string name="sort_order">Sort Order</string>
+    <string name="sort_order_folder">Sort Order folder</string>
     <string name="minimal_note_width">Minimal width of a note</string>
     <string name="show_long_notes">Show long notes entirely</string>
     <string name="remember_last_opened_folder">Remember last opened folder</string>
@@ -37,6 +37,8 @@
     <string name="close_repository_confirmation">Do you really want to close the repository?</string>
     <string name="version">Version</string>
     <string name="show_logs">Show logs</string>
+    <string name="reload_database">Reload the database</string>
+    <string name="success_reload">Successfully reloaded the database</string>
     <string name="report_an_issue">Report an issue</string>
     <string name="source_code">Source code</string>
     <string name="libraries">Libraries</string>

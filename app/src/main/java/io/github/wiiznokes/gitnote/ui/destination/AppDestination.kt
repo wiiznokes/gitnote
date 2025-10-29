@@ -34,7 +34,7 @@ sealed class EditParams : Parcelable {
     ) : EditParams()
 
     fun fileExtension(): FileExtension {
-        return when(this) {
+        return when (this) {
             is Idle -> this.note.fileExtension()
             is Saved -> this.note.fileExtension()
         }

@@ -5,10 +5,6 @@ import androidx.annotation.Keep
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.model.Cred
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
@@ -67,7 +63,7 @@ class GitManager {
                 }
                 isLibInitialized = true
             }
-           success(f())
+            success(f())
         } catch (e: Exception) {
             e.printStackTrace()
             failure(e)

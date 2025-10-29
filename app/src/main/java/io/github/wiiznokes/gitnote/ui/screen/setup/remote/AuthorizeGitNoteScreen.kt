@@ -51,7 +51,7 @@ fun AuthorizeGitNoteScreen(
             },
             enabled = authState.isClickable() && authState != AuthState.Success
         ) {
-             if (!authState.isLoading()) {
+            if (!authState.isLoading()) {
                 Text(text = stringResource(R.string.authorize_gitnote))
             } else {
                 Text(text = authState.message())

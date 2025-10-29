@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.data.room
 
 import android.os.Parcelable
 import androidx.room.Entity
+import androidx.room.Fts4
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.data.removeFirstAndLastSlash
@@ -136,3 +137,10 @@ data class Note(
 
     override fun hashCode(): Int = id
 }
+
+@Fts4(contentEntity = Note::class)
+@Entity(tableName = "NotesFts")
+data class NoteFts(
+    val relativePath: String,
+    val content: String
+)

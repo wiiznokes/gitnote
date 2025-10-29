@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.util.TypedValueCompat.pxToDp
@@ -41,7 +41,7 @@ fun CustomDropDown(
         mutableStateOf(Offset.Zero)
     }
 ) {
-    val m = LocalContext.current.resources.displayMetrics
+    val m = LocalResources.current.displayMetrics
     val x = pxToDp(clickPosition.value.x, m).dp
     val y = pxToDp(clickPosition.value.y, m).dp
     val offset = DpOffset(x, y)

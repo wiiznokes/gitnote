@@ -12,6 +12,8 @@ activity-compose = "1.11.0"
 datastore-preferences = "1.1.7"
 compose-bom = "2025.09.00"
 room = "2.8.0"
+sqlite = "3.49.0"
+paging = "3.3.6"
 compose-richtext = "1.0.0-alpha03"
 # todo: remove this dep and use the standard one
 reimagined-navigation = "1.5.0"
@@ -43,6 +45,11 @@ compose-material-icons-extended = { group = "androidx.compose.material", name = 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite = { group = "com.github.requery", name = "sqlite-android", version.ref = "sqlite" }
+paging = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+
 
 # Markdown
 richtext-commonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "compose-richtext" }

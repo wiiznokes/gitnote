@@ -6,7 +6,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import io.github.wiiznokes.gitnote.MyApp
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
+import io.requery.android.database.sqlite.SQLiteDatabase
+import io.requery.android.database.sqlite.SQLiteDatabaseConfiguration
+import io.requery.android.database.sqlite.SQLiteFunction
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
@@ -14,8 +19,8 @@ import kotlin.random.Random
 private const val TAG = "RepoDatabase"
 
 @Database(
-    entities = [NoteFolder::class, Note::class],
-    version = 1
+    entities = [NoteFolder::class, Note::class, NoteFts::class],
+    version = 2
 )
 abstract class RepoDatabase : RoomDatabase() {
 
@@ -40,10 +45,31 @@ abstract class RepoDatabase : RoomDatabase() {
                     klass = RepoDatabase::class.java,
                     name = TAG
                 )
-                .fallbackToDestructiveMigration(false)
+                .fallbackToDestructiveMigration(true)
                 .addCallback(onMigration)
+                .openHelperFactory(buildFactory(context.filesDir.toPath().resolve(TAG).toString()))
                 .build()
         }
+
+        fun buildFactory(path: String): SupportSQLiteOpenHelper.Factory {
+            return object : SupportSQLiteOpenHelper.Factory {
+                override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
+                    val config = SQLiteDatabaseConfiguration(
+                        path,
+                        SQLiteDatabase.OPEN_CREATE or SQLiteDatabase.OPEN_READWRITE
+                    )
+
+                    config.functions.add(SQLiteFunction("rank", 1, Rank))
+                    config.functions.add(SQLiteFunction("parentPath", 1, ParentPath))
+                    config.functions.add(SQLiteFunction("fullName", 1, FullName))
+
+                    val options = RequerySQLiteOpenHelperFactory.ConfigurationOptions { config }
+                    return RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
+                }
+
+            }
+        }
+
     }
 
 }

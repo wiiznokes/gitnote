@@ -108,6 +108,7 @@ android {
 
         debug {
             applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("nightly")
         }
     }
 
@@ -166,6 +167,10 @@ dependencies {
     implementation(libs.room.ktx)
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
+    implementation(libs.sqlite)
+    implementation(libs.paging)
+    implementation(libs.paging.compose)
+    implementation(libs.room.paging)
 
     // Compose Navigation
     implementation(libs.reimagined.navigation)

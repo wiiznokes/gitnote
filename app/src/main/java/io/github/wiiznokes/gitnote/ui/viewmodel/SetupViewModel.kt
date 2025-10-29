@@ -41,22 +41,25 @@ interface SetupViewModelI {
         remoteUrl: String,
         cred: Cred? = null,
         onSuccess: () -> Unit
-    ) {}
+    ) {
+    }
 
     fun createRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
-    ) {}
+    ) {
+    }
 
     fun cloneRepoAutomatic(
         repoName: String,
         storageConfig: StorageConfiguration,
         onSuccess: () -> Unit
-    ) {}
+    ) {
+    }
 }
 
-class SetupViewModelMock: SetupViewModelI
+class SetupViewModelMock : SetupViewModelI
 
 class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewModelI {
 
@@ -146,7 +149,6 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         }
 
     }
-
 
 
     fun checkPathForClone(repoPath: String): Result<Unit> {
@@ -339,13 +341,13 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
 
 
 sealed class InitState {
-    data object Idle: InitState()
+    data object Idle : InitState()
 
-    open fun isClickable() : Boolean = true
+    open fun isClickable(): Boolean = true
     open fun isLoading(): Boolean = false
     open fun message(): String = ""
 
-    sealed class AuthState: InitState() {
+    sealed class AuthState : InitState() {
         data object Idle : AuthState()
         data object GetAccessToken : AuthState()
         data object FetchRepos : AuthState()
@@ -354,7 +356,8 @@ sealed class InitState {
         data object Error : AuthState()
 
         override fun isClickable(): Boolean = this is Idle || this is Error || this is Success
-        override fun isLoading(): Boolean = this is GetAccessToken || this is FetchRepos || this is GetUserInfo
+        override fun isLoading(): Boolean =
+            this is GetAccessToken || this is FetchRepos || this is GetUserInfo
 
         override fun message(): String {
             return when (this) {
@@ -368,7 +371,7 @@ sealed class InitState {
         }
     }
 
-    sealed class AuthStep2: InitState() {
+    sealed class AuthStep2 : InitState() {
         data object Idle : AuthStep2()
         data object CreateRepo : AuthStep2()
         data object AddDeployKey : AuthStep2()
@@ -388,7 +391,7 @@ sealed class InitState {
     }
 
 
-    sealed class CloneState: InitState() {
+    sealed class CloneState : InitState() {
         data object Idle : CloneState()
         data class Cloning(val percent: Int) : CloneState()
         data object Error : CloneState()

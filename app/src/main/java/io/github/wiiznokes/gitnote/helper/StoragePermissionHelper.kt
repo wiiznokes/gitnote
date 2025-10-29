@@ -3,13 +3,12 @@ package io.github.wiiznokes.gitnote.helper
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.net.toUri
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.helper.StoragePermissionHelper.Companion.isPermissionGranted
-import androidx.core.net.toUri
 
 
 class StoragePermissionHelper {

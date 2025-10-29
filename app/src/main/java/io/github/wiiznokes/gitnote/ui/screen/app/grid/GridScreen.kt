@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
@@ -152,7 +152,10 @@ fun GridScreen(
                 drawerState = drawerState,
                 onSettingsClick = onSettingsClick,
                 searchFocusRequester = searchFocusRequester,
-                padding = padding
+                padding = padding,
+                onReloadDatabase = {
+                    vm.reloadDatabase()
+                }
             )
 
         }
@@ -173,7 +176,7 @@ private fun GridView(
     selectedNotes: List<Note>,
     padding: PaddingValues,
 ) {
-    val gridNotes by vm.gridNotes.collectAsState()
+    val gridNotes = vm.gridNotes.collectAsLazyPagingItems()
 
     val gridState = rememberLazyStaggeredGridState()
 
@@ -222,7 +225,15 @@ private fun GridView(
                 Spacer(modifier = Modifier.height(topBarHeight + 40.dp + 15.dp))
             }
 
-            items(items = gridNotes, key = { it.note.id }) { gridNote ->
+
+            items(
+                count = gridNotes.itemCount,
+                key = { index ->
+                    val note = gridNotes[index]!!
+                    note.note.id
+                }
+            ) { index ->
+                val gridNote = gridNotes[index]!!
 
                 val dropDownExpanded = remember {
                     mutableStateOf(false)
@@ -302,7 +313,8 @@ private fun GridView(
                             horizontalAlignment = Alignment.Start,
                         ) {
                             Text(
-                                text = if (showFullPathOfNotes.value) gridNote.note.relativePath else gridNote.title,
+                                text = if (showFullPathOfNotes.value || !gridNote.isUnique) gridNote.note.relativePath else
+                                    gridNote.note.nameWithoutExtension(),
                                 modifier = Modifier.padding(bottom = 6.dp),
                                 overflow = TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.titleMedium.copy(
@@ -337,6 +349,7 @@ private fun GridView(
                     }
                 }
             }
+
 
             item(
                 span = StaggeredGridItemSpan.FullLine

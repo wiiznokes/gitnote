@@ -2,14 +2,27 @@ package io.github.wiiznokes.gitnote.data.room
 
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Upsert
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
+import io.github.wiiznokes.gitnote.ui.model.GridNote
+import io.github.wiiznokes.gitnote.ui.model.SortOrder
+import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
+import io.requery.android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.flow.Flow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
 
 private const val TAG = "Dao"
+
+private const val LIMIT_FILE_SIZE_DB = 2 * 1024 * 1024
 
 @Dao
 interface RepoDatabaseDao {
@@ -41,10 +54,20 @@ interface RepoDatabaseDao {
                             return@forEachNodeFs
                         }
 
+                        val fileSize = nodeFs.fileSize()
+                        if (fileSize > LIMIT_FILE_SIZE_DB) {
+                            Log.d(
+                                TAG,
+                                "skipped ${nodeFs.path} with mime type $mimeType because size was above $LIMIT_FILE_SIZE_DB ($fileSize)"
+                            )
+                            return@forEachNodeFs
+                        }
+
                         val relativePath = nodeFs.path.substring(startIndex = rootLength)
                         val note = Note.new(
                             relativePath = relativePath,
-                            lastModifiedTimeMillis = timestamps.get(relativePath) ?: nodeFs.lastModifiedTime().toMillis(),
+                            lastModifiedTimeMillis = timestamps.get(relativePath)
+                                ?: nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
                         insertNote(note)
@@ -73,12 +96,155 @@ interface RepoDatabaseDao {
     @Query("SELECT * FROM NoteFolders WHERE relativePath = ''")
     suspend fun rootNoteFolder(): NoteFolder
 
-    @Query("SELECT * FROM NoteFolders")
-    fun allNoteFolders(): Flow<List<NoteFolder>>
+    @Query(
+        """
+    SELECT EXISTS(
+        SELECT 1 FROM Notes WHERE relativePath = :relativePath
+    )
+    """
+    )
+    suspend fun isNoteExist(relativePath: String): Boolean
+
+    @RawQuery(observedEntities = [Note::class])
+    fun gridNotesRaw(query: SupportSQLiteQuery): PagingSource<Int, GridNote>
+
+    fun gridNotes(
+        currentNoteFolderRelativePath: String,
+        sortOrder: SortOrder,
+    ): PagingSource<Int, GridNote> {
+
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "fileName" to "ASC"
+            SortOrder.ZA -> "fileName" to "DESC"
+            SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
+            SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
+        }
+
+        val sql = """
+            WITH notes_with_filename AS (
+                SELECT *, fullName(relativePath) AS fileName
+                FROM Notes
+                WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'
+            )
+            SELECT *,
+                   CASE 
+                       WHEN COUNT(*) OVER (PARTITION BY fileName) = 1 THEN 1
+                       ELSE 0
+                   END AS isUnique
+            FROM notes_with_filename
+            ORDER BY $sortColumn $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.gridNotesRaw(query)
+    }
+
+    fun gridNotesWithQuery(
+        currentNoteFolderRelativePath: String,
+        sortOrder: SortOrder,
+        query: String,
+    ): PagingSource<Int, GridNote> {
+
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "fileName" to "ASC"
+            SortOrder.ZA -> "fileName" to "DESC"
+            SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
+            SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
+        }
+
+        fun ftsEscape(query: String): String {
+
+            // todo: change this when FTS5 is supported by room https://issuetracker.google.com/issues/146824830
+            val specialChars: List<CharSequence> =
+                listOf("\"", "*", "-", "(", ")", "<", ">", ":", "^", "~", "'", "AND", "OR", "NOT")
+
+            if (specialChars.any { query.contains(it) }) {
+                val escapedQuery = query.replace("\"", "\"\"")
+                return "\"$escapedQuery\" * "
+            } else {
+                return "$query*"
+            }
+        }
+
+        val sql = """
+            WITH notes_with_filename AS (
+                SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score, fullName(Notes.relativePath) as fileName
+                FROM Notes
+                JOIN NotesFts ON NotesFts.rowid = Notes.rowid
+                WHERE
+                    Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
+                    AND
+                    NotesFts MATCH :query
+            )
+            SELECT *,
+                   CASE 
+                       WHEN COUNT(*) OVER (PARTITION BY fileName) = 1 THEN 1
+                       ELSE 0
+                   END AS isUnique
+            FROM notes_with_filename
+            ORDER BY score DESC, $sortColumn $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, ftsEscape(query)))
 
 
-    @Query("SELECT * FROM Notes")
-    fun allNotes(): Flow<List<Note>>
+        return this.gridNotesRaw(query)
+    }
+
+
+    @RawQuery(observedEntities = [Note::class, NoteFolder::class])
+    fun gridDrawerFoldersRaw(query: SupportSQLiteQuery): Flow<List<DrawerFolderModel>>
+
+    fun drawerFolders(
+        currentNoteFolderRelativePath: String,
+        sortOrder: SortOrder,
+    ): Flow<List<DrawerFolderModel>> {
+
+        val (sortColumn, order) = when (sortOrder) {
+            SortOrder.AZ -> "folderName" to "ASC"
+            SortOrder.ZA -> "folderName" to "DESC"
+            SortOrder.MostRecent -> "MAX(n.lastModifiedTimeMillis)" to "DESC"
+            SortOrder.Oldest -> "MAX(n.lastModifiedTimeMillis)" to "ASC"
+        }
+
+        val sql = """
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount, fullName(f.relativePath) as folderName
+            FROM NoteFolders AS f
+            LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
+            WHERE parentPath(f.relativePath) = ?
+            GROUP BY f.relativePath, f.id, folderName
+            ORDER BY $sortColumn $order
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.gridDrawerFoldersRaw(query)
+    }
+
+    data class Testing(
+        val relativePath: String,
+        val id: Int,
+        val noteCount: Int,
+    )
+
+    @RawQuery
+    fun debugQuery(query: SupportSQLiteQuery): List<Testing>
+
+    fun testing() {
+
+        val sql = """
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount
+            FROM NoteFolders AS f
+            LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
+            WHERE parentPath(f.relativePath) = ?
+            GROUP BY f.relativePath
+            ORDER BY MAX(n.lastModifiedTimeMillis) DESC
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(""))
+        val results = this.debugQuery(query)
+
+        Log.d("SQL_DEBUG", results.joinToString("\n"))
+    }
 
 
     @Upsert
@@ -120,5 +286,75 @@ interface RepoDatabaseDao {
     fun clearDatabase() {
         removeAllNoteFolder()
         removeAllNote()
+    }
+}
+
+object Rank : SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val blob = args.getBlob(0) ?: return
+
+        val buffer = ByteBuffer.wrap(blob).order(ByteOrder.nativeOrder())
+
+        val phraseCount = buffer.int
+        val columnCount = buffer.int
+
+        var score = 0.0
+
+        for (phrase in 0 until phraseCount) {
+            for (column in 0 until columnCount) {
+
+                val hitsThisRow = buffer.int
+                buffer.int
+                buffer.int
+
+                if (hitsThisRow != 0) {
+                    // relativePath column
+                    if (column == 0) {
+                        result.set(2.0)
+                        return
+                    }
+                    // content column
+                    else {
+                        score = 1.0
+                    }
+                }
+            }
+        }
+
+        result.set(score)
+    }
+
+}
+
+object ParentPath : SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val path = args.getString(0) ?: return
+
+        if (path == "") return
+
+        result.set(path.substringBeforeLast("/", missingDelimiterValue = ""))
+    }
+}
+
+object FullName : SQLiteDatabase.Function {
+    override fun callback(
+        args: SQLiteDatabase.Function.Args?,
+        result: SQLiteDatabase.Function.Result?
+    ) {
+        if (args == null || result == null) return
+
+        val path = args.getString(0) ?: return
+
+        result.set(path.substringAfterLast("/"))
     }
 }

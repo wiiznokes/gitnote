@@ -3,6 +3,11 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
@@ -12,24 +17,17 @@ import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.model.GridNote
-import io.github.wiiznokes.gitnote.ui.model.SortOrder.Ascending
-import io.github.wiiznokes.gitnote.ui.model.SortOrder.Descending
-import io.github.wiiznokes.gitnote.ui.model.SortType.AlphaNumeric
-import io.github.wiiznokes.gitnote.ui.model.SortType.Modification
-import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
-import io.github.wiiznokes.gitnote.ui.utils.fuzzySort
-import io.github.wiiznokes.gitnote.utils.mapAndCombine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 class GridViewModel : ViewModel() {
 
@@ -60,8 +58,6 @@ class GridViewModel : ViewModel() {
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
 
-
-
     private val _currentNoteFolderRelativePath = MutableStateFlow(
         if (prefs.rememberLastOpenedFolder.getBlocking()) {
             prefs.lastOpenedFolder.getBlocking()
@@ -79,20 +75,15 @@ class GridViewModel : ViewModel() {
         get() = _selectedNotes.asStateFlow()
 
 
-    private val allNotes = dao.allNotes()
-
-
     init {
         Log.d(TAG, "init")
+    }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            allNotes.collect { allNotes ->
-                selectedNotes.value.filter { selectedNote ->
-                    allNotes.contains(selectedNote)
-                }.let { newSelectedNotes ->
-                    _selectedNotes.emit(newSelectedNotes)
-                }
-            }
+    suspend fun refreshSelectedNotes() {
+        selectedNotes.value.filter { selectedNote ->
+            dao.isNoteExist(selectedNote.relativePath)
+        }.let { newSelectedNotes ->
+            _selectedNotes.emit(newSelectedNotes)
         }
     }
 
@@ -100,6 +91,7 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO).launch {
             _isRefreshing.emit(true)
             storageManager.updateDatabaseAndRepo()
+            refreshSelectedNotes()
             _isRefreshing.emit(false)
         }
     }
@@ -204,105 +196,56 @@ class GridViewModel : ViewModel() {
     }
 
 
-    private val notes = allNotes.combine(currentNoteFolderRelativePath) { allNotes, path ->
-        if (path.isEmpty()) {
-            allNotes
-        } else {
-            allNotes.filter {
-                it.relativePath.startsWith("$path/")
-            }
-        }
-    }.let { filteredNotesFlow ->
-        combine(
-            filteredNotesFlow, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()
-        ) { filteredNotes, sortType, sortOrder ->
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val gridNotes = combine(
+        currentNoteFolderRelativePath,
+        prefs.sortOrder.getFlow(),
+        query,
+    ) { currentNoteFolderRelativePath, sortOrder, query ->
+        Triple(currentNoteFolderRelativePath, sortOrder, query)
+    }.flatMapLatest { triple ->
+        val (currentNoteFolderRelativePath, sortOrder, query) = triple
 
-            when (sortType) {
-                Modification -> when (sortOrder) {
-                    Ascending -> filteredNotes.sortedByDescending { it.lastModifiedTimeMillis }
-                    Descending -> filteredNotes.sortedBy { it.lastModifiedTimeMillis }
-                }
-
-                AlphaNumeric -> when (sortOrder) {
-                    Ascending -> filteredNotes.sortedBy { it.fullName() }
-                    Descending -> filteredNotes.sortedByDescending { it.fullName() }
-                }
-            }
-        }
-    }.combine(query) { allNotesInCurrentPath, query ->
-        if (query.isNotEmpty()) {
-            fuzzySort(query, allNotesInCurrentPath)
-        } else {
-            allNotesInCurrentPath
-        }
-    }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
-    )
-
-
-    val gridNotes = notes.mapAndCombine { notes ->
-        notes.groupBy {
-            it.nameWithoutExtension()
-        }
-    }.combine(selectedNotes) { (notes, notesGroupByName), selectedNotes ->
-        notes.map { note ->
-            val name = note.nameWithoutExtension()
-
-            GridNote(
-                // if there is more than one note with the same name, draw the full path
-                title = if (notesGroupByName[name]!!.size > 1) {
-                    note.relativePath
+        Pager(
+            config = PagingConfig(pageSize = 50),
+            pagingSourceFactory = {
+                if (query.isEmpty()) {
+                    dao.gridNotes(currentNoteFolderRelativePath, sortOrder)
                 } else {
-                    name
-                }, selected = selectedNotes.contains(note), note = note
-            )
-        }
-    }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
-    )
-
-
-    val drawerFolders = combine(
-        dao.allNoteFolders(), currentNoteFolderRelativePath
-    ) { notesFolders, path ->
-        notesFolders.filter {
-            it.parentPath() == path
-        }
-    }.combine(notes) { folders, notes ->
-        folders.map { folder ->
-
-            val (noteCount, lastModifiedTimeMillis) = notes
-                .filter { it.parentPath().startsWith(folder.relativePath) }
-                .fold(Pair(0, Long.MIN_VALUE)) { (count, max), note ->
-                    (count + 1) to max(max, note.lastModifiedTimeMillis)
-                }
-
-            DrawerFolderModel(
-                noteCount = noteCount,
-                lastModifiedTimeMillis = lastModifiedTimeMillis,
-                noteFolder = folder
-            )
-        }
-    }.let { folders ->
-        combine(
-            folders, prefs.sortType.getFlow(), prefs.sortOrder.getFlow()
-        ) { folders, sortType, sortOrder ->
-
-            when (sortType) {
-                Modification -> when (sortOrder) {
-                    Ascending -> folders.sortedByDescending { it.lastModifiedTimeMillis }
-                    Descending -> folders.sortedBy { it.lastModifiedTimeMillis }
-                }
-
-                AlphaNumeric -> when (sortOrder) {
-                    Ascending -> folders.sortedBy { it.noteFolder.fullName() }
-                    Descending -> folders.sortedByDescending { it.noteFolder.fullName() }
+                    dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query)
                 }
             }
+        ).flow.cachedIn(viewModelScope)
+    }.combine(selectedNotes) { gridNotes, selectedNotes ->
+        gridNotes.map { gridNote ->
+            gridNote.copy(
+                selected = selectedNotes.contains(gridNote.note)
+            )
         }
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val drawerFolders = combine(
+        currentNoteFolderRelativePath,
+        prefs.sortOrderFolder.getFlow(),
+    ) { currentNoteFolderRelativePath, sortOrder ->
+        Pair(currentNoteFolderRelativePath, sortOrder)
+    }.flatMapLatest { pair ->
+        val (currentNoteFolderRelativePath, sortOrder) = pair
+        dao.drawerFolders(currentNoteFolderRelativePath, sortOrder)
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
+    fun reloadDatabase() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val res = storageManager.updateDatabase(force = true)
+            res.onFailure {
+                uiHelper.makeToast("$it")
+            }
+        }
+    }
 }
 

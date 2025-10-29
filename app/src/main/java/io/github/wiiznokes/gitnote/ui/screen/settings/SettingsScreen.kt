@@ -5,11 +5,11 @@ import android.content.ClipDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,7 +37,6 @@ import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
-import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -86,16 +85,6 @@ fun SettingsScreen(
             title = stringResource(R.string.grid)
         ) {
 
-            val sortType by vm.prefs.sortType.getAsState()
-            MultipleChoiceSettings(
-                title = stringResource(R.string.sort_type),
-                subtitle = sortType.toString(),
-                options = SortType.entries,
-                onOptionClick = {
-                    vm.update { vm.prefs.sortType.update(it) }
-                }
-            )
-
             val sortOrder by vm.prefs.sortOrder.getAsState()
             MultipleChoiceSettings(
                 title = stringResource(R.string.sort_order),
@@ -103,6 +92,16 @@ fun SettingsScreen(
                 options = SortOrder.entries,
                 onOptionClick = {
                     vm.update { vm.prefs.sortOrder.update(it) }
+                }
+            )
+
+            val sortOrderFolder by vm.prefs.sortOrderFolder.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.sort_order_folder),
+                subtitle = sortOrderFolder.toString(),
+                options = SortOrder.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.sortOrderFolder.update(it) }
                 }
             )
 
@@ -260,6 +259,14 @@ fun SettingsScreen(
                     vm.viewModelScope.launch {
                         clipboardManager.setClipEntry(ClipEntry(data))
                     }
+                }
+            )
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.reload_database),
+                startIcon = Icons.Default.Refresh,
+                onClick = {
+                    vm.reloadDatabase()
                 }
             )
 

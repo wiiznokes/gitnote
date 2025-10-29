@@ -1,31 +1,22 @@
 package io.github.wiiznokes.gitnote.ui.model
 
+import androidx.room.Embedded
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 
-
-enum class SortType {
-    Modification,
-    AlphaNumeric;
-
-    override fun toString(): String {
-        val res = when (this) {
-            Modification -> R.string.modification_sort_type
-            AlphaNumeric -> R.string.alpha_numeric_sort_type
-        }
-        return MyApp.appModule.uiHelper.getString(res)
-    }
-}
-
 enum class SortOrder {
-    Ascending,
-    Descending;
+    AZ,
+    ZA,
+    MostRecent,
+    Oldest;
 
     override fun toString(): String {
         val res = when (this) {
-            Ascending -> R.string.ascending_sort_order
-            Descending -> R.string.descending_sort_order
+            AZ -> R.string.az_sort_order
+            ZA -> R.string.za_sort_order
+            MostRecent -> R.string.most_recent_sort_order
+            Oldest -> R.string.oldest_sort_order
         }
         return MyApp.appModule.uiHelper.getString(res)
     }
@@ -44,7 +35,8 @@ enum class NoteMinWidth(val size: Int) {
 }
 
 data class GridNote(
+    @Embedded
     val note: Note,
-    val title: String,
-    val selected: Boolean,
+    val isUnique: Boolean,
+    val selected: Boolean = false,
 )

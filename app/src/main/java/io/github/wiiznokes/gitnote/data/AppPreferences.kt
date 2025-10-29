@@ -8,7 +8,6 @@ import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
-import io.github.wiiznokes.gitnote.ui.model.SortType
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import kotlinx.coroutines.runBlocking
@@ -79,6 +78,7 @@ class AppPreferences(
                     password = userPassPassword.get()
                 )
             }
+
             CredType.Ssh -> Cred.Ssh(
                 username = this.sshUsername.get(),
                 publicKey = this.publicKey.get(),
@@ -95,20 +95,22 @@ class AppPreferences(
                 publicKey.update(cred.publicKey)
                 privateKey.update(cred.privateKey)
             }
+
             is Cred.UserPassPlainText -> {
                 credType.update(CredType.UserPassPlainText)
                 userPassUsername.update(cred.username)
                 userPassPassword.update(cred.password)
             }
+
             null -> credType.update(CredType.None)
         }
     }
 
     val provider = enumPreference("provider", ProviderType.GitHub)
 
-    val sortType = enumPreference("sortType", SortType.Modification)
 
-    val sortOrder = enumPreference("sortOrder", SortOrder.Ascending)
+    val sortOrder = enumPreference("sortOrder", SortOrder.MostRecent)
+    val sortOrderFolder = enumPreference("sortOrderFolder", SortOrder.AZ)
 
     val noteMinWidth = enumPreference("noteMinWidth", NoteMinWidth.Default)
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
