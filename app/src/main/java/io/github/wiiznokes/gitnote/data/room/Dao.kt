@@ -2,6 +2,8 @@ package io.github.wiiznokes.gitnote.data.room
 
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
@@ -99,13 +101,13 @@ interface RepoDatabaseDao {
     suspend fun isNoteExist(relativePath: String): Boolean
 
     @RawQuery(observedEntities = [Note::class])
-    fun gridNotesRaw(query: SupportSQLiteQuery) : Flow<List<Note>>
+    fun gridNotesRaw(query: SupportSQLiteQuery) : PagingSource<Int, Note>
 
     // todo: duplicate ?
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
-    ) : Flow<List<Note>> {
+    ) : PagingSource<Int, Note> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "relativePath" to "ASC"
@@ -130,7 +132,7 @@ interface RepoDatabaseDao {
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
         query: String,
-    ) : Flow<List<Note>> {
+    ) : PagingSource<Int, Note> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "relativePath" to "ASC"

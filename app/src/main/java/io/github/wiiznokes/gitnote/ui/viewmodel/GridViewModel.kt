@@ -3,6 +3,11 @@ package io.github.wiiznokes.gitnote.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
@@ -13,7 +18,6 @@ import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
-import io.github.wiiznokes.gitnote.utils.mapAndCombine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,15 +80,15 @@ class GridViewModel : ViewModel() {
     init {
         Log.d(TAG, "init")
 
-        CoroutineScope(Dispatchers.IO).launch {
-            gridNotes.collect {
-                selectedNotes.value.filter { selectedNote ->
-                    dao.isNoteExist(selectedNote.relativePath)
-                }.let { newSelectedNotes ->
-                    _selectedNotes.emit(newSelectedNotes)
-                }
-            }
-        }
+//        CoroutineScope(Dispatchers.IO).launch {
+//            gridNotes.collect {
+//                selectedNotes.value.filter { selectedNote ->
+//                    dao.isNoteExist(selectedNote.relativePath)
+//                }.let { newSelectedNotes ->
+//                    _selectedNotes.emit(newSelectedNotes)
+//                }
+//            }
+//        }
     }
 
     fun refresh() {
@@ -196,7 +200,7 @@ class GridViewModel : ViewModel() {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val note = combine(
+    val notes = combine(
         currentNoteFolderRelativePath,
         prefs.sortOrder.getFlow(),
         query,
@@ -205,32 +209,30 @@ class GridViewModel : ViewModel() {
     }.flatMapLatest { triple ->
         val (currentNoteFolderRelativePath, sortOrder, query) = triple
 
-        if (query.isEmpty()) {
-            dao.gridNotes(currentNoteFolderRelativePath, sortOrder)
-        } else {
-            dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query)
-        }
-    }
+        Pager(
+            config = PagingConfig(pageSize = 50),
+            pagingSourceFactory = {
+                if (query.isEmpty()) {
+                    dao.gridNotes(currentNoteFolderRelativePath, sortOrder)
+                } else {
+                    dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query)
+                }
+            }
+        ).flow.cachedIn(viewModelScope)
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
+    )
 
-    val gridNotes = note.mapAndCombine { notes ->
-        notes.groupBy {
-            it.nameWithoutExtension()
-        }
-    }.combine(selectedNotes) { (notes, notesGroupByName), selectedNotes ->
+    val gridNotes = combine(notes, selectedNotes) { notes, selectedNotes ->
         notes.map { note ->
             val name = note.nameWithoutExtension()
 
             GridNote(
-                // if there is more than one note with the same name, draw the full path
-                title = if (notesGroupByName[name]!!.size > 1) {
-                    note.relativePath
-                } else {
-                    name
-                }, selected = selectedNotes.contains(note), note = note
+                title = name, selected = selectedNotes.contains(note), note = note
             )
         }
     }.stateIn(
-        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
