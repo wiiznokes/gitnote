@@ -288,7 +288,7 @@ pub fn is_change() -> Result<bool, Error> {
 }
 
 fn is_extension_supported(str: &str) -> bool {
-    let mimes = mime_guess::from_ext(str);
+    let mimes = mime_guess::from_path(str);
     mimes.iter().any(|mime| mime.type_() == mime::TEXT)
 }
 
@@ -309,22 +309,24 @@ fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option
             .is_ok()
         {
             // We want to check if this commit modified the file_path compared to its parent(s)
-            let parents = commit.parents().collect::<Vec<_>>();
-            let is_modified = if parents.is_empty() {
+            let parent = commit.parents().next();
+
+            let is_modified = match parent {
+                Some(parent) => {
+                    // Compare trees between commit and its first parent
+                    let parent_tree = parent.tree()?;
+                    let current_tree = commit.tree()?;
+
+                    let diff = repo.diff_tree_to_tree(
+                        Some(&parent_tree),
+                        Some(&current_tree),
+                        Some(git2::DiffOptions::new().pathspec(&file_path)),
+                    )?;
+
+                    diff.deltas().len() > 0
+                }
                 // Initial commit, consider as modified
-                true
-            } else {
-                // Compare trees between commit and its first parent
-                let parent_tree = parents[0].tree()?;
-                let current_tree = commit.tree()?;
-
-                let diff = repo.diff_tree_to_tree(
-                    Some(&parent_tree),
-                    Some(&current_tree),
-                    Some(git2::DiffOptions::new().pathspec(&file_path)),
-                )?;
-
-                diff.deltas().len() > 0
+                None => true,
             };
 
             if is_modified {
@@ -352,7 +354,7 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
             && let Some(name) = entry.name()
             && is_extension_supported(name)
         {
-            let path = format!("{root}/{name}");
+            let path = format!("{root}{name}");
             if let Ok(Some((path, time))) = find_timestamp(repo, path) {
                 file_timestamps.insert(path, time);
             }
