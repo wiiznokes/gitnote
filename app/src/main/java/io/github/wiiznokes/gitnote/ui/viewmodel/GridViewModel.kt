@@ -17,7 +17,6 @@ import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.model.GridNote
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
