@@ -110,8 +110,8 @@ interface RepoDatabaseDao {
     ) : PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
-            SortOrder.AZ -> "relativePath" to "ASC"
-            SortOrder.ZA -> "relativePath" to "DESC"
+            SortOrder.AZ -> "fileName" to "ASC"
+            SortOrder.ZA -> "fileName" to "DESC"
             SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
             SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
         }
@@ -142,8 +142,8 @@ interface RepoDatabaseDao {
     ) : PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
-            SortOrder.AZ -> "relativePath" to "ASC"
-            SortOrder.ZA -> "relativePath" to "DESC"
+            SortOrder.AZ -> "fileName" to "ASC"
+            SortOrder.ZA -> "fileName" to "DESC"
             SortOrder.MostRecent -> "lastModifiedTimeMillis" to "DESC"
             SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
         }
@@ -196,18 +196,18 @@ interface RepoDatabaseDao {
     ): Flow<List<DrawerFolderModel>> {
 
         val (sortColumn, order) = when (sortOrder) {
-            SortOrder.AZ -> "f.relativePath" to "ASC"
-            SortOrder.ZA -> "f.relativePath" to "DESC"
+            SortOrder.AZ -> "folderName" to "ASC"
+            SortOrder.ZA -> "folderName" to "DESC"
             SortOrder.MostRecent -> "MAX(n.lastModifiedTimeMillis)" to "DESC"
             SortOrder.Oldest -> "MAX(n.lastModifiedTimeMillis)" to "ASC"
         }
 
         val sql = """
-            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount, fullName(f.relativePath) as folderName
             FROM NoteFolders AS f
             LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
             WHERE parentPath(f.relativePath) = ?
-            GROUP BY f.relativePath
+            GROUP BY f.relativePath, f.id, folderName
             ORDER BY $sortColumn $order
         """.trimIndent()
 
