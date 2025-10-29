@@ -20,6 +20,8 @@ import java.nio.ByteOrder
 
 private const val TAG = "Dao"
 
+private const val LIMIT_FILE_SIZE_DB = 2 * 1024 * 1024
+
 @Dao
 interface RepoDatabaseDao {
 
@@ -47,6 +49,12 @@ interface RepoDatabaseDao {
                             .getMimeTypeFromExtension(nodeFs.extension.text)
                         if (mimeType == null || !mimeType.startsWith("text")) {
                             //Log.d(TAG, "skipped ${nodeFs.path} with mime type $mimeType")
+                            return@forEachNodeFs
+                        }
+
+                        val fileSize = nodeFs.fileSize()
+                        if (fileSize > LIMIT_FILE_SIZE_DB) {
+                            Log.d(TAG, "skipped ${nodeFs.path} with mime type $mimeType because size was above $LIMIT_FILE_SIZE_DB ($fileSize)")
                             return@forEachNodeFs
                         }
 
