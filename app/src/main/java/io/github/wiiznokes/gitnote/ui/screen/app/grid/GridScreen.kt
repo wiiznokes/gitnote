@@ -226,7 +226,8 @@ private fun GridView(
             }
 
 
-            items(count = gridNotes.itemCount,
+            items(
+                count = gridNotes.itemCount,
                 key = { index ->
                     val note = gridNotes[index]!!
                     note.note.id

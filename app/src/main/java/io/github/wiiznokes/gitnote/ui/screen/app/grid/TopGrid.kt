@@ -346,8 +346,6 @@ private fun SelectableTopBar(
 }
 
 
-
-
 @Composable
 private fun SyncStateIcon(
     state: SyncState,

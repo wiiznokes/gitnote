@@ -5,9 +5,8 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import kotlinx.parcelize.Parcelize
 
 
-
 @Parcelize
-sealed class Cred: Parcelable {
+sealed class Cred : Parcelable {
     data class UserPassPlainText(
         val username: String,
         val password: String

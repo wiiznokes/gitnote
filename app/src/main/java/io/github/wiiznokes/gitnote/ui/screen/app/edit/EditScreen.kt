@@ -52,7 +52,6 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newEditViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newMarkDownVM
-import kotlin.text.startsWith
 
 
 private const val TAG = "EditScreen"

@@ -45,7 +45,7 @@ sealed class NodeFs(
     protected val pathFs: Path = Paths.get(path)
 ) {
 
-    fun fileSize() : Long {
+    fun fileSize(): Long {
         return pathFs.fileSize()
     }
 

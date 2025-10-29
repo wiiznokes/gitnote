@@ -78,6 +78,7 @@ class AppPreferences(
                     password = userPassPassword.get()
                 )
             }
+
             CredType.Ssh -> Cred.Ssh(
                 username = this.sshUsername.get(),
                 publicKey = this.publicKey.get(),
@@ -94,11 +95,13 @@ class AppPreferences(
                 publicKey.update(cred.publicKey)
                 privateKey.update(cred.privateKey)
             }
+
             is Cred.UserPassPlainText -> {
                 credType.update(CredType.UserPassPlainText)
                 userPassUsername.update(cred.username)
                 userPassPassword.update(cred.password)
             }
+
             null -> credType.update(CredType.None)
         }
     }

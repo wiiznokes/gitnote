@@ -68,18 +68,19 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 Log.d(TAG, "launch as EDIT_IS_UNSAVED")
                                 Destination.App(
-                                    AppDestination.Edit(EditParams.Saved(
-                                        note = saveInfo.previousNote,
-                                        editType = saveInfo.editType,
-                                        name = saveInfo.name,
-                                        content = saveInfo.content
-                                    ))
+                                    AppDestination.Edit(
+                                        EditParams.Saved(
+                                            note = saveInfo.previousNote,
+                                            editType = saveInfo.editType,
+                                            name = saveInfo.name,
+                                            content = saveInfo.content
+                                        )
+                                    )
                                 )
                             }
 
                         } else Destination.App(AppDestination.Grid)
-                    }
-                    else Destination.Setup(SetupDestination.Main)
+                    } else Destination.Setup(SetupDestination.Main)
                 }
 
 

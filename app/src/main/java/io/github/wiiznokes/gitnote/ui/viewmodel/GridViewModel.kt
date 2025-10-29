@@ -58,7 +58,6 @@ class GridViewModel : ViewModel() {
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
 
-
     private val _currentNoteFolderRelativePath = MutableStateFlow(
         if (prefs.rememberLastOpenedFolder.getBlocking()) {
             prefs.lastOpenedFolder.getBlocking()

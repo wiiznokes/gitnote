@@ -3,7 +3,6 @@ package io.github.wiiznokes.gitnote.data.room
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.paging.PagingSource
-import androidx.paging.PagingState
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
@@ -57,14 +56,18 @@ interface RepoDatabaseDao {
 
                         val fileSize = nodeFs.fileSize()
                         if (fileSize > LIMIT_FILE_SIZE_DB) {
-                            Log.d(TAG, "skipped ${nodeFs.path} with mime type $mimeType because size was above $LIMIT_FILE_SIZE_DB ($fileSize)")
+                            Log.d(
+                                TAG,
+                                "skipped ${nodeFs.path} with mime type $mimeType because size was above $LIMIT_FILE_SIZE_DB ($fileSize)"
+                            )
                             return@forEachNodeFs
                         }
 
                         val relativePath = nodeFs.path.substring(startIndex = rootLength)
                         val note = Note.new(
                             relativePath = relativePath,
-                            lastModifiedTimeMillis = timestamps.get(relativePath) ?: nodeFs.lastModifiedTime().toMillis(),
+                            lastModifiedTimeMillis = timestamps.get(relativePath)
+                                ?: nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
                         insertNote(note)
@@ -90,24 +93,25 @@ interface RepoDatabaseDao {
     }
 
 
-
     @Query("SELECT * FROM NoteFolders WHERE relativePath = ''")
     suspend fun rootNoteFolder(): NoteFolder
 
-    @Query("""
+    @Query(
+        """
     SELECT EXISTS(
         SELECT 1 FROM Notes WHERE relativePath = :relativePath
     )
-    """)
+    """
+    )
     suspend fun isNoteExist(relativePath: String): Boolean
 
     @RawQuery(observedEntities = [Note::class])
-    fun gridNotesRaw(query: SupportSQLiteQuery) : PagingSource<Int, GridNote>
+    fun gridNotesRaw(query: SupportSQLiteQuery): PagingSource<Int, GridNote>
 
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
-    ) : PagingSource<Int, GridNote> {
+    ): PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "fileName" to "ASC"
@@ -139,7 +143,7 @@ interface RepoDatabaseDao {
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
         query: String,
-    ) : PagingSource<Int, GridNote> {
+    ): PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
             SortOrder.AZ -> "fileName" to "ASC"
@@ -151,7 +155,8 @@ interface RepoDatabaseDao {
         fun ftsEscape(query: String): String {
 
             // todo: change this when FTS5 is supported by room https://issuetracker.google.com/issues/146824830
-            val specialChars: List<CharSequence> = listOf("\"", "*", "-", "(", ")", "<", ">", ":", "^", "~", "'", "AND", "OR", "NOT")
+            val specialChars: List<CharSequence> =
+                listOf("\"", "*", "-", "(", ")", "<", ">", ":", "^", "~", "'", "AND", "OR", "NOT")
 
             if (specialChars.any { query.contains(it) }) {
                 val escapedQuery = query.replace("\"", "\"\"")
@@ -188,7 +193,7 @@ interface RepoDatabaseDao {
 
 
     @RawQuery(observedEntities = [Note::class, NoteFolder::class])
-    fun gridDrawerFoldersRaw(query: SupportSQLiteQuery) : Flow<List<DrawerFolderModel>>
+    fun gridDrawerFoldersRaw(query: SupportSQLiteQuery): Flow<List<DrawerFolderModel>>
 
     fun drawerFolders(
         currentNoteFolderRelativePath: String,
@@ -242,7 +247,6 @@ interface RepoDatabaseDao {
     }
 
 
-
     @Upsert
     suspend fun insertNoteFolder(noteFolder: NoteFolder)
 
@@ -285,7 +289,7 @@ interface RepoDatabaseDao {
     }
 }
 
-object Rank: SQLiteDatabase.Function {
+object Rank : SQLiteDatabase.Function {
     override fun callback(
         args: SQLiteDatabase.Function.Args?,
         result: SQLiteDatabase.Function.Result?
@@ -305,15 +309,20 @@ object Rank: SQLiteDatabase.Function {
             for (column in 0 until columnCount) {
 
                 val hitsThisRow = buffer.int
-                val hitsAllRows = buffer.int
-                val docsWithHits = buffer.int
+                buffer.int
+                buffer.int
 
-                val weight = when (column) {
-                    0 -> 2.0 // relativePath column
-                    else -> 1.0 // content or others
+                if (hitsThisRow != 0) {
+                    // relativePath column
+                    if (column == 0) {
+                        result.set(2.0)
+                        return
+                    }
+                    // content column
+                    else {
+                        score = 1.0
+                    }
                 }
-
-                score += weight * hitsThisRow
             }
         }
 
@@ -322,7 +331,7 @@ object Rank: SQLiteDatabase.Function {
 
 }
 
-object ParentPath: SQLiteDatabase.Function {
+object ParentPath : SQLiteDatabase.Function {
     override fun callback(
         args: SQLiteDatabase.Function.Args?,
         result: SQLiteDatabase.Function.Result?
@@ -337,7 +346,7 @@ object ParentPath: SQLiteDatabase.Function {
     }
 }
 
-object FullName: SQLiteDatabase.Function {
+object FullName : SQLiteDatabase.Function {
     override fun callback(
         args: SQLiteDatabase.Function.Args?,
         result: SQLiteDatabase.Function.Result?

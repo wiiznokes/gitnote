@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.viewmodel.edit
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.viewmodel.compose.viewModel
