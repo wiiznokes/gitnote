@@ -163,7 +163,7 @@ interface RepoDatabaseDao {
 
         val sql = """
             WITH notes_with_filename AS (
-                SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score, fullName(relativePath) as fileName
+                SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score, fullName(Notes.relativePath) as fileName
                 FROM Notes
                 JOIN NotesFts ON NotesFts.rowid = Notes.rowid
                 WHERE
