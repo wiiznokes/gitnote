@@ -152,7 +152,10 @@ fun GridScreen(
                 drawerState = drawerState,
                 onSettingsClick = onSettingsClick,
                 searchFocusRequester = searchFocusRequester,
-                padding = padding
+                padding = padding,
+                onReloadDatabase = {
+                    vm.reloadDatabase()
+                }
             )
 
         }

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -259,6 +260,14 @@ fun SettingsScreen(
                     vm.viewModelScope.launch {
                         clipboardManager.setClipEntry(ClipEntry(data))
                     }
+                }
+            )
+
+            DefaultSettingsRow(
+                title = stringResource(R.string.reload_database),
+                startIcon = Icons.Default.Refresh,
+                onClick = {
+                    vm.reloadDatabase()
                 }
             )
 

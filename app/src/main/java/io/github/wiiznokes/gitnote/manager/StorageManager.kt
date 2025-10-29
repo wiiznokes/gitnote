@@ -95,13 +95,13 @@ class StorageManager {
      * The caller must ensure that all files has been committed
      * to keep the database in sync with the remote repo
      */
-    private suspend fun updateDatabaseWithoutLocker(): Result<Unit> {
+    private suspend fun updateDatabaseWithoutLocker(force: Boolean = false): Result<Unit> {
 
         val fsCommit = gitManager.lastCommit()
         val databaseCommit = prefs.databaseCommit.get()
 
         Log.d(TAG, "fsCommit: $fsCommit, databaseCommit: $databaseCommit")
-        if (fsCommit == databaseCommit) {
+        if (!force && fsCommit == databaseCommit) {
             Log.d(TAG, "last commit is already loaded in data base")
             return success(Unit)
         }
@@ -120,8 +120,8 @@ class StorageManager {
     /**
      * See the documentation of [updateDatabaseWithoutLocker]
      */
-    suspend fun updateDatabase(): Result<Unit> = locker.withLock {
-        updateDatabaseWithoutLocker()
+    suspend fun updateDatabase(force: Boolean = false): Result<Unit> = locker.withLock {
+        updateDatabaseWithoutLocker(force)
     }
 
     /**

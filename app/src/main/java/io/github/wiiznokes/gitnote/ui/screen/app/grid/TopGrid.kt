@@ -60,6 +60,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
+import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.manager.SyncState
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
@@ -82,6 +83,7 @@ fun TopBar(
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
     searchFocusRequester: FocusRequester,
+    onReloadDatabase: () -> Unit,
 ) {
 
     AnimatedContent(
@@ -95,7 +97,8 @@ fun TopBar(
                 drawerState = drawerState,
                 vm = vm,
                 onSettingsClick = onSettingsClick,
-                searchFocusRequester = searchFocusRequester
+                searchFocusRequester = searchFocusRequester,
+                onReloadDatabase = onReloadDatabase,
             )
         } else {
             SelectableTopBar(
@@ -115,7 +118,8 @@ private fun SearchBar(
     drawerState: DrawerState,
     vm: GridViewModel,
     onSettingsClick: () -> Unit,
-    searchFocusRequester: FocusRequester
+    searchFocusRequester: FocusRequester,
+    onReloadDatabase: () -> Unit,
 ) {
 
 
@@ -213,6 +217,7 @@ private fun SearchBar(
 
                         val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
+                        @Suppress("KotlinConstantConditions")
                         CustomDropDown(
                             expanded = expanded,
                             options = listOf(
@@ -230,6 +235,12 @@ private fun SearchBar(
                                         }
                                     }
                                 ),
+                                if (BuildConfig.BUILD_TYPE != "release") {
+                                    CustomDropDownModel(
+                                        text = stringResource(R.string.reload_database),
+                                        onClick = onReloadDatabase
+                                    )
+                                } else null
                             )
                         )
                     }

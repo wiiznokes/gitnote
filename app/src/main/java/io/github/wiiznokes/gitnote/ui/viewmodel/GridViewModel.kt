@@ -240,5 +240,13 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
+    fun reloadDatabase() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val res = storageManager.updateDatabase(force = true)
+            res.onFailure {
+                uiHelper.makeToast("$it")
+            }
+        }
+    }
 }
 
