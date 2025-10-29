@@ -10,6 +10,7 @@ use git2::{
     CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
+use mime_guess::mime;
 
 use crate::{Cred, Error, ProgressCB};
 
@@ -286,6 +287,54 @@ pub fn is_change() -> Result<bool, Error> {
     Ok(count > 0)
 }
 
+fn is_extension_supported(str: &str) -> bool {
+    let mimes = mime_guess::from_ext(str);
+    mimes.iter().any(|mime| mime.type_() == mime::TEXT)
+}
+
+fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option<(String, i64)>> {
+    // Use revwalk to find the last commit that touched this path
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+    revwalk.set_sorting(git2::Sort::TIME)?;
+
+    for oid_result in revwalk {
+        let oid = oid_result?;
+        let commit = repo.find_commit(oid)?;
+
+        // Check if this commit touches the file
+        if commit
+            .tree()?
+            .get_path(std::path::Path::new(&file_path))
+            .is_ok()
+        {
+            // We want to check if this commit modified the file_path compared to its parent(s)
+            let parents = commit.parents().collect::<Vec<_>>();
+            let is_modified = if parents.is_empty() {
+                // Initial commit, consider as modified
+                true
+            } else {
+                // Compare trees between commit and its first parent
+                let parent_tree = parents[0].tree()?;
+                let current_tree = commit.tree()?;
+
+                let diff = repo.diff_tree_to_tree(
+                    Some(&parent_tree),
+                    Some(&current_tree),
+                    Some(git2::DiffOptions::new().pathspec(&file_path)),
+                )?;
+
+                diff.deltas().len() > 0
+            };
+
+            if is_modified {
+                return Ok(Some((file_path, commit.time().seconds() * 1000)));
+            }
+        }
+    }
+    Ok(None)
+}
+
 pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
@@ -293,68 +342,23 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
     // Get HEAD commit
     let head = repo.head()?.peel_to_commit()?;
 
-    // We'll build a map from file path -> last commit time (u64)
     let mut file_timestamps = HashMap::new();
 
     // Get the list of files in the repo at HEAD
     let tree = head.tree()?;
 
-    // Collect all file paths
-    let mut file_paths = Vec::new();
     tree.walk(TreeWalkMode::PreOrder, |root, entry| {
-        if let Some(name) = entry.name() {
-            let full_path = format!("{root}{name}");
-            if entry.kind() == Some(git2::ObjectType::Blob) {
-                file_paths.push(full_path);
+        if entry.kind() == Some(git2::ObjectType::Blob)
+            && let Some(name) = entry.name()
+            && is_extension_supported(name)
+        {
+            let path = format!("{root}/{name}");
+            if let Ok(Some((path, time))) = find_timestamp(repo, path) {
+                file_timestamps.insert(path, time);
             }
         }
         TreeWalkResult::Ok
     })?;
-
-    // For each file, find last commit that modified it
-    for file_path in file_paths {
-        // Use revwalk to find the last commit that touched this path
-        let mut revwalk = repo.revwalk()?;
-        revwalk.push_head()?;
-        revwalk.set_sorting(git2::Sort::TIME)?;
-
-        for oid_result in revwalk {
-            let oid = oid_result?;
-            let commit = repo.find_commit(oid)?;
-
-            // Check if this commit touches the file
-            if commit
-                .tree()?
-                .get_path(std::path::Path::new(&file_path))
-                .is_ok()
-            {
-                // We want to check if this commit modified the file_path compared to its parent(s)
-                let parents = commit.parents().collect::<Vec<_>>();
-                let is_modified = if parents.is_empty() {
-                    // Initial commit, consider as modified
-                    true
-                } else {
-                    // Compare trees between commit and its first parent
-                    let parent_tree = parents[0].tree()?;
-                    let current_tree = commit.tree()?;
-
-                    let diff = repo.diff_tree_to_tree(
-                        Some(&parent_tree),
-                        Some(&current_tree),
-                        Some(git2::DiffOptions::new().pathspec(&file_path)),
-                    )?;
-
-                    diff.deltas().len() > 0
-                };
-
-                if is_modified {
-                    // Store commit time
-                    file_timestamps.insert(file_path.clone(), commit.time().seconds() * 1000);
-                    break;
-                }
-            }
-        }
-    }
 
     Ok(file_timestamps)
 }
