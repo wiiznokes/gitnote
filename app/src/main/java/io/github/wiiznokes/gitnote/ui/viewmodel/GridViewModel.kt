@@ -226,6 +226,7 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
     )
 
+    // todo: use pager
     @OptIn(ExperimentalCoroutinesApi::class)
     val drawerFolders = combine(
         currentNoteFolderRelativePath,

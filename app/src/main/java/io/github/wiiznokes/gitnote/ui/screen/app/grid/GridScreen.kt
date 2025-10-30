@@ -93,7 +93,12 @@ fun GridScreen(
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         ModalDrawerSheet {
             DrawerScreen(
-                vm = vm, drawerState = drawerState
+                drawerState = drawerState,
+                currentNoteFolderRelativePath = vm.currentNoteFolderRelativePath.collectAsState().value,
+                drawerFolders = vm.drawerFolders.collectAsState().value,
+                openFolder = vm::openFolder,
+                deleteFolder = vm::deleteFolder,
+                createNoteFolder = vm::createNoteFolder,
             )
         }
     }) {

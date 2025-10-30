@@ -33,8 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,7 +58,6 @@ import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.component.SimpleSpacer
 import io.github.wiiznokes.gitnote.ui.theme.IconDefaultSize
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
-import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import kotlinx.coroutines.launch
 
 
@@ -75,11 +72,13 @@ data class DrawerFolderModel(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DrawerScreen(
-    vm: GridViewModel,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    currentNoteFolderRelativePath: String,
+    drawerFolders: List<DrawerFolderModel>,
+    openFolder: (String) -> Unit,
+    deleteFolder: (NoteFolder) -> Unit,
+    createNoteFolder: (relativeParentPath: String, name: String) -> Boolean,
 ) {
-    val currentNoteFolderRelativePath by vm.currentNoteFolderRelativePath.collectAsState()
-    val currentNoteFolders by vm.drawerFolders.collectAsState()
 
     fun getParent(path: String) = path.substringBeforeLast(
         delimiter = "/",
@@ -91,15 +90,16 @@ fun DrawerScreen(
         if (currentNoteFolderRelativePath.isEmpty()) {
             scope.launch { drawerState.close() }
         } else {
-            vm.openFolder(getParent(currentNoteFolderRelativePath))
+            openFolder(getParent(currentNoteFolderRelativePath))
         }
     }
 
     Scaffold(
         topBar = {
             RowNFoldersNavigation(
-                vm = vm,
-                currentPath = currentNoteFolderRelativePath
+                currentPath = currentNoteFolderRelativePath,
+                openFolder = openFolder,
+                createNoteFolder = createNoteFolder
             )
         },
         floatingActionButton = {
@@ -112,7 +112,7 @@ fun DrawerScreen(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
-                        vm.openFolder(getParent(currentNoteFolderRelativePath))
+                        openFolder(getParent(currentNoteFolderRelativePath))
                     }
                 ) {
                     SimpleIcon(
@@ -134,7 +134,7 @@ fun DrawerScreen(
         ) {
 
             items(
-                currentNoteFolders,
+                drawerFolders,
                 key = { it.noteFolder.id }) { drawerNoteFolder ->
                 Box {
                     val dropDownExpanded = remember {
@@ -154,7 +154,7 @@ fun DrawerScreen(
                                 CustomDropDownModel(
                                     text = stringResource(R.string.delete_this_folder),
                                     onClick = {
-                                        vm.deleteFolder(drawerNoteFolder.noteFolder)
+                                        deleteFolder(drawerNoteFolder.noteFolder)
                                     }
                                 ),
                             ),
@@ -172,7 +172,7 @@ fun DrawerScreen(
                                         dropDownExpanded.value = true
                                     },
                                     onClick = {
-                                        vm.openFolder(drawerNoteFolder.noteFolder.relativePath)
+                                        openFolder(drawerNoteFolder.noteFolder.relativePath)
                                     }
                                 )
                                 .pointerInteropFilter {
@@ -227,8 +227,9 @@ fun DrawerScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowNFoldersNavigation(
-    vm: GridViewModel,
-    currentPath: String
+    currentPath: String,
+    openFolder: (String) -> Unit,
+    createNoteFolder: (relativeParentPath: String, name: String) -> Boolean,
 ) {
     val containers = if (currentPath.isEmpty()) emptyList() else currentPath.split('/')
 
@@ -242,7 +243,7 @@ fun RowNFoldersNavigation(
         navigationIcon = {
             IconButton(
                 onClick = {
-                    vm.openFolder("")
+                    openFolder("")
                 }
             ) {
                 Icon(
@@ -278,7 +279,7 @@ fun RowNFoldersNavigation(
                                         folder
                                     }
                                 }
-                                vm.openFolder(path)
+                                openFolder(path)
                             },
                         text = item,
                         maxLines = 1,
@@ -308,7 +309,7 @@ fun RowNFoldersNavigation(
                 actionText = stringResource(R.string.create_new_folder),
                 unExpandedOnValidation = false
             ) {
-                if (vm.createNoteFolder(currentPath, it)) {
+                if (createNoteFolder(currentPath, it)) {
                     showCreateNewFolder.value = false
                 }
             }
