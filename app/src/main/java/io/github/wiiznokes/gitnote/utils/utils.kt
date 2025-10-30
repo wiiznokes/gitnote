@@ -89,3 +89,8 @@ inline fun <T, R> Flow<T>.mapAndCombine(crossinline transform: suspend (value: T
     transform { value ->
         return@transform emit(Pair(value, transform(value)))
     }
+
+fun getParentPath(path: String) = path.substringBeforeLast(
+    delimiter = "/",
+    missingDelimiterValue = ""
+)

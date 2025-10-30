@@ -108,7 +108,7 @@ class AppPreferences(
 
     val provider = enumPreference("provider", ProviderType.GitHub)
 
-
+    val defaultPathForNewNote = stringPreference("defaultPathForNewNote", "")
     val sortOrder = enumPreference("sortOrder", SortOrder.MostRecent)
     val sortOrderFolder = enumPreference("sortOrderFolder", SortOrder.AZ)
 

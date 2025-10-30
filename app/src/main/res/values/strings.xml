@@ -19,6 +19,7 @@
     <string name="dynamic_colors">Dynamic colors</string>
     <string name="sort_order">Sort Order</string>
     <string name="sort_order_folder">Sort Order folder</string>
+    <string name="defaultPathForNewNote">Default path for new notes</string>
     <string name="minimal_note_width">Minimal width of a note</string>
     <string name="show_long_notes">Show long notes entirely</string>
     <string name="remember_last_opened_folder">Remember last opened folder</string>
@@ -148,5 +149,7 @@
     <string name="loading">Loading…</string>
     <string name="logs">Logs</string>
     <string name="extension">Extension: %1$s</string>
+    <string name="parent">Parent: %1$s</string>
+    <string name="pick_folder">Pick this folder</string>
 
 </resources>

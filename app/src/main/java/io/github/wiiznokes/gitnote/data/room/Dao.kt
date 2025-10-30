@@ -222,6 +222,25 @@ interface RepoDatabaseDao {
         return this.gridDrawerFoldersRaw(query)
     }
 
+    @RawQuery(observedEntities = [Note::class, NoteFolder::class])
+    fun noteFoldersRaw(query: SupportSQLiteQuery): Flow<List<NoteFolder>>
+
+    // todo: use pages
+    fun noteFolders(
+        currentNoteFolderRelativePath: String,
+    ): Flow<List<NoteFolder>> {
+
+        val sql = """
+            SELECT relativePath, id, fullName(relativePath) as folderName
+            FROM NoteFolders
+            WHERE parentPath(relativePath) = ?
+            ORDER BY folderName ASC
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.noteFoldersRaw(query)
+    }
+
     data class Testing(
         val relativePath: String,
         val id: Int,

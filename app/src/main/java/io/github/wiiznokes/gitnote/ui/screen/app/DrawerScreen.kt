@@ -58,6 +58,7 @@ import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.component.SimpleSpacer
 import io.github.wiiznokes.gitnote.ui.theme.IconDefaultSize
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
+import io.github.wiiznokes.gitnote.utils.getParentPath
 import kotlinx.coroutines.launch
 
 
@@ -80,17 +81,14 @@ fun DrawerScreen(
     createNoteFolder: (relativeParentPath: String, name: String) -> Boolean,
 ) {
 
-    fun getParent(path: String) = path.substringBeforeLast(
-        delimiter = "/",
-        missingDelimiterValue = ""
-    )
+
 
     val scope = rememberCoroutineScope()
     BackHandler(enabled = drawerState.isOpen) {
         if (currentNoteFolderRelativePath.isEmpty()) {
             scope.launch { drawerState.close() }
         } else {
-            openFolder(getParent(currentNoteFolderRelativePath))
+            openFolder(getParentPath(currentNoteFolderRelativePath))
         }
     }
 
@@ -112,7 +110,7 @@ fun DrawerScreen(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     shape = RoundedCornerShape(20.dp),
                     onClick = {
-                        openFolder(getParent(currentNoteFolderRelativePath))
+                        openFolder(getParentPath(currentNoteFolderRelativePath))
                     }
                 ) {
                     SimpleIcon(
