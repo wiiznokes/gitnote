@@ -24,13 +24,13 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthStep2
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.CloneState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlin.concurrent.thread
 
 private const val TAG = "SetupViewModel"
 
@@ -77,7 +77,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     var provider: Provider? = null
         private set
 
-    private var job: Job? = null
+    private var job: Thread? = null
 
     var repos = listOf<RepoInfo>()
         private set
@@ -103,9 +103,13 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         folder.create()
     }
 
+    var shouldCancel = false
     fun cancelClone() {
-        job?.cancel()
+        shouldCancel = true
+        job?.interrupt()
+        job = null
     }
+
     fun createLocalRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -170,6 +174,20 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         viewModelScope.launch { f() }
     }
 
+    private fun runCloneJob(f: suspend () -> Unit) {
+        job = thread(name = "clone thread") {
+            try {
+                runBlocking { f() }
+            } catch (e: InterruptedException) {
+                runBlocking {
+                    _initState.emit(AuthStep2.Error)
+                }
+
+            }
+
+        }
+    }
+
     override fun cloneRepo(
         storageConfig: StorageConfiguration,
         remoteUrl: String,
@@ -177,7 +195,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        job = CoroutineScope(Dispatchers.IO).launch {
+        runCloneJob {
             cloneRepoInternal(
                 storageConfig = storageConfig,
                 remoteUrl = remoteUrl,
@@ -193,6 +211,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         cred: Cred?,
         onSuccess: () -> Unit
     ) {
+        shouldCancel = false
 
         if (storageConfig is StorageConfiguration.App) {
             prepareLocalStorageRepoPath()
@@ -206,6 +225,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             cred = cred,
             progressCallback = {
                 _initState.tryEmit(CloneState.Cloning(it))
+                !shouldCancel
             }
         ).onFailure {
             uiHelper.makeToast(it.message)
@@ -281,7 +301,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        job = CoroutineScope(Dispatchers.IO).launch {
+        runCloneJob {
             val (publicKey, privateKey) = generateSshKeysLib()
 
             _initState.emit(AuthStep2.AddDeployKey)
@@ -294,7 +314,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
                 _initState.emit(AuthStep2.Error)
-                return@launch
+                return@runCloneJob
             }
 
             cloneRepoInternal(
@@ -317,7 +337,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        job = CoroutineScope(Dispatchers.IO).launch {
+        runCloneJob {
 
             _initState.emit(AuthStep2.CreateRepo)
             try {
@@ -328,7 +348,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             } catch (e: Exception) {
                 Log.e(TAG, "createNewRepoOnRemoteGithub: ${e.message}, $e")
                 _initState.emit(AuthStep2.Error)
-                return@launch
+                return@runCloneJob
             }
 
             val (publicKey, privateKey) = generateSshKeysLib()
@@ -343,7 +363,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             } catch (e: Exception) {
                 Log.e(TAG, "addDeployKey: ${e.message}, $e")
                 _initState.emit(AuthStep2.Error)
-                return@launch
+                return@runCloneJob
             }
 
             cloneRepoInternal(
