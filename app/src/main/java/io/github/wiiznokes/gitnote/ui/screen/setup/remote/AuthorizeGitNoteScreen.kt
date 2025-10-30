@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
-import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthState
 
 private const val TAG = "AuthorizeGitNoteScreen"
 
@@ -32,11 +31,12 @@ fun AuthorizeGitNoteScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
+        onBackClickEnabled = !authState.isLoading()
     ) {
 
         LaunchedEffect(authState) {
             Log.d(TAG, "LaunchedEffect: $authState, hash=${vmHashCode}")
-            if (authState is AuthState.Success) {
+            if (authState is InitState.AuthentificationSuccess) {
                 onSuccess()
             }
         }
@@ -48,7 +48,7 @@ fun AuthorizeGitNoteScreen(
                 val intent = getLaunchOAuthScreenIntent()
                 ctx.startActivity(intent)
             },
-            enabled = authState.isClickable() && authState != AuthState.Success
+            enabled = !authState.isLoading() && authState != InitState.AuthentificationSuccess
         ) {
             if (!authState.isLoading()) {
                 Text(text = stringResource(R.string.authorize_gitnote))
@@ -65,7 +65,7 @@ private fun AuthorizeGitNoteScreenPreview() {
 
     AuthorizeGitNoteScreen(
         onBackClick = {},
-        authState = AuthState.Idle,
+        authState = InitState.Idle,
         onSuccess = {},
         getLaunchOAuthScreenIntent = {
             Intent()

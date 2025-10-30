@@ -86,17 +86,12 @@ fun DrawerScreen(
         missingDelimiterValue = ""
     )
 
-    if (drawerState.isOpen) {
-
+    val scope = rememberCoroutineScope()
+    BackHandler(enabled = drawerState.isOpen) {
         if (currentNoteFolderRelativePath.isEmpty()) {
-            val scope = rememberCoroutineScope()
-            BackHandler {
-                scope.launch { drawerState.close() }
-            }
+            scope.launch { drawerState.close() }
         } else {
-            BackHandler {
-                vm.openFolder(getParent(currentNoteFolderRelativePath))
-            }
+            vm.openFolder(getParent(currentNoteFolderRelativePath))
         }
     }
 

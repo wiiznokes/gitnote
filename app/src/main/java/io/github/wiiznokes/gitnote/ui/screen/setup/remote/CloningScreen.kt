@@ -23,7 +23,7 @@ fun CloningScreen(
         title = "Clone",
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        onBackClickEnabled = cloneState.isClickable()
+        onBackClickEnabled = !cloneState.isLoading()
     ) {
         Text(text = cloneState.message())
 
@@ -40,7 +40,7 @@ fun CloningScreen(
 private fun PickRepoScreenPreview() {
 
     CloningScreen(
-        cloneState = InitState.CloneState.Cloning(50),
+        cloneState = InitState.Cloning(50),
         onCancel = {},
     )
 }

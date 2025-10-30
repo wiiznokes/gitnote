@@ -67,7 +67,7 @@ fun PickRepoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
         onBackClick = onBackClick,
-        onBackClickEnabled = authStep2State.isClickable(),
+        onBackClickEnabled = !authStep2State.isLoading(),
         disableVerticalScroll = true
     ) {
 
@@ -244,7 +244,7 @@ fun PickRepoScreen(
 private fun PickRepoScreenPreview() {
     PickRepoScreen(
         onBackClick = {},
-        authStep2State = InitState.AuthStep2.Idle,
+        authStep2State = InitState.Idle,
         vm = SetupViewModelMock(),
         userInfo = UserInfo(username = "", name = "", email = ""),
         repos = listOf(

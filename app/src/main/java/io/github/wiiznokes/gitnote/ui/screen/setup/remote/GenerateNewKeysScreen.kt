@@ -62,7 +62,7 @@ fun GenerateNewKeysScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
-        onBackClickEnabled = cloneState.isClickable()
+        onBackClickEnabled = !cloneState.isLoading()
     ) {
 
         val publicKey = rememberSaveable { mutableStateOf("") }
@@ -187,7 +187,7 @@ fun GenerateNewKeysScreen(
 private fun GenerateNewKeysScreenPreview() {
     GenerateNewKeysScreen(
         onBackClick = {},
-        cloneState = InitState.CloneState.Idle,
+        cloneState = InitState.Idle,
         provider = GithubProvider(),
         storageConfig = StorageConfiguration.App,
         url = "url",
