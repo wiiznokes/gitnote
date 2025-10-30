@@ -50,7 +50,8 @@ class GitManager {
     private val uiHelper = MyApp.appModule.uiHelper
 
     private val locker = Mutex()
-    private var isRepoInitialized = false
+    var isRepoInitialized = false
+        private set
     private var isLibInitialized = false
 
     private suspend fun <T> safelyAccessLibGit2(f: suspend () -> T): Result<T> = locker.withLock {
@@ -95,23 +96,21 @@ class GitManager {
         isRepoInitialized = true
     }
 
-    private var actualCb: ((Int) -> Unit)? = null
+    private var actualCb: ((Int) -> Boolean)? = null
 
     /**
      * This function is called from native code
      */
     @Keep
-    fun progressCb(progress: Int) {
-        if (actualCb != null) {
-            actualCb?.invoke(progress)
-        }
+    fun progressCb(progress: Int): Boolean {
+        return actualCb?.invoke(progress) != false
     }
 
     suspend fun cloneRepo(
         repoPath: String,
         repoUrl: String,
         cred: Cred?,
-        progressCallback: (Int) -> Unit
+        progressCallback: (Int) -> Boolean
     ): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "clone repo: $repoPath, $repoUrl, $cred")
 

@@ -35,6 +35,8 @@ sealed interface RemoteDestination : Parcelable {
         val url: String,
     ) : RemoteDestination
 
+    @Parcelize
+    data object Cloning : RemoteDestination
 //    @Parcelize
 //    data class LoadKeysFromDevice(
 //        val provider: Provider?,

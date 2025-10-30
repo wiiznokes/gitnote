@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,6 +43,13 @@ fun RemoteScreen(
 
     NavBackHandler(navController)
 
+    val initState = vm.initState.collectAsState().value
+
+    BackHandler(
+        enabled = initState.isLoading()
+    ) {
+        // do nothing
+    }
 
     AnimatedNavHost(
         controller = navController,
@@ -69,8 +77,11 @@ fun RemoteScreen(
 
             is AuthorizeGitNote -> AuthorizeGitNoteScreen(
                 onBackClick = { navController.pop() },
-                authState = vm.initState.collectAsState().value,
-                onSuccess = { navController.navigate(PickRepo) },
+                authState = initState,
+                onSuccess = {
+                    navController.navigate(PickRepo)
+                    vm.setStateToIdle()
+                },
                 getLaunchOAuthScreenIntent = { vm.getLaunchOAuthScreenIntent() },
                 vmHashCode = vm.hashCode()
             )
@@ -102,12 +113,13 @@ fun RemoteScreen(
 
             is PickRepo -> PickRepoScreen(
                 onBackClick = { navController.pop() },
-                authStep2State = vm.initState.collectAsState().value,
+                authStep2State = initState,
                 vm = vm,
                 userInfo = vm.userInfo,
                 repos = vm.repos,
                 storageConfig = storageConfig,
                 onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
             )
 
             is SelectGenerateNewKeys -> SelectGenerateNewKeysScreen(
@@ -123,13 +135,22 @@ fun RemoteScreen(
 
             is GenerateNewKeys -> GenerateNewKeysScreen(
                 onBackClick = { navController.pop() },
-                cloneState = vm.initState.collectAsState().value,
+                cloneState = initState,
                 provider = vm.provider,
                 storageConfig = storageConfig,
                 url = remoteDestination.url,
                 vm = vm,
                 generateSshKeys = ::generateSshKeysLib,
                 onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
+            )
+
+            RemoteDestination.Cloning -> CloningScreen(
+                cloneState = initState,
+                onCancel = {
+                    if (vm.cancelClone())
+                        navController.pop()
+                }
             )
         }
     }

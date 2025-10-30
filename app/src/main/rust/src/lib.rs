@@ -230,16 +230,19 @@ mod callback {
                 callback_class,
             }
         }
-        pub fn progress(&mut self, progress: i32) {
+        pub fn progress(&mut self, progress: i32) -> bool {
             match self.env.call_method(
                 &self.callback_class,
                 "progressCb",
-                "(I)V",
+                "(I)Z",
                 &[progress.into()],
             ) {
-                Ok(_) => {}
+                Ok(res) => {
+                    res.z().unwrap()
+                }
                 Err(e) => {
                     error!("{e}");
+                    true
                 }
             }
         }

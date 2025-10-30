@@ -2,9 +2,12 @@ package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -58,6 +61,7 @@ fun PickRepoScreen(
     userInfo: UserInfo,
     repos: List<RepoInfo>,
     storageConfig: StorageConfiguration,
+    onClone: () -> Unit,
     onSuccess: () -> Unit
 ) {
 
@@ -66,7 +70,7 @@ fun PickRepoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
         onBackClick = onBackClick,
-        onBackClickEnabled = authStep2State.isClickable(),
+        onBackClickEnabled = !authStep2State.isLoading(),
         disableVerticalScroll = true
     ) {
 
@@ -117,12 +121,14 @@ fun PickRepoScreen(
                 singleLine = true,
             )
 
+            Spacer(Modifier.height(15.dp))
 
             val showCreate = nameText.isNotEmpty() && !repos.contains { it.name == nameText }
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
 
                 if (showCreate) {
@@ -205,13 +211,9 @@ fun PickRepoScreen(
 
             }
 
-
             NextButton(
-                text = if (!authStep2State.isLoading()) {
-                    stringResource(R.string.next)
-                } else {
-                    authStep2State.message()
-                },
+                modifier = Modifier.padding(vertical = 10.dp),
+                text = stringResource(R.string.next),
                 onClick = {
 
                     val selected = selected.value
@@ -233,8 +235,9 @@ fun PickRepoScreen(
                         )
                     }
 
+                    onClone()
                 },
-                enabled = selected.value !is Selected.None && authStep2State.isClickable(),
+                enabled = selected.value !is Selected.None,
             )
         }
     }
@@ -246,7 +249,7 @@ fun PickRepoScreen(
 private fun PickRepoScreenPreview() {
     PickRepoScreen(
         onBackClick = {},
-        authStep2State = InitState.AuthStep2.Idle,
+        authStep2State = InitState.Idle,
         vm = SetupViewModelMock(),
         userInfo = UserInfo(username = "", name = "", email = ""),
         repos = listOf(
@@ -260,8 +263,19 @@ private fun PickRepoScreenPreview() {
             RepoInfo(name = "repoName8", owner = "wiiz", url = "repoName1", 7),
             RepoInfo(name = "repoName9", owner = "wiiz", url = "repoName1", 8),
             RepoInfo(name = "repoName10", owner = "wiiz", url = "repoName1", 9),
+            RepoInfo(name = "repoName1", owner = "wiiz", url = "repoName1", 0),
+            RepoInfo(name = "repoName2", owner = "wiiz", url = "repoName1", 1),
+            RepoInfo(name = "repoName3", owner = "wiiz", url = "repoName1", 2),
+            RepoInfo(name = "repoName4", owner = "wiiz", url = "repoName1", 3),
+            RepoInfo(name = "repoName5", owner = "wiiz", url = "repoName1", 4),
+            RepoInfo(name = "repoName6", owner = "wiiz", url = "repoName1", 5),
+            RepoInfo(name = "repoName7", owner = "wiiz", url = "repoName1", 6),
+            RepoInfo(name = "repoName8", owner = "wiiz", url = "repoName1", 7),
+            RepoInfo(name = "repoName9", owner = "wiiz", url = "repoName1", 8),
+            RepoInfo(name = "repoName10", owner = "wiiz", url = "repoName1", 9),
         ),
         storageConfig = StorageConfiguration.App,
-        onSuccess = {}
+        onSuccess = {},
+        onClone = {}
     )
 }

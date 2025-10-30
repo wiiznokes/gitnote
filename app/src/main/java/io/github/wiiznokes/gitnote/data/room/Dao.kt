@@ -11,6 +11,7 @@ import androidx.room.Upsert
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
+import io.github.wiiznokes.gitnote.manager.Progress
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
@@ -29,7 +30,7 @@ interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
-    suspend fun clearAndInit(rootPath: String, timestamps: HashMap<String, Long>) {
+    suspend fun clearAndInit(rootPath: String, timestamps: HashMap<String, Long>, progressCb: ((Progress) -> Unit)? = null) {
         Log.d(TAG, "clearAndInit")
         clearDatabase()
 
@@ -83,6 +84,7 @@ interface RepoDatabaseDao {
                         )
                         //Log.d(TAG, "add noteFolder: $noteFolder")
                         insertNoteFolder(noteFolder)
+                        progressCb?.invoke(Progress.GeneratingDatabase(noteFolder.relativePath))
                         initRec(nodeFs)
                     }
                 }

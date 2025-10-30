@@ -128,12 +128,11 @@ pub fn clone_repo(
             .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
 
+
     callbacks.transfer_progress(|stats: Progress| {
         let progress = stats.indexed_objects() as f32 / stats.total_objects() as f32 * 100.;
 
-        cb.progress(progress as i32);
-
-        true
+        cb.progress(progress as i32)
     });
 
     let mut fetch_options = FetchOptions::new();
