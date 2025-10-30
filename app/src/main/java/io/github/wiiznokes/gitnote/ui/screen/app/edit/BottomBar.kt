@@ -94,7 +94,10 @@ fun DefaultRow(
                 Text(
                     modifier = Modifier
                         .padding(10.dp),
-                    text = stringResource(R.string.parent, getParentPath(vm.previousNote.relativePath))
+                    text = stringResource(
+                        R.string.parent,
+                        getParentPath(vm.previousNote.relativePath)
+                    )
                 )
             }
         }

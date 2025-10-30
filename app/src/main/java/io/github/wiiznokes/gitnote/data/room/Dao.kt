@@ -30,7 +30,11 @@ interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
-    suspend fun clearAndInit(rootPath: String, timestamps: HashMap<String, Long>, progressCb: ((Progress) -> Unit)? = null) {
+    suspend fun clearAndInit(
+        rootPath: String,
+        timestamps: HashMap<String, Long>,
+        progressCb: ((Progress) -> Unit)? = null
+    ) {
         Log.d(TAG, "clearAndInit")
         clearDatabase()
 

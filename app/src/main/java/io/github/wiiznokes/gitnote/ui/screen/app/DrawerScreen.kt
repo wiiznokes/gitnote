@@ -82,7 +82,6 @@ fun DrawerScreen(
 ) {
 
 
-
     val scope = rememberCoroutineScope()
     BackHandler(enabled = drawerState.isOpen) {
         if (currentNoteFolderRelativePath.isEmpty()) {

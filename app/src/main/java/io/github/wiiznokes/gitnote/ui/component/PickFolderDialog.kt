@@ -6,16 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -51,7 +50,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -59,7 +57,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "PickFolder"
 
-class PickFolderVm: ViewModel() {
+class PickFolderVm : ViewModel() {
 
     val prefs: AppPreferences = MyApp.appModule.appPreferences
     private val db: RepoDatabase = MyApp.appModule.repoDatabase
@@ -130,7 +128,7 @@ fun PickFolderDialog(
 ) {
 
     if (expanded.value) {
-        val vm: PickFolderVm  = viewModel()
+        val vm: PickFolderVm = viewModel()
 
         PickFolderDialogInternal(
             expanded = expanded,
@@ -144,6 +142,7 @@ fun PickFolderDialog(
         )
     }
 }
+
 @Composable
 private fun PickFolderDialogInternal(
     expanded: MutableState<Boolean>,
@@ -270,7 +269,7 @@ private fun PickFolderDialogPreview() {
         currentNoteFolderRelativePath = "",
         noteFolders = listOf(),
         openFolder = {},
-        createNoteFolder = { _,_ ->
+        createNoteFolder = { _, _ ->
             true
         },
         onSelectedFolder = {},
