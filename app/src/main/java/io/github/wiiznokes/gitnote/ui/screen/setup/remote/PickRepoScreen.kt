@@ -58,6 +58,7 @@ fun PickRepoScreen(
     userInfo: UserInfo,
     repos: List<RepoInfo>,
     storageConfig: StorageConfiguration,
+    onClone: () -> Unit,
     onSuccess: () -> Unit
 ) {
 
@@ -207,11 +208,7 @@ fun PickRepoScreen(
 
 
             NextButton(
-                text = if (!authStep2State.isLoading()) {
-                    stringResource(R.string.next)
-                } else {
-                    authStep2State.message()
-                },
+                text = stringResource(R.string.next),
                 onClick = {
 
                     val selected = selected.value
@@ -233,8 +230,9 @@ fun PickRepoScreen(
                         )
                     }
 
+                    onClone()
                 },
-                enabled = selected.value !is Selected.None && authStep2State.isClickable(),
+                enabled = selected.value !is Selected.None,
             )
         }
     }
@@ -262,6 +260,7 @@ private fun PickRepoScreenPreview() {
             RepoInfo(name = "repoName10", owner = "wiiz", url = "repoName1", 9),
         ),
         storageConfig = StorageConfiguration.App,
-        onSuccess = {}
+        onSuccess = {},
+        onClone = {}
     )
 }

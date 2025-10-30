@@ -108,6 +108,7 @@ fun RemoteScreen(
                 repos = vm.repos,
                 storageConfig = storageConfig,
                 onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
             )
 
             is SelectGenerateNewKeys -> SelectGenerateNewKeysScreen(
@@ -130,6 +131,15 @@ fun RemoteScreen(
                 vm = vm,
                 generateSshKeys = ::generateSshKeysLib,
                 onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
+            )
+
+            RemoteDestination.Cloning -> CloningScreen(
+                cloneState = vm.initState.collectAsState().value,
+                onCancel = {
+                    vm.cancelClone()
+                    navController.pop()
+                }
             )
         }
     }

@@ -24,6 +24,8 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.AuthStep2
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState.CloneState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,6 +77,8 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     var provider: Provider? = null
         private set
 
+    private var job: Job? = null
+
     var repos = listOf<RepoInfo>()
         private set
 
@@ -99,6 +103,9 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         folder.create()
     }
 
+    fun cancelClone() {
+        job?.cancel()
+    }
     fun createLocalRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -170,35 +177,51 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        CoroutineScope(Dispatchers.IO).launch {
-            if (storageConfig is StorageConfiguration.App) {
-                prepareLocalStorageRepoPath()
-            }
-
-            _initState.emit(CloneState.Cloning(0))
-
-            gitManager.cloneRepo(
-                repoPath = storageConfig.repoPath(),
-                repoUrl = remoteUrl,
+        job = CoroutineScope(Dispatchers.IO).launch {
+            cloneRepoInternal(
+                storageConfig = storageConfig,
+                remoteUrl = remoteUrl,
                 cred = cred,
-                progressCallback = {
-                    _initState.tryEmit(CloneState.Cloning(it))
-                }
-            ).onFailure {
-                uiHelper.makeToast(it.message)
-                _initState.emit(CloneState.Error)
-                return@launch
-            }
-
-            prefs.initRepo(storageConfig)
-            prefs.remoteUrl.update(remoteUrl)
-
-            prefs.updateCred(cred)
-
-            storageManager.updateDatabase()
-
-            onSuccess()
+                onSuccess = onSuccess
+            )
         }
+    }
+
+    suspend fun cloneRepoInternal(
+        storageConfig: StorageConfiguration,
+        remoteUrl: String,
+        cred: Cred?,
+        onSuccess: () -> Unit
+    ) {
+
+        if (storageConfig is StorageConfiguration.App) {
+            prepareLocalStorageRepoPath()
+        }
+
+        _initState.emit(CloneState.Cloning(0))
+
+        gitManager.cloneRepo(
+            repoPath = storageConfig.repoPath(),
+            repoUrl = remoteUrl,
+            cred = cred,
+            progressCallback = {
+                _initState.tryEmit(CloneState.Cloning(it))
+            }
+        ).onFailure {
+            uiHelper.makeToast(it.message)
+            _initState.emit(CloneState.Error)
+            return
+        }
+
+        prefs.initRepo(storageConfig)
+        prefs.remoteUrl.update(remoteUrl)
+
+        prefs.updateCred(cred)
+
+        storageManager.updateDatabase()
+
+        onSuccess()
+
     }
 
 
@@ -258,7 +281,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        CoroutineScope(Dispatchers.IO).launch {
+        job = CoroutineScope(Dispatchers.IO).launch {
             val (publicKey, privateKey) = generateSshKeysLib()
 
             _initState.emit(AuthStep2.AddDeployKey)
@@ -274,7 +297,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 return@launch
             }
 
-            cloneRepo(
+            cloneRepoInternal(
                 storageConfig = storageConfig,
                 remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
@@ -294,7 +317,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         onSuccess: () -> Unit
     ) {
 
-        CoroutineScope(Dispatchers.IO).launch {
+        job = CoroutineScope(Dispatchers.IO).launch {
 
             _initState.emit(AuthStep2.CreateRepo)
             try {
@@ -323,7 +346,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 return@launch
             }
 
-            cloneRepo(
+            cloneRepoInternal(
                 storageConfig = storageConfig,
                 remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(

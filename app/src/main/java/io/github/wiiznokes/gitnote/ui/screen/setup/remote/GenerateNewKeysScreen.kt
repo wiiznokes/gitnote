@@ -53,6 +53,7 @@ fun GenerateNewKeysScreen(
     url: String,
     vm: SetupViewModelI,
     generateSshKeys: () -> Pair<String, String>,
+    onClone: () -> Unit,
     onSuccess: () -> Unit,
 ) {
 
@@ -161,9 +162,7 @@ fun GenerateNewKeysScreen(
             ) {
 
                 SetupButton(
-                    text = if (cloneState.isLoading()) {
-                        cloneState.message()
-                    } else stringResource(R.string.clone_repo),
+                    text = stringResource(R.string.clone_repo),
                     onClick = {
                         vm.cloneRepo(
                             storageConfig = storageConfig,
@@ -174,8 +173,9 @@ fun GenerateNewKeysScreen(
                             ),
                             onSuccess = onSuccess
                         )
+
+                        onClone()
                     },
-                    enabled = cloneState.isClickable()
                 )
             }
         }
@@ -193,7 +193,8 @@ private fun GenerateNewKeysScreenPreview() {
         url = "url",
         vm = SetupViewModelMock(),
         generateSshKeys = { "aaaaaaaaaaaabbbbbbbbbbbbb" to "aaaaaaaaaaaabbbbbbbbbbbbb" },
-        onSuccess = {}
+        onSuccess = {},
+        onClone = {}
     )
 
 }
