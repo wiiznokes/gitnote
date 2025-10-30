@@ -148,8 +148,8 @@ fun RemoteScreen(
             RemoteDestination.Cloning -> CloningScreen(
                 cloneState = initState,
                 onCancel = {
-                    vm.cancelClone()
-                    navController.pop()
+                    if (vm.cancelClone())
+                        navController.pop()
                 }
             )
         }

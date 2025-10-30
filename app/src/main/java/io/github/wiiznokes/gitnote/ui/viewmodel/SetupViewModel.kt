@@ -11,6 +11,7 @@ import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.helper.UiHelper
+import io.github.wiiznokes.gitnote.manager.Progress
 import io.github.wiiznokes.gitnote.manager.generateSshKeysLib
 import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
@@ -97,8 +98,12 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     }
 
     private var shouldCancel = false
-    fun cancelClone() {
+    fun cancelClone(): Boolean {
+        if (gitManager.isRepoInitialized) {
+            return false
+        }
         shouldCancel = true
+        return true
     }
 
     fun setStateToIdle() {
@@ -217,17 +222,26 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 !shouldCancel
             }
         ).onFailure {
-            uiHelper.makeToast(it.message)
-            _initState.emit(InitState.Error(it.message))
+            _initState.emit(InitState.Error(if (shouldCancel) "Clone canceled" else it.message))
             return
         }
+        if (shouldCancel) return
 
         prefs.initRepo(storageConfig)
         prefs.remoteUrl.update(remoteUrl)
 
         prefs.updateCred(cred)
 
-        storageManager.updateDatabase()
+        storageManager.updateDatabase(
+            progressCb = {
+                viewModelScope.launch {
+                    _initState.emit(when (it) {
+                        is Progress.GeneratingDatabase -> InitState.GeneratingDatabase(it.path)
+                        Progress.Timestamps -> InitState.CalculatingTimestamps
+                    })
+                }
+            }
+        )
 
         onSuccess()
 
@@ -388,7 +402,7 @@ sealed class InitState {
     data class Cloning(val percent: Int): InitState()
 
     data object CalculatingTimestamps: InitState()
-    data object GeneratingDatabase: InitState()
+    data class GeneratingDatabase(val path: String): InitState()
 
 
     fun message(): String {
@@ -399,7 +413,7 @@ sealed class InitState {
             CreatingRemoteRepo -> "Creating repository"
             is Error -> if (message != null) "Error: $message" else "Error"
             FetchingRepos -> "Fetching repositories"
-            GeneratingDatabase -> "Generating database"
+            is GeneratingDatabase -> "Generating database, path: $path"
             GettingAccessToken -> "Getting the access token"
             GettingUserInfo -> "Getting user information"
             Idle -> ""

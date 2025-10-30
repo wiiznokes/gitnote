@@ -31,6 +31,12 @@ sealed interface SyncState {
     }
 }
 
+sealed class Progress {
+    data object Timestamps: Progress()
+
+    data class GeneratingDatabase(val path: String): Progress()
+}
+
 class StorageManager {
 
 
@@ -95,7 +101,7 @@ class StorageManager {
      * The caller must ensure that all files has been committed
      * to keep the database in sync with the remote repo
      */
-    private suspend fun updateDatabaseWithoutLocker(force: Boolean = false): Result<Unit> {
+    private suspend fun updateDatabaseWithoutLocker(force: Boolean = false, progressCb: ((Progress) -> Unit)? = null): Result<Unit> {
 
         val fsCommit = gitManager.lastCommit()
         val databaseCommit = prefs.databaseCommit.get()
@@ -109,9 +115,10 @@ class StorageManager {
         val repoPath = prefs.repoPath()
         Log.d(TAG, "repoPath = $repoPath")
 
+        progressCb?.invoke(Progress.Timestamps)
         val timestamps = gitManager.getTimestamps().getOrThrow()
 
-        dao.clearAndInit(repoPath, timestamps)
+        dao.clearAndInit(repoPath, timestamps, progressCb)
         prefs.databaseCommit.update(fsCommit)
 
         return success(Unit)
@@ -120,8 +127,8 @@ class StorageManager {
     /**
      * See the documentation of [updateDatabaseWithoutLocker]
      */
-    suspend fun updateDatabase(force: Boolean = false): Result<Unit> = locker.withLock {
-        updateDatabaseWithoutLocker(force)
+    suspend fun updateDatabase(force: Boolean = false, progressCb: ((Progress) -> Unit)? = null): Result<Unit> = locker.withLock {
+        updateDatabaseWithoutLocker(force, progressCb)
     }
 
     /**

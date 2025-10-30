@@ -1,13 +1,15 @@
 package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import io.github.wiiznokes.gitnote.R
+import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
 
@@ -27,8 +29,11 @@ fun CloningScreen(
     ) {
         Text(text = cloneState.message())
 
+        Spacer(Modifier.height(20.dp))
+
         Button(
-            onClick = onCancel
+            onClick = onCancel,
+            enabled = cloneState !is InitState.CalculatingTimestamps && cloneState !is InitState.GeneratingDatabase
         ) {
             Text("Cancel")
         }
