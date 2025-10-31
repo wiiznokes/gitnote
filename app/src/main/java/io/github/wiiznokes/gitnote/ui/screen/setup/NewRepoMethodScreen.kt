@@ -61,7 +61,6 @@ fun NewRepoMethodScreen(
             val newRepoMethod = newRepoMethod.value!!
             navigate(
                 SetupDestination.FileExplorer(
-                    title = newRepoMethod.getExplorerTitle(),
                     path = repoPath,
                     newRepoMethod = newRepoMethod,
                 )
@@ -99,7 +98,6 @@ fun NewRepoMethodScreen(
                 } else {
                     navigate(
                         SetupDestination.FileExplorer(
-                            title = newRepoMethod.getExplorerTitle(),
                             path = repoPath,
                             newRepoMethod = newRepoMethod,
                         )
@@ -184,7 +182,6 @@ fun NewRepoMethodScreen(
                             val newRepoMethod = newRepoMethod.value!!
                             navigate(
                                 SetupDestination.FileExplorer(
-                                    title = newRepoMethod.getExplorerTitle(),
                                     path = repoPath,
                                     newRepoMethod = newRepoMethod,
                                 )

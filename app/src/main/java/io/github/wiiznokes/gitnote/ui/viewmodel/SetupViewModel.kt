@@ -22,6 +22,7 @@ import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -91,12 +92,6 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         }
     }
 
-    private fun prepareLocalStorageRepoPath() {
-        val folder = NodeFs.Folder.fromPath(AppPreferences.appStorageRepoPath)
-        folder.delete()
-        folder.create()
-    }
-
     private var shouldCancel = false
     fun cancelClone(): Boolean {
         if (gitManager.isRepoInitialized) {
@@ -108,6 +103,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
 
     fun setStateToIdle() {
         viewModelScope.launch {
+            delay(50)
             _initState.emit(InitState.Idle)
         }
     }
@@ -116,9 +112,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
 
         CoroutineScope(Dispatchers.IO).launch {
 
-            if (storageConfig is StorageConfiguration.App) {
-                prepareLocalStorageRepoPath()
-            }
+            storageConfig.prepareStorageRepoPath()
 
             NodeFs.Folder.fromPath(storageConfig.repoPath()).isEmptyDirectory().onFailure {
                 uiHelper.makeToast(it.message)
@@ -207,9 +201,8 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     ) {
         shouldCancel = false
 
-        if (storageConfig is StorageConfiguration.App) {
-            prepareLocalStorageRepoPath()
-        }
+        storageConfig.applyUrlName(remoteUrl)
+        storageConfig.prepareStorageRepoPath()
 
         _initState.emit(InitState.Cloning(0))
 

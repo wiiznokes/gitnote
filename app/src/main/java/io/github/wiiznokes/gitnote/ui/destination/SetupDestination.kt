@@ -14,7 +14,6 @@ sealed interface SetupDestination : Parcelable {
 
     @Parcelize
     data class FileExplorer(
-        val title: String,
         val path: String?,
         val newRepoMethod: NewRepoMethod,
     ) : SetupDestination
@@ -30,13 +29,15 @@ enum class NewRepoMethod {
     Clone;
 
 
-    fun getExplorerTitle(): String {
+    fun getExplorerTitle(useUrlForRootFolder: Boolean): String {
         val context = MyApp.appModule.context
 
         return when (this) {
             Create -> context.getString(R.string.create_repo_explorer)
             Open -> context.getString(R.string.open_repo_explorer)
-            Clone -> context.getString(R.string.clone_repo_explorer)
+            Clone -> if (useUrlForRootFolder) context.getString(R.string.clone_repo_explorer_use_url_for_root_folder) else context.getString(
+                R.string.clone_repo_explorer
+            )
         }
     }
 }

@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.ui.model
 
 import android.os.Parcelable
 import io.github.wiiznokes.gitnote.data.AppPreferences
+import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import kotlinx.parcelize.Parcelize
 
 
@@ -37,12 +38,28 @@ enum class CredType {
 @Parcelize
 sealed class StorageConfiguration : Parcelable {
     data object App : StorageConfiguration()
-    class Device(val path: String) : StorageConfiguration()
+    class Device(var path: String, val useUrlForRootFolder: Boolean = false) : StorageConfiguration()
 
     fun repoPath(): String {
         return when (this) {
             App -> AppPreferences.appStorageRepoPath
             is Device -> this.path
         }
+    }
+
+    fun applyUrlName(url: String) {
+        if (this is Device && useUrlForRootFolder) {
+            val name = url
+                .substringAfterLast('/')
+                .substringBeforeLast(".git")
+
+            path = "$path/$name"
+        }
+    }
+
+    fun prepareStorageRepoPath() {
+        val folder = NodeFs.Folder.fromPath(repoPath())
+        folder.delete()
+        folder.create()
     }
 }

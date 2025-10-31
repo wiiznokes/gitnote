@@ -79,6 +79,7 @@
     <string name="create_repo_explorer">Create repository in this folder</string>
     <string name="open_repo_explorer">Open this repository</string>
     <string name="clone_repo_explorer">Clone repository in this folder</string>
+    <string name="clone_repo_explorer_use_url_for_root_folder">Clone repository in this folder and use the URL as the root folder name</string>
     <string name="quick_links">Quick links</string>
     <string name="quick_links_home_page">Home page</string>
     <string name="quick_links_create_repo">Create repository</string>

@@ -2,6 +2,8 @@ package io.github.wiiznokes.gitnote.ui.screen.setup
 
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
@@ -18,6 +20,7 @@ import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.setup.remote.RemoteScreen
 import io.github.wiiznokes.gitnote.ui.utils.crossFade
 import io.github.wiiznokes.gitnote.ui.utils.slide
+import io.github.wiiznokes.gitnote.ui.viewmodel.FileExplorerViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -46,6 +49,9 @@ fun SetupNav(
     NavBackHandler(navController)
 
 
+    val useUrlForRootFolder = rememberSaveable { mutableStateOf(false) }
+
+
     AnimatedNavHost(
         controller = navController,
         transitionSpec = InitNavTransitionSpec
@@ -63,23 +69,34 @@ fun SetupNav(
 
             is SetupDestination.FileExplorer -> {
 
-                FileExplorerScreen(
-                    path = setupDestination.path?.let {
-                        it.ifEmpty {
-                            null
-                        }
+                val path = setupDestination.path?.let {
+                    it.ifEmpty {
+                        null
+                    }
+                }
+
+                val fileExplorerVm: FileExplorerViewModel = viewModel(
+                    factory = viewModelFactory {
+                        FileExplorerViewModel(
+                            path = path
+                        )
                     },
+                    key = path
+                )
+
+
+                FileExplorerScreen(
+                    currentDir = fileExplorerVm.currentDir,
                     onDirectoryClick = {
                         navController.navigate(
                             SetupDestination.FileExplorer(
-                                title = setupDestination.title,
                                 path = it,
                                 newRepoMethod = setupDestination.newRepoMethod
                             )
                         )
                     },
-                    onFinish = { path ->
-                        val storageConfig = StorageConfiguration.Device(path)
+                    onFinish = { path, useUrlForRootFolder ->
+                        val storageConfig = StorageConfiguration.Device(path, useUrlForRootFolder = useUrlForRootFolder)
 
                         when (setupDestination.newRepoMethod) {
                             NewRepoMethod.Create -> vm.createLocalRepo(
@@ -89,7 +106,7 @@ fun SetupNav(
 
                             NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
                             NewRepoMethod.Clone -> {
-                                vm.checkPathForClone(storageConfig.repoPath()).onSuccess {
+                                if (useUrlForRootFolder || vm.checkPathForClone(storageConfig.repoPath()).isSuccess) {
                                     navController.navigate(
                                         SetupDestination.Remote(storageConfig)
                                     )
@@ -102,7 +119,11 @@ fun SetupNav(
                             it !is SetupDestination.FileExplorer
                         }
                     },
-                    title = setupDestination.title
+                    title = setupDestination.newRepoMethod.getExplorerTitle(useUrlForRootFolder.value),
+                    createDir = fileExplorerVm::createDir,
+                    folders = fileExplorerVm.folders,
+                    newRepoMethod = setupDestination.newRepoMethod,
+                    useUrlForRootFolder = useUrlForRootFolder,
                 )
             }
 

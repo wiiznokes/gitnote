@@ -12,51 +12,47 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CreateNewFolder
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.GetStringDialog
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
-import io.github.wiiznokes.gitnote.ui.viewmodel.FileExplorerViewModel
-import io.github.wiiznokes.gitnote.ui.viewmodel.viewModelFactory
+
 
 @Composable
 fun FileExplorerScreen(
-    path: String?,
+    currentDir: NodeFs.Folder,
     onDirectoryClick: (String) -> Unit,
-    onFinish: (String) -> Unit,
+    onFinish: (path: String, useUrlAsRootFolder: Boolean) -> Unit,
     onBackClick: () -> Unit,
-    title: String
+    title: String,
+    createDir: (String) -> Boolean,
+    folders: List<NodeFs.Folder>,
+    newRepoMethod: NewRepoMethod,
+    useUrlForRootFolder: MutableState<Boolean>,
 ) {
 
-
-    val vm: FileExplorerViewModel = viewModel(
-        factory = viewModelFactory {
-            FileExplorerViewModel(
-                path = path
-            )
-        },
-        key = path
-    )
-
-
     AppPage(
-        title = vm.currentDir.path,
+        title = currentDir.path,
         titleStyle = MaterialTheme.typography.titleSmall,
         onBackClick = onBackClick,
         disableVerticalScroll = true,
@@ -78,23 +74,37 @@ fun FileExplorerScreen(
                 label = stringResource(R.string.new_folder_label),
                 actionText = stringResource(R.string.create_new_folder)
             ) {
-                if (vm.createDir(it)) {
-                    onDirectoryClick(NodeFs.Folder.fromPath(vm.currentDir.path, it).path)
+                if (createDir(it)) {
+                    onDirectoryClick(NodeFs.Folder.fromPath(currentDir.path, it).path)
                 }
             }
         },
         bottomBar = {
 
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(LocalSpaces.current.medium),
-                onClick = {
-                    onFinish(vm.currentDir.path)
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = title)
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(LocalSpaces.current.medium),
+                    onClick = {
+                        onFinish(currentDir.path, useUrlForRootFolder.value)
+                    }
+                ) {
+                    Text(text = title)
+                }
+
+                if (newRepoMethod == NewRepoMethod.Clone) {
+                    Checkbox(
+                        checked = useUrlForRootFolder.value,
+                        onCheckedChange = {
+                            useUrlForRootFolder.value = it
+                        }
+                    )
+                }
             }
+
         }
     ) {
 
@@ -102,7 +112,7 @@ fun FileExplorerScreen(
             modifier = Modifier,
         ) {
 
-            vm.currentDir.parent()?.let { parent ->
+            currentDir.parent()?.let { parent ->
                 item {
                     FolderRow(
                         item = FolderItem(
@@ -115,7 +125,7 @@ fun FileExplorerScreen(
                 }
             }
 
-            items(vm.folders) { folderFs ->
+            items(folders) { folderFs ->
                 FolderRow(
                     item = FolderItem(
                         path = folderFs.path,
@@ -162,4 +172,42 @@ private fun FolderRow(
             color = color
         )
     }
+}
+
+@Composable
+@Preview
+private fun FileExplorerPreview() {
+
+    FileExplorerScreen(
+        currentDir = NodeFs.Folder.fromPath("hello"),
+        onDirectoryClick = {},
+        onFinish = { _, _ -> },
+        onBackClick = {},
+        title = "Clone repository in this folder and use the URL as the root folder name",
+        createDir = { _ -> true },
+        folders = listOf(
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+            NodeFs.Folder.fromPath("hello"),
+        ),
+        newRepoMethod = NewRepoMethod.Clone,
+        useUrlForRootFolder = remember { mutableStateOf(false) }
+    )
 }

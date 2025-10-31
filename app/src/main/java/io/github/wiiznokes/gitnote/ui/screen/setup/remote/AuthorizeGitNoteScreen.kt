@@ -31,7 +31,7 @@ fun AuthorizeGitNoteScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
-        onBackClickEnabled = !authState.isLoading()
+        onBackClickEnabled = !authState.isLoading() && authState != InitState.AuthentificationSuccess
     ) {
 
         LaunchedEffect(authState) {
