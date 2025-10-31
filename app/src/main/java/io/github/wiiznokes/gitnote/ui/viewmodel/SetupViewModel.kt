@@ -235,10 +235,12 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         storageManager.updateDatabase(
             progressCb = {
                 viewModelScope.launch {
-                    _initState.emit(when (it) {
-                        is Progress.GeneratingDatabase -> InitState.GeneratingDatabase(it.path)
-                        Progress.Timestamps -> InitState.CalculatingTimestamps
-                    })
+                    _initState.emit(
+                        when (it) {
+                            is Progress.GeneratingDatabase -> InitState.GeneratingDatabase(it.path)
+                            Progress.Timestamps -> InitState.CalculatingTimestamps
+                        }
+                    )
                 }
             }
         )
@@ -387,22 +389,22 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
 
 
 sealed class InitState {
-    data object Idle: InitState()
-    data class Error(val message: String? = null): InitState()
+    data object Idle : InitState()
+    data class Error(val message: String? = null) : InitState()
 
-    data object GettingAccessToken: InitState()
-    data object FetchingRepos: InitState()
-    data object GettingUserInfo: InitState()
+    data object GettingAccessToken : InitState()
+    data object FetchingRepos : InitState()
+    data object GettingUserInfo : InitState()
 
-    data object AuthentificationSuccess: InitState()
+    data object AuthentificationSuccess : InitState()
 
-    data object CreatingRemoteRepo: InitState()
-    data object AddingDeployKey: InitState()
+    data object CreatingRemoteRepo : InitState()
+    data object AddingDeployKey : InitState()
 
-    data class Cloning(val percent: Int): InitState()
+    data class Cloning(val percent: Int) : InitState()
 
-    data object CalculatingTimestamps: InitState()
-    data class GeneratingDatabase(val path: String): InitState()
+    data object CalculatingTimestamps : InitState()
+    data class GeneratingDatabase(val path: String) : InitState()
 
 
     fun message(): String {

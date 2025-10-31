@@ -166,7 +166,6 @@ class GridViewModel : ViewModel() {
     }
 
     fun deleteNote(note: Note) {
-        selectNote(note, false)
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNote(note)
         }
@@ -190,8 +189,14 @@ class GridViewModel : ViewModel() {
         val defaultExtension = FileExtension.match(prefs.defaultExtension.getBlocking())
         val defaultFullName = "$defaultName.${defaultExtension.text}"
 
+        val currentNoteFolderRelativePath = currentNoteFolderRelativePath.value
+
+        val parent = if (currentNoteFolderRelativePath == "") {
+            prefs.defaultPathForNewNote.getBlocking()
+        } else currentNoteFolderRelativePath
+
         return Note.new(
-            relativePath = "${currentNoteFolderRelativePath.value}/$defaultFullName",
+            relativePath = "$parent/$defaultFullName",
         )
     }
 
@@ -226,6 +231,7 @@ class GridViewModel : ViewModel() {
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
     )
 
+    // todo: use pager
     @OptIn(ExperimentalCoroutinesApi::class)
     val drawerFolders = combine(
         currentNoteFolderRelativePath,

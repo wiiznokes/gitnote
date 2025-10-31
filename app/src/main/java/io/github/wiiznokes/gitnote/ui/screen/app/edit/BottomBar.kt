@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
+import io.github.wiiznokes.gitnote.utils.getParentPath
 
 val bottomBarHeight = 50.dp
 
@@ -89,6 +90,14 @@ fun DefaultRow(
                     modifier = Modifier
                         .padding(10.dp),
                     text = stringResource(R.string.extension, vm.previousNote.fileExtension().text)
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(10.dp),
+                    text = stringResource(
+                        R.string.parent,
+                        getParentPath(vm.previousNote.relativePath)
+                    )
                 )
             }
         }

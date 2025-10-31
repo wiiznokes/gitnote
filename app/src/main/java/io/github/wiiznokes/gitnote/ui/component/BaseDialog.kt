@@ -14,10 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import io.github.wiiznokes.gitnote.ui.utils.conditional
 
 @Composable
 fun BaseDialog(
     expanded: MutableState<Boolean>,
+    modifier: Modifier = Modifier,
+    verticalScrollEnabled: Boolean = true,
     dialogContent: @Composable ColumnScope.(MutableState<Boolean>) -> Unit
 ) {
     if (expanded.value) {
@@ -27,9 +30,11 @@ fun BaseDialog(
             }
         ) {
             Surface(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .conditional(verticalScrollEnabled) {
+                        verticalScroll(rememberScrollState())
+                    },
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface

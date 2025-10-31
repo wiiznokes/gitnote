@@ -30,7 +30,11 @@ interface RepoDatabaseDao {
 
     // todo: use @Transaction
     // todo: don't clear the all database each time
-    suspend fun clearAndInit(rootPath: String, timestamps: HashMap<String, Long>, progressCb: ((Progress) -> Unit)? = null) {
+    suspend fun clearAndInit(
+        rootPath: String,
+        timestamps: HashMap<String, Long>,
+        progressCb: ((Progress) -> Unit)? = null
+    ) {
         Log.d(TAG, "clearAndInit")
         clearDatabase()
 
@@ -220,6 +224,25 @@ interface RepoDatabaseDao {
 
         val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
         return this.gridDrawerFoldersRaw(query)
+    }
+
+    @RawQuery(observedEntities = [Note::class, NoteFolder::class])
+    fun noteFoldersRaw(query: SupportSQLiteQuery): Flow<List<NoteFolder>>
+
+    // todo: use pages
+    fun noteFolders(
+        currentNoteFolderRelativePath: String,
+    ): Flow<List<NoteFolder>> {
+
+        val sql = """
+            SELECT relativePath, id, fullName(relativePath) as folderName
+            FROM NoteFolders
+            WHERE parentPath(relativePath) = ?
+            ORDER BY folderName ASC
+        """.trimIndent()
+
+        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        return this.noteFoldersRaw(query)
     }
 
     data class Testing(

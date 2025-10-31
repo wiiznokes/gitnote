@@ -28,6 +28,7 @@ import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.DefaultSettingsRow
 import io.github.wiiznokes.gitnote.ui.component.MultipleChoiceSettings
+import io.github.wiiznokes.gitnote.ui.component.PickFolderDialog
 import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
 import io.github.wiiznokes.gitnote.ui.component.SettingsSection
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
@@ -140,6 +141,22 @@ fun SettingsScreen(
                 checked = showFullPathOfNotes,
                 onCheckedChange = {
                     vm.update { vm.prefs.showFullPathOfNotes.update(it) }
+                }
+            )
+
+
+            val defaultPathForNewNote by vm.prefs.defaultPathForNewNote.getAsState()
+            val pickFolderDialogExpanded = rememberSaveable { mutableStateOf(false) }
+            DefaultSettingsRow(
+                title = stringResource(R.string.defaultPathForNewNote),
+                subTitle = "Only when located in the root folder.\nCurrent value: \"$defaultPathForNewNote\"",
+                onClick = { pickFolderDialogExpanded.value = true }
+            )
+
+            PickFolderDialog(
+                expanded = pickFolderDialogExpanded,
+                onSelectedFolder = {
+                    vm.update { vm.prefs.defaultPathForNewNote.update(it) }
                 }
             )
 
