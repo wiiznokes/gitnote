@@ -122,7 +122,7 @@ fun RemoteScreen(
                 onClone = { navController.navigate(RemoteDestination.Cloning) }
             )
 
-            is SelectGenerateNewKeys -> SelectGenerateNewKeysScreen(
+            is SelectGenerateNewKeys -> SelectGenerateSshNewKeysScreen(
                 onBackClick = { navController.pop() },
                 onGenerate = {
                     navController.navigate(
@@ -133,7 +133,7 @@ fun RemoteScreen(
                 },
             )
 
-            is GenerateNewKeys -> GenerateNewKeysScreen(
+            is GenerateNewKeys -> GenerateNewSshKeysScreen(
                 onBackClick = { navController.pop() },
                 cloneState = initState,
                 provider = vm.provider,

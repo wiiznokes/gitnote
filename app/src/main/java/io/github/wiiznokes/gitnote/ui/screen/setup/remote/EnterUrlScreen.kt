@@ -27,8 +27,12 @@ import io.github.wiiznokes.gitnote.ui.component.SetupPage
 
 private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
 
-private fun isUrlCorrect(url: String): Boolean {
+fun isUrlSsh(url: String): Boolean {
     return sshGitRegex.matches(url)
+}
+
+private fun isUrlCorrect(url: String): Boolean {
+    return url.isNotBlank()
 }
 
 @Composable
@@ -130,7 +134,6 @@ private fun UrlTextField(url: MutableState<TextFieldValue>) {
             Text(text = "git@github.com:wiiznokes/gitnote.git")
         },
         singleLine = true,
-        isError = !isUrlCorrect(url.value.text),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Uri
         )
