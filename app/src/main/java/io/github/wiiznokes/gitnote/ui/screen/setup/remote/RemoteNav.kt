@@ -147,6 +147,7 @@ fun RemoteScreen(
                 onBackClick = { navController.pop() },
                 storageConfig = storageConfig,
                 url = remoteDestination.url,
+                provider = vm.provider,
                 vm = vm,
                 onSuccess = onInitSuccess,
                 onClone = { navController.navigate(RemoteDestination.Cloning) }
