@@ -23,11 +23,11 @@ Because all apps which integrate git on Android either separate the note title f
 # Features
 
 - [x] create/open/clone repositories
-- [x] fuzzy search (global and from specific folder)
+- [x] notes search (global and from specific folder)
 - [x] grid view
 - [x] tree view
 - [x] edit view
-- [x] private repo with SSH
+- [x] private repo (SSH and HTTPS)
 - [x] remote sync
 - [x] time based sort
 
