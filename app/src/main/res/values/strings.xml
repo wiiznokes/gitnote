@@ -120,7 +120,7 @@
     <string name="read_only_mode_deactive">Deactivate read only mode</string>
     <string name="authorize_gitnote">Authorize Gitnote</string>
     <string name="clone_url">Clone URL</string>
-    <string name="url_explain_create_remote_repo">Go to the website, create a repository and copy its git clone URL. Choose the SSH method</string>
+    <string name="url_explain_create_remote_repo">Go to the website, create a repository and copy its git clone URL</string>
     <string name="url_explain_enter_url">Enter the Git clone URL</string>
     <string name="open_link_create_repo">Create repository</string>
     <string name="next">Next</string>
