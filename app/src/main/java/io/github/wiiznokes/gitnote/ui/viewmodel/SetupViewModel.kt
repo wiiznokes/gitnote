@@ -268,6 +268,14 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 _initState.emit(InitState.Error(e.message))
                 return@launch
             }
+            prefs.appAuthToken.update(token)
+
+            fetchInfos(token = token)
+        }
+    }
+
+    fun fetchInfos(token: String) {
+        CoroutineScope(Dispatchers.IO).launch {
 
             _initState.emit(InitState.FetchingRepos)
 
@@ -289,7 +297,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             }
 
             Log.d(TAG, "emit: Success")
-            _initState.emit(InitState.AuthentificationSuccess)
+            _initState.emit(InitState.FetchingInfosSuccess)
         }
     }
 
@@ -389,7 +397,7 @@ sealed class InitState {
     data object FetchingRepos : InitState()
     data object GettingUserInfo : InitState()
 
-    data object AuthentificationSuccess : InitState()
+    data object FetchingInfosSuccess : InitState()
 
     data object CreatingRemoteRepo : InitState()
     data object AddingDeployKey : InitState()
@@ -412,9 +420,9 @@ sealed class InitState {
             GettingAccessToken -> "Getting the access token"
             GettingUserInfo -> "Getting user information"
             Idle -> ""
-            AuthentificationSuccess -> ""
+            FetchingInfosSuccess -> ""
         }
     }
 
-    fun isLoading(): Boolean = this !is Idle && this !is Error && this !is AuthentificationSuccess
+    fun isLoading(): Boolean = this !is Idle && this !is Error && this !is FetchingInfosSuccess
 }

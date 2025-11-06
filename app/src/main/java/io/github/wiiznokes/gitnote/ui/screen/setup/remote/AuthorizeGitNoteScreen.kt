@@ -21,8 +21,10 @@ private const val TAG = "AuthorizeGitNoteScreen"
 fun AuthorizeGitNoteScreen(
     onBackClick: () -> Unit,
     authState: InitState,
+    appAuthToken: String,
     onSuccess: () -> Unit,
     getLaunchOAuthScreenIntent: () -> Intent,
+    fetchInfos: (String) -> Unit,
     vmHashCode: Int,
 ) {
 
@@ -31,12 +33,12 @@ fun AuthorizeGitNoteScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
-        onBackClickEnabled = !authState.isLoading() && authState != InitState.AuthentificationSuccess
+        onBackClickEnabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess
     ) {
 
         LaunchedEffect(authState) {
             Log.d(TAG, "LaunchedEffect: $authState, hash=${vmHashCode}")
-            if (authState is InitState.AuthentificationSuccess) {
+            if (authState is InitState.FetchingInfosSuccess) {
                 onSuccess()
             }
         }
@@ -48,12 +50,27 @@ fun AuthorizeGitNoteScreen(
                 val intent = getLaunchOAuthScreenIntent()
                 ctx.startActivity(intent)
             },
-            enabled = !authState.isLoading() && authState != InitState.AuthentificationSuccess
+            enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess
         ) {
             if (!authState.isLoading()) {
                 Text(text = stringResource(R.string.authorize_gitnote))
             } else {
                 Text(text = authState.message())
+            }
+        }
+
+        if (appAuthToken.isNotEmpty()) {
+            Button(
+                onClick = {
+                    fetchInfos(appAuthToken)
+                },
+                enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess
+            ) {
+                if (!authState.isLoading()) {
+                    Text(text = "Fetch repositories metadata with the previous logged account")
+                } else {
+                    Text(text = authState.message())
+                }
             }
         }
     }
@@ -70,6 +87,8 @@ private fun AuthorizeGitNoteScreenPreview() {
         getLaunchOAuthScreenIntent = {
             Intent()
         },
-        vmHashCode = 0
+        vmHashCode = 0,
+        appAuthToken = "hello",
+        fetchInfos = {}
     )
 }

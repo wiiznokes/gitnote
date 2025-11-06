@@ -83,7 +83,9 @@ fun RemoteScreen(
                     vm.setStateToIdle()
                 },
                 getLaunchOAuthScreenIntent = { vm.getLaunchOAuthScreenIntent() },
-                vmHashCode = vm.hashCode()
+                vmHashCode = vm.hashCode(),
+                appAuthToken = vm.prefs.appAuthToken.getAsState().value,
+                fetchInfos = vm::fetchInfos
             )
 
             is EnterUrl -> {
