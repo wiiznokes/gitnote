@@ -118,6 +118,7 @@
 
     <string name="read_only_mode_activate">Activate read only mode</string>
     <string name="read_only_mode_deactive">Deactivate read only mode</string>
+    <string name="authorize_gitnote_title">Fetch repositories metadata</string>
     <string name="authorize_gitnote">Authorize Gitnote and fetch repositories metadata</string>
     <string name="clone_url">Clone URL</string>
     <string name="url_explain_create_remote_repo">Go to the website, create a repository and copy its git clone URL</string>

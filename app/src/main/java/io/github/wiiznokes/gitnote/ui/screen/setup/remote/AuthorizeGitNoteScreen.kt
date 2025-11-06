@@ -7,12 +7,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.SetupButton
+import io.github.wiiznokes.gitnote.ui.component.SetupLine
+import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
 
 private const val TAG = "AuthorizeGitNoteScreen"
@@ -29,7 +33,7 @@ fun AuthorizeGitNoteScreen(
 ) {
 
     AppPage(
-        title = stringResource(R.string.authorize_gitnote),
+        title = stringResource(R.string.authorize_gitnote_title),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         onBackClick = onBackClick,
@@ -43,33 +47,48 @@ fun AuthorizeGitNoteScreen(
             }
         }
 
-        val ctx = LocalContext.current
-
-        Button(
-            onClick = {
-                val intent = getLaunchOAuthScreenIntent()
-                ctx.startActivity(intent)
-            },
-            enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess
-        ) {
-            if (!authState.isLoading()) {
-                Text(text = stringResource(R.string.authorize_gitnote))
-            } else {
-                Text(text = authState.message())
-            }
+        var authButtonClicked = remember {
+            false
         }
 
-        if (appAuthToken.isNotEmpty()) {
-            Button(
-                onClick = {
-                    fetchInfos(appAuthToken)
-                },
-                enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess
+        SetupPage {
+
+            SetupLine(
+                text = ""
             ) {
-                if (!authState.isLoading()) {
-                    Text(text = "Fetch repositories metadata with the previous logged account")
-                } else {
-                    Text(text = authState.message())
+                val ctx = LocalContext.current
+
+                SetupButton(
+                    onClick = {
+                        authButtonClicked = true
+                        val intent = getLaunchOAuthScreenIntent()
+                        ctx.startActivity(intent)
+                    },
+                    enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess,
+                    text = if (authButtonClicked && authState.isLoading()) {
+                        authState.message()
+                    } else {
+                        stringResource(R.string.authorize_gitnote)
+                    }
+                )
+            }
+
+            if (appAuthToken.isNotEmpty()) {
+                SetupLine(
+                    text = ""
+                ) {
+                    SetupButton(
+                        onClick = {
+                            authButtonClicked = false
+                            fetchInfos(appAuthToken)
+                        },
+                        enabled = !authState.isLoading() && authState != InitState.FetchingInfosSuccess,
+                        text = if (!authButtonClicked && authState.isLoading()) {
+                            authState.message()
+                        } else {
+                            "Fetch repositories metadata with the previous logged account"
+                        }
+                    )
                 }
             }
         }
