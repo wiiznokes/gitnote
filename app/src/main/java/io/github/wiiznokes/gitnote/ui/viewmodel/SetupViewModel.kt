@@ -77,8 +77,6 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     var repos = listOf<RepoInfo>()
         private set
 
-    private var token = String()
-
     lateinit var userInfo: UserInfo
         private set
 
@@ -261,13 +259,21 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         CoroutineScope(Dispatchers.IO).launch {
 
             _initState.emit(InitState.GettingAccessToken)
-            token = try {
+            val token = try {
                 provider!!.exchangeCodeForAccessToken(code)
             } catch (e: Exception) {
                 Log.e(TAG, "exchangeCodeForAccessToken: ${e.message}, $e")
                 _initState.emit(InitState.Error(e.message))
                 return@launch
             }
+            prefs.appAuthToken.update(token)
+
+            fetchInfos(token = token)
+        }
+    }
+
+    fun fetchInfos(token: String) {
+        CoroutineScope(Dispatchers.IO).launch {
 
             _initState.emit(InitState.FetchingRepos)
 
@@ -289,7 +295,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             }
 
             Log.d(TAG, "emit: Success")
-            _initState.emit(InitState.AuthentificationSuccess)
+            _initState.emit(InitState.FetchingInfosSuccess)
         }
     }
 
@@ -305,7 +311,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             _initState.emit(InitState.AddingDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
-                    token = token,
+                    token = prefs.appAuthToken.get(),
                     publicKey = publicKey,
                     fullRepoName = repoName
                 )
@@ -340,7 +346,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             _initState.emit(InitState.CreatingRemoteRepo)
             try {
                 provider!!.createNewRepo(
-                    token = token,
+                    token = prefs.appAuthToken.get(),
                     repoName = repoName
                 )
             } catch (e: Exception) {
@@ -354,7 +360,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             _initState.emit(InitState.AddingDeployKey)
             try {
                 provider!!.addDeployKeyToRepo(
-                    token = token,
+                    token = prefs.appAuthToken.get(),
                     publicKey = publicKey,
                     fullRepoName = repoName
                 )
@@ -389,7 +395,7 @@ sealed class InitState {
     data object FetchingRepos : InitState()
     data object GettingUserInfo : InitState()
 
-    data object AuthentificationSuccess : InitState()
+    data object FetchingInfosSuccess : InitState()
 
     data object CreatingRemoteRepo : InitState()
     data object AddingDeployKey : InitState()
@@ -412,9 +418,9 @@ sealed class InitState {
             GettingAccessToken -> "Getting the access token"
             GettingUserInfo -> "Getting user information"
             Idle -> ""
-            AuthentificationSuccess -> ""
+            FetchingInfosSuccess -> ""
         }
     }
 
-    fun isLoading(): Boolean = this !is Idle && this !is Error && this !is AuthentificationSuccess
+    fun isLoading(): Boolean = this !is Idle && this !is Error && this !is FetchingInfosSuccess
 }

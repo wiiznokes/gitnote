@@ -69,6 +69,8 @@ class AppPreferences(
     val publicKey = stringPreference("publicKey", "")
     val privateKey = stringPreference("privateKey", "")
 
+    val appAuthToken = stringPreference("appAuthToken", "")
+
     suspend fun cred(): Cred? {
         return when (credType.get()) {
             CredType.None -> null

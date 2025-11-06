@@ -113,7 +113,6 @@
 
     <string name="read_only_mode_activate">Aktivovat režim jen pro čtení</string>
     <string name="read_only_mode_deactive">Deaktivovat režim jen pro čtení</string>
-    <string name="authorize_gitnote">Autorizovat Gitnote</string>
     <string name="clone_url">Klonovat URL</string>
     <string name="url_explain_create_remote_repo">Přejděte na webovou stránku, vytvořte repozitář a zkopírujte adresu URL klonu git</string>
     <string name="url_explain_enter_url">Zadejte adresu URL klonu Git</string>
