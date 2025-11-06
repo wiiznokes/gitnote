@@ -127,7 +127,7 @@
     <string name="read_only_mode_deactive">Desactiver la lecture seule</string>
     <string name="authorize_gitnote">Autoriser Gitnote</string>
     <string name="clone_url">Clone URL</string>
-    <string name="url_explain_create_remote_repo">"Allez sur la page Web, créez un référentiel et copiez son URL. Choisissez celui avec SSH "</string>
+    <string name="url_explain_create_remote_repo">"Allez sur la page Web, créez un référentiel et copiez son URL"</string>
     <string name="url_explain_enter_url">Entrez l\'URL de clonage</string>
     <string name="open_link_create_repo">Créer le référentiel</string>
     <string name="next">Suivant</string>

@@ -19,7 +19,7 @@ import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.AuthorizeGit
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.EnterUrl
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.GenerateNewKeys
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.PickRepo
-import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenerateNewKeys
+import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenerateNewSshKeys
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvider
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
@@ -93,18 +93,16 @@ fun RemoteScreen(
                         onBackClick = { navController.pop() },
                         provider = vm.provider!!,
                         onUrl = { url ->
-                            navController.navigate(
-                                SelectGenerateNewKeys(url = url)
-                            )
+                            if (isUrlSsh(url)) navController.navigate(SelectGenerateNewSshKeys(url = url))
+                            else navController.navigate(RemoteDestination.Credentials(url = url))
                         }
                     )
                 } else {
                     EnterUrlScreen(
                         onBackClick = { navController.pop() },
                         onUrl = { url ->
-                            navController.navigate(
-                                SelectGenerateNewKeys(url = url)
-                            )
+                            if (isUrlSsh(url)) navController.navigate(SelectGenerateNewSshKeys(url = url))
+                            else navController.navigate(RemoteDestination.Credentials(url = url))
                         }
                     )
                 }
@@ -122,7 +120,7 @@ fun RemoteScreen(
                 onClone = { navController.navigate(RemoteDestination.Cloning) }
             )
 
-            is SelectGenerateNewKeys -> SelectGenerateNewKeysScreen(
+            is SelectGenerateNewSshKeys -> SelectGenerateNewSshKeysScreen(
                 onBackClick = { navController.pop() },
                 onGenerate = {
                     navController.navigate(
@@ -133,7 +131,7 @@ fun RemoteScreen(
                 },
             )
 
-            is GenerateNewKeys -> GenerateNewKeysScreen(
+            is GenerateNewKeys -> GenerateNewSshKeysScreen(
                 onBackClick = { navController.pop() },
                 cloneState = initState,
                 provider = vm.provider,
@@ -141,6 +139,16 @@ fun RemoteScreen(
                 url = remoteDestination.url,
                 vm = vm,
                 generateSshKeys = ::generateSshKeysLib,
+                onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
+            )
+
+            is RemoteDestination.Credentials -> CredentialsScreen(
+                onBackClick = { navController.pop() },
+                storageConfig = storageConfig,
+                url = remoteDestination.url,
+                provider = vm.provider,
+                vm = vm,
                 onSuccess = onInitSuccess,
                 onClone = { navController.navigate(RemoteDestination.Cloning) }
             )

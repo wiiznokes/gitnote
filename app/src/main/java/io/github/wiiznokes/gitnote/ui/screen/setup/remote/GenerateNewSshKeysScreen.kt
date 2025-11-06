@@ -45,7 +45,7 @@ private fun extractUserRepo(url: String): String? {
 }
 
 @Composable
-fun GenerateNewKeysScreen(
+fun GenerateNewSshKeysScreen(
     onBackClick: () -> Unit,
     cloneState: InitState,
     provider: Provider?,
@@ -184,8 +184,8 @@ fun GenerateNewKeysScreen(
 
 @Preview
 @Composable
-private fun GenerateNewKeysScreenPreview() {
-    GenerateNewKeysScreen(
+private fun GenerateNewSshKeysScreenPreview() {
+    GenerateNewSshKeysScreen(
         onBackClick = {},
         cloneState = InitState.Idle,
         provider = GithubProvider(),
