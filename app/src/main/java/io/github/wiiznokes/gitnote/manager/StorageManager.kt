@@ -207,6 +207,7 @@ class StorageManager {
     }
 
 
+    // todo: remove this function and use deleteNotes
     suspend fun deleteNote(note: Note): Result<Unit> = locker.withLock {
 
         Log.d(TAG, "deleteNote: $note")
@@ -268,6 +269,17 @@ class StorageManager {
                 uiHelper.makeToast(message)
             }
 
+            success(Unit)
+        }
+    }
+
+    suspend fun moveNotes(notes: List<Note>, folderPath: String): Result<Unit> = locker.withLock {
+        Log.d(TAG, "moveNotes: ${notes.size}")
+
+        update(
+            commitMessage = "gitnote moved ${notes.size} notes to $folderPath"
+        ) {
+         
             success(Unit)
         }
     }

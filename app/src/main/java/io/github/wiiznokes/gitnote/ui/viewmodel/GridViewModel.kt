@@ -171,6 +171,12 @@ class GridViewModel : ViewModel() {
         }
     }
 
+    fun moveNote(note: Note, folder: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            storageManager.moveNotes(listOf(note), folder)
+        }
+    }
+
     fun deleteFolder(noteFolder: NoteFolder) {
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.deleteNoteFolder(noteFolder)

@@ -68,6 +68,7 @@ import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
+import io.github.wiiznokes.gitnote.ui.component.PickFolderDialog
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerScreen
@@ -291,14 +292,28 @@ private fun GridView(
                 ) {
                     Box {
 
+
                         // need this box for clickPosition
                         Box {
+                            val pickFolderDialogExpanded = rememberSaveable { mutableStateOf(false) }
+                            PickFolderDialog(
+                                expanded = pickFolderDialogExpanded,
+                                onSelectedFolder = {
+                                    vm.moveNote(gridNote.note, it)
+                                }
+                            )
+
                             CustomDropDown(
                                 expanded = dropDownExpanded,
                                 shape = MaterialTheme.shapes.medium,
                                 options = listOf(
                                     CustomDropDownModel(
                                         text = stringResource(R.string.delete_this_note),
+                                        onClick = {
+                                            vm.deleteNote(gridNote.note)
+                                        }),
+                                    CustomDropDownModel(
+                                        text = "Move this note",
                                         onClick = {
                                             vm.deleteNote(gridNote.note)
                                         }),

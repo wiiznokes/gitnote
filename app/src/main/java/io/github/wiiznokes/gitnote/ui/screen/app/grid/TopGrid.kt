@@ -217,7 +217,7 @@ private fun SearchBar(
 
                         val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
-                        @Suppress("KotlinConstantConditions")
+                        @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
                         CustomDropDown(
                             expanded = expanded,
                             options = listOf(
