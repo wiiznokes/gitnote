@@ -25,13 +25,18 @@ sealed interface RemoteDestination : Parcelable {
     data object PickRepo : RemoteDestination
 
     @Parcelize
-    data class SelectGenerateNewKeys(
+    data class SelectGenerateNewSshKeys(
         val url: String
     ) : RemoteDestination
 
 
     @Parcelize
     data class GenerateNewKeys(
+        val url: String,
+    ) : RemoteDestination
+
+    @Parcelize
+    data class Credentials(
         val url: String,
     ) : RemoteDestination
 

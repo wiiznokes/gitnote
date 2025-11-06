@@ -13,7 +13,7 @@ import io.github.wiiznokes.gitnote.ui.component.SetupPage
 
 
 @Composable
-fun SelectGenerateSshNewKeysScreen(
+fun SelectGenerateNewSshKeysScreen(
     onBackClick: () -> Unit,
     onGenerate: () -> Unit,
 ) {
@@ -43,8 +43,8 @@ fun SelectGenerateSshNewKeysScreen(
 
 @Preview
 @Composable
-private fun SelectGenerateSshNewKeysScreenPreview() {
-    SelectGenerateSshNewKeysScreen(
+private fun SelectGenerateNewSshKeysScreenPreview() {
+    SelectGenerateNewSshKeysScreen(
         onBackClick = {},
         onGenerate = {}
     )
