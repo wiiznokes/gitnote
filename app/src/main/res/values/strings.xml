@@ -151,7 +151,7 @@
     <string name="loading">Loading…</string>
     <string name="logs">Logs</string>
     <string name="extension">Extension: %1$s</string>
-    <string name="parent">Parent: %1$s</string>
+    <string name="parent_path">Parent: %1$s</string>
     <string name="pick_folder">Pick this folder</string>
 
 </resources>
