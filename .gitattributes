@@ -7,4 +7,4 @@ gradle/wrapper/gradle-wrapper.jar filter=lfs diff=lfs merge=lfs -text
 *.graphite filter=lfs diff=lfs merge=lfs -text
 
 
-/metadata/**/*.png -filter -diff -merge text
+/metadata/**/*.png -filter -diff -merge -text
