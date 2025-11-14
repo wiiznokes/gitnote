@@ -1,14 +1,11 @@
-use mime_guess::mime;
-
-const ADDITIONAL_SUPPORTED_EXTENSIONS: &[&str] = &["sh", "fish", "ps1", "bat"];
+use include_lines::include_lines;
 
 pub fn is_extension_supported(extension: &str) -> bool {
-    if ADDITIONAL_SUPPORTED_EXTENSIONS.contains(&extension) {
-        return true;
-    }
+    let text_extensions = include_lines!("./extensions/text.txt");
+    let markdown_extensions = include_lines!("./extensions/markdown.txt");
 
-    let mimes = mime_guess::from_ext(extension);
-    mimes.iter().any(|mime| mime.type_() == mime::TEXT)
+    text_extensions.binary_search(&extension).is_ok()
+        || markdown_extensions.binary_search(&extension).is_ok()
 }
 
 #[cfg(test)]
@@ -16,6 +13,13 @@ mod test {
     use std::{collections::HashMap, fs, path::Path};
 
     use super::*;
+
+    #[test]
+    fn test1() {
+        assert!(is_extension_supported("md"));
+        assert!(is_extension_supported("txt"));
+        assert!(!is_extension_supported("bin"));
+    }
 
     #[test]
     #[ignore = "local repo"]
@@ -43,27 +47,19 @@ mod test {
         let mut extensions = counts
             .into_iter()
             .map(|(extension, count)| {
-                let supported = {
-                    let mimes = mime_guess::from_ext(&extension);
-                    mimes.iter().any(|mime| mime.type_() == mime::TEXT)
-                };
+                let supported = is_extension_supported(&extension);
 
-                let supported_manually =
-                    ADDITIONAL_SUPPORTED_EXTENSIONS.contains(&extension.as_str());
-
-                (extension, count, supported, supported_manually)
+                (extension, count, supported)
             })
             .collect::<Vec<_>>();
 
         extensions.sort_by(|a, b| b.1.cmp(&a.1));
         extensions.sort_by(|a, b| b.2.cmp(&a.2));
 
-        println!("extension     supported     supported_manually    count");
+        println!("extension     supported     count");
         // Print results
-        for (ext, count, supported, supported_manually) in extensions {
-            println!(
-                "{ext:<10}    {supported:<5}         {supported_manually:<5}                 {count:<6}"
-            );
+        for (ext, count, supported) in extensions {
+            println!("{ext:<10}    {supported:<5}         {count:<6}");
         }
     }
 }

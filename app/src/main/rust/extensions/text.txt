@@ -1,0 +1,16 @@
+bat
+c
+cpp
+fish
+h
+html
+java
+kt
+nu
+ps1
+ron
+rs
+sh
+toml
+txt
+xml
