@@ -1,0 +1,10 @@
+Aplicativo de anotações Android com arquivos reais. Pode ser sincronizado com provedores git como o Github.
+
+* crie/abra/clone repositórios
+* busca de anotações (global ou por pasta específica)
+* exibição de grade
+* exibição de árvore
+* tela de edição
+* repositório privado (SSH e HTTPS)
+* sincronização remota
+* organização baseada em tempo
