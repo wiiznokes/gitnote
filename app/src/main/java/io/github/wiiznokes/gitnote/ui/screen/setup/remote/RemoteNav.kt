@@ -131,6 +131,13 @@ fun RemoteScreen(
                         )
                     )
                 },
+                onCustom = {
+                    navController.navigate(
+                        RemoteDestination.LoadKeysFromDevice(
+                            url = remoteDestination.url
+                        )
+                    )
+                }
             )
 
             is GenerateNewKeys -> GenerateNewSshKeysScreen(
@@ -141,6 +148,16 @@ fun RemoteScreen(
                 url = remoteDestination.url,
                 vm = vm,
                 generateSshKeys = ::generateSshKeysLib,
+                onSuccess = onInitSuccess,
+                onClone = { navController.navigate(RemoteDestination.Cloning) }
+            )
+
+            is RemoteDestination.LoadKeysFromDevice -> LoadKeysFromDeviceScreen(
+                onBackClick = { navController.pop() },
+                cloneState = initState,
+                storageConfig = storageConfig,
+                url = remoteDestination.url,
+                vm = vm,
                 onSuccess = onInitSuccess,
                 onClone = { navController.navigate(RemoteDestination.Cloning) }
             )

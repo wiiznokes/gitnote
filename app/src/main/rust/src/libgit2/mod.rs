@@ -108,7 +108,13 @@ fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
             username,
             private_key,
             public_key,
-        } => git2::Cred::ssh_key_from_memory(username, Some(public_key), private_key, None),
+            passphrase,
+        } => git2::Cred::ssh_key_from_memory(
+            username,
+            Some(public_key),
+            private_key,
+            passphrase.as_deref(),
+        ),
     }
 }
 
@@ -127,7 +133,6 @@ pub fn clone_repo(
         callbacks
             .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
-
 
     callbacks.transfer_progress(|stats: Progress| {
         let progress = stats.indexed_objects() as f32 / stats.total_objects() as f32 * 100.;
