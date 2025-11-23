@@ -141,6 +141,7 @@
     <string name="create_private_repo">Create private repo %1$s</string>
     <string name="we_need_ssh_keys_to_authenticate">Need SSH keys to authenticate</string>
     <string name="generate_new_keys">Generate new keys</string>
+    <string name="custom_ssh_keys">Use custom SSH keys</string>
     <string name="custom">Custom</string>
     <string name="git_hosting_provider">Git Hosting Provider</string>
     <string name="select_a_git_hosting_provider">Select a Git Hosting Provider</string>
@@ -153,5 +154,9 @@
     <string name="extension">Extension: %1$s</string>
     <string name="parent_path">Parent: %1$s</string>
     <string name="pick_folder">Pick this folder</string>
+    <string name="public_key">Public key</string>
+    <string name="load_from_file">Load from file</string>
+    <string name="private_key">Private key</string>
+    <string name="private_key_password">Private key password</string>
 
 </resources>

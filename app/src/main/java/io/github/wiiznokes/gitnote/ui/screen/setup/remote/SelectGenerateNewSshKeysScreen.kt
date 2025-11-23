@@ -9,13 +9,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
+import io.github.wiiznokes.gitnote.ui.component.SetupButton
+import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
+import io.github.wiiznokes.gitnote.ui.component.SimpleButton
 
 
 @Composable
 fun SelectGenerateNewSshKeysScreen(
     onBackClick: () -> Unit,
     onGenerate: () -> Unit,
+    onCustom: () -> Unit,
 ) {
 
     AppPage(
@@ -29,12 +33,17 @@ fun SelectGenerateNewSshKeysScreen(
             title = stringResource(R.string.we_need_ssh_keys_to_authenticate),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = {
-                    onGenerate()
-                }
-            ) {
-                Text(text = stringResource(R.string.generate_new_keys))
+
+            SetupLine(text = "") {
+                SetupButton(
+                    onClick = onGenerate,
+                    text = stringResource(R.string.generate_new_keys)
+                )
+
+                SetupButton(
+                    onClick = onCustom,
+                    text = stringResource(R.string.custom_ssh_keys)
+                )
             }
         }
     }
@@ -46,6 +55,7 @@ fun SelectGenerateNewSshKeysScreen(
 private fun SelectGenerateNewSshKeysScreenPreview() {
     SelectGenerateNewSshKeysScreen(
         onBackClick = {},
-        onGenerate = {}
+        onGenerate = {},
+        onCustom = {}
     )
 }
