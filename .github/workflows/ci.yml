@@ -51,3 +51,18 @@ jobs:
       - name: Build App and run unit tests
         run: |
           ./gradlew assembleDebug lintDebug testDebugUnitTest --stacktrace
+
+  file-extension:
+    name: Check sort
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      - run: |
+          extension_dir=app/src/main/rust/supported_extensions
+          for f in $(ls $extension_dir 2>/dev/null); do
+            diff $extension_dir/$f <(sort $extension_dir/$f)
+          done
+        shell: bash

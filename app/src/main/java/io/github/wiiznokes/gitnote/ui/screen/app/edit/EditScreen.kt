@@ -44,6 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.manager.ExtensionType
+import io.github.wiiznokes.gitnote.manager.extensionType
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
@@ -65,18 +67,11 @@ fun EditScreen(
 ) {
 
     val extension = editParams.fileExtension()
-    val vm = when (extension) {
-        is FileExtension.Txt -> newEditViewModel(editParams)
-        is FileExtension.Md -> newMarkDownVM(editParams)
-        is FileExtension.Other -> {
-            val mimeType = MimeTypeMap.getSingleton()
-                .getMimeTypeFromExtension(extension.text)
-            if (mimeType?.startsWith("text") == true) {
-                newEditViewModel(editParams)
-            } else {
-                throw Exception("file extension not supported, but present in the database?? $extension")
-            }
-        }
+
+    val vm = when (extensionType(extension.text)) {
+        ExtensionType.Text -> newEditViewModel(editParams)
+        ExtensionType.Markdown -> newMarkDownVM(editParams)
+        null -> throw Exception("file extension not supported, but present in the database?? $extension")
     }
 
     if (editParams is EditParams.Saved) {

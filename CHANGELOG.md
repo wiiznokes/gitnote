@@ -10,8 +10,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 
 - optimization for big repo
-    - use fts in libsql
-    - use a padger (only load notes visibles)
+  - use fts in libsql
+  - use a padger (only load notes visibles)
 
 ### Added
 
