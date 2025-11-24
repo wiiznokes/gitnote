@@ -129,6 +129,7 @@ pub enum Cred {
         username: String,
         public_key: String,
         private_key: String,
+        passphrase: Option<String>,
     },
 }
 
@@ -146,6 +147,7 @@ impl Debug for Cred {
                 username,
                 public_key,
                 private_key: _private_key,
+                passphrase: _passphrase,
             } => f
                 .debug_struct("Ssh")
                 .field("username", username)
@@ -200,14 +202,24 @@ impl Cred {
                     .l()?
                     .into();
 
+                let passphrase_obj = env
+                    .get_field(cred_obj, "passphrase", "Ljava/lang/String;")?
+                    .l()?;
+
                 let username: String = env.get_string(&username_key_obj)?.into();
                 let public_key: String = env.get_string(&public_key_obj)?.into();
                 let private_key: String = env.get_string(&private_key_obj)?.into();
+                let passphrase: Option<String> = if passphrase_obj.is_null() {
+                    None
+                } else {
+                    Some(env.get_string(&JString::from(passphrase_obj))?.into())
+                };
 
                 Ok(Some(Cred::Ssh {
                     username,
                     public_key,
                     private_key,
+                    passphrase,
                 }))
             }
             other => Err(anyhow!("Unknown class name: {}", other)),
@@ -237,9 +249,7 @@ mod callback {
                 "(I)Z",
                 &[progress.into()],
             ) {
-                Ok(res) => {
-                    res.z().unwrap()
-                }
+                Ok(res) => res.z().unwrap(),
                 Err(e) => {
                     error!("{e}");
                     true

@@ -326,7 +326,8 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
                     publicKey = publicKey,
-                    privateKey = privateKey
+                    privateKey = privateKey,
+                    passphrase = null
                 ),
                 onSuccess = {
                     onSuccess()
@@ -375,7 +376,8 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 remoteUrl = provider!!.sshCloneUrlFromRepoName(repoName),
                 cred = Cred.Ssh(
                     publicKey = publicKey,
-                    privateKey = privateKey
+                    privateKey = privateKey,
+                    passphrase = null
                 ),
                 onSuccess = {
                     onSuccess()

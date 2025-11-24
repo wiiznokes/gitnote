@@ -68,6 +68,7 @@ class AppPreferences(
     val sshUsername = stringPreference("sshUsername", "")
     val publicKey = stringPreference("publicKey", "")
     val privateKey = stringPreference("privateKey", "")
+    val passphrase = stringPreference("passphrase", "")
 
     val appAuthToken = stringPreference("appAuthToken", "")
 
@@ -85,6 +86,7 @@ class AppPreferences(
                 username = this.sshUsername.get(),
                 publicKey = this.publicKey.get(),
                 privateKey = this.privateKey.get(),
+                passphrase = this.passphrase.get().ifEmpty { null }
             )
         }
     }
@@ -96,6 +98,7 @@ class AppPreferences(
                 sshUsername.update(cred.username)
                 publicKey.update(cred.publicKey)
                 privateKey.update(cred.privateKey)
+                passphrase.update(cred.passphrase ?: "")
             }
 
             is Cred.UserPassPlainText -> {
