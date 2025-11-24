@@ -13,13 +13,14 @@ fun extensionType(extension: String): ExtensionType? = extensionTypeLib(extensio
     extensionTypeFromNumber(it)
 }
 
-private fun extensionTypeFromNumber(num: Int): ExtensionType =
+private fun extensionTypeFromNumber(num: Int): ExtensionType? =
     when (num) {
+        0 -> null
         1 -> Text
         2 -> Markdown
         else -> throw Exception("Invalid number for ExtensionType: ^$num")
     }
 
-private external fun extensionTypeLib(extension: String): Int?
+private external fun extensionTypeLib(extension: String): Int
 
 external fun isExtensionSupported(extension: String): Boolean
