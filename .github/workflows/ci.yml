@@ -61,7 +61,8 @@ jobs:
           lfs: true
 
       - run: |
-          for f in $(ls app/src/main/rust/extensions 2>/dev/null); do
-            diff app/src/main/rust/extensions/$f <(sort app/src/main/rust/extensions/$f)
+          extension_dir=app/src/main/rust/supported_extensions
+          for f in $(ls $extension_dir 2>/dev/null); do
+            diff $extension_dir/$f <(sort $extension_dir/$f)
           done
         shell: bash

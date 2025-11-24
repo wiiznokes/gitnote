@@ -16,6 +16,8 @@ prettier:
 
 sort-supported-extension:
     #!/usr/bin/env bash
-    for f in $(ls app/src/main/rust/extensions 2>/dev/null); do
-    	sort app/src/main/rust/extensions/$f -o app/src/main/rust/extensions/$f
+    extension_dir=app/src/main/rust/supported_extensions
+    for f in $(ls $extension_dir 2>/dev/null); do
+    	sort $extension_dir/$f -o $extension_dir/$f
+        echo sorted $f
     done

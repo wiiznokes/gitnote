@@ -1,11 +1,26 @@
 use include_lines::include_lines;
 
-pub fn is_extension_supported(extension: &str) -> bool {
-    let text_extensions = include_lines!("./extensions/text.txt");
-    let markdown_extensions = include_lines!("./extensions/markdown.txt");
+// important: 0 is reserved for None
+pub enum ExtensionType {
+    Text = 1,
+    Markdown = 2,
+}
 
-    text_extensions.binary_search(&extension).is_ok()
-        || markdown_extensions.binary_search(&extension).is_ok()
+pub fn extension_type(extension: &str) -> Option<ExtensionType> {
+    let text_extensions = include_lines!("./supported_extensions/text.txt");
+    let markdown_extensions = include_lines!("./supported_extensions/markdown.txt");
+
+    if text_extensions.binary_search(&extension).is_ok() {
+        return Some(ExtensionType::Text);
+    }
+    if markdown_extensions.binary_search(&extension).is_ok() {
+        return Some(ExtensionType::Markdown);
+    }
+    None
+}
+
+pub fn is_extension_supported(extension: &str) -> bool {
+    extension_type(extension).is_some()
 }
 
 #[cfg(test)]

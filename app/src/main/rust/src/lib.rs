@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use anyhow::anyhow;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
-use jni::sys::{jint, jobject, jstring};
+use jni::sys::{jboolean, jint, jobject, jstring};
 
 use crate::callback::ProgressCB;
 use crate::key_gen::gen_keys;
@@ -446,4 +446,33 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generate
         .unwrap();
 
     pair_obj.into_raw()
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_extensionTypeLib<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    extension: JString<'local>,
+) -> jint {
+    let extension: String = env.get_string(&extension).unwrap().into();
+
+    match mime_types::extension_type(extension.as_str()) {
+        Some(ext_type) => ext_type as jint,
+        None => 0,
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_isExtensionSupported<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    extension: JString<'local>,
+) -> jboolean {
+    let extension: String = env.get_string(&extension).unwrap().into();
+
+    mime_types::is_extension_supported(extension.as_str()).into()
 }
