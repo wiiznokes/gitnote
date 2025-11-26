@@ -330,11 +330,17 @@ private fun GridView(
                             )
 
                             if (gridNote.note.fileExtension() is FileExtension.Md) {
-                                MarkdownText(
-                                    markdown = gridNote.note.content,
-                                    disableLinkMovementMethod = true,
-                                    isTextSelectable = false,
-                                    onLinkClicked = { }
+//                                MarkdownText(
+//                                    markdown = gridNote.note.content,
+//                                    disableLinkMovementMethod = true,
+//                                    isTextSelectable = false,
+//                                    onLinkClicked = { }
+//                                )
+                                Text(
+                                    text = gridNote.note.content,
+                                    modifier = Modifier,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             } else {
                                 Text(
