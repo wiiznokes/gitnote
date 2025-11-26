@@ -331,7 +331,10 @@ private fun GridView(
 
                             if (gridNote.note.fileExtension() is FileExtension.Md) {
                                 MarkdownText(
-                                    markdown = gridNote.note.content
+                                    markdown = gridNote.note.content,
+                                    disableLinkMovementMethod = true,
+                                    isTextSelectable = false,
+                                    onLinkClicked = { }
                                 )
                             } else {
                                 Text(
