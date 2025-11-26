@@ -139,6 +139,7 @@ class AppPreferences(
     suspend fun initRepo(storageConfig: StorageConfiguration) {
         databaseCommit.update("")
         isInit.update(true)
+        remoteUrl.reset()
 
         when (storageConfig) {
             StorageConfiguration.App -> {

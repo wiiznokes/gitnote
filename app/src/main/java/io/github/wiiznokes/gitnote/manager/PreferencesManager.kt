@@ -85,6 +85,10 @@ abstract class Preference<T>(
     suspend fun update(value: T) = dataStore.editor {
         this@Preference.value = value
     }
+
+    suspend fun reset() = dataStore.editor {
+        this@Preference.value = default
+    }
 }
 
 class EnumPreference<E : Enum<E>>(
