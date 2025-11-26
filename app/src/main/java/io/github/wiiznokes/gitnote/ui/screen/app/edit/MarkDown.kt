@@ -2,7 +2,6 @@ package io.github.wiiznokes.gitnote.ui.screen.app.edit
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,15 +26,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.halilibo.richtext.commonmark.Markdown
-import com.halilibo.richtext.ui.RichTextStyle
-import com.halilibo.richtext.ui.material3.RichText
-import com.halilibo.richtext.ui.string.RichTextStringStyle
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 
 @Composable
@@ -47,25 +40,16 @@ fun MarkDownContent(
     textContent: TextFieldValue,
 ) {
     if (isReadOnlyModeActive) {
-        SelectionContainer {
-            RichText(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(15.dp),
-                style = RichTextStyle(
-                    stringStyle = RichTextStringStyle(
-                        linkStyle = TextLinkStyles(
-                            style = SpanStyle(
-                                color = if (isSystemInDarkTheme()) Color(0xFF3268ae) else
-                                    Color(0xFF5a9ae6)
-                            )
-                        )
-                    )
-                )
-            ) {
-                Markdown(textContent.text)
+        MarkdownText(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(15.dp),
+            markdown = textContent.text,
+            isTextSelectable = true,
+            onClick = {
+
             }
-        }
+        )
     } else {
         GenericTextField(
             vm = vm,
