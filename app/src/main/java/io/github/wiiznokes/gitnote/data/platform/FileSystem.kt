@@ -16,6 +16,7 @@ import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
+import kotlin.io.path.createParentDirectories
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.exists
@@ -88,7 +89,7 @@ sealed class NodeFs(
         }
 
         fun nameWithoutExtension() =
-            fullName.substring(0, fullName.lastIndex - extension.text.length)
+            fullName.take(fullName.lastIndex - extension.text.length)
 
         override fun delete(): Result<Unit> {
 
@@ -96,7 +97,10 @@ sealed class NodeFs(
         }
 
         override fun create(): Result<Unit> {
-            return toResult { pathFs.createFile() }
+            return toResult {
+                pathFs.createParentDirectories()
+                pathFs.createFile()
+            }
         }
 
 
