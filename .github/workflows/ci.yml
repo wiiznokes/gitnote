@@ -16,7 +16,7 @@ jobs:
     name: Build-Debug-Ci
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           lfs: true
 
@@ -56,7 +56,7 @@ jobs:
     name: Check sort
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           lfs: true
 
