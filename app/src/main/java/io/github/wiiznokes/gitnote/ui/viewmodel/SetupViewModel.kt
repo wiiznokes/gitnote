@@ -123,6 +123,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 return@launch
             }
 
+            prefs.applyGitAuthorDefaults(gitManager.currentSignature())
             prefs.initRepo(storageConfig)
 
             storageManager.updateDatabase()
@@ -146,6 +147,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 return@launch
             }
 
+            prefs.applyGitAuthorDefaults(gitManager.currentSignature())
             prefs.initRepo(storageConfig)
 
             storageManager.updateDatabaseAndRepo()
@@ -222,6 +224,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         prefs.remoteUrl.update(remoteUrl)
 
         prefs.updateCred(cred)
+        prefs.applyGitAuthorDefaults(gitManager.currentSignature())
 
         storageManager.updateDatabase(
             progressCb = {

@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
@@ -21,6 +22,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.olshevski.navigation.reimagined.NavController
 import dev.olshevski.navigation.reimagined.navigate
 import io.github.wiiznokes.gitnote.BuildConfig
@@ -198,6 +200,28 @@ fun SettingsScreen(
             title = stringResource(R.string.repository)
         ) {
 
+            val gitAuthorFlow = remember { vm.prefs.gitAuthorFlow() }
+            val gitAuthor by gitAuthorFlow
+                .collectAsStateWithLifecycle(initialValue = vm.prefs.gitAuthorBlocking())
+            StringSettings(
+                title = stringResource(R.string.git_author_name),
+                subtitle = gitAuthor.name,
+                stringValue = gitAuthor.name,
+                onChange = { updated ->
+                    vm.update { vm.prefs.gitAuthorName.update(updated.trim()) }
+                }
+            )
+
+            StringSettings(
+                title = stringResource(R.string.git_author_email),
+                subtitle = gitAuthor.email,
+                stringValue = gitAuthor.email,
+                onChange = { updated ->
+                    vm.update { vm.prefs.gitAuthorEmail.update(updated.trim()) }
+                },
+                keyboardType = KeyboardType.Email
+            )
+
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
             StringSettings(
                 title = stringResource(R.string.remote_url),
@@ -313,4 +337,3 @@ fun SettingsScreen(
         }
     }
 }
-
