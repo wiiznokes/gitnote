@@ -305,15 +305,45 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastComm
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
-    username: JString<'local>,
+    name: JString<'local>,
+    email: JString<'local>,
     message: JString<'local>,
 ) -> jint {
-    let username: String = env.get_string(&username).unwrap().into();
+    let name: String = env.get_string(&name).unwrap().into();
+    let email: String = env.get_string(&email).unwrap().into();
     let message: String = env.get_string(&message).unwrap().into();
 
-    unwrap_or_log!(libgit2::commit_all(&username, &message), "commit_all");
+    unwrap_or_log!(libgit2::commit_all(&name, &email, &message), "commit_all");
 
     OK
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_currentSignatureLib<
+    'local,
+>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+) -> jobject {
+    let signature = match libgit2::signature() {
+        Some(signature) => signature,
+        None => return std::ptr::null_mut(),
+    };
+
+    let name_jstring = env.new_string(&signature.0).unwrap();
+    let email_jstring = env.new_string(&signature.1).unwrap();
+
+    let pair_class = env.find_class("kotlin/Pair").unwrap();
+
+    let pair_obj = env
+        .new_object(
+            &pair_class,
+            "(Ljava/lang/Object;Ljava/lang/Object;)V",
+            &[(&name_jstring).into(), (&email_jstring).into()],
+        )
+        .unwrap();
+
+    pair_obj.into_raw()
 }
 #[unsafe(no_mangle)]
 pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<'local>(
