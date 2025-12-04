@@ -34,6 +34,8 @@
     <string name="password">Password</string>
     <string name="username">Username</string>
     <string name="remote_url">Remote url</string>
+    <string name="git_author_name">Git author name</string>
+    <string name="git_author_email">Git author email</string>
     <string name="close_repository">Close repository</string>
     <string name="close_repository_confirmation">Do you really want to close the repository?</string>
     <string name="version">Version</string>
