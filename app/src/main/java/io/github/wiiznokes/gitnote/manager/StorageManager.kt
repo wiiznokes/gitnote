@@ -62,8 +62,6 @@ class StorageManager {
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
 
-
-
         gitManager.commitAll(
             author,
             "commit from gitnote to update the repo of the app"
