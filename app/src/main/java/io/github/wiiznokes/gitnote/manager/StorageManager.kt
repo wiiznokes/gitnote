@@ -60,11 +60,10 @@ class StorageManager {
 
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
-
-
+        val author = prefs.gitAuthor()
 
         gitManager.commitAll(
-            prefs.usernameOrDefault(),
+            author,
             "commit from gitnote to update the repo of the app"
         ).onFailure {
             uiHelper.makeToast(it.message)
@@ -305,9 +304,10 @@ class StorageManager {
 
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
+        val author = prefs.gitAuthor()
 
         gitManager.commitAll(
-            prefs.usernameOrDefault(),
+            author,
             "commit from gitnote, before doing a change"
         ).onFailure {
             return failure(it)
@@ -333,7 +333,7 @@ class StorageManager {
             }
         )
 
-        gitManager.commitAll(prefs.usernameOrDefault(), commitMessage).onFailure {
+        gitManager.commitAll(author, commitMessage).onFailure {
             return failure(it)
         }
 

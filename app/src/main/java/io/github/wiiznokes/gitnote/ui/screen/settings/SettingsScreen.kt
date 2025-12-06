@@ -198,6 +198,27 @@ fun SettingsScreen(
             title = stringResource(R.string.repository)
         ) {
 
+            val gitAuthorName by vm.prefs.gitAuthorName.getAsState()
+            StringSettings(
+                title = stringResource(R.string.git_author_name),
+                subtitle = gitAuthorName.ifEmpty { stringResource(id = R.string.none) },
+                stringValue = gitAuthorName,
+                onChange = { updated ->
+                    vm.update { vm.prefs.gitAuthorName.update(updated.trim()) }
+                }
+            )
+
+            val gitAuthorEmail by vm.prefs.gitAuthorName.getAsState()
+            StringSettings(
+                title = stringResource(R.string.git_author_email),
+                subtitle = gitAuthorEmail.ifEmpty { stringResource(id = R.string.none) },
+                stringValue = gitAuthorEmail,
+                onChange = { updated ->
+                    vm.update { vm.prefs.gitAuthorEmail.update(updated.trim()) }
+                },
+                keyboardType = KeyboardType.Email
+            )
+
             val remoteUrl by vm.prefs.remoteUrl.getAsState()
             StringSettings(
                 title = stringResource(R.string.remote_url),
@@ -313,4 +334,3 @@ fun SettingsScreen(
         }
     }
 }
-
