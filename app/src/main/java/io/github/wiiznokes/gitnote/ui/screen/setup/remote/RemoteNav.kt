@@ -115,7 +115,7 @@ fun RemoteScreen(
                 onBackClick = { navController.pop() },
                 authStep2State = initState,
                 vm = vm,
-                userInfo = vm.userInfo,
+                userInfo = vm.userInfo!!,
                 repos = vm.repos,
                 storageConfig = storageConfig,
                 onSuccess = onInitSuccess,

@@ -52,7 +52,7 @@ class MainViewModel : ViewModel() {
         gitManager.openRepo(storageConfig.repoPath()).onFailure {
             return false
         }
-        prefs.applyGitAuthorDefaults(gitManager.currentSignature())
+        prefs.applyGitAuthorDefaults(null, gitManager.currentSignature())
 
         CoroutineScope(Dispatchers.IO).launch {
             storageManager.updateDatabaseAndRepo()

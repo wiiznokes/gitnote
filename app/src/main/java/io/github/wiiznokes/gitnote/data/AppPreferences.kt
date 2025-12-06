@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
 import io.github.wiiznokes.gitnote.provider.ProviderType
+import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.GitAuthor
@@ -59,47 +60,26 @@ class AppPreferences(
 
     val credType = enumPreference("credType", CredType.None)
 
-    val username = stringPreference("username", "")
-
-    suspend fun usernameOrDefault(): String =
-        username.get().let { it.ifEmpty { DEFAULT_USERNAME } }
-
     val gitAuthorName = stringPreference("gitAuthorName", "")
     val gitAuthorEmail = stringPreference("gitAuthorEmail", "")
 
-    fun gitAuthorFlow() = combine(
-        gitAuthorName.getFlow(),
-        gitAuthorEmail.getFlow(),
-        username.getFlow()
-    ) { name, email, usernamePref ->
-        val fallback = usernamePref.ifEmpty { DEFAULT_USERNAME }
-        GitAuthor(
-            name = name.ifEmpty { fallback },
-            email = email.ifEmpty { fallback }
-        )
-    }
-
     suspend fun gitAuthor(): GitAuthor {
-        val name = gitAuthorName.get()
-        val email = gitAuthorEmail.get()
-        val usernameValue = username.get()
-        val fallback = usernameValue.ifEmpty { DEFAULT_USERNAME }
-
         return GitAuthor(
-            name = name.ifEmpty { fallback },
-            email = email.ifEmpty { fallback }
+            name = gitAuthorName.get().ifEmpty { DEFAULT_USERNAME },
+            email = gitAuthorEmail.get()
         )
     }
 
-    fun gitAuthorBlocking(): GitAuthor = runBlocking { gitAuthor() }
-
-    suspend fun applyGitAuthorDefaults(author: GitAuthor?) {
-        val fallback = usernameOrDefault()
+    suspend fun applyGitAuthorDefaults(userInfo: UserInfo?, author: GitAuthor?) {
         if (gitAuthorName.get().isEmpty()) {
-            gitAuthorName.update(author?.name?.takeIf { it.isNotEmpty() } ?: fallback)
+            (userInfo?.username ?: author?.name)?.let {
+                gitAuthorName.update(it)
+            }
         }
         if (gitAuthorEmail.get().isEmpty()) {
-            gitAuthorEmail.update(author?.email?.takeIf { it.isNotEmpty() } ?: fallback)
+            (userInfo?.email ?: author?.email)?.let {
+                gitAuthorEmail.update(it)
+            }
         }
     }
 
