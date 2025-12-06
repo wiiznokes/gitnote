@@ -6,10 +6,12 @@ import io.github.wiiznokes.gitnote.manager.PreferencesManager
 import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
+import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.pathString
 
@@ -61,6 +63,45 @@ class AppPreferences(
 
     suspend fun usernameOrDefault(): String =
         username.get().let { it.ifEmpty { DEFAULT_USERNAME } }
+
+    val gitAuthorName = stringPreference("gitAuthorName", "")
+    val gitAuthorEmail = stringPreference("gitAuthorEmail", "")
+
+    fun gitAuthorFlow() = combine(
+        gitAuthorName.getFlow(),
+        gitAuthorEmail.getFlow(),
+        username.getFlow()
+    ) { name, email, usernamePref ->
+        val fallback = usernamePref.ifEmpty { DEFAULT_USERNAME }
+        GitAuthor(
+            name = name.ifEmpty { fallback },
+            email = email.ifEmpty { fallback }
+        )
+    }
+
+    suspend fun gitAuthor(): GitAuthor {
+        val name = gitAuthorName.get()
+        val email = gitAuthorEmail.get()
+        val usernameValue = username.get()
+        val fallback = usernameValue.ifEmpty { DEFAULT_USERNAME }
+
+        return GitAuthor(
+            name = name.ifEmpty { fallback },
+            email = email.ifEmpty { fallback }
+        )
+    }
+
+    fun gitAuthorBlocking(): GitAuthor = runBlocking { gitAuthor() }
+
+    suspend fun applyGitAuthorDefaults(author: GitAuthor?) {
+        val fallback = usernameOrDefault()
+        if (gitAuthorName.get().isEmpty()) {
+            gitAuthorName.update(author?.name?.takeIf { it.isNotEmpty() } ?: fallback)
+        }
+        if (gitAuthorEmail.get().isEmpty()) {
+            gitAuthorEmail.update(author?.email?.takeIf { it.isNotEmpty() } ?: fallback)
+        }
+    }
 
     val userPassUsername = stringPreference("userPassUsername", "")
     val userPassPassword = stringPreference("userPassPassword", "")
@@ -167,4 +208,3 @@ enum class StorageConfig {
     App,
     Device
 }
-
