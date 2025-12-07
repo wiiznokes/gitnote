@@ -208,7 +208,7 @@ fun SettingsScreen(
                 }
             )
 
-            val gitAuthorEmail by vm.prefs.gitAuthorName.getAsState()
+            val gitAuthorEmail by vm.prefs.gitAuthorEmail.getAsState()
             StringSettings(
                 title = stringResource(R.string.git_author_email),
                 subtitle = gitAuthorEmail.ifEmpty { stringResource(id = R.string.none) },
