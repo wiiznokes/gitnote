@@ -5,6 +5,7 @@ import androidx.annotation.Keep
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.model.Cred
+import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
@@ -142,8 +143,8 @@ class GitManager {
         lastCommitLib()
     }.getOrDefault("") ?: ""
 
-    suspend fun commitAll(username: String, message: String): Result<Unit> = safelyAccessLibGit2 {
-        Log.d(TAG, "commit all: $username")
+    suspend fun commitAll(author: GitAuthor, message: String): Result<Unit> = safelyAccessLibGit2 {
+        Log.d(TAG, "commit all: ${author.name}")
         if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
 
         var res = isChangeLib()
@@ -158,12 +159,19 @@ class GitManager {
             return@safelyAccessLibGit2
         }
 
-        res = commitAllLib(username, message)
+        res = commitAllLib(author.name, author.email, message)
         if (res < 0) {
             throw GitException(uiHelper.getString(R.string.error_commit_repo, res.toString()))
         }
 
     }
+
+    suspend fun currentSignature(): GitAuthor? = safelyAccessLibGit2 {
+        Log.d(TAG, "currentSignature")
+        if (!isRepoInitialized) throw GitException(GitExceptionType.RepoNotInit)
+
+        currentSignatureLib()
+    }.getOrNull()?.let { GitAuthor(name = it.first, email = it.second) }
 
     suspend fun push(cred: Cred?): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "push: $cred")
@@ -240,7 +248,8 @@ private external fun cloneRepoLib(
 
 private external fun lastCommitLib(): String?
 
-private external fun commitAllLib(username: String, message: String): Int
+private external fun commitAllLib(name: String, email: String, message: String): Int
+private external fun currentSignatureLib(): Pair<String, String>?
 private external fun pushLib(cred: Cred?): Int
 private external fun pullLib(cred: Cred?): Int
 

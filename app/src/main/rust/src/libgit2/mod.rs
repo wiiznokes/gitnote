@@ -108,7 +108,13 @@ fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
             username,
             private_key,
             public_key,
-        } => git2::Cred::ssh_key_from_memory(username, Some(public_key), private_key, None),
+            passphrase,
+        } => git2::Cred::ssh_key_from_memory(
+            username,
+            Some(public_key),
+            private_key,
+            passphrase.as_deref(),
+        ),
     }
 }
 
@@ -127,7 +133,6 @@ pub fn clone_repo(
         callbacks
             .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
     }
-
 
     callbacks.transfer_progress(|stats: Progress| {
         let progress = stats.indexed_objects() as f32 / stats.total_objects() as f32 * 100.;
@@ -160,7 +165,30 @@ pub fn last_commit() -> Option<String> {
     Some(head.to_string())
 }
 
-pub fn commit_all(username: &str, message: &str) -> Result<(), Error> {
+pub fn signature() -> Option<(String, String)> {
+    let repo = REPO.lock().expect("repo lock");
+    let repo = repo.as_ref()?;
+
+    if let Ok(signature) = repo.signature() {
+        let name = signature.name().unwrap_or_default().to_string();
+        let email = signature.email().unwrap_or_default().to_string();
+
+        if !name.is_empty() || !email.is_empty() {
+            return Some((name, email));
+        }
+    }
+
+    let head = repo.head().ok()?;
+    let commit = head.peel_to_commit().ok()?;
+    let author = commit.author();
+
+    Some((
+        author.name().unwrap_or_default().to_string(),
+        author.email().unwrap_or_default().to_string(),
+    ))
+}
+
+pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -185,7 +213,8 @@ pub fn commit_all(username: &str, message: &str) -> Result<(), Error> {
     // Get HEAD commit as parent, and Allow initial commit
     let parent_commit = repo.head().and_then(|r| r.peel_to_commit()).ok();
 
-    let sig = Signature::now(username, username).map_err(|e| Error::git2(e, "Signature::now"))?;
+    let sig =
+        Signature::now(name, email).map_err(|e| Error::git2(e, "Signature::now"))?;
 
     // Create commit
     match parent_commit {

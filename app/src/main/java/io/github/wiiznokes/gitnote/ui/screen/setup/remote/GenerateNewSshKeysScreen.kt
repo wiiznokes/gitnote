@@ -170,6 +170,7 @@ fun GenerateNewSshKeysScreen(
                             cred = Cred.Ssh(
                                 publicKey = publicKey.value,
                                 privateKey = privateKey.value,
+                                passphrase = null
                             ),
                             onSuccess = onSuccess
                         )

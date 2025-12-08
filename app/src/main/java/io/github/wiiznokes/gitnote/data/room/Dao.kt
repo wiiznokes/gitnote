@@ -12,6 +12,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.manager.Progress
+import io.github.wiiznokes.gitnote.manager.isExtensionSupported
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
@@ -52,10 +53,8 @@ interface RepoDatabaseDao {
 
                 when (nodeFs) {
                     is NodeFs.File -> {
-                        val mimeType = MimeTypeMap.getSingleton()
-                            .getMimeTypeFromExtension(nodeFs.extension.text)
-                        if (mimeType == null || !mimeType.startsWith("text")) {
-                            //Log.d(TAG, "skipped ${nodeFs.path} with mime type $mimeType")
+                        if (!isExtensionSupported(nodeFs.extension.text)) {
+                            //Log.d(TAG, "skipped ${nodeFs.path} because extension not supported")
                             return@forEachNodeFs
                         }
 
@@ -63,7 +62,7 @@ interface RepoDatabaseDao {
                         if (fileSize > LIMIT_FILE_SIZE_DB) {
                             Log.d(
                                 TAG,
-                                "skipped ${nodeFs.path} with mime type $mimeType because size was above $LIMIT_FILE_SIZE_DB ($fileSize)"
+                                "skipped ${nodeFs.path} because size was above $LIMIT_FILE_SIZE_DB ($fileSize)"
                             )
                             return@forEachNodeFs
                         }

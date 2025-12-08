@@ -4,12 +4,15 @@ import android.content.Context
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.manager.PreferencesManager
 import io.github.wiiznokes.gitnote.provider.ProviderType
+import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
+import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.pathString
 
@@ -57,10 +60,28 @@ class AppPreferences(
 
     val credType = enumPreference("credType", CredType.None)
 
-    val username = stringPreference("username", "")
+    val gitAuthorName = stringPreference("gitAuthorName", "")
+    val gitAuthorEmail = stringPreference("gitAuthorEmail", "")
 
-    suspend fun usernameOrDefault(): String =
-        username.get().let { it.ifEmpty { DEFAULT_USERNAME } }
+    suspend fun gitAuthor(): GitAuthor {
+        return GitAuthor(
+            name = gitAuthorName.get().ifEmpty { DEFAULT_USERNAME },
+            email = gitAuthorEmail.get()
+        )
+    }
+
+    suspend fun applyGitAuthorDefaults(userInfo: UserInfo?, author: GitAuthor?) {
+        if (gitAuthorName.get().isEmpty()) {
+            (userInfo?.username ?: author?.name)?.let {
+                gitAuthorName.update(it)
+            }
+        }
+        if (gitAuthorEmail.get().isEmpty()) {
+            (userInfo?.email ?: author?.email)?.let {
+                gitAuthorEmail.update(it)
+            }
+        }
+    }
 
     val userPassUsername = stringPreference("userPassUsername", "")
     val userPassPassword = stringPreference("userPassPassword", "")
@@ -68,6 +89,7 @@ class AppPreferences(
     val sshUsername = stringPreference("sshUsername", "")
     val publicKey = stringPreference("publicKey", "")
     val privateKey = stringPreference("privateKey", "")
+    val passphrase = stringPreference("passphrase", "")
 
     val appAuthToken = stringPreference("appAuthToken", "")
 
@@ -85,6 +107,7 @@ class AppPreferences(
                 username = this.sshUsername.get(),
                 publicKey = this.publicKey.get(),
                 privateKey = this.privateKey.get(),
+                passphrase = this.passphrase.get().ifEmpty { null }
             )
         }
     }
@@ -96,6 +119,7 @@ class AppPreferences(
                 sshUsername.update(cred.username)
                 publicKey.update(cred.publicKey)
                 privateKey.update(cred.privateKey)
+                passphrase.update(cred.passphrase ?: "")
             }
 
             is Cred.UserPassPlainText -> {
@@ -136,6 +160,7 @@ class AppPreferences(
     suspend fun initRepo(storageConfig: StorageConfiguration) {
         databaseCommit.update("")
         isInit.update(true)
+        remoteUrl.reset()
 
         when (storageConfig) {
             StorageConfiguration.App -> {
@@ -163,4 +188,3 @@ enum class StorageConfig {
     App,
     Device
 }
-

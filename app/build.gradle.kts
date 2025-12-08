@@ -50,8 +50,8 @@ android {
         applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 30
         targetSdk = 36
-        versionCode = 11
-        versionName = "25.11"
+        versionCode = 13
+        versionName = "25.12"
 
         buildConfigField(
             "String",
@@ -179,9 +179,8 @@ dependencies {
     // Compose Navigation
     implementation(libs.reimagined.navigation)
 
-    // Markdown to HTML
-    implementation(libs.richtext.commonmark)
-    implementation(libs.richtext.ui.material3)
+    // Markdown
+    implementation(libs.compose.markdown)
 
     // unit test
     testImplementation(kotlin("test"))

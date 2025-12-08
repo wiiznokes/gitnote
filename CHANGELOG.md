@@ -5,13 +5,23 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [25.12]
+
+### Changed
+
+- new markdown rendering lib
+
+### Added
+
+- load keys from devices
+
 ## [25.11]
 
 ### Changed
 
 - optimization for big repo
-    - use fts in libsql
-    - use a padger (only load notes visibles)
+  - use fts in libsql
+  - use a padger (only load notes visibles)
 
 ### Added
 

@@ -45,15 +45,20 @@ fun SetupPage(
 @Composable
 fun SetupLine(
     text: String,
-    content: @Composable ColumnScope.() -> Unit
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
 
     Column(
         modifier = Modifier
-            .padding(bottom = 18.dp)
+            .padding(bottom = 18.dp),
     ) {
         Text(text = text)
-        content()
+        Column(
+            horizontalAlignment = horizontalAlignment
+        ) {
+            content()
+        }
     }
 }
 

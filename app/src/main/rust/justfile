@@ -5,3 +5,11 @@ zip_openssl_build arch:
     cp -r target/{{ arch }}-linux-android/release/build/openssl-sys-*/out/openssl-build/install openssl-prebuild/{{ arch }}
     zip -r install.zip openssl-prebuild/{{ arch }}/install
     mv install.zip openssl-prebuild/{{ arch }}
+
+sortext:
+    #!/usr/bin/env bash
+    extension_dir=supported_extensions
+    for f in $(ls $extension_dir 2>/dev/null); do
+        sort $extension_dir/$f -o $extension_dir/$f
+        echo sorted $f
+    done
