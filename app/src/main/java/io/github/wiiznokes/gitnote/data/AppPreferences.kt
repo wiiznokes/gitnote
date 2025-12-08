@@ -9,6 +9,7 @@ import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
 import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
@@ -140,6 +141,7 @@ class AppPreferences(
 
     val noteMinWidth = enumPreference("noteMinWidth", NoteMinWidth.Default)
     val showFullNoteHeight = booleanPreference("showFullNoteHeight", false)
+    val noteViewType = enumPreference("noteViewType", NoteViewType.Grid)
 
     val rememberLastOpenedFolder = booleanPreference("rememberLastOpenedFolder", false)
     val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
