@@ -17,6 +17,7 @@ import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -157,6 +158,17 @@ class GridViewModel : ViewModel() {
         _selectedNotes.emit(emptyList())
     }
 
+    fun toggleViewType() {
+        viewModelScope.launch {
+            val next = if (prefs.noteViewType.get() == NoteViewType.Grid) {
+                NoteViewType.List
+            } else {
+                NoteViewType.Grid
+            }
+            prefs.noteViewType.update(next)
+        }
+    }
+
     fun deleteSelectedNotes() {
         CoroutineScope(Dispatchers.IO).launch {
             val currentSelectedNotes = selectedNotes.value
@@ -254,4 +266,3 @@ class GridViewModel : ViewModel() {
         }
     }
 }
-

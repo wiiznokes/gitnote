@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.ViewList
+import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,6 +68,7 @@ import io.github.wiiznokes.gitnote.manager.SyncState
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -141,6 +144,7 @@ private fun SearchBar(
     }
 
     val query = vm.query.collectAsState()
+    val noteViewType = vm.prefs.noteViewType.getAsState()
     if (query.value.isNotEmpty()) {
         BackHandler {
             clearQuery()
@@ -202,6 +206,28 @@ private fun SearchBar(
                         vm.consumeOkSyncState()
                     })
 
+                    IconButton(
+                        onClick = {
+                            vm.toggleViewType()
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = if (noteViewType.value == NoteViewType.Grid) {
+                                Icons.Rounded.ViewList
+                            } else {
+                                Icons.Rounded.ViewModule
+                            },
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = stringResource(
+                                if (noteViewType.value == NoteViewType.Grid) {
+                                    R.string.switch_to_list_view
+                                } else {
+                                    R.string.switch_to_grid_view
+                                }
+                            )
+                        )
+                    }
+
                     Box {
                         val expanded = remember { mutableStateOf(false) }
                         IconButton(
@@ -248,15 +274,41 @@ private fun SearchBar(
             }
         } else {
             {
-                IconButton(
-                    onClick = {
-                        clearQuery()
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SimpleIcon(
-                        imageVector = Icons.Rounded.Close,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                    IconButton(
+                        onClick = {
+                            vm.toggleViewType()
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = if (noteViewType.value == NoteViewType.Grid) {
+                                Icons.Rounded.ViewList
+                            } else {
+                                Icons.Rounded.ViewModule
+                            },
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = stringResource(
+                                if (noteViewType.value == NoteViewType.Grid) {
+                                    R.string.switch_to_list_view
+                                } else {
+                                    R.string.switch_to_grid_view
+                                }
+                            )
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            clearQuery()
+                        }
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Rounded.Close,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
