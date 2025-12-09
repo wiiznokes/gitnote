@@ -101,18 +101,16 @@ pub fn open_repo(repo_path: &str) -> Result<(), Error> {
 fn current_branch(repo: &Repository) -> Result<String, Error> {
     let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
 
-    head.shorthand()
-        .map(str::to_string)
-        .or_else(|| {
-            head.name()
-                .and_then(|name| name.rsplit('/').next().map(str::to_string))
-        })
-        .ok_or_else(|| {
-            Error::git2(
-                git2::Error::from_str("unable to determine current branch"),
-                "head",
-            )
-        })
+    if head.is_branch()
+        && let Some(name) = head.shorthand() {
+            return Ok(name.to_string());
+        }
+
+    // Detached HEAD or not a branch
+    Err(Error::git2(
+        git2::Error::from_str("unable to determine default branch"),
+        "",
+    ))
 }
 
 fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
@@ -229,8 +227,7 @@ pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
     // Get HEAD commit as parent, and Allow initial commit
     let parent_commit = repo.head().and_then(|r| r.peel_to_commit()).ok();
 
-    let sig =
-        Signature::now(name, email).map_err(|e| Error::git2(e, "Signature::now"))?;
+    let sig = Signature::now(name, email).map_err(|e| Error::git2(e, "Signature::now"))?;
 
     // Create commit
     match parent_commit {
