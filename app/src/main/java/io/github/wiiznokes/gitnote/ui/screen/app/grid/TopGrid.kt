@@ -194,46 +194,43 @@ private fun SearchBar(
                 )
             }
         },
-        trailingIcon = if (queryTextField.text.isEmpty()) {
-            {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+        trailingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
+                if (queryTextField.text.isEmpty()) {
                     val syncState = vm.syncState.collectAsState()
-
-                    SyncStateIcon(syncState.value, {
+                    SyncStateIcon(syncState.value) {
                         vm.consumeOkSyncState()
-                    })
-
-                    IconButton(
-                        onClick = {
-                            vm.toggleViewType()
-                        }
-                    ) {
-                        SimpleIcon(
-                            imageVector = if (noteViewType.value == NoteViewType.Grid) {
-                                Icons.Rounded.ViewList
-                            } else {
-                                Icons.Rounded.ViewModule
-                            },
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            contentDescription = stringResource(
-                                if (noteViewType.value == NoteViewType.Grid) {
-                                    R.string.switch_to_list_view
-                                } else {
-                                    R.string.switch_to_grid_view
-                                }
-                            )
-                        )
                     }
+                }
 
+                IconButton(
+                    onClick = { vm.toggleViewType() }
+                ) {
+                    SimpleIcon(
+                        imageVector = if (noteViewType.value == NoteViewType.Grid) {
+                            Icons.Rounded.ViewList
+                        } else {
+                            Icons.Rounded.ViewModule
+                        },
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        contentDescription = stringResource(
+                            if (noteViewType.value == NoteViewType.Grid) {
+                                R.string.switch_to_list_view
+                            } else {
+                                R.string.switch_to_grid_view
+                            }
+                        )
+                    )
+                }
+
+                if (queryTextField.text.isEmpty()) {
                     Box {
                         val expanded = remember { mutableStateOf(false) }
                         IconButton(
-                            onClick = {
-                                expanded.value = true
-                            }
+                            onClick = { expanded.value = true }
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.Rounded.MoreVert,
@@ -270,39 +267,9 @@ private fun SearchBar(
                             )
                         )
                     }
-                }
-            }
-        } else {
-            {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                } else {
                     IconButton(
-                        onClick = {
-                            vm.toggleViewType()
-                        }
-                    ) {
-                        SimpleIcon(
-                            imageVector = if (noteViewType.value == NoteViewType.Grid) {
-                                Icons.Rounded.ViewList
-                            } else {
-                                Icons.Rounded.ViewModule
-                            },
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            contentDescription = stringResource(
-                                if (noteViewType.value == NoteViewType.Grid) {
-                                    R.string.switch_to_list_view
-                                } else {
-                                    R.string.switch_to_grid_view
-                                }
-                            )
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            clearQuery()
-                        }
+                        onClick = { clearQuery() }
                     ) {
                         SimpleIcon(
                             imageVector = Icons.Rounded.Close,

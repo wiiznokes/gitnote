@@ -40,11 +40,14 @@ import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import java.text.DateFormat
 import java.util.Date
 import androidx.paging.compose.LazyPagingItems
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.geometry.Offset
 
 @Composable
 internal fun NoteListView(
     gridNotes: LazyPagingItems<GridNote>,
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     topSpacerHeight: Dp,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
@@ -52,7 +55,7 @@ internal fun NoteListView(
     vm: GridViewModel,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         state = listState
     ) {
         item {
@@ -119,22 +122,16 @@ private fun NoteListRow(
                 }
             )
             .pointerInteropFilter {
-                clickPosition.value = androidx.compose.ui.geometry.Offset(it.x, it.y)
+                clickPosition.value = Offset(it.x, it.y)
                 false
             }
     ) {
         Box {
-            CustomDropDown(
-                expanded = dropDownExpanded,
-                shape = MaterialTheme.shapes.medium,
-                options = listOf(
-                    CustomDropDownModel(
-                        text = stringResource(R.string.delete_this_note),
-                        onClick = { vm.deleteNote(gridNote.note) }),
-                    if (selectedNotes.isEmpty()) CustomDropDownModel(
-                        text = stringResource(R.string.select_multiple_notes),
-                        onClick = { vm.selectNote(gridNote.note, true) }) else null,
-                ),
+            NoteActionsDropdown(
+                vm = vm,
+                gridNote = gridNote,
+                selectedNotes = selectedNotes,
+                dropDownExpanded = dropDownExpanded,
                 clickPosition = clickPosition
             )
 
@@ -179,4 +176,27 @@ private fun NoteListRow(
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(80.dp)
         )
     }
+}
+
+@Composable
+internal fun NoteActionsDropdown(
+    vm: GridViewModel,
+    gridNote: GridNote,
+    selectedNotes: List<Note>,
+    dropDownExpanded: MutableState<Boolean>,
+    clickPosition: MutableState<Offset>,
+) {
+    CustomDropDown(
+        expanded = dropDownExpanded,
+        shape = MaterialTheme.shapes.medium,
+        options = listOf(
+            CustomDropDownModel(
+                text = stringResource(R.string.delete_this_note),
+                onClick = { vm.deleteNote(gridNote.note) }),
+            if (selectedNotes.isEmpty()) CustomDropDownModel(
+                text = stringResource(R.string.select_multiple_notes),
+                onClick = { vm.selectNote(gridNote.note, true) }) else null,
+        ),
+        clickPosition = clickPosition
+    )
 }
