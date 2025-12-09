@@ -68,8 +68,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
@@ -191,24 +189,7 @@ private fun GridView(
     noteViewType: NoteViewType,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems()
-
-    val gridState = rememberLazyStaggeredGridState()
-    val listState = rememberLazyListState()
-
-
     val query = vm.query.collectAsState()
-
-    val lastQuery = rememberSaveable { mutableStateOf(query.value) }
-
-    LaunchedEffect(query.value, noteViewType) {
-        if (lastQuery.value != query.value) {
-            lastQuery.value = query.value
-            when (noteViewType) {
-                NoteViewType.Grid -> gridState.animateScrollToItem(index = 0)
-                NoteViewType.List -> listState.animateScrollToItem(index = 0)
-            }
-        }
-    }
 
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
@@ -235,29 +216,25 @@ private fun GridView(
 
         when (noteViewType) {
             NoteViewType.Grid -> {
+                val gridState = rememberLazyStaggeredGridState()
+
+                LaunchedEffect(query.value) {
+                    gridState.animateScrollToItem(index = 0)
+                }
+
                 LazyVerticalStaggeredGrid(
                     modifier = commonModifier,
-                    contentPadding = PaddingValues(
-                        horizontal = 3.dp
-                    ),
+                    contentPadding = PaddingValues(horizontal = 3.dp),
                     columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
                     state = gridState
-
                 ) {
-
-                    item(
-                        span = StaggeredGridItemSpan.FullLine
-                    ) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         Spacer(modifier = Modifier.height(topSpacerHeight))
                     }
 
-
                     items(
                         count = gridNotes.itemCount,
-                        key = { index ->
-                            val note = gridNotes[index]!!
-                            note.note.id
-                        }
+                        key = { index -> gridNotes[index]!!.note.id }
                     ) { index ->
                         val gridNote = gridNotes[index]!!
 
@@ -268,24 +245,27 @@ private fun GridView(
                             selectedNotes = selectedNotes,
                             showFullPathOfNotes = showFullPathOfNotes.value,
                             showFullNoteHeight = showFullNoteHeight.value,
-                            modifier = Modifier
-                                .padding(3.dp)
+                            modifier = Modifier.padding(3.dp)
                         )
                     }
 
-
-                    item(
-                        span = StaggeredGridItemSpan.FullLine
-                    ) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
                     }
                 }
             }
 
             NoteViewType.List -> {
+                val listState = rememberLazyListState()
+
+                LaunchedEffect(query.value) {
+                    listState.animateScrollToItem(index = 0)
+                }
+
                 NoteListView(
                     gridNotes = gridNotes,
                     listState = listState,
+                    modifier = commonModifier,
                     topSpacerHeight = topSpacerHeight,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
@@ -392,22 +372,11 @@ private fun NoteCardContent(
 
         // need this box for clickPosition
         Box {
-            CustomDropDown(
-                expanded = dropDownExpanded,
-                shape = MaterialTheme.shapes.medium,
-                options = listOf(
-                    CustomDropDownModel(
-                        text = stringResource(R.string.delete_this_note),
-                        onClick = {
-                            vm.deleteNote(gridNote.note)
-                        }),
-                    if (selectedNotes.isEmpty()) CustomDropDownModel(
-                        text = stringResource(
-                            R.string.select_multiple_notes
-                        ), onClick = {
-                            vm.selectNote(gridNote.note, true)
-                        }) else null,
-                ),
+            NoteActionsDropdown(
+                vm = vm,
+                gridNote = gridNote,
+                selectedNotes = selectedNotes,
+                dropDownExpanded = dropDownExpanded,
                 clickPosition = clickPosition
             )
         }
