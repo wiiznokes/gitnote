@@ -19,7 +19,6 @@ mod merge;
 mod test;
 
 const REMOTE: &str = "origin";
-const BRANCH: &str = "main";
 
 static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
 
@@ -97,6 +96,23 @@ pub fn open_repo(repo_path: &str) -> Result<(), Error> {
     REPO.lock().unwrap().replace(repo);
 
     Ok(())
+}
+
+fn current_branch(repo: &Repository) -> Result<String, Error> {
+    let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
+
+    head.shorthand()
+        .map(str::to_string)
+        .or_else(|| {
+            head.name()
+                .and_then(|name| name.rsplit('/').next().map(str::to_string))
+        })
+        .ok_or_else(|| {
+            Error::git2(
+                git2::Error::from_str("unable to determine current branch"),
+                "head",
+            )
+        })
 }
 
 fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
@@ -234,7 +250,8 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
         .find_remote(REMOTE)
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
-    let refspecs = [format!("refs/heads/{BRANCH}:refs/heads/{BRANCH}")];
+    let branch = current_branch(repo)?;
+    let refspecs = [format!("refs/heads/{branch}:refs/heads/{branch}")];
 
     let mut callbacks = RemoteCallbacks::new();
 
@@ -276,6 +293,7 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
     let mut fetch_options = FetchOptions::new();
     fetch_options.remote_callbacks(callbacks);
 
+    let branch = current_branch(repo)?;
     remote
         .fetch(&[] as &[&str], Some(&mut fetch_options), None)
         .map_err(|e| Error::git2(e, "fetch"))?;
@@ -288,7 +306,7 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
         .reference_to_annotated_commit(&fetch_head)
         .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
 
-    merge::do_merge(repo, BRANCH, commit).map_err(|e| Error::git2(e, "do_merge"))?;
+    merge::do_merge(repo, &branch, commit).map_err(|e| Error::git2(e, "do_merge"))?;
 
     Ok(())
 }
