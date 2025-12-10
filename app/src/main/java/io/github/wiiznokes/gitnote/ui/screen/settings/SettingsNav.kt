@@ -53,7 +53,6 @@ fun SettingsNav(
                     onBackClick = {
                         navController.pop()
                     },
-                    vm = vm
                 )
             }
 
