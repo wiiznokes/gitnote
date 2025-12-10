@@ -96,7 +96,10 @@ fun SetupNav(
                         )
                     },
                     onFinish = { path, useUrlForRootFolder ->
-                        val storageConfig = StorageConfiguration.Device(path, useUrlForRootFolder = useUrlForRootFolder)
+                        val storageConfig = StorageConfiguration.Device(
+                            path,
+                            useUrlForRootFolder = useUrlForRootFolder
+                        )
 
                         when (setupDestination.newRepoMethod) {
                             NewRepoMethod.Create -> vm.createLocalRepo(

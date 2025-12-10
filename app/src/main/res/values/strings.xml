@@ -69,6 +69,9 @@
     <string name="error_folder_already_exist">Folder already exist</string>
     <string name="error_note_is_the_same">No modification</string>
     <string name="grid">Grid</string>
+    <string name="list">List</string>
+    <string name="switch_to_list_view">Switch to list view</string>
+    <string name="switch_to_grid_view">Switch to grid view</string>
     <string name="about">About</string>
     <string name="app_page_choose_method">Choose method</string>
     <string name="create_local_repo">Create local repository</string>

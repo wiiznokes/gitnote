@@ -3,8 +3,6 @@ package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember

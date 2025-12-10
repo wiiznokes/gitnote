@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -44,7 +46,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -63,14 +64,16 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.GridNote
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerScreen
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 
@@ -79,6 +82,8 @@ private const val TAG = "GridScreen"
 
 private const val maxOffset = -500f
 internal val topBarHeight = 80.dp
+
+internal val topSpacerHeight = topBarHeight + 40.dp + 15.dp
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -111,6 +116,8 @@ fun GridScreen(
                 vm.unselectAllNotes()
             }
         }
+
+        val noteViewType by vm.prefs.noteViewType.getAsState()
 
         val searchFocusRequester = remember { FocusRequester() }
 
@@ -148,7 +155,8 @@ fun GridScreen(
                 onEditClick = onEditClick,
                 selectedNotes = selectedNotes,
                 nestedScrollConnection = nestedScrollConnection,
-                padding = padding
+                padding = padding,
+                noteViewType = noteViewType,
             )
 
             TopBar(
@@ -181,23 +189,10 @@ private fun GridView(
     onEditClick: (Note, EditType) -> Unit,
     selectedNotes: List<Note>,
     padding: PaddingValues,
+    noteViewType: NoteViewType,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems()
-
-    val gridState = rememberLazyStaggeredGridState()
-
-
     val query = vm.query.collectAsState()
-
-    var lastQuery: String = rememberSaveable { query.value }
-
-    if (lastQuery != query.value) {
-        @Suppress("UNUSED_VALUE")
-        lastQuery = query.value
-        LaunchedEffect(null) {
-            gridState.animateScrollToItem(index = 0)
-        }
-    }
 
 
     val isRefreshing by vm.isRefreshing.collectAsStateWithLifecycle()
@@ -206,160 +201,53 @@ private fun GridView(
         vm.refresh()
     })
 
+    val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
+
     Box {
 
         // todo: scroll even when there is nothing to scroll
         // todo: add scroll bar
 
-        val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
-        val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
-        val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
+        val commonModifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
+            .nestedScroll(nestedScrollConnection)
 
-        LazyVerticalStaggeredGrid(
-            modifier = Modifier
-                .fillMaxSize()
-                .pullRefresh(pullRefreshState)
-                .nestedScroll(nestedScrollConnection), contentPadding = PaddingValues(
-                horizontal = 3.dp
-            ), columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp), state = gridState
+        when (noteViewType) {
+            NoteViewType.Grid -> {
+                val gridState = rememberLazyStaggeredGridState()
 
-        ) {
+                LaunchedEffect(query.value) {
+                    gridState.animateScrollToItem(index = 0)
+                }
 
-            item(
-                span = StaggeredGridItemSpan.FullLine
-            ) {
-                Spacer(modifier = Modifier.height(topBarHeight + 40.dp + 15.dp))
+                GridNotesView(
+                    gridNotes = gridNotes,
+                    gridState = gridState,
+                    modifier = commonModifier,
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes.value,
+                    onEditClick = onEditClick,
+                    vm = vm,
+                )
             }
 
+            NoteViewType.List -> {
+                val listState = rememberLazyListState()
 
-            items(
-                count = gridNotes.itemCount,
-                key = { index ->
-                    val note = gridNotes[index]!!
-                    note.note.id
-                }
-            ) { index ->
-                val gridNote = gridNotes[index]!!
-
-                val dropDownExpanded = remember {
-                    mutableStateOf(false)
+                LaunchedEffect(query.value) {
+                    listState.animateScrollToItem(index = 0)
                 }
 
-                val clickPosition = remember {
-                    mutableStateOf(Offset.Zero)
-                }
-
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    border = if (dropDownExpanded.value) {
-                        BorderStroke(
-                            width = 2.dp, color = MaterialTheme.colorScheme.primary
-                        )
-                    } else if (gridNote.selected) {
-                        BorderStroke(
-                            width = 2.dp, color = MaterialTheme.colorScheme.onSurface
-                        )
-                    } else {
-                        BorderStroke(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1000.dp)
-                        )
-                    },
-                    modifier = Modifier
-                        .sizeIn(
-                            maxHeight = if (showFullNoteHeight.value) Dp.Unspecified else 500.dp
-                        )
-                        .padding(3.dp)
-                        .combinedClickable(onLongClick = {
-                            dropDownExpanded.value = true
-                        }, onClick = {
-                            if (selectedNotes.isEmpty()) {
-                                onEditClick(
-                                    gridNote.note, EditType.Update
-                                )
-                            } else {
-                                vm.selectNote(
-                                    gridNote.note, add = !gridNote.selected
-                                )
-                            }
-                        })
-                        .pointerInteropFilter {
-                            clickPosition.value = Offset(it.x, it.y)
-                            false
-                        },
-                ) {
-                    Box {
-
-                        // need this box for clickPosition
-                        Box {
-                            CustomDropDown(
-                                expanded = dropDownExpanded,
-                                shape = MaterialTheme.shapes.medium,
-                                options = listOf(
-                                    CustomDropDownModel(
-                                        text = stringResource(R.string.delete_this_note),
-                                        onClick = {
-                                            vm.deleteNote(gridNote.note)
-                                        }),
-                                    if (selectedNotes.isEmpty()) CustomDropDownModel(
-                                        text = stringResource(
-                                            R.string.select_multiple_notes
-                                        ), onClick = {
-                                            vm.selectNote(gridNote.note, true)
-                                        }) else null,
-                                ),
-                                clickPosition = clickPosition
-                            )
-                        }
-                        Column(
-                            modifier = Modifier.padding(10.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.Start,
-                        ) {
-                            Text(
-                                text = if (showFullPathOfNotes.value || !gridNote.isUnique) gridNote.note.relativePath else
-                                    gridNote.note.nameWithoutExtension(),
-                                modifier = Modifier.padding(bottom = 6.dp),
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                ),
-                                color = MaterialTheme.colorScheme.tertiary
-                            )
-
-                            if (gridNote.note.fileExtension() is FileExtension.Md) {
-//                                MarkdownText(
-//                                    markdown = gridNote.note.content,
-//                                    disableLinkMovementMethod = true,
-//                                    isTextSelectable = false,
-//                                    onLinkClicked = { }
-//                                )
-                                Text(
-                                    text = gridNote.note.content,
-                                    modifier = Modifier,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            } else {
-                                Text(
-                                    text = gridNote.note.content,
-                                    modifier = Modifier,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            item(
-                span = StaggeredGridItemSpan.FullLine
-            ) {
-                Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+                NoteListView(
+                    gridNotes = gridNotes,
+                    listState = listState,
+                    modifier = commonModifier,
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes.value,
+                    onEditClick = onEditClick,
+                    vm = vm,
+                )
             }
         }
 
@@ -378,6 +266,195 @@ private fun GridView(
 
 }
 
+
+@Composable
+private fun GridNotesView(
+    gridNotes: LazyPagingItems<GridNote>,
+    gridState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier,
+    selectedNotes: List<Note>,
+    showFullPathOfNotes: Boolean,
+    onEditClick: (Note, EditType) -> Unit,
+    vm: GridViewModel,
+) {
+
+
+    val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
+    val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
+
+    LazyVerticalStaggeredGrid(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 3.dp),
+        columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
+        state = gridState
+    ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Spacer(modifier = Modifier.height(topSpacerHeight))
+        }
+
+        items(
+            count = gridNotes.itemCount,
+            key = { index -> gridNotes[index]!!.note.id }
+        ) { index ->
+            val gridNote = gridNotes[index]!!
+
+            NoteCard(
+                gridNote = gridNote,
+                vm = vm,
+                onEditClick = onEditClick,
+                selectedNotes = selectedNotes,
+                showFullPathOfNotes = showFullPathOfNotes,
+                showFullNoteHeight = showFullNoteHeight.value,
+                modifier = Modifier.padding(3.dp)
+            )
+        }
+
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+        }
+    }
+}
+
+@Composable
+private fun NoteCard(
+    gridNote: GridNote,
+    vm: GridViewModel,
+    onEditClick: (Note, EditType) -> Unit,
+    selectedNotes: List<Note>,
+    showFullPathOfNotes: Boolean,
+    showFullNoteHeight: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val dropDownExpanded = remember {
+        mutableStateOf(false)
+    }
+
+    val clickPosition = remember {
+        mutableStateOf(Offset.Zero)
+    }
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = if (dropDownExpanded.value) {
+            BorderStroke(
+                width = 2.dp, color = MaterialTheme.colorScheme.primary
+            )
+        } else if (gridNote.selected) {
+            BorderStroke(
+                width = 2.dp, color = MaterialTheme.colorScheme.onSurface
+            )
+        } else {
+            BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(1000.dp)
+            )
+        },
+        modifier = modifier
+            .sizeIn(
+                maxHeight = if (showFullNoteHeight) Dp.Unspecified else 500.dp
+            )
+            .combinedClickable(onLongClick = {
+                dropDownExpanded.value = true
+            }, onClick = {
+                if (selectedNotes.isEmpty()) {
+                    onEditClick(
+                        gridNote.note, EditType.Update
+                    )
+                } else {
+                    vm.selectNote(
+                        gridNote.note, add = !gridNote.selected
+                    )
+                }
+            })
+            .pointerInteropFilter {
+                clickPosition.value = Offset(it.x, it.y)
+                false
+            },
+    ) {
+        Box {
+
+            NoteActionsDropdown(
+                vm = vm,
+                gridNote = gridNote,
+                selectedNotes = selectedNotes,
+                dropDownExpanded = dropDownExpanded,
+                clickPosition = clickPosition
+            )
+
+            Column(
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start,
+            ) {
+                val title = if (showFullPathOfNotes || !gridNote.isUnique) {
+                    gridNote.note.relativePath
+                } else {
+                    gridNote.note.nameWithoutExtension()
+                }
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+
+                if (gridNote.note.fileExtension() is FileExtension.Md) {
+//                                MarkdownText(
+//                                    markdown = gridNote.note.content,
+//                                    disableLinkMovementMethod = true,
+//                                    isTextSelectable = false,
+//                                    onLinkClicked = { }
+//                                )
+                    Text(
+                        text = gridNote.note.content,
+                        modifier = Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    Text(
+                        text = gridNote.note.content,
+                        modifier = Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun NoteActionsDropdown(
+    vm: GridViewModel,
+    gridNote: GridNote,
+    selectedNotes: List<Note>,
+    dropDownExpanded: MutableState<Boolean>,
+    clickPosition: MutableState<Offset>,
+) {
+
+    // need this box for clickPosition
+    Box {
+        CustomDropDown(
+            expanded = dropDownExpanded,
+            shape = MaterialTheme.shapes.medium,
+            options = listOf(
+                CustomDropDownModel(
+                    text = stringResource(R.string.delete_this_note),
+                    onClick = { vm.deleteNote(gridNote.note) }),
+                if (selectedNotes.isEmpty()) CustomDropDownModel(
+                    text = stringResource(R.string.select_multiple_notes),
+                    onClick = { vm.selectNote(gridNote.note, true) }) else null,
+            ),
+            clickPosition = clickPosition
+        )
+    }
+}
 
 // https://stackoverflow.com/questions/73079388/android-jetpack-compose-keyboard-not-close
 // https://medium.com/@debdut.saha.1/top-app-bar-animation-using-nestedscrollconnection-like-facebook-jetpack-compose-b446c109ee52
