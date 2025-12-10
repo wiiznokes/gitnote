@@ -13,16 +13,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -46,7 +46,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -65,22 +64,26 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
+import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
+import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerScreen
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
-import java.util.Date
 
 
 private const val TAG = "GridScreen"
 
 private const val maxOffset = -500f
 internal val topBarHeight = 80.dp
+
+internal val topSpacerHeight = topBarHeight + 40.dp + 15.dp
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -198,11 +201,7 @@ private fun GridView(
         vm.refresh()
     })
 
-    val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
     val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
-    val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
-
-    val topSpacerHeight = topBarHeight + 40.dp + 15.dp
 
     Box {
 
@@ -222,37 +221,15 @@ private fun GridView(
                     gridState.animateScrollToItem(index = 0)
                 }
 
-                LazyVerticalStaggeredGrid(
+                GridNotesView(
+                    gridNotes = gridNotes,
+                    gridState = gridState,
                     modifier = commonModifier,
-                    contentPadding = PaddingValues(horizontal = 3.dp),
-                    columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
-                    state = gridState
-                ) {
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        Spacer(modifier = Modifier.height(topSpacerHeight))
-                    }
-
-                    items(
-                        count = gridNotes.itemCount,
-                        key = { index -> gridNotes[index]!!.note.id }
-                    ) { index ->
-                        val gridNote = gridNotes[index]!!
-
-                        NoteCard(
-                            gridNote = gridNote,
-                            vm = vm,
-                            onEditClick = onEditClick,
-                            selectedNotes = selectedNotes,
-                            showFullPathOfNotes = showFullPathOfNotes.value,
-                            showFullNoteHeight = showFullNoteHeight.value,
-                            modifier = Modifier.padding(3.dp)
-                        )
-                    }
-
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
-                    }
-                }
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes.value,
+                    onEditClick = onEditClick,
+                    vm = vm,
+                )
             }
 
             NoteViewType.List -> {
@@ -266,7 +243,6 @@ private fun GridView(
                     gridNotes = gridNotes,
                     listState = listState,
                     modifier = commonModifier,
-                    topSpacerHeight = topSpacerHeight,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
                     onEditClick = onEditClick,
@@ -288,6 +264,55 @@ private fun GridView(
         )
     }
 
+}
+
+
+@Composable
+private fun GridNotesView(
+    gridNotes: LazyPagingItems<GridNote>,
+    gridState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier,
+    selectedNotes: List<Note>,
+    showFullPathOfNotes: Boolean,
+    onEditClick: (Note, EditType) -> Unit,
+    vm: GridViewModel,
+) {
+
+
+    val noteMinWidth = vm.prefs.noteMinWidth.getAsState()
+    val showFullNoteHeight = vm.prefs.showFullNoteHeight.getAsState()
+
+    LazyVerticalStaggeredGrid(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 3.dp),
+        columns = StaggeredGridCells.Adaptive(noteMinWidth.value.size.dp),
+        state = gridState
+    ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Spacer(modifier = Modifier.height(topSpacerHeight))
+        }
+
+        items(
+            count = gridNotes.itemCount,
+            key = { index -> gridNotes[index]!!.note.id }
+        ) { index ->
+            val gridNote = gridNotes[index]!!
+
+            NoteCard(
+                gridNote = gridNote,
+                vm = vm,
+                onEditClick = onEditClick,
+                selectedNotes = selectedNotes,
+                showFullPathOfNotes = showFullPathOfNotes,
+                showFullNoteHeight = showFullNoteHeight.value,
+                modifier = Modifier.padding(3.dp)
+            )
+        }
+
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Spacer(modifier = Modifier.height(topBarHeight + 10.dp))
+        }
+    }
 }
 
 @Composable
@@ -348,30 +373,8 @@ private fun NoteCard(
                 false
             },
     ) {
-        NoteCardContent(
-            gridNote = gridNote,
-            vm = vm,
-            selectedNotes = selectedNotes,
-            showFullPathOfNotes = showFullPathOfNotes,
-            clickPosition = clickPosition,
-            dropDownExpanded = dropDownExpanded
-        )
-    }
-}
-
-@Composable
-private fun NoteCardContent(
-    gridNote: GridNote,
-    vm: GridViewModel,
-    selectedNotes: List<Note>,
-    showFullPathOfNotes: Boolean,
-    clickPosition: MutableState<Offset>,
-    dropDownExpanded: MutableState<Boolean>,
-) {
-    Box {
-
-        // need this box for clickPosition
         Box {
+
             NoteActionsDropdown(
                 vm = vm,
                 gridNote = gridNote,
@@ -379,49 +382,77 @@ private fun NoteCardContent(
                 dropDownExpanded = dropDownExpanded,
                 clickPosition = clickPosition
             )
-        }
-        Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
-        ) {
-            val title = if (showFullPathOfNotes || !gridNote.isUnique) {
-                gridNote.note.relativePath
-            } else {
-                gridNote.note.nameWithoutExtension()
-            }
-            Text(
-                text = title,
-                modifier = Modifier.padding(bottom = 6.dp),
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                ),
-                color = MaterialTheme.colorScheme.tertiary
-            )
 
-            if (gridNote.note.fileExtension() is FileExtension.Md) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start,
+            ) {
+                val title = if (showFullPathOfNotes || !gridNote.isUnique) {
+                    gridNote.note.relativePath
+                } else {
+                    gridNote.note.nameWithoutExtension()
+                }
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+
+                if (gridNote.note.fileExtension() is FileExtension.Md) {
 //                                MarkdownText(
 //                                    markdown = gridNote.note.content,
 //                                    disableLinkMovementMethod = true,
 //                                    isTextSelectable = false,
 //                                    onLinkClicked = { }
 //                                )
-                Text(
-                    text = gridNote.note.content,
-                    modifier = Modifier,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            } else {
-                Text(
-                    text = gridNote.note.content,
-                    modifier = Modifier,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                    Text(
+                        text = gridNote.note.content,
+                        modifier = Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                } else {
+                    Text(
+                        text = gridNote.note.content,
+                        modifier = Modifier,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+internal fun NoteActionsDropdown(
+    vm: GridViewModel,
+    gridNote: GridNote,
+    selectedNotes: List<Note>,
+    dropDownExpanded: MutableState<Boolean>,
+    clickPosition: MutableState<Offset>,
+) {
+
+    // need this box for clickPosition
+    Box {
+        CustomDropDown(
+            expanded = dropDownExpanded,
+            shape = MaterialTheme.shapes.medium,
+            options = listOf(
+                CustomDropDownModel(
+                    text = stringResource(R.string.delete_this_note),
+                    onClick = { vm.deleteNote(gridNote.note) }),
+                if (selectedNotes.isEmpty()) CustomDropDownModel(
+                    text = stringResource(R.string.select_multiple_notes),
+                    onClick = { vm.selectNote(gridNote.note, true) }) else null,
+            ),
+            clickPosition = clickPosition
+        )
     }
 }
 

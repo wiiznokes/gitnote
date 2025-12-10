@@ -17,45 +17,39 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Text
-import io.github.wiiznokes.gitnote.R
+import androidx.paging.compose.LazyPagingItems
 import io.github.wiiznokes.gitnote.data.room.Note
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
-import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import java.text.DateFormat
 import java.util.Date
-import androidx.paging.compose.LazyPagingItems
-import androidx.compose.runtime.MutableState
-import androidx.compose.ui.geometry.Offset
 
 @Composable
 internal fun NoteListView(
     gridNotes: LazyPagingItems<GridNote>,
     listState: LazyListState,
     modifier: Modifier = Modifier,
-    topSpacerHeight: Dp,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
 ) {
+
     LazyColumn(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         state = listState
     ) {
         item {
@@ -94,7 +88,7 @@ private fun NoteListRow(
     showFullPathOfNotes: Boolean,
 ) {
     val dropDownExpanded = remember { mutableStateOf(false) }
-    val clickPosition = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+    val clickPosition = remember { mutableStateOf(Offset.Zero) }
 
     val formattedDate = remember(gridNote.note.lastModifiedTimeMillis) {
         DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
@@ -176,27 +170,4 @@ private fun NoteListRow(
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(80.dp)
         )
     }
-}
-
-@Composable
-internal fun NoteActionsDropdown(
-    vm: GridViewModel,
-    gridNote: GridNote,
-    selectedNotes: List<Note>,
-    dropDownExpanded: MutableState<Boolean>,
-    clickPosition: MutableState<Offset>,
-) {
-    CustomDropDown(
-        expanded = dropDownExpanded,
-        shape = MaterialTheme.shapes.medium,
-        options = listOf(
-            CustomDropDownModel(
-                text = stringResource(R.string.delete_this_note),
-                onClick = { vm.deleteNote(gridNote.note) }),
-            if (selectedNotes.isEmpty()) CustomDropDownModel(
-                text = stringResource(R.string.select_multiple_notes),
-                onClick = { vm.selectNote(gridNote.note, true) }) else null,
-        ),
-        clickPosition = clickPosition
-    )
 }

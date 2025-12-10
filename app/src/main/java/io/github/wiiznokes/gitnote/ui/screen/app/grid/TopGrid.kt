@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.screen.app.grid
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -23,13 +22,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.ViewList
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
@@ -126,8 +125,7 @@ private fun SearchBar(
 ) {
 
 
-    var queryTextField by remember {
-        Log.d(TAG, "")
+    val queryTextField = remember {
         mutableStateOf(
             TextFieldValue(
                 text = vm.query.value,
@@ -138,7 +136,7 @@ private fun SearchBar(
 
     val focusManager = LocalFocusManager.current
     fun clearQuery() {
-        queryTextField = TextFieldValue("")
+        queryTextField.value = TextFieldValue("")
         vm.clearQuery()
         focusManager.clearFocus()
     }
@@ -160,9 +158,9 @@ private fun SearchBar(
             .padding(top = 15.dp)
             .offset { IntOffset(x = 0, y = offset.roundToInt()) }
             .focusRequester(searchFocusRequester),
-        value = queryTextField,
+        value = queryTextField.value,
         onValueChange = {
-            queryTextField = it
+            queryTextField.value = it
             vm.search(it.text)
         },
         colors = TextFieldDefaults.colors(
@@ -199,7 +197,9 @@ private fun SearchBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                if (queryTextField.text.isEmpty()) {
+                val isEmpty = queryTextField.value.text.isEmpty()
+
+                if (isEmpty) {
                     val syncState = vm.syncState.collectAsState()
                     SyncStateIcon(syncState.value) {
                         vm.consumeOkSyncState()
@@ -211,7 +211,7 @@ private fun SearchBar(
                 ) {
                     SimpleIcon(
                         imageVector = if (noteViewType.value == NoteViewType.Grid) {
-                            Icons.Rounded.ViewList
+                            Icons.AutoMirrored.Rounded.ViewList
                         } else {
                             Icons.Rounded.ViewModule
                         },
@@ -226,7 +226,7 @@ private fun SearchBar(
                     )
                 }
 
-                if (queryTextField.text.isEmpty()) {
+                if (isEmpty) {
                     Box {
                         val expanded = remember { mutableStateOf(false) }
                         IconButton(
@@ -240,7 +240,7 @@ private fun SearchBar(
 
                         val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
-                        @Suppress("KotlinConstantConditions")
+                        @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
                         CustomDropDown(
                             expanded = expanded,
                             options = listOf(
@@ -267,7 +267,9 @@ private fun SearchBar(
                             )
                         )
                     }
-                } else {
+                }
+
+                if (!isEmpty) {
                     IconButton(
                         onClick = { clearQuery() }
                     ) {

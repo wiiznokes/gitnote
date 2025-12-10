@@ -1,7 +1,6 @@
 package io.github.wiiznokes.gitnote.data.room
 
 import android.util.Log
-import android.webkit.MimeTypeMap
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete

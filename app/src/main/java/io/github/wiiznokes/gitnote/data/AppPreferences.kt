@@ -13,7 +13,6 @@ import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.theme.Theme
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.pathString
 

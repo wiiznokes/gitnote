@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.screen.app.edit
 
-import android.webkit.MimeTypeMap
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,7 +48,6 @@ import io.github.wiiznokes.gitnote.manager.extensionType
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
-import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.TextVM
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.newEditViewModel
