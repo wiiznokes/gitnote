@@ -163,5 +163,7 @@
     <string name="load_from_file">Load from file</string>
     <string name="private_key">Private key</string>
     <string name="private_key_password">Private key password</string>
+    <string name="cancel">Cancel</string>
+    <string name="go_back">Go back</string>
 
 </resources>

@@ -28,14 +28,12 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
-import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,15 +69,16 @@ private fun getTextStyleFromInt(id: Int): TextStyle {
 @Composable
 fun LogsScreen(
     onBackClick: () -> Unit,
-    vm: SettingsViewModel
 ) {
 
     val logLevel = remember {
         mutableStateOf(LogLevel.ERROR)
     }
 
+    val initTextValue = stringResource(R.string.loading)
+
     val logState: MutableState<String> = remember {
-        mutableStateOf(vm.uiHelper.getString(R.string.loading))
+        mutableStateOf(initTextValue)
     }
 
 
@@ -141,7 +140,7 @@ fun LogsScreen(
                             ClipData.Item(logState.value)
                         )
 
-                        vm.viewModelScope.launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             clipboardManager.setClipEntry(ClipEntry(data))
                         }
 
