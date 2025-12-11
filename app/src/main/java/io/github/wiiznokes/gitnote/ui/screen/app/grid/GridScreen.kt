@@ -121,10 +121,6 @@ fun GridScreen(
 
         val searchFocusRequester = remember { FocusRequester() }
 
-        val fabExpanded = remember {
-            mutableStateOf(false)
-        }
-
         val offset = remember { mutableFloatStateOf(0f) }
 
         Scaffold(
@@ -137,8 +133,6 @@ fun GridScreen(
                         vm = vm,
                         offset = offset.floatValue,
                         onEditClick = onEditClick,
-                        searchFocusRequester = searchFocusRequester,
-                        expanded = fabExpanded,
                     )
                 }
 
@@ -146,7 +140,6 @@ fun GridScreen(
 
             val nestedScrollConnection = rememberNestedScrollConnection(
                 offset = offset,
-                fabExpanded = fabExpanded,
             )
 
 
@@ -463,7 +456,6 @@ internal fun NoteActionsDropdown(
 @Composable
 private fun rememberNestedScrollConnection(
     offset: MutableFloatState,
-    fabExpanded: MutableState<Boolean>,
 ): NestedScrollConnection {
 
 
@@ -482,8 +474,6 @@ private fun rememberNestedScrollConnection(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 //Log.d(TAG, "onPreScroll(available: ${available.y})")
                 if (!shouldBlock) keyboardController?.hide()
-
-                fabExpanded.value = false
 
                 return calculateOffset(available.y)
             }
