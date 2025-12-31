@@ -5,6 +5,21 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01]
+
+### Added
+
+- Task Management: Support for marking notes as tasks with completion checkboxes
+  - YAML frontmatter parsing for `completed?` field
+  - Toggleable checkboxes in grid and list views
+  - Convert notes to tasks and vice versa via long-press menu
+- Frontmatter Hiding: Automatically hide YAML frontmatter in read-only view mode for clean Markdown rendering
+- List View Improvements: Option to show full note titles with line wrapping instead of truncation
+
+### Changed
+
+- Improved note title display logic to respect "show full path" settings consistently
+
 ## [25.12]
 
 ### Changed

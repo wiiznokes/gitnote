@@ -31,3 +31,62 @@ To do that,
 4. `make build_install` (you can add `DEBUG=0` for a release build). This will also copy the build artifacts to the jni folders
 
 Et voilà!
+
+# Release Builds
+
+To build a release APK for distribution:
+
+## 1. Generate Signing Keys
+
+Run the key generation script:
+```bash
+./generate-release-keys.sh
+```
+
+Or use the just command:
+```bash
+just generate-release-keys
+```
+
+This will create a `app/key.jks` keystore file and display the required environment variables.
+
+**Note:** For PKCS12 keystores (default), the key password must be the same as the store password.
+
+## 2. Set Environment Variables
+
+Either run the setup script:
+```bash
+./setup-release-env.sh
+```
+
+Or manually export the variables:
+```bash
+export KEY_ALIAS="gitnote_release_key"
+export KEY_PASSWORD="GitNote2025!"
+export STORE_PASSWORD="GitNoteStore2025!"
+```
+
+## 3. Build Release APK
+
+```bash
+just release-build
+```
+
+Or directly:
+```bash
+./gradlew :app:assembleRelease
+```
+
+## 4. Install to Device
+
+```bash
+just release-install
+```
+
+This will build the release APK and install it directly to your connected device using adb. It automatically checks for connected devices and provides helpful error messages if none are found.
+
+## Security Notes
+
+- Keep your `key.jks` file secure and never commit it to version control
+- The generated passwords are for development/testing - use stronger passwords for production
+- Consider using a password manager or secure environment variables for production builds
