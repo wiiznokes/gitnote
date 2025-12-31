@@ -19,6 +19,11 @@
     <string name="dynamic_colors">Dynamic colors</string>
     <string name="sort_order">Sort Order</string>
     <string name="sort_order_folder">Sort Order folder</string>
+    <string name="sort_type">Sort type</string>
+    <string name="alpha_numeric_sort_type">Alpha-numeric</string>
+    <string name="modification_sort_type">Modification</string>
+    <string name="ascending_sort_order">Ascending</string>
+    <string name="descending_sort_order">Descending</string>
     <string name="defaultPathForNewNote">Default path for new notes</string>
     <string name="minimal_note_width">Minimal width of a note</string>
     <string name="show_long_notes">Show long notes entirely</string>
