@@ -44,6 +44,15 @@ GitNote supports filtering notes by tags defined in the frontmatter, allowing us
 3. Click on "meeting" to show only notes tagged with "meeting".
 4. Click "All notes" to return to showing all notes.
 
+#### Auto-Closing Drawer
+To provide a focused view of filtered results, the navigation drawer automatically closes in certain scenarios:
+
+- **Tag Selection**: When you select a tag (including "All notes"), the drawer closes immediately, allowing you to view the filtered notes without obstruction.
+- **Final Folder Navigation**: When navigating to a folder that has no subfolders (a "leaf" folder), the drawer closes to let you focus on the notes in that folder.
+- **Mode Switching**: Switching between tag and folder modes clears the respective filters (tags when switching to folder mode, folder when switching to tag mode) to prevent confusion.
+
+This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes.
+
 ### User Interface
 - **Grid and List Views**: Switch between grid and list layouts for notes.
 - **Search and Sort**: Search notes by content, sort by date, title, etc.

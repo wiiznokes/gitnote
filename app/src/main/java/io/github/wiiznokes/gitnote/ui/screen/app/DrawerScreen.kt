@@ -61,6 +61,7 @@ import io.github.wiiznokes.gitnote.ui.theme.IconDefaultSize
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
 import io.github.wiiznokes.gitnote.utils.getParentPath
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
 
 
 private const val TAG = "DrawerScreen"
@@ -200,6 +201,12 @@ fun DrawerScreen(
         }
     }
 
+    LaunchedEffect(drawerFolders, currentNoteFolderRelativePath) {
+        if (drawerFolders.isEmpty() && currentNoteFolderRelativePath.isNotEmpty()) {
+            scope.launch { drawerState.close() }
+        }
+    }
+
     Scaffold(
         topBar = {
             RowNFoldersNavigation(
@@ -207,7 +214,15 @@ fun DrawerScreen(
                 openFolder = openFolder,
                 createNoteFolder = createNoteFolder,
                 showTags = showTags.value,
-                onToggleMode = { showTags.value = !showTags.value },
+                onToggleMode = { 
+                    val newShowTags = !showTags.value
+                    showTags.value = newShowTags
+                    if (!newShowTags) { // switching to folder mode
+                        onTagSelected(null)
+                    } else { // switching to tag mode
+                        openFolder("")
+                    }
+                },
             )
         },
         floatingActionButton = {
@@ -255,7 +270,10 @@ fun DrawerScreen(
                         text = stringResource(R.string.all_notes),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onTagSelected(null) }
+                            .clickable { 
+                                onTagSelected(null)
+                                scope.launch { drawerState.close() }
+                            }
                             .padding(LocalSpaces.current.smallPadding),
                         color = if (selectedTag == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
@@ -266,7 +284,10 @@ fun DrawerScreen(
                         text = tag,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onTagSelected(tag) }
+                            .clickable { 
+                                onTagSelected(tag)
+                                scope.launch { drawerState.close() }
+                            }
                             .padding(LocalSpaces.current.smallPadding),
                         color = if (selectedTag == tag) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
