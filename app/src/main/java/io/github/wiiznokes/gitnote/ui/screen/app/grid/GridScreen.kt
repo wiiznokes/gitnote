@@ -294,19 +294,35 @@ private fun GridNotesView(
 
         items(
             count = gridNotes.itemCount,
-            key = { index -> gridNotes[index]!!.note.id }
+            key = { index -> gridNotes[index]?.note?.id ?: index }
         ) { index ->
-            val gridNote = gridNotes[index]!!
-
-            NoteCard(
-                gridNote = gridNote,
-                vm = vm,
-                onEditClick = onEditClick,
-                selectedNotes = selectedNotes,
-                showFullPathOfNotes = showFullPathOfNotes,
-                showFullNoteHeight = showFullNoteHeight.value,
-                modifier = Modifier.padding(3.dp)
-            )
+            val gridNote = gridNotes[index]
+            if (gridNote != null) {
+                NoteCard(
+                    gridNote = gridNote,
+                    vm = vm,
+                    onEditClick = onEditClick,
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes,
+                    showFullNoteHeight = showFullNoteHeight.value,
+                    modifier = Modifier.padding(3.dp)
+                )
+            } else {
+                // Placeholder for loading item
+                Card(
+                    modifier = Modifier.padding(3.dp).height(100.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Loading...")
+                    }
+                }
+            }
         }
 
         item(span = StaggeredGridItemSpan.FullLine) {
