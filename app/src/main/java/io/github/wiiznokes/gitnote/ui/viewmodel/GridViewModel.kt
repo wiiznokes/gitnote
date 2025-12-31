@@ -14,6 +14,7 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
+import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
@@ -46,6 +47,8 @@ class GridViewModel : ViewModel() {
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query
+
+    private val refreshCounter = MutableStateFlow(0)
 
     val syncState = storageManager.syncState
 
@@ -218,7 +221,8 @@ class GridViewModel : ViewModel() {
         currentNoteFolderRelativePath,
         prefs.sortOrder.getFlow(),
         query,
-    ) { currentNoteFolderRelativePath, sortOrder, query ->
+        refreshCounter
+    ) { currentNoteFolderRelativePath, sortOrder, query, _ ->
         Triple(currentNoteFolderRelativePath, sortOrder, query)
     }.flatMapLatest { triple ->
         val (currentNoteFolderRelativePath, sortOrder, query) = triple
@@ -236,7 +240,8 @@ class GridViewModel : ViewModel() {
     }.combine(selectedNotes) { gridNotes, selectedNotes ->
         gridNotes.map { gridNote ->
             gridNote.copy(
-                selected = selectedNotes.contains(gridNote.note)
+                selected = selectedNotes.contains(gridNote.note),
+                completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
             )
         }
     }.stateIn(
@@ -263,6 +268,22 @@ class GridViewModel : ViewModel() {
             res.onFailure {
                 uiHelper.makeToast("$it")
             }
+        }
+    }
+
+    fun toggleCompleted(note: Note) {
+        viewModelScope.launch {
+            val newContent = FrontmatterParser.toggleCompleted(note.content)
+            val newNote = note.copy(
+                content = newContent,
+                lastModifiedTimeMillis = System.currentTimeMillis()
+            )
+            val result = storageManager.updateNote(newNote, note)
+            result.onFailure {
+                uiHelper.makeToast("Failed to update note: $it")
+            }
+            // Trigger refresh
+            refreshCounter.value++
         }
     }
 }

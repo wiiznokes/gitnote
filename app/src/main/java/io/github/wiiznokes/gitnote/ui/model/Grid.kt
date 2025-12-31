@@ -44,4 +44,5 @@ data class GridNote(
     val note: Note,
     val isUnique: Boolean,
     val selected: Boolean = false,
+    val completed: Boolean? = null,
 )

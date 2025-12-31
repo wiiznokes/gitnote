@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +31,7 @@ import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.LazyPagingItems
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.model.EditType
@@ -58,19 +61,18 @@ internal fun NoteListView(
 
         items(
             count = gridNotes.itemCount,
-            key = { index ->
-                val note = gridNotes[index]!!
-                note.note.id
-            }
+            key = { index -> gridNotes[index]?.note?.id ?: index }
         ) { index ->
-            val gridNote = gridNotes[index]!!
-            NoteListRow(
-                gridNote = gridNote,
-                vm = vm,
-                onEditClick = onEditClick,
-                selectedNotes = selectedNotes,
-                showFullPathOfNotes = showFullPathOfNotes,
-            )
+            val gridNote = gridNotes[index]
+            if (gridNote != null) {
+                NoteListRow(
+                    gridNote = gridNote,
+                    vm = vm,
+                    onEditClick = onEditClick,
+                    selectedNotes = selectedNotes,
+                    showFullPathOfNotes = showFullPathOfNotes,
+                )
+            }
         }
 
         item {
@@ -141,6 +143,14 @@ private fun NoteListRow(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+
+                if (gridNote.completed != null) {
+                    Checkbox(
+                        checked = gridNote.completed!!,
+                        onCheckedChange = { vm.toggleCompleted(gridNote.note) },
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
 
                 Column(
                     verticalArrangement = Arrangement.Center
