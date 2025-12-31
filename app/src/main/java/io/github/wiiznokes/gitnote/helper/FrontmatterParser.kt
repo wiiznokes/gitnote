@@ -130,6 +130,14 @@ object FrontmatterParser {
         }
     }
 
+    fun extractBody(content: String): String {
+        val lines = content.lines()
+        if (lines.isEmpty() || !lines[0].trim().startsWith("---")) return content
+        val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+        if (endIndex == -1) return content
+        return if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size).joinToString("\n") else ""
+    }
+
     private fun extractFrontmatter(content: String): String? {
         val lines = content.lines()
         if (lines.size < 3 || !lines[0].trim().startsWith("---")) return null
@@ -138,11 +146,22 @@ object FrontmatterParser {
         return lines.subList(1, endIndex + 1).joinToString("\n")
     }
 
-    fun extractBody(content: String): String {
-        val lines = content.lines()
-        if (lines.size < 3 || !lines[0].trim().startsWith("---")) return content
-        val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
-        if (endIndex == -1) return content
-        return if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size).joinToString("\n") else ""
+    fun parseTags(content: String): List<String> {
+        val frontmatter = extractFrontmatter(content) ?: return emptyList()
+        val lines = frontmatter.lines()
+        val tagsIndex = lines.indexOfFirst { it.trim().startsWith("tags:") }
+        if (tagsIndex == -1) return emptyList()
+
+        val tags = mutableListOf<String>()
+        for (i in tagsIndex + 1 until lines.size) {
+            val line = lines[i].trim()
+            if (line.startsWith("- ")) {
+                tags.add(line.substring(2).trim())
+            } else if (line.isNotEmpty() && !line.startsWith(" ") && !line.startsWith("\t")) {
+                // Next key, stop
+                break
+            }
+        }
+        return tags
     }
 }

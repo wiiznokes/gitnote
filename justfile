@@ -28,6 +28,12 @@ build:
     export JAVA_HOME
     ./gradlew :app:assembleDebug
 
+install:
+    #!/usr/bin/env bash
+    JAVA_HOME=$(grep '^java.home=' .gradle/config.properties | cut -d'=' -f2)
+    export JAVA_HOME
+    ./gradlew :app:assembleDebug :app:installDebug
+
 fix-wrapper:
     #curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.13.0/gradle/wrapper/gradle-wrapper.jar
     git lfs pull

@@ -18,16 +18,20 @@ import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
+import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map as flowMap
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -77,6 +81,16 @@ class GridViewModel : ViewModel() {
 
     val selectedNotes: StateFlow<List<Note>>
         get() = _selectedNotes.asStateFlow()
+
+
+    private val _selectedTag = MutableStateFlow<String?>(null)
+    val selectedTag: StateFlow<String?> = _selectedTag.asStateFlow()
+
+    fun selectTag(tag: String?) {
+        viewModelScope.launch {
+            _selectedTag.emit(tag)
+        }
+    }
 
 
     init {
@@ -217,28 +231,35 @@ class GridViewModel : ViewModel() {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val gridNotes = combine(
-        currentNoteFolderRelativePath,
-        prefs.sortOrder.getFlow(),
-        query,
-        refreshCounter
-    ) { currentNoteFolderRelativePath, sortOrder, query, _ ->
-        Triple(currentNoteFolderRelativePath, sortOrder, query)
-    }.flatMapLatest { triple ->
-        val (currentNoteFolderRelativePath, sortOrder, query) = triple
-
+    val pagingFlow = combine(
+        currentNoteFolderRelativePath as Flow<Any>,
+        prefs.sortOrder.getFlow() as Flow<Any>,
+        query as Flow<Any>,
+        selectedTag as Flow<Any>,
+        refreshCounter as Flow<Any>
+    ) { a, b, c, e, d ->
+        val currentNoteFolderRelativePath = a as String
+        val sortOrder = b as SortOrder
+        val query = c as String
+        val selectedTag = e as String?
+        val refreshCounter = d as Int
         Pager(
             config = PagingConfig(pageSize = 50),
             pagingSourceFactory = {
                 if (query.isEmpty()) {
-                    dao.gridNotes(currentNoteFolderRelativePath, sortOrder)
+                    dao.gridNotes(currentNoteFolderRelativePath, sortOrder, selectedTag)
                 } else {
-                    dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query)
+                    dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, selectedTag)
                 }
             }
         ).flow.cachedIn(viewModelScope)
-    }.combine(selectedNotes) { gridNotes, selectedNotes ->
-        gridNotes.map { gridNote ->
+    }.flatMapLatest { it }
+
+    val gridNotes = combine(
+        pagingFlow,
+        selectedNotes
+    ) { pagingData: PagingData<GridNote>, selectedNotes: List<Note> ->
+        pagingData.map { gridNote ->
             gridNote.copy(
                 selected = selectedNotes.contains(gridNote.note),
                 completed = FrontmatterParser.parseCompletedOrNull(gridNote.note.content)
@@ -246,6 +267,14 @@ class GridViewModel : ViewModel() {
         }
     }.stateIn(
         CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), PagingData.empty()
+    )
+
+    val allTags = dao.allNotes().flowMap { notes: List<Note> ->
+        notes.flatMap { note: Note ->
+            FrontmatterParser.parseTags(note.content)
+        }.distinct().sorted()
+    }.stateIn(
+        CoroutineScope(Dispatchers.IO), SharingStarted.WhileSubscribed(5000), emptyList()
     )
 
     // todo: use pager

@@ -169,5 +169,6 @@
     <string name="private_key_password">Private key password</string>
     <string name="cancel">Cancel</string>
     <string name="go_back">Go back</string>
-
+    <string name="tags">Tags</string>
+    <string name="all_notes">All notes</string>
 </resources>

@@ -110,6 +110,9 @@ fun GridScreen(
                 openFolder = vm::openFolder,
                 deleteFolder = vm::deleteFolder,
                 createNoteFolder = vm::createNoteFolder,
+                allTags = vm.allTags.collectAsState<List<String>>().value,
+                selectedTag = vm.selectedTag.collectAsState<String?>().value,
+                onTagSelected = vm::selectTag,
             )
         }
     }) {
@@ -196,7 +199,7 @@ private fun GridView(
     padding: PaddingValues,
     noteViewType: NoteViewType,
 ) {
-    val gridNotes = vm.gridNotes.collectAsLazyPagingItems()
+    val gridNotes = vm.gridNotes.collectAsLazyPagingItems<GridNote>()
     val query = vm.query.collectAsState()
 
 

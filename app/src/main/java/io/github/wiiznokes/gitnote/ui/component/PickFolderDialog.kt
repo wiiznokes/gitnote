@@ -175,7 +175,9 @@ private fun PickFolderDialogInternal(
         RowNFoldersNavigation(
             currentPath = currentNoteFolderRelativePath,
             openFolder = openFolder,
-            createNoteFolder = createNoteFolder
+            createNoteFolder = createNoteFolder,
+            showTags = false,
+            onToggleMode = {}
         )
 
         val listState = rememberLazyListState()

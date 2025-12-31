@@ -109,12 +109,16 @@ interface RepoDatabaseDao {
     )
     suspend fun isNoteExist(relativePath: String): Boolean
 
+    @Query("SELECT * FROM Notes")
+    fun allNotes(): Flow<List<Note>>
+
     @RawQuery(observedEntities = [Note::class])
     fun gridNotesRaw(query: SupportSQLiteQuery): PagingSource<Int, GridNote>
 
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
+        tag: String? = null,
     ): PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
@@ -129,6 +133,7 @@ interface RepoDatabaseDao {
                 SELECT *, fullName(relativePath) AS fileName
                 FROM Notes
                 WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'
+                ${if (tag != null) "AND content LIKE '%  - ' || :tag || '%'" else ""}
             )
             SELECT *,
                    CASE 
@@ -139,7 +144,8 @@ interface RepoDatabaseDao {
             ORDER BY $sortColumn $order
         """.trimIndent()
 
-        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath))
+        val args = if (tag != null) arrayOf(currentNoteFolderRelativePath, tag) else arrayOf(currentNoteFolderRelativePath)
+        val query = SimpleSQLiteQuery(sql, args)
         return this.gridNotesRaw(query)
     }
 
@@ -147,6 +153,7 @@ interface RepoDatabaseDao {
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
         query: String,
+        tag: String? = null,
     ): PagingSource<Int, GridNote> {
 
         val (sortColumn, order) = when (sortOrder) {
@@ -179,6 +186,7 @@ interface RepoDatabaseDao {
                     Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'
                     AND
                     NotesFts MATCH :query
+                    ${if (tag != null) "AND Notes.content LIKE '%  - ' || :tag || '%'" else ""}
             )
             SELECT *,
                    CASE 
@@ -189,7 +197,8 @@ interface RepoDatabaseDao {
             ORDER BY score DESC, $sortColumn $order
         """.trimIndent()
 
-        val query = SimpleSQLiteQuery(sql, arrayOf(currentNoteFolderRelativePath, ftsEscape(query)))
+        val args = if (tag != null) arrayOf(currentNoteFolderRelativePath, ftsEscape(query), tag) else arrayOf(currentNoteFolderRelativePath, ftsEscape(query))
+        val query = SimpleSQLiteQuery(sql, args)
 
 
         return this.gridNotesRaw(query)

@@ -41,6 +41,11 @@ _Supported Android versions: 11 to 16_
 
 _Supported Architecture: `arm64-v8a`, `x86_64`_
 
+## Documentation
+
+- [Detailed Features](./doc/features.md)
+- [Design Document](./doc/design/markdown_header.md)
+
 # Build
 
 [See](./BUILD.md).

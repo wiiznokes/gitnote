@@ -14,6 +14,36 @@ GitNote is a Git-based note-taking app for Android that integrates seamlessly wi
 - **Frontmatter Metadata**: YAML headers for titles, timestamps, completion status, tags, and authors.
 - **File-Based Storage**: Notes are stored as Markdown files in the repository.
 
+### Tag Filtering
+GitNote supports filtering notes by tags defined in the frontmatter, allowing users to quickly find related notes.
+
+#### How It Works
+- **Tag Parsing**: Tags are extracted from the `tags:` field in YAML frontmatter.
+- **Drawer Navigation**: Switch between folder and tag browsing modes in the navigation drawer.
+- **Tag Selection**: Click on tags in the drawer to filter notes, or select "All notes" to show everything.
+- **Real-time Filtering**: Notes are filtered instantly when a tag is selected, showing only matching notes.
+
+#### Usage Tips
+- Add tags to notes using YAML frontmatter: `tags: - tag1 - tag2`
+- Use the toggle button in the drawer to switch between folder and tag modes.
+- Tag filtering works in both grid and list views.
+- Tags are case-sensitive and must match exactly.
+
+#### Example Workflow
+1. Add tags to a note's frontmatter:
+   ```
+   ---
+   title: Meeting Notes
+   tags:
+     - meeting
+     - planning
+     - work
+   ---
+   ```
+2. Open the navigation drawer and click the tag icon to switch to tag mode.
+3. Click on "meeting" to show only notes tagged with "meeting".
+4. Click "All notes" to return to showing all notes.
+
 ### User Interface
 - **Grid and List Views**: Switch between grid and list layouts for notes.
 - **Search and Sort**: Search notes by content, sort by date, title, etc.
