@@ -483,6 +483,11 @@ internal fun NoteActionsDropdown(
                 if (selectedNotes.isEmpty()) CustomDropDownModel(
                     text = stringResource(R.string.select_multiple_notes),
                     onClick = { vm.selectNote(gridNote.note, true) }) else null,
+                if (gridNote.completed != null) CustomDropDownModel(
+                    text = stringResource(R.string.convert_to_note),
+                    onClick = { vm.convertToNote(gridNote.note) }) else CustomDropDownModel(
+                    text = stringResource(R.string.convert_to_task),
+                    onClick = { vm.convertToTask(gridNote.note) }),
             ),
             clickPosition = clickPosition
         )

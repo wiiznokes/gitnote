@@ -286,4 +286,36 @@ class GridViewModel : ViewModel() {
             refreshCounter.value++
         }
     }
+
+    fun convertToTask(note: Note) {
+        viewModelScope.launch {
+            val newContent = FrontmatterParser.addCompleted(note.content)
+            val newNote = note.copy(
+                content = newContent,
+                lastModifiedTimeMillis = System.currentTimeMillis()
+            )
+            val result = storageManager.updateNote(newNote, note)
+            result.onFailure {
+                uiHelper.makeToast("Failed to convert note: $it")
+            }
+            // Trigger refresh
+            refreshCounter.value++
+        }
+    }
+
+    fun convertToNote(note: Note) {
+        viewModelScope.launch {
+            val newContent = FrontmatterParser.removeCompleted(note.content)
+            val newNote = note.copy(
+                content = newContent,
+                lastModifiedTimeMillis = System.currentTimeMillis()
+            )
+            val result = storageManager.updateNote(newNote, note)
+            result.onFailure {
+                uiHelper.makeToast("Failed to convert note: $it")
+            }
+            // Trigger refresh
+            refreshCounter.value++
+        }
+    }
 }

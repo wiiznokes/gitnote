@@ -61,6 +61,75 @@ object FrontmatterParser {
         return (listOf("---") + newFrontmatter + listOf("---") + bodyLines).joinToString("\n")
     }
 
+    fun removeCompleted(content: String): String {
+        val lines = content.lines()
+        if (lines.isEmpty() || !lines[0].trim().startsWith("---")) return content
+
+        val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+        if (endIndex == -1) return content
+
+        val frontmatterLines = lines.subList(1, endIndex + 1)
+        val bodyLines = if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size) else emptyList()
+
+        val currentTime = updatedFormatter.format(Instant.now())
+
+        val newFrontmatter = frontmatterLines.map { line ->
+            when {
+                completedRegex.containsMatchIn(line.trim()) -> null // remove the line
+                line.trim().startsWith("updated:") -> {
+                    "updated: $currentTime"
+                }
+                else -> line
+            }
+        }.filterNotNull()
+
+        return (listOf("---") + newFrontmatter + listOf("---") + bodyLines).joinToString("\n")
+    }
+
+    fun addCompleted(content: String): String {
+        val lines = content.lines()
+        val currentTime = updatedFormatter.format(Instant.now())
+
+        if (lines.isNotEmpty() && lines[0].trim().startsWith("---")) {
+            // Has frontmatter, add completed? if missing
+            val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+            if (endIndex == -1) return content
+
+            val frontmatterLines = lines.subList(1, endIndex + 1)
+            val bodyLines = if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size) else emptyList()
+
+            var newFrontmatter = frontmatterLines.map { line ->
+                when {
+                    line.trim().startsWith("updated:") -> {
+                        "updated: $currentTime"
+                    }
+                    else -> line
+                }
+            }
+
+            // If no completed? field, add it
+            val hasCompleted = newFrontmatter.any { completedRegex.containsMatchIn(it.trim()) }
+            if (!hasCompleted) {
+                val insertIndex = newFrontmatter.indexOfFirst { it.trim().startsWith("title:") }.takeIf { it >= 0 }?.plus(1) ?: newFrontmatter.size
+                newFrontmatter = newFrontmatter.toMutableList().apply {
+                    add(insertIndex, "completed?: no")
+                }
+            }
+
+            return (listOf("---") + newFrontmatter + listOf("---") + bodyLines).joinToString("\n")
+        } else {
+            // No frontmatter, add it
+            val title = "title: ${lines.firstOrNull()?.take(50) ?: "Untitled"}" // guess title from first line
+            val newFrontmatter = listOf(
+                title,
+                "updated: $currentTime",
+                "created: $currentTime",
+                "completed?: no"
+            )
+            return (listOf("---") + newFrontmatter + listOf("---") + lines).joinToString("\n")
+        }
+    }
+
     private fun extractFrontmatter(content: String): String? {
         val lines = content.lines()
         if (lines.size < 3 || !lines[0].trim().startsWith("---")) return null

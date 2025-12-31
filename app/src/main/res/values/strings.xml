@@ -51,6 +51,8 @@
     <string name="theme">Theme</string>
     <string name="delete_this_note">Delete this note</string>
     <string name="select_multiple_notes">Select multiple notes</string>
+    <string name="convert_to_task">Convert to task</string>
+    <string name="convert_to_note">Convert to note</string>
     <string name="error_invalid_link">Invalid link, can\'t open it</string>
     <string name="error_file_already_exist">File already exist</string>
     <string name="error_create_file">Can\'t create file: %1$s</string>
