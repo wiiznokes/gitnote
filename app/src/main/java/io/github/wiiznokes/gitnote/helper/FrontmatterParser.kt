@@ -137,4 +137,12 @@ object FrontmatterParser {
         if (endIndex == -1) return null
         return lines.subList(1, endIndex + 1).joinToString("\n")
     }
+
+    fun extractBody(content: String): String {
+        val lines = content.lines()
+        if (lines.size < 3 || !lines[0].trim().startsWith("---")) return content
+        val endIndex = lines.drop(1).indexOfFirst { it.trim().startsWith("---") }
+        if (endIndex == -1) return content
+        return if (endIndex + 2 < lines.size) lines.subList(endIndex + 2, lines.size).joinToString("\n") else ""
+    }
 }

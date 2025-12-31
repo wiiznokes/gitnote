@@ -61,3 +61,14 @@ Just a simple note without completion or tags.
 - Timestamps should be in the format `yyyy-MM-dd HH:mm:ssZ`.
 - Extra spaces around `?` and `:` are allowed (e.g., `completed ? : yes`).
 - If no frontmatter is present, the app treats the note as incomplete.
+
+## UI Rendering
+
+### View Mode
+- Frontmatter is automatically hidden when viewing Markdown notes in read-only mode.
+- Only the content after the frontmatter is rendered as Markdown.
+- This provides a clean reading experience without metadata clutter.
+
+### Edit Mode
+- Full content including frontmatter is shown when editing notes.
+- Users can modify frontmatter fields directly in the text editor.

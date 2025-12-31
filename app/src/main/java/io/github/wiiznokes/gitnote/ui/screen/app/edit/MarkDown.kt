@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 
 @Composable
@@ -49,7 +50,7 @@ fun MarkDownContent(
             MarkdownText(
                 modifier = Modifier
                     .padding(15.dp),
-                markdown = textContent.text,
+                markdown = FrontmatterParser.extractBody(textContent.text),
                 isTextSelectable = true,
             )
         }

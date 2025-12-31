@@ -69,3 +69,35 @@ GitNote allows quick conversion between regular notes and task-like notes via th
 2. Select "Convert to Task"; frontmatter is added with `completed?: no`.
 3. The note now displays a checkbox for completion tracking.
 4. To revert, long-press again and select "Convert to Note"; the `completed?` field is removed.
+
+## Frontmatter Hiding in View Mode
+
+GitNote automatically hides YAML frontmatter when viewing Markdown notes in read-only mode to provide a clean, distraction-free reading experience.
+
+### How It Works
+- **Automatic Detection**: The app detects YAML frontmatter enclosed in `---` markers at the beginning of Markdown files.
+- **Content Extraction**: In view mode, only the content after the frontmatter is rendered as Markdown.
+- **Edit Mode Visibility**: Frontmatter remains visible and editable when switching to edit mode.
+- **No Data Loss**: Frontmatter is preserved in the file; it's only hidden during rendering.
+
+### Usage Tips
+- Frontmatter is completely hidden in read-only view, showing only the actual note content.
+- Switch to edit mode to see and modify frontmatter fields.
+- This feature works automatically for all Markdown notes with valid frontmatter.
+- Non-Markdown files and notes without frontmatter display normally.
+
+### Example
+A note file containing:
+```
+---
+title: My Note
+completed?: yes
+---
+
+# Main Content
+This is the actual note content that users see.
+```
+
+Will display in view mode as:
+> # Main Content
+> This is the actual note content that users see.
