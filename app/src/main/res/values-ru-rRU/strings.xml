@@ -23,6 +23,8 @@
     <string name="remember_last_opened_folder">Запоминать последнюю открытую папку</string>
     <string name="show_the_full_notes_path">Всегда показывать полный путь заметки</string>
     <string name="show_the_full_notes_path_subtitle">По умолчанию путь отображается только если более двух заметок имеют одинаковое имя</string>
+    <string name="show_full_title_in_list_view">Показывать полный заголовок в списке</string>
+    <string name="show_full_title_in_list_view_subtitle">Разрешить заголовкам заметок переноситься на несколько строк вместо усечения</string>
     <string name="folder_filters">Фильтры папок</string>
     <string name="folder_filters_subtitle">Задайте регулярные выражения для фильтрации папок репозитория</string>
     <string name="edit">Редактировать</string>

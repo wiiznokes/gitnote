@@ -101,3 +101,31 @@ This is the actual note content that users see.
 Will display in view mode as:
 > # Main Content
 > This is the actual note content that users see.
+
+## Show Full Title in List View
+
+GitNote allows long note titles to wrap to multiple lines in list view instead of being truncated with ellipsis.
+
+### How It Works
+- **Setting Toggle**: Enable "Show full title in list view" in Settings > Appearance
+- **Multi-line Display**: When enabled, note titles wrap naturally to multiple lines
+- **Single-line Display**: When disabled, titles are truncated with "..." after one line
+- **List View Only**: This setting only affects the list view, not the grid view
+
+### Usage Tips
+- Enable this setting if you have long note titles that are being cut off
+- The setting provides better readability for notes with descriptive titles
+- Disable it to keep a more compact list view with consistent row heights
+- Changes take effect immediately without restarting the app
+
+### Example
+With the setting **disabled** (default):
+```
+My Very Long Note Title That Gets... 
+```
+
+With the setting **enabled**:
+```
+My Very Long Note Title That Gets
+Cut Off At The End Of The Line
+```

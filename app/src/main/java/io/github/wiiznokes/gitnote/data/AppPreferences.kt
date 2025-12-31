@@ -146,6 +146,7 @@ class AppPreferences(
     val lastOpenedFolder = stringPreference("lastOpenedFolder", "")
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
+    val showFullTitleInListView = booleanPreference("showFullTitleInListView", false)
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)

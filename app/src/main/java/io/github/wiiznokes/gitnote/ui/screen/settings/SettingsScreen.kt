@@ -144,6 +144,16 @@ fun SettingsScreen(
                 }
             )
 
+            val showFullTitleInListView by vm.prefs.showFullTitleInListView.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.show_full_title_in_list_view),
+                subtitle = stringResource(R.string.show_full_title_in_list_view_subtitle),
+                checked = showFullTitleInListView,
+                onCheckedChange = {
+                    vm.update { vm.prefs.showFullTitleInListView.update(it) }
+                }
+            )
+
 
             val defaultPathForNewNote by vm.prefs.defaultPathForNewNote.getAsState()
             val pickFolderDialogExpanded = rememberSaveable { mutableStateOf(false) }

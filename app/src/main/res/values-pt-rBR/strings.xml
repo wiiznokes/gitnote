@@ -21,6 +21,8 @@
     <string name="remember_last_opened_folder">Lembrar última pasta aberta</string>
     <string name="show_the_full_notes_path">Sempre mostrar o caminho completo das notas</string>
     <string name="show_the_full_notes_path_subtitle">Note que o comportamento padrão irá apenas mostrar o caminho se duas ou mais notas tiverem o mesmo nome</string>
+    <string name="show_full_title_in_list_view">Mostrar título completo na visualização em lista</string>
+    <string name="show_full_title_in_list_view_subtitle">Permitir que os títulos das notas quebrem em várias linhas em vez de serem truncados</string>
     <string name="za_sort_order">Z-A</string>
     <string name="most_recent_sort_order">Mais recente</string>
     <string name="sort_order_folder">Organizar ordem das pastas</string>

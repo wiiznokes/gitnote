@@ -207,6 +207,7 @@ private fun GridView(
     })
 
     val showFullPathOfNotes = vm.prefs.showFullPathOfNotes.getAsState()
+    val showFullTitleInListView = vm.prefs.showFullTitleInListView.getAsState()
 
     Box {
 
@@ -250,6 +251,7 @@ private fun GridView(
                     modifier = commonModifier,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
+                    showFullTitleInListView = showFullTitleInListView.value,
                     onEditClick = onEditClick,
                     vm = vm,
                 )

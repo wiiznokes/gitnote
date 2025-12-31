@@ -23,6 +23,8 @@
     <string name="remember_last_opened_folder">Запам’ятовувати останню відкриту папку</string>
     <string name="show_the_full_notes_path">Завжди показувати повний шлях нотатки</string>
     <string name="show_the_full_notes_path_subtitle">За замовчуванням шлях відображається лише якщо більше двох нотаток мають однакову назву</string>
+    <string name="show_full_title_in_list_view">Показувати повну назву у списку</string>
+    <string name="show_full_title_in_list_view_subtitle">Дозволити назвам нотаток переноситися на кілька рядків замість скорочення</string>
     <string name="folder_filters">Фільтри папок</string>
     <string name="folder_filters_subtitle">Задайте регулярні вирази для фільтрації папок репозиторію</string>
     <string name="edit">Редагувати</string>

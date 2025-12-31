@@ -23,6 +23,8 @@
     <string name="remember_last_opened_folder">Pamatovat si naposledy otevřenou složku</string>
     <string name="show_the_full_notes_path">Vždy zobrazit celou cestu k poznámkám</string>
     <string name="show_the_full_notes_path_subtitle">Upozorňujeme, že ve výchozím nastavení se cesta vypíše pouze v případě, že více než dvě poznámky mají stejný název</string>
+    <string name="show_full_title_in_list_view">Zobrazit celý název v seznamu</string>
+    <string name="show_full_title_in_list_view_subtitle">Povolit názvům poznámek zalamovat se do více řádků místo zkrácení</string>
     <string name="folder_filters">Filtry složek</string>
     <string name="folder_filters_subtitle">Definovat regex pro filtrování složek repozitáře</string>
     <string name="edit">Úpravy</string>

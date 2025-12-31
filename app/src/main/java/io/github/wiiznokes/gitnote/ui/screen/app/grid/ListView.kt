@@ -47,6 +47,7 @@ internal fun NoteListView(
     modifier: Modifier = Modifier,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
+    showFullTitleInListView: Boolean,
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
 ) {
@@ -71,6 +72,7 @@ internal fun NoteListView(
                     onEditClick = onEditClick,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes,
+                    showFullTitleInListView = showFullTitleInListView,
                 )
             }
         }
@@ -88,6 +90,7 @@ private fun NoteListRow(
     onEditClick: (Note, EditType) -> Unit,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
+    showFullTitleInListView: Boolean,
 ) {
     val dropDownExpanded = remember { mutableStateOf(false) }
     val clickPosition = remember { mutableStateOf(Offset.Zero) }
@@ -157,17 +160,28 @@ private fun NoteListRow(
                 }
 
                 Column(
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = title,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    if (showFullTitleInListView) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        Text(
+                            text = title,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     Text(
                         text = formattedDate,
                         maxLines = 1,

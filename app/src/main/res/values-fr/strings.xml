@@ -38,6 +38,8 @@
     <string name="remember_last_opened_folder">Se souvenir du dernier dossier ouvert</string>
     <string name="show_the_full_notes_path">Montrer le chemin entier des notes</string>
     <string name="show_the_full_notes_path_subtitle">Notez que le comportement par défaut montrera le chemin entier si plus de deux notes partage le même nom</string>
+    <string name="show_full_title_in_list_view">Afficher le titre complet en vue liste</string>
+    <string name="show_full_title_in_list_view_subtitle">Permettre aux titres des notes de passer à la ligne au lieu d\'être tronqués</string>
     <string name="folder_filters">Filtre de dossier</string>
     <string name="folder_filters_subtitle">Définir des regex pour filtrer certain dossier du dépôt</string>
     <string name="edit">Édition</string>
