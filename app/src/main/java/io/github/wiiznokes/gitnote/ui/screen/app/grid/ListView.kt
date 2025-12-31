@@ -97,7 +97,11 @@ private fun NoteListRow(
             .format(Date(gridNote.note.lastModifiedTimeMillis))
     }
 
-    val title = gridNote.note.relativePath
+    val title = if (showFullPathOfNotes || !gridNote.isUnique) {
+        gridNote.note.relativePath
+    } else {
+        gridNote.note.nameWithoutExtension()
+    }
 
     val rowBackground =
         if (gridNote.selected) MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
