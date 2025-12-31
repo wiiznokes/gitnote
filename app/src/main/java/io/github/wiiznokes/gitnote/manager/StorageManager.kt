@@ -22,6 +22,8 @@ sealed interface SyncState {
 
     object Error : SyncState
 
+    object Offline : SyncState
+
     object Pull : SyncState
 
     object Push : SyncState
@@ -62,6 +64,8 @@ class StorageManager {
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
 
+        var syncFailed = false
+
         gitManager.commitAll(
             author,
             "commit from gitnote to update the repo of the app"
@@ -72,7 +76,9 @@ class StorageManager {
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
-                uiHelper.makeToast(it.message)
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
+                uiHelper.makeToast("${it.message}${uiHelper.getString(R.string.offline_hint)}")
             }
         }
 
@@ -80,10 +86,15 @@ class StorageManager {
             _syncState.emit(SyncState.Push)
             // todo: maybe async this call
             gitManager.push(cred).onFailure {
-                uiHelper.makeToast(it.message)
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
+                uiHelper.makeToast("${it.message}${uiHelper.getString(R.string.offline_hint)}")
             }
         }
-        _syncState.emit(SyncState.Ok(false))
+
+        if (!syncFailed) {
+            _syncState.emit(SyncState.Ok(false))
+        }
 
         updateDatabaseWithoutLocker()
 
@@ -306,6 +317,8 @@ class StorageManager {
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
 
+        var syncFailed = false
+
         gitManager.commitAll(
             author,
             "commit from gitnote, before doing a change"
@@ -316,7 +329,8 @@ class StorageManager {
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
-                it.printStackTrace()
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
             }
         }
 
@@ -340,13 +354,16 @@ class StorageManager {
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Push)
             gitManager.push(cred).onFailure {
-                it.printStackTrace()
+                syncFailed = true
+                _syncState.emit(SyncState.Offline)
             }
         }
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
-        _syncState.emit(SyncState.Ok(false))
+        if (!syncFailed) {
+            _syncState.emit(SyncState.Ok(false))
+        }
         return success(payload)
     }
 

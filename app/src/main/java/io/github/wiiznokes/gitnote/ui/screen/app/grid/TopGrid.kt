@@ -398,6 +398,14 @@ private fun SyncStateIcon(
             )
         }
 
+        is SyncState.Offline -> {
+            Icon(
+                painter = painterResource(R.drawable.cloud_alert_24px),
+                contentDescription = "Offline",
+                modifier = modifier,
+            )
+        }
+
         is SyncState.Ok -> {
             var visible by remember { mutableStateOf(!state.isConsumed) }
 

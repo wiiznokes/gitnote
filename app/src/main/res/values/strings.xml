@@ -171,4 +171,5 @@
     <string name="go_back">Go back</string>
     <string name="tags">Tags</string>
     <string name="all_notes">All notes</string>
+    <string name="offline_hint">, are we offline?</string>
 </resources>
