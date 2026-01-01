@@ -226,11 +226,12 @@ interface RepoDatabaseDao {
         }
 
         val sql = """
-            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount, fullName(f.relativePath) as folderName
+            SELECT f.relativePath, f.id, COUNT(n.relativePath) as noteCount, fullName(f.relativePath) as folderName,
+                   EXISTS(SELECT 1 FROM NoteFolders AS sub WHERE parentPath(sub.relativePath) = f.relativePath) as hasChildren
             FROM NoteFolders AS f
             LEFT JOIN Notes AS n ON n.relativePath LIKE f.relativePath || '%'
             WHERE parentPath(f.relativePath) = ?
-            GROUP BY f.relativePath, f.id, folderName
+            GROUP BY f.relativePath, f.id, folderName, hasChildren
             ORDER BY $sortColumn $order
         """.trimIndent()
 

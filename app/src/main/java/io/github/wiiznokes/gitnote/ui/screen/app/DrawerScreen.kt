@@ -69,6 +69,7 @@ private const val TAG = "DrawerScreen"
 data class DrawerFolderModel(
     @Embedded val noteFolder: NoteFolder,
     val noteCount: Int,
+    val hasChildren: Boolean,
 )
 
 
@@ -201,8 +202,9 @@ fun DrawerScreen(
         }
     }
 
-    LaunchedEffect(drawerFolders, currentNoteFolderRelativePath) {
-        if (drawerFolders.isEmpty() && currentNoteFolderRelativePath.isNotEmpty()) {
+    // Auto-close drawer when navigating to a leaf folder (no subfolders)
+    LaunchedEffect(drawerFolders) {
+        if (currentNoteFolderRelativePath.isNotEmpty() && drawerFolders.isEmpty()) {
             scope.launch { drawerState.close() }
         }
     }
@@ -333,6 +335,9 @@ fun DrawerScreen(
                                     },
                                     onClick = {
                                         openFolder(drawerNoteFolder.noteFolder.relativePath)
+                                        if (!drawerNoteFolder.hasChildren) {
+                                            scope.launch { drawerState.close() }
+                                        }
                                     }
                                 )
                                 .pointerInteropFilter {
