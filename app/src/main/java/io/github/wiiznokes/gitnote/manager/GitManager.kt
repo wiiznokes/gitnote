@@ -37,6 +37,14 @@ class GitException(
     constructor(type: GitExceptionType) : this(type, null)
 }
 
+@Keep
+data class GitLogEntry(
+    val hash: String,
+    val message: String,
+    val author: String,
+    val date: String
+)
+
 class GitManager {
 
     companion object {
@@ -212,6 +220,19 @@ class GitManager {
         h
     }
 
+    suspend fun getGitLog(limit: Int = 20): Result<List<GitLogEntry>> = safelyAccessLibGit2 {
+        Log.d(TAG, "getGitLog: limit=$limit")
+
+        val log = mutableListOf<GitLogEntry>()
+
+        val res = getGitLogLib(log, limit)
+
+        if (res < 0) {
+            throw Exception("getGitLogLib error $res")
+        }
+        log
+    }
+
 
     fun closeRepoWithoutLock() {
         if (isRepoInitialized) closeRepoLib()
@@ -261,5 +282,7 @@ private external fun closeRepoLib()
 private external fun isChangeLib(): Int
 
 private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
+
+private external fun getGitLogLib(log: MutableList<GitLogEntry>, limit: Int): Int
 
 external fun generateSshKeysLib(): Pair<String, String>

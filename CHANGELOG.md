@@ -39,6 +39,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Create regular notes or tasks with completion tracking
   - Quick search access
   - Context-aware folder inheritance for new items
+- Git Log Viewer: Access git commit history directly in the app
+  - View commit messages, authors, dates, and hashes
+  - Loading indicator during git log retrieval
+  - Formatted timestamps for better readability
+  - Available in the main menu
 
 ### Changed
 

@@ -22,6 +22,11 @@ sort-supported-extension:
         echo sorted $f
     done
 
+rust-build:
+    #!/usr/bin/env bash
+    cd app/src/main/rust
+    make DEBUG=0 build_install
+
 build:
     #!/usr/bin/env bash
     JAVA_HOME=$(grep '^java.home=' .gradle/config.properties | cut -d'=' -f2)

@@ -412,6 +412,10 @@ class StorageManager {
         return success(payload)
     }
 
+    suspend fun getGitLog(limit: Int = 20): Result<List<GitLogEntry>> {
+        return gitManager.getGitLog(limit)
+    }
+
     suspend fun consumeOkSyncState() {
         _syncState.emit(SyncState.Ok(true))
     }

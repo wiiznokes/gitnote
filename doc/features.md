@@ -8,6 +8,7 @@ GitNote is a Git-based note-taking app for Android that integrates seamlessly wi
 - **Repository Management**: Clone, pull, and push notes to Git repositories.
 - **Version Control**: Automatic commits on note changes, with conflict resolution.
 - **SSH Support**: Secure authentication using SSH keys.
+- **Git Log Viewer**: Access commit history directly in the app with formatted timestamps, author information, and commit messages.
 
 ### Note Management
 - **Markdown Support**: Full Markdown rendering with syntax highlighting.
@@ -97,6 +98,22 @@ GitNote allows users to control whether notes from subfolders are included when 
 - **Minimal Note Width**: Adjustable minimum width for notes in grid view (100dp, 150dp, 200dp, 250dp).
 - **Offline Indicator**: Persistent icon showing when the app is offline and cannot sync.
 - **Tag Display Mode**: Control whether tags are shown in grid view, list view, both, or neither.
+
+### Git Log Viewer
+GitNote provides direct access to the git commit history of your notes repository, allowing you to track changes and see the evolution of your notes over time.
+
+#### How It Works
+- **Menu Access**: Available in the main menu (three-dot menu) in the grid view
+- **Commit Information**: Displays commit message, author, date, and abbreviated hash for each commit.
+- **Loading Indicator**: Shows a progress indicator while retrieving git log data.
+- **Formatted Timestamps**: Dates are displayed in readable "YYYY-MM-DD HH:MM:SS" format.
+- **Scrollable List**: All commits are shown in a scrollable list within a dialog.
+
+#### Usage Tips
+- Access the git log to understand what changes were made and when.
+- Useful for tracking note modifications, additions, and deletions over time.
+- The loading indicator appears on first access due to repository initialization.
+- Subsequent accesses are faster as the repository stays cached in memory.
 
 ## Completion Checkbox Feature
 

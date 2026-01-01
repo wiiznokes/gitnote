@@ -6,6 +6,8 @@ use std::{
     sync::{LazyLock, Mutex, OnceLock},
 };
 
+use chrono::DateTime;
+
 use git2::{
     CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
@@ -402,4 +404,45 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
     })?;
 
     Ok(file_timestamps)
+}
+
+#[derive(Debug)]
+pub struct GitLogEntry {
+    pub hash: String,
+    pub message: String,
+    pub author: String,
+    pub date: String,
+}
+
+pub fn get_git_log(limit: usize) -> Result<Vec<GitLogEntry>, Error> {
+    let repo = REPO.lock().expect("repo lock");
+    let repo = repo.as_ref().expect("repo");
+
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+
+    let mut entries = Vec::new();
+
+    for oid in revwalk.take(limit) {
+        let oid = oid?;
+        let commit = repo.find_commit(oid)?;
+
+        let hash = oid.to_string();
+        let message = commit.message().unwrap_or("").to_string();
+        let author = commit.author().name().unwrap_or("").to_string();
+
+        // Format date as readable string
+        let time = commit.time();
+        let datetime = DateTime::from_timestamp(time.seconds(), 0).unwrap_or(DateTime::UNIX_EPOCH);
+        let date = datetime.format("%Y-%m-%d %H:%M:%S").to_string();
+
+        entries.push(GitLogEntry {
+            hash,
+            message,
+            author,
+            date,
+        });
+    }
+
+    Ok(entries)
 }

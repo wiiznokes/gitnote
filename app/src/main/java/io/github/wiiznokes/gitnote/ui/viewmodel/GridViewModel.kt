@@ -16,6 +16,7 @@ import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.helper.NameValidation
+import io.github.wiiznokes.gitnote.manager.GitLogEntry
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
@@ -81,6 +82,15 @@ class GridViewModel : ViewModel() {
 
     val selectedNotes: StateFlow<List<Note>>
         get() = _selectedNotes.asStateFlow()
+
+    private val _showGitLogDialog = MutableStateFlow(false)
+    val showGitLogDialog: StateFlow<Boolean> = _showGitLogDialog.asStateFlow()
+
+    private val _gitLogEntries = MutableStateFlow<List<GitLogEntry>>(emptyList())
+    val gitLogEntries: StateFlow<List<GitLogEntry>> = _gitLogEntries.asStateFlow()
+
+    private val _isGitLogLoading = MutableStateFlow(false)
+    val isGitLogLoading: StateFlow<Boolean> = _isGitLogLoading.asStateFlow()
 
 
     private val _selectedTag = MutableStateFlow<String?>(null)
@@ -383,5 +393,24 @@ class GridViewModel : ViewModel() {
             // Trigger refresh
             refreshCounter.value++
         }
+    }
+
+    fun showGitLog() {
+        viewModelScope.launch {
+            _isGitLogLoading.value = true
+            storageManager.getGitLog().onSuccess { entries ->
+                _gitLogEntries.value = entries
+                _showGitLogDialog.value = true
+            }.onFailure {
+                uiHelper.makeToast("Failed to load git log: $it")
+            }.also {
+                _isGitLogLoading.value = false
+            }
+        }
+    }
+
+    fun hideGitLogDialog() {
+        _showGitLogDialog.value = false
+        _gitLogEntries.value = emptyList()
     }
 }

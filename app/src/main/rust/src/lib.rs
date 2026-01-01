@@ -506,3 +506,63 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_isE
 
     mime_types::is_extension_supported(extension.as_str()).into()
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getGitLogLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    j_list: JObject<'local>,
+    limit: jint,
+) -> jint {
+    let log_entries = unwrap_or_log!(libgit2::get_git_log(limit as usize), "get_git_log");
+
+    if let Err(e) = get_git_log_jni(&mut env, &j_list, log_entries) {
+        error!("get_git_log_jni: {e}");
+        return -1;
+    }
+
+    OK
+}
+
+fn get_git_log_jni<'local>(
+    env: &mut JNIEnv<'local>,
+    j_list: &JObject<'local>,
+    entries: Vec<libgit2::GitLogEntry>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let list_class = env.get_object_class(j_list)?;
+    let add_method = env.get_method_id(&list_class, "add", "(Ljava/lang/Object;)Z")?;
+
+    let entry_class = env.find_class("io/github/wiiznokes/gitnote/manager/GitLogEntry")?;
+    let entry_ctor = env.get_method_id(&entry_class, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V")?;
+
+    for entry in entries {
+        let j_hash = env.new_string(&entry.hash)?;
+        let j_message = env.new_string(&entry.message)?;
+        let j_author = env.new_string(&entry.author)?;
+        let j_date = env.new_string(&entry.date)?;
+
+        let j_entry = unsafe {
+            env.new_object_unchecked(
+                &entry_class,
+                entry_ctor,
+                &[
+                    JValue::Object(&JObject::from(j_hash)).as_jni(),
+                    JValue::Object(&JObject::from(j_message)).as_jni(),
+                    JValue::Object(&JObject::from(j_author)).as_jni(),
+                    JValue::Object(&JObject::from(j_date)).as_jni(),
+                ],
+            )?
+        };
+
+        unsafe {
+            env.call_method_unchecked(
+                j_list,
+                add_method,
+                jni::signature::ReturnType::Primitive(jni::signature::Primitive::Boolean),
+                &[JValue::Object(&j_entry).as_jni()],
+            )?;
+        }
+    }
+
+    Ok(())
+}

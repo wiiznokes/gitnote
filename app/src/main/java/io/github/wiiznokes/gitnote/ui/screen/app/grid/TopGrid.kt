@@ -84,6 +84,7 @@ fun TopBar(
     selectedNotesNumber: Int,
     drawerState: DrawerState,
     onSettingsClick: () -> Unit,
+    onShowGitLog: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
 ) {
@@ -99,6 +100,7 @@ fun TopBar(
                 drawerState = drawerState,
                 vm = vm,
                 onSettingsClick = onSettingsClick,
+                onShowGitLog = onShowGitLog,
                 searchFocusRequester = searchFocusRequester,
                 onReloadDatabase = onReloadDatabase,
             )
@@ -120,6 +122,7 @@ private fun SearchBar(
     drawerState: DrawerState,
     vm: GridViewModel,
     onSettingsClick: () -> Unit,
+    onShowGitLog: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
 ) {
@@ -247,6 +250,10 @@ private fun SearchBar(
                                 CustomDropDownModel(
                                     text = stringResource(R.string.settings),
                                     onClick = onSettingsClick
+                                ),
+                                CustomDropDownModel(
+                                    text = stringResource(R.string.show_git_log),
+                                    onClick = onShowGitLog
                                 ),
                                 CustomDropDownModel(
                                     text = if (readOnlyMode) stringResource(
