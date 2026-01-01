@@ -73,6 +73,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
+import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.model.EditType
@@ -449,7 +450,7 @@ private fun NoteCard(
 //                                    onLinkClicked = { }
 //                                )
                     Text(
-                        text = gridNote.note.content,
+                        text = FrontmatterParser.extractBody(gridNote.note.content),
                         modifier = Modifier,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
