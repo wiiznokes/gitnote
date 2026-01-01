@@ -53,6 +53,42 @@ To provide a focused view of filtered results, the navigation drawer automatical
 
 This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes. Note that when moving notes, the drawer remains open during folder navigation to allow selecting the destination folder.
 
+### Folder Display Mode
+
+GitNote allows users to control whether notes from subfolders are included when browsing a folder, providing flexible folder navigation options.
+
+#### How It Works
+- **Current Folder Only**: Shows only notes directly in the selected folder, excluding notes from subfolders.
+- **Include Subfolders**: Shows notes from the selected folder and all its subfolders (default behavior).
+- **Setting Location**: Configure this option in Settings > Appearance > Folder display mode.
+- **Real-time Updates**: Changes take effect immediately when switching folders or updating the setting.
+
+#### Usage Tips
+- Use "Current folder only" for focused work in specific folders without subfolder distractions.
+- Use "Include subfolders" (default) to see all related notes in a folder hierarchy.
+- The setting applies to both grid and list views.
+- Search functionality respects the current folder display mode setting.
+
+#### Example Workflow
+1. Navigate to a folder containing both direct notes and subfolders with notes.
+2. Open Settings > Appearance and select "Folder display mode".
+3. Choose "Current folder only" to see only notes directly in the current folder.
+4. Switch back to "Include subfolders" to see all notes in the folder hierarchy.
+
+#### Folder Structure Example
+```
+📁 Project/
+├── 📄 project-overview.md
+├── 📁 planning/
+│   ├── 📄 timeline.md
+│   └── 📄 budget.md
+└── 📁 implementation/
+    └── 📄 code-structure.md
+```
+
+- **Current folder only** in "Project/": Shows only `project-overview.md`
+- **Include subfolders** in "Project/": Shows all 4 notes from the entire hierarchy
+
 ### User Interface
 - **Grid and List Views**: Switch between grid and list layouts for notes.
 - **Search and Sort**: Search notes by content, sort by date, title, etc.

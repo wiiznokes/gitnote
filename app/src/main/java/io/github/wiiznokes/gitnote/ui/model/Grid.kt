@@ -57,6 +57,19 @@ enum class TagDisplayMode {
     }
 }
 
+enum class FolderDisplayMode {
+    CurrentFolderOnly,
+    IncludeSubfolders;
+
+    override fun toString(): String {
+        val res = when (this) {
+            CurrentFolderOnly -> R.string.folder_display_current_only
+            IncludeSubfolders -> R.string.folder_display_include_subfolders
+        }
+        return MyApp.appModule.uiHelper.getString(res)
+    }
+}
+
 data class GridNote(
     @Embedded
     val note: Note,

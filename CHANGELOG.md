@@ -19,6 +19,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Settings option with 4 modes: None, List Only, Grid Only, Both
   - YAML frontmatter parsing for `tags:` field with list support
   - Tag chips with Material 3 styling in note cards
+- Folder Display Mode: Control whether subfolder notes are included when browsing folders
+  - Settings option with 2 modes: Current Folder Only, Include Subfolders
+  - Real-time folder filtering in both grid and list views
+  - Default behavior maintains existing subfolder inclusion
 - Tag Filtering: Browse and filter notes by tags in the navigation drawer
   - Automatic tag extraction from all notes' frontmatter
   - Tag-based navigation with drawer auto-close for focused viewing

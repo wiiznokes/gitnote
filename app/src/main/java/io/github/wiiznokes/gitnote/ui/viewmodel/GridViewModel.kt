@@ -18,6 +18,7 @@ import io.github.wiiznokes.gitnote.helper.FrontmatterParser
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.FolderDisplayMode
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
@@ -267,23 +268,25 @@ class GridViewModel : ViewModel() {
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingFlow = combine(
-        currentNoteFolderRelativePath,
-        prefs.sortOrder.getFlow(),
-        query,
-        selectedTag,
-        refreshCounter
-    ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshCounter ->
-        Pager(
-            config = PagingConfig(pageSize = 50),
-            pagingSourceFactory = {
-                if (query.isEmpty()) {
-                    dao.gridNotes(currentNoteFolderRelativePath, sortOrder, selectedTag)
-                } else {
-                    dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, selectedTag)
+    val pagingFlow = prefs.folderDisplayMode.getFlow().flatMapLatest { folderDisplayMode ->
+        combine(
+            currentNoteFolderRelativePath,
+            prefs.sortOrder.getFlow(),
+            query,
+            selectedTag,
+            refreshCounter
+        ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshCounter ->
+            Pager(
+                config = PagingConfig(pageSize = 50),
+                pagingSourceFactory = {
+                    if (query.isEmpty()) {
+                        dao.gridNotes(currentNoteFolderRelativePath, sortOrder, folderDisplayMode, selectedTag)
+                    } else {
+                        dao.gridNotesWithQuery(currentNoteFolderRelativePath, sortOrder, query, folderDisplayMode, selectedTag)
+                    }
                 }
-            }
-        ).flow.cachedIn(viewModelScope)
+            ).flow.cachedIn(viewModelScope)
+        }
     }.flatMapLatest { it }
 
     val gridNotes = combine(
