@@ -15,8 +15,8 @@ KEY_ALIAS="gitnote_release_key"
 ENV_FILE="release-keys.env"
 
 # Generate random passwords
-KEY_PASSWORD=$(openssl rand -base64 32)
 STORE_PASSWORD=$(openssl rand -base64 32)
+KEY_PASSWORD="$STORE_PASSWORD"
 
 echo "Generated secure random passwords for keystore..."
 

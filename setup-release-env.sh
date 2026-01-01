@@ -18,6 +18,11 @@ fi
 # Load the environment variables
 source "$ENV_FILE"
 
+# Export the variables so they're available to subprocesses
+export KEY_ALIAS
+export KEY_PASSWORD  
+export STORE_PASSWORD
+
 echo "Environment variables loaded from $ENV_FILE:"
 echo "KEY_ALIAS=$KEY_ALIAS"
 echo "KEY_PASSWORD=[HIDDEN]"
