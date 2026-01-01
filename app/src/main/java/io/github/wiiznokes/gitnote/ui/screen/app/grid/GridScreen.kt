@@ -3,8 +3,9 @@ package io.github.wiiznokes.gitnote.ui.screen.app.grid
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,10 +30,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -80,6 +83,7 @@ import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
+import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerScreen
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 
@@ -99,6 +103,8 @@ fun GridScreen(
 ) {
 
     val vm: GridViewModel = viewModel()
+
+    val tagDisplayMode by vm.prefs.tagDisplayMode.getAsState()
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -186,6 +192,7 @@ fun GridScreen(
                 nestedScrollConnection = nestedScrollConnection,
                 padding = padding,
                 noteViewType = noteViewType,
+                tagDisplayMode = tagDisplayMode,
             )
 
             TopBar(
@@ -219,6 +226,7 @@ private fun GridView(
     selectedNotes: List<Note>,
     padding: PaddingValues,
     noteViewType: NoteViewType,
+    tagDisplayMode: TagDisplayMode,
 ) {
     val gridNotes = vm.gridNotes.collectAsLazyPagingItems<GridNote>()
     val query = vm.query.collectAsState()
@@ -243,6 +251,8 @@ private fun GridView(
             .pullRefresh(pullRefreshState)
             .nestedScroll(nestedScrollConnection)
 
+        val currentTagDisplayMode = tagDisplayMode
+
         when (noteViewType) {
             NoteViewType.Grid -> {
                 val gridState = rememberLazyStaggeredGridState()
@@ -257,6 +267,8 @@ private fun GridView(
                     modifier = commonModifier,
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
+                    tagDisplayMode = currentTagDisplayMode,
+                    noteViewType = noteViewType,
                     onEditClick = onEditClick,
                     vm = vm,
                 )
@@ -276,6 +288,8 @@ private fun GridView(
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes.value,
                     showFullTitleInListView = showFullTitleInListView.value,
+                    tagDisplayMode = currentTagDisplayMode,
+                    noteViewType = noteViewType,
                     onEditClick = onEditClick,
                     vm = vm,
                 )
@@ -305,6 +319,8 @@ private fun GridNotesView(
     modifier: Modifier = Modifier,
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
+    tagDisplayMode: TagDisplayMode,
+    noteViewType: NoteViewType,
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
 ) {
@@ -336,6 +352,8 @@ private fun GridNotesView(
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes,
                     showFullNoteHeight = showFullNoteHeight.value,
+                    tagDisplayMode = tagDisplayMode,
+                    noteViewType = noteViewType,
                     modifier = Modifier.padding(3.dp)
                 )
             } else {
@@ -370,6 +388,8 @@ private fun NoteCard(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullNoteHeight: Boolean,
+    tagDisplayMode: TagDisplayMode,
+    noteViewType: NoteViewType,
     modifier: Modifier = Modifier,
 ) {
     val dropDownExpanded = remember {
@@ -460,6 +480,39 @@ private fun NoteCard(
                         ),
                         color = MaterialTheme.colorScheme.tertiary
                     )
+                }
+
+                // Display tags if enabled for current view
+                val shouldShowTags = when (tagDisplayMode) {
+                    TagDisplayMode.None -> false
+                    TagDisplayMode.ListOnly -> noteViewType == NoteViewType.List
+                    TagDisplayMode.GridOnly -> noteViewType == NoteViewType.Grid
+                    TagDisplayMode.Both -> true
+                }
+
+                if (shouldShowTags) {
+                    val tags = FrontmatterParser.parseTags(gridNote.note.content)
+                    if (tags.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.padding(bottom = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            tags.forEach { tag ->
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    modifier = Modifier.padding(vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = tag,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (gridNote.note.fileExtension() is FileExtension.Md) {

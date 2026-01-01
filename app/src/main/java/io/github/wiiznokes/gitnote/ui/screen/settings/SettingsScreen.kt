@@ -38,6 +38,7 @@ import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
+import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -151,6 +152,16 @@ fun SettingsScreen(
                 checked = showFullTitleInListView,
                 onCheckedChange = {
                     vm.update { vm.prefs.showFullTitleInListView.update(it) }
+                }
+            )
+
+            val tagDisplayMode by vm.prefs.tagDisplayMode.getAsState()
+            MultipleChoiceSettings(
+                title = stringResource(R.string.tag_display_mode),
+                subtitle = tagDisplayMode.toString(),
+                options = TagDisplayMode.entries,
+                onOptionClick = {
+                    vm.update { vm.prefs.tagDisplayMode.update(it) }
                 }
             )
 

@@ -2,6 +2,8 @@ package io.github.wiiznokes.gitnote.ui.screen.app.grid
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,9 @@ import androidx.paging.compose.LazyPagingItems
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.GridNote
+import io.github.wiiznokes.gitnote.helper.FrontmatterParser
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
+import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
 import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import java.text.DateFormat
 import java.util.Date
@@ -48,6 +53,8 @@ internal fun NoteListView(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullTitleInListView: Boolean,
+    tagDisplayMode: TagDisplayMode,
+    noteViewType: NoteViewType,
     onEditClick: (Note, EditType) -> Unit,
     vm: GridViewModel,
 ) {
@@ -73,6 +80,8 @@ internal fun NoteListView(
                     selectedNotes = selectedNotes,
                     showFullPathOfNotes = showFullPathOfNotes,
                     showFullTitleInListView = showFullTitleInListView,
+                    tagDisplayMode = tagDisplayMode,
+                    noteViewType = noteViewType,
                 )
             }
         }
@@ -91,6 +100,8 @@ private fun NoteListRow(
     selectedNotes: List<Note>,
     showFullPathOfNotes: Boolean,
     showFullTitleInListView: Boolean,
+    tagDisplayMode: TagDisplayMode,
+    noteViewType: NoteViewType,
 ) {
     val dropDownExpanded = remember { mutableStateOf(false) }
     val clickPosition = remember { mutableStateOf(Offset.Zero) }
@@ -185,6 +196,40 @@ private fun NoteListRow(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
+
+                    // Display tags if enabled for current view
+                    val shouldShowTags = when (tagDisplayMode) {
+                        TagDisplayMode.None -> false
+                        TagDisplayMode.ListOnly -> noteViewType == NoteViewType.List
+                        TagDisplayMode.GridOnly -> noteViewType == NoteViewType.Grid
+                        TagDisplayMode.Both -> true
+                    }
+
+                    if (shouldShowTags) {
+                        val tags = FrontmatterParser.parseTags(gridNote.note.content)
+                        if (tags.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                tags.forEach { tag ->
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.secondaryContainer,
+                                        modifier = Modifier.padding(vertical = 1.dp)
+                                    ) {
+                                        Text(
+                                            text = tag,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Text(
                         text = formattedDate,
                         maxLines = 1,

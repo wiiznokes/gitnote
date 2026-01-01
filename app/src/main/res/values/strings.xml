@@ -32,6 +32,11 @@
     <string name="show_the_full_notes_path_subtitle">Note that the default behavior will only print the path if more than two notes share the same name</string>
     <string name="show_full_title_in_list_view">Show full title in list view</string>
     <string name="show_full_title_in_list_view_subtitle">Allow note titles to wrap to multiple lines instead of being truncated</string>
+    <string name="tag_display_mode">Tag display mode</string>
+    <string name="tag_display_none">None</string>
+    <string name="tag_display_list_only">List view only</string>
+    <string name="tag_display_grid_only">Grid view only</string>
+    <string name="tag_display_both">Both views</string>
     <string name="folder_filters">Folder filters</string>
     <string name="folder_filters_subtitle">Define regex to filter folders of the repository</string>
     <string name="edit">Edit</string>

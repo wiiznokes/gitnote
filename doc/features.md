@@ -60,6 +60,7 @@ This behavior ensures a smooth user experience by reducing the need for manual d
 - **Note Actions Menu**: Long-press notes to access options like delete, multi-select, convert between notes and tasks, and move notes.
 - **Minimal Note Width**: Adjustable minimum width for notes in grid view (100dp, 150dp, 200dp, 250dp).
 - **Offline Indicator**: Persistent icon showing when the app is offline and cannot sync.
+- **Tag Display Mode**: Control whether tags are shown in grid view, list view, both, or neither.
 
 ## Completion Checkbox Feature
 

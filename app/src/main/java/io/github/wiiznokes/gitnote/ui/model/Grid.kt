@@ -40,6 +40,23 @@ enum class NoteViewType {
     List,
 }
 
+enum class TagDisplayMode {
+    None,
+    ListOnly,
+    GridOnly,
+    Both;
+
+    override fun toString(): String {
+        val res = when (this) {
+            None -> R.string.tag_display_none
+            ListOnly -> R.string.tag_display_list_only
+            GridOnly -> R.string.tag_display_grid_only
+            Both -> R.string.tag_display_both
+        }
+        return MyApp.appModule.uiHelper.getString(res)
+    }
+}
+
 data class GridNote(
     @Embedded
     val note: Note,

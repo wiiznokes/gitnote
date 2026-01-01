@@ -12,6 +12,7 @@ import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
+import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
 import io.github.wiiznokes.gitnote.ui.theme.Theme
 import kotlinx.coroutines.runBlocking
 import kotlin.io.path.pathString
@@ -147,6 +148,7 @@ class AppPreferences(
 
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
     val showFullTitleInListView = booleanPreference("showFullTitleInListView", false)
+    val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.Both)
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)
