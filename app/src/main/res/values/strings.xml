@@ -58,7 +58,11 @@
     <string name="version">Version</string>
     <string name="show_logs">Show logs</string>
     <string name="reload_database">Reload the database</string>
+    <string name="reloading_database">Reloading database…</string>
+    <string name="debug_features_enabled">Enable debug features</string>
+    <string name="debug_features_description">Show developer tools like database reload in menus</string>
     <string name="success_reload">Successfully reloaded the database</string>
+    <string name="failed_reload">Failed to reload the database</string>
     <string name="report_an_issue">Report an issue</string>
     <string name="source_code">Source code</string>
     <string name="libraries">Libraries</string>

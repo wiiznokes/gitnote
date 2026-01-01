@@ -187,6 +187,8 @@ class AppPreferences(
 
     val isReadOnlyModeActive = booleanPreference("isReadOnlyModeActive", false)
 
+    val debugFeaturesEnabled = booleanPreference("debugFeaturesEnabled", false)
+
 }
 
 

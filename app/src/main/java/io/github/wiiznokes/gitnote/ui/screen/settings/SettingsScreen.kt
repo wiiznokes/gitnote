@@ -341,6 +341,15 @@ fun SettingsScreen(
                 }
             )
 
+            val debugFeaturesEnabled by vm.prefs.debugFeaturesEnabled.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.debug_features_enabled),
+                subtitle = stringResource(R.string.debug_features_description),
+                checked = debugFeaturesEnabled
+            ) {
+                vm.update { vm.prefs.debugFeaturesEnabled.update(it) }
+            }
+
             DefaultSettingsRow(
                 title = stringResource(R.string.reload_database),
                 startIcon = Icons.Default.Refresh,

@@ -44,6 +44,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Loading indicator during git log retrieval
   - Formatted timestamps for better readability
   - Available in the main menu
+- Debug Features Toggle: Option to enable debug features in release builds
+  - Settings option in About section to enable debug tools
+  - Makes reload database button available when needed for troubleshooting
 
 ### Changed
 

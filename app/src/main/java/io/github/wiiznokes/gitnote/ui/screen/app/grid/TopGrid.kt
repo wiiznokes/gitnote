@@ -242,6 +242,7 @@ private fun SearchBar(
                         }
 
                         val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
+                        val debugFeaturesEnabled = vm.prefs.debugFeaturesEnabled.getAsState().value
 
                         @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
                         CustomDropDown(
@@ -265,7 +266,7 @@ private fun SearchBar(
                                         }
                                     }
                                 ),
-                                if (BuildConfig.BUILD_TYPE != "release") {
+                                if (BuildConfig.BUILD_TYPE != "release" || debugFeaturesEnabled) {
                                     CustomDropDownModel(
                                         text = stringResource(R.string.reload_database),
                                         onClick = onReloadDatabase
