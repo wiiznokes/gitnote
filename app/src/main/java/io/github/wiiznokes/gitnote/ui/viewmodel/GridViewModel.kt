@@ -229,6 +229,12 @@ class GridViewModel : ViewModel() {
         )
     }
 
+    fun defaultNewTask(): Note {
+        val note = defaultNewNote()
+        val content = FrontmatterParser.addCompleted(note.content)
+        return note.copy(content = content)
+    }
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagingFlow = combine(

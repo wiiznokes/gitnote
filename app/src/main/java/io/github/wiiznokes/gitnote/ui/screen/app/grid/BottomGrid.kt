@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -64,10 +66,16 @@ fun FloatingActionButtons(
             .offset { IntOffset(x = 0, y = -offset.roundToInt()) },
         items = listOf(
             FABItem(
-                icon = Icons.Default.Add,
-                label = "create",
-                type = FABItemType.CREATE,
+                icon = Icons.Default.CheckBox,
+                label = "create task",
+                type = FABItemType.CREATE_TASK,
                 containerColor = MaterialTheme.colorScheme.tertiary
+            ),
+            FABItem(
+                icon = Icons.Rounded.Description,
+                label = "create note",
+                type = FABItemType.CREATE_NOTE,
+                containerColor = MaterialTheme.colorScheme.secondary
             ),
             FABItem(
                 icon = Icons.Default.Search,
@@ -78,9 +86,16 @@ fun FloatingActionButtons(
         onItemClicked = {
 
             when (it.type) {
-                FABItemType.CREATE -> {
+                FABItemType.CREATE_NOTE -> {
                     onEditClick(
                         vm.defaultNewNote(),
+                        EditType.Create
+                    )
+                }
+
+                FABItemType.CREATE_TASK -> {
+                    onEditClick(
+                        vm.defaultNewTask(),
                         EditType.Create
                     )
                 }
@@ -167,7 +182,8 @@ private data class FABItem(
 )
 
 private enum class FABItemType {
-    CREATE,
+    CREATE_NOTE,
+    CREATE_TASK,
     SEARCH
 }
 
