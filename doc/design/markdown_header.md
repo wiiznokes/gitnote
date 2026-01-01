@@ -2,6 +2,8 @@
 
 GitNote supports YAML frontmatter in Markdown files to store metadata. The frontmatter is enclosed between `---` markers at the beginning of the file.
 
+> **Note**: This frontmatter format is compatible with [Joplin's frontmatter specification](https://joplinapp.org/help/dev/spec/interop_with_frontmatter/), allowing seamless interoperability between GitNote and Joplin applications.
+
 ## Supported Fields
 
 - `title`: The title of the note (optional, can be inferred from filename).
