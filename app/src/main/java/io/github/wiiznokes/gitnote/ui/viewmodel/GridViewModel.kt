@@ -268,17 +268,12 @@ class GridViewModel : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagingFlow = combine(
-        currentNoteFolderRelativePath as Flow<Any>,
-        prefs.sortOrder.getFlow() as Flow<Any>,
-        query as Flow<Any>,
-        selectedTag as Flow<Any>,
-        refreshCounter as Flow<Any>
-    ) { a, b, c, e, d ->
-        val currentNoteFolderRelativePath = a as String
-        val sortOrder = b as SortOrder
-        val query = c as String
-        val selectedTag = e as String?
-        val refreshCounter = d as Int
+        currentNoteFolderRelativePath,
+        prefs.sortOrder.getFlow(),
+        query,
+        selectedTag,
+        refreshCounter
+    ) { currentNoteFolderRelativePath, sortOrder, query, selectedTag, refreshCounter ->
         Pager(
             config = PagingConfig(pageSize = 50),
             pagingSourceFactory = {
