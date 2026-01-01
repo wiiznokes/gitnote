@@ -145,18 +145,21 @@ private fun NoteListRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Description,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-
-                if (gridNote.completed != null) {
-                    Checkbox(
-                        checked = gridNote.completed!!,
-                        onCheckedChange = { vm.toggleCompleted(gridNote.note) },
-                        modifier = Modifier.size(16.dp)
-                    )
+                Box(modifier = Modifier.size(24.dp)) {
+                    if (gridNote.completed != null) {
+                        Checkbox(
+                            checked = gridNote.completed!!,
+                            onCheckedChange = { vm.toggleCompleted(gridNote.note) },
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.Description,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
                 Column(
