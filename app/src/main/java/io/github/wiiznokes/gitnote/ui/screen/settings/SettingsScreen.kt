@@ -175,6 +175,16 @@ fun SettingsScreen(
                 }
             )
 
+            val backgroundGitOperations by vm.prefs.backgroundGitOperations.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.background_git_operations),
+                subtitle = stringResource(R.string.background_git_operations_subtitle),
+                checked = backgroundGitOperations,
+                onCheckedChange = {
+                    vm.update { vm.prefs.backgroundGitOperations.update(it) }
+                }
+            )
+
 
             val defaultPathForNewNote by vm.prefs.defaultPathForNewNote.getAsState()
             val pickFolderDialogExpanded = rememberSaveable { mutableStateOf(false) }

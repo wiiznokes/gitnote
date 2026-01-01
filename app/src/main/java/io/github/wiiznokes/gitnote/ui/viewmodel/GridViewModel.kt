@@ -138,7 +138,11 @@ class GridViewModel : ViewModel() {
     fun refresh() {
         CoroutineScope(Dispatchers.IO).launch {
             _isRefreshing.emit(true)
-            storageManager.updateDatabaseAndRepo()
+            val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
+            storageManager.updateDatabaseAndRepo(includeGitOperations = !backgroundGitOps)
+            if (backgroundGitOps) {
+                storageManager.performBackgroundGitOperations()
+            }
             refreshSelectedNotes()
             _isRefreshing.emit(false)
         }

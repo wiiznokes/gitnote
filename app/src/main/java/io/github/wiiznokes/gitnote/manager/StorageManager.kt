@@ -7,8 +7,11 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.Result.Companion.failure
@@ -57,7 +60,7 @@ class StorageManager {
     val syncState: StateFlow<SyncState> = _syncState
 
 
-    suspend fun updateDatabaseAndRepo(): Result<Unit> = locker.withLock {
+    suspend fun updateDatabaseAndRepo(includeGitOperations: Boolean = true): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
 
         val cred = prefs.cred()
@@ -73,7 +76,7 @@ class StorageManager {
             uiHelper.makeToast(it.message)
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        if (includeGitOperations && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
                 syncFailed = true
@@ -82,7 +85,7 @@ class StorageManager {
             }
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        if (includeGitOperations && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Push)
             // todo: maybe async this call
             gitManager.push(cred).onFailure {
@@ -99,6 +102,36 @@ class StorageManager {
         updateDatabaseWithoutLocker()
 
         return success(Unit)
+    }
+
+    /**
+     * Perform git pull and push operations in the background
+     */
+    fun performBackgroundGitOperations() {
+        CoroutineScope(Dispatchers.IO).launch {
+            locker.withLock {
+                val cred = prefs.cred()
+                val remoteUrl = prefs.remoteUrl.get()
+
+                if (remoteUrl.isNotEmpty()) {
+                    _syncState.emit(SyncState.Pull)
+                    gitManager.pull(cred).onFailure {
+                        _syncState.emit(SyncState.Offline)
+                        // Don't show toast for background operations
+                    }
+                }
+
+                if (remoteUrl.isNotEmpty()) {
+                    _syncState.emit(SyncState.Push)
+                    gitManager.push(cred).onFailure {
+                        _syncState.emit(SyncState.Offline)
+                        // Don't show toast for background operations
+                    }
+                }
+
+                _syncState.emit(SyncState.Ok(false))
+            }
+        }
     }
 
     /**
@@ -316,6 +349,7 @@ class StorageManager {
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
+        val backgroundGitOps = prefs.backgroundGitOperations.getBlocking()
 
         var syncFailed = false
 
@@ -326,7 +360,8 @@ class StorageManager {
             return failure(it)
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        // Only perform pull/push if background git operations are disabled
+        if (!backgroundGitOps && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred).onFailure {
                 syncFailed = true
@@ -351,7 +386,8 @@ class StorageManager {
             return failure(it)
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        // Only perform push if background git operations are disabled
+        if (!backgroundGitOps && remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Push)
             gitManager.push(cred).onFailure {
                 syncFailed = true
@@ -361,9 +397,13 @@ class StorageManager {
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
-        if (!syncFailed) {
+        // If background git operations are enabled, perform them asynchronously
+        if (backgroundGitOps) {
+            performBackgroundGitOperations()
+        } else if (!syncFailed) {
             _syncState.emit(SyncState.Ok(false))
         }
+
         return success(payload)
     }
 

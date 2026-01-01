@@ -23,6 +23,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Toggle setting: Include subfolders on/off
   - Real-time folder filtering in both grid and list views
   - Default behavior maintains existing subfolder inclusion
+- Background Git Operations: Option to perform git pull/push operations in background
+  - Toggle setting to avoid blocking UI during refresh operations
+  - Useful when working alone and app syncs at startup
+  - Maintains sync status without UI interruptions
 - Tag Filtering: Browse and filter notes by tags in the navigation drawer
   - Automatic tag extraction from all notes' frontmatter
   - Tag-based navigation with drawer auto-close for focused viewing

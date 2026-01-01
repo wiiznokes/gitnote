@@ -39,6 +39,8 @@
     <string name="tag_display_both">Both views</string>
     <string name="include_subfolders">Include subfolders</string>
     <string name="include_subfolders_subtitle">Show notes from subfolders when browsing a folder</string>
+    <string name="background_git_operations">Background git operations</string>
+    <string name="background_git_operations_subtitle">Perform git pull/push in background during refresh to avoid blocking UI</string>
     <string name="folder_filters">Folder filters</string>
     <string name="folder_filters_subtitle">Define regex to filter folders of the repository</string>
     <string name="edit">Edit</string>

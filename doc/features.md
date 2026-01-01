@@ -282,3 +282,29 @@ With the setting **enabled**:
 My Very Long Note Title That Gets
 Cut Off At The End Of The Line
 ```
+
+## Background Git Operations
+
+GitNote allows users to perform git synchronization operations asynchronously to prevent UI blocking during all note operations, not just refreshes.
+
+### How It Works
+- **Setting Toggle**: Enable "Background git operations" in Settings > Git
+- **Non-blocking Operations**: When enabled, git pull/push operations run asynchronously after any note modification (create, update, delete, convert)
+- **Immediate Commits**: Changes are committed immediately for data integrity, then sync operations happen in the background
+- **UI Responsiveness**: The app remains responsive during all operations, allowing continued note editing
+- **Status Updates**: Sync state indicators still update to show current operation status
+- **Default Behavior**: Disabled by default to maintain immediate sync feedback
+
+### Usage Tips
+- Enable this setting if you work alone and want uninterrupted note editing during any operation
+- The setting is ideal for users who perform frequent note operations and prefer responsiveness over immediate sync feedback
+- Disable it if you need to know immediately when sync operations complete or fail
+- Background operations don't show error toasts to avoid interrupting your workflow
+- Applies to all note operations: creating, editing, deleting, converting between tasks/notes, moving notes
+
+### Example Workflow
+1. Open Settings > Git and enable "Background git operations"
+2. Edit notes, convert tasks, create new notes - all operations complete immediately
+3. Check sync status indicators to monitor background operations
+4. Continue working without waiting for git synchronization
+5. Disable the setting if you need blocking sync behavior for collaboration workflows
