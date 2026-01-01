@@ -48,16 +48,18 @@ GitNote supports filtering notes by tags defined in the frontmatter, allowing us
 To provide a focused view of filtered results, the navigation drawer automatically closes in certain scenarios:
 
 - **Tag Selection**: When you select a tag (including "All notes"), the drawer closes immediately, allowing you to view the filtered notes without obstruction.
-- **Final Folder Navigation**: When navigating to a folder that has no subfolders (a "leaf" folder), the drawer closes to let you focus on the notes in that folder.
+- **Final Folder Navigation**: When navigating to a folder that has no subfolders (a "leaf" folder) during normal browsing, the drawer closes to let you focus on the notes in that folder.
 - **Mode Switching**: Switching between tag and folder modes clears the respective filters (tags when switching to folder mode, folder when switching to tag mode) to prevent confusion.
 
-This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes.
+This behavior ensures a smooth user experience by reducing the need for manual drawer management while browsing and filtering notes. Note that when moving notes, the drawer remains open during folder navigation to allow selecting the destination folder.
 
 ### User Interface
 - **Grid and List Views**: Switch between grid and list layouts for notes.
 - **Search and Sort**: Search notes by content, sort by date, title, etc.
 - **Dark Mode**: Automatic theme switching.
-- **Note Actions Menu**: Long-press notes to access options like delete, multi-select, and convert between notes and tasks.
+- **Note Actions Menu**: Long-press notes to access options like delete, multi-select, convert between notes and tasks, and move notes.
+- **Minimal Note Width**: Adjustable minimum width for notes in grid view (100dp, 150dp, 200dp, 250dp).
+- **Offline Indicator**: Persistent icon showing when the app is offline and cannot sync.
 
 ## Completion Checkbox Feature
 
@@ -68,12 +70,14 @@ GitNote now supports marking notes as completed using a checkbox in the UI, tied
 - **Toggling**: Click the checkbox to toggle between `completed?: yes` and `completed?: no`.
 - **Automatic Updates**: Toggling updates the `updated` timestamp and saves the changes to the file and Git repository.
 - **Visual Feedback**: Completed notes can be visually distinguished (future feature).
+- **List View Icons**: In list view, tasks show a checkbox icon while notes show a document icon.
 
 ### Usage Tips
 - Add frontmatter to notes to enable the checkbox.
 - Use completion for tasks, reminders, or project tracking.
 - The checkbox is read-only in display; editing requires toggling in the app.
 - Changes are committed to Git automatically.
+- In list view, the icon type (checkbox vs document) indicates whether the item is a task or note.
 
 ### Example Workflow
 1. Create a note with frontmatter:
@@ -86,6 +90,79 @@ GitNote now supports marking notes as completed using a checkbox in the UI, tied
 2. Open the note in GitNote; a checkbox appears.
 3. Click the checkbox to mark as complete; the file updates to `completed?: yes`.
 4. Sync with Git to persist changes across devices.
+
+## Task Sorting in List View
+
+Completed tasks are automatically sorted to the end of the list view to keep active tasks visible at the top.
+
+### How It Works
+- **Automatic Sorting**: In list view, completed tasks (with `completed?: yes`) appear after incomplete tasks.
+- **Primary Sort**: Tasks are first sorted by completion status, then by the selected sort order (date, title, etc.).
+- **Grid View**: This sorting only applies to list view; grid view maintains the standard sort order.
+- **Real-time Updates**: Sorting updates immediately when task completion status changes.
+
+### Usage Tips
+- Use list view to keep your active tasks at the top of the list.
+- Completed tasks remain accessible but don't clutter the active task list.
+- This feature works automatically for all notes with completion status.
+- Switch to grid view if you prefer a different organization.
+
+### Example
+In list view, with sort by "Most recent":
+```
+[ ] Active Task 1 (today)
+[ ] Active Task 2 (yesterday)
+[x] Completed Task 1 (last week)
+[x] Completed Task 2 (last month)
+```
+
+## Floating Action Button (FAB)
+
+The FAB provides quick access to create new notes and tasks directly.
+
+### How It Works
+- **Expandable Menu**: Long-press or tap the FAB to expand creation options.
+- **Create Note**: Creates a new regular note with document icon.
+- **Create Task**: Creates a new task with checkbox icon and `completed?: no` in frontmatter.
+- **Search**: Quick access to the search functionality.
+- **Smart Defaults**: New items inherit the current folder and use query text as title if available.
+
+### Usage Tips
+- Use the document icon to create regular notes.
+- Use the checkbox icon to create tasks that need completion tracking.
+- The FAB respects the current folder context for new items.
+- Search option focuses the search bar for quick note finding.
+
+### Example Workflow
+1. Navigate to the desired folder.
+2. Tap the FAB to expand options.
+3. Select the checkbox icon to create a new task.
+4. The task appears immediately with completion checkbox.
+
+## Move Note Feature
+
+GitNote allows moving notes between folders using an intuitive drag-and-drop style interface.
+
+### How It Works
+- **Initiate Move**: Long-press a note and select "Move note" from the menu.
+- **Drawer Navigation**: The navigation drawer opens in move mode, allowing folder browsing.
+- **Folder Selection**: Navigate through folders without closing the drawer.
+- **Confirm Move**: Click the check icon ("Insert here") to move the note to the current folder.
+- **Cancel Move**: Click the close icon to abort the move operation.
+- **Automatic Close**: The drawer closes automatically after a successful move.
+
+### Usage Tips
+- Use the drawer to browse and select destination folders.
+- The drawer stays open during folder navigation in move mode.
+- Move operations update the note's file path and commit changes to Git.
+- Cancel at any time without making changes.
+
+### Example Workflow
+1. Long-press a note in the current folder.
+2. Select "Move note" from the menu.
+3. Use the drawer to navigate to the target folder.
+4. Click the check icon to complete the move.
+5. The drawer closes, showing the note in its new location.
 
 ## Convert to Task/Note Feature
 
