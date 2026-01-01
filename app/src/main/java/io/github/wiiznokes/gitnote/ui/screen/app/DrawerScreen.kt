@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Home
@@ -51,6 +53,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.room.Embedded
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
@@ -81,6 +84,9 @@ fun RowNFoldersNavigation(
     createNoteFolder: (relativeParentPath: String, name: String) -> Boolean,
     showTags: Boolean,
     onToggleMode: () -> Unit,
+    noteBeingMoved: Note?,
+    onMoveNoteToFolder: (String) -> Unit,
+    onCancelMove: () -> Unit,
 ) {
     val containers = if (currentPath.isEmpty()) emptyList() else currentPath.split('/')
 
@@ -142,33 +148,46 @@ fun RowNFoldersNavigation(
             }
         },
         actions = {
-            IconButton(onClick = onToggleMode) {
-                SimpleIcon(
-                    imageVector = if (showTags) Icons.Filled.Folder else Icons.Rounded.Tag
-                )
-            }
-
-            if (!showTags) {
-                val showCreateNewFolder = rememberSaveable {
-                    mutableStateOf(false)
-                }
-
-                IconButton(onClick = {
-                    showCreateNewFolder.value = true
-                }) {
+            if (noteBeingMoved != null) {
+                IconButton(onClick = { onMoveNoteToFolder(currentPath) }) {
                     SimpleIcon(
-                        imageVector = Icons.Filled.CreateNewFolder
+                        imageVector = Icons.Filled.Check
+                    )
+                }
+                IconButton(onClick = onCancelMove) {
+                    SimpleIcon(
+                        imageVector = Icons.Filled.Close
+                    )
+                }
+            } else {
+                IconButton(onClick = onToggleMode) {
+                    SimpleIcon(
+                        imageVector = if (showTags) Icons.Filled.Folder else Icons.Rounded.Tag
                     )
                 }
 
-                GetStringDialog(
-                    expanded = showCreateNewFolder,
-                    label = stringResource(R.string.new_folder_label),
-                    actionText = stringResource(R.string.create_new_folder),
-                    unExpandedOnValidation = false
-                ) {
-                    if (createNoteFolder(currentPath, it)) {
-                        showCreateNewFolder.value = false
+                if (!showTags) {
+                    val showCreateNewFolder = rememberSaveable {
+                        mutableStateOf(false)
+                    }
+
+                    IconButton(onClick = {
+                        showCreateNewFolder.value = true
+                    }) {
+                        SimpleIcon(
+                            imageVector = Icons.Filled.CreateNewFolder
+                        )
+                    }
+
+                    GetStringDialog(
+                        expanded = showCreateNewFolder,
+                        label = stringResource(R.string.new_folder_label),
+                        actionText = stringResource(R.string.create_new_folder),
+                        unExpandedOnValidation = false
+                    ) {
+                        if (createNoteFolder(currentPath, it)) {
+                            showCreateNewFolder.value = false
+                        }
                     }
                 }
             }
@@ -188,6 +207,9 @@ fun DrawerScreen(
     allTags: List<String>,
     selectedTag: String?,
     onTagSelected: (String?) -> Unit,
+    noteBeingMoved: Note?,
+    onMoveNoteToFolder: (String) -> Unit,
+    onCancelMove: () -> Unit,
 ) {
 
     val showTags = rememberSaveable { mutableStateOf(false) }
@@ -204,7 +226,7 @@ fun DrawerScreen(
 
     // Auto-close drawer when navigating to a leaf folder (no subfolders)
     LaunchedEffect(drawerFolders) {
-        if (currentNoteFolderRelativePath.isNotEmpty() && drawerFolders.isEmpty()) {
+        if (currentNoteFolderRelativePath.isNotEmpty() && drawerFolders.isEmpty() && noteBeingMoved == null) {
             scope.launch { drawerState.close() }
         }
     }
@@ -225,6 +247,9 @@ fun DrawerScreen(
                         openFolder("")
                     }
                 },
+                noteBeingMoved = noteBeingMoved,
+                onMoveNoteToFolder = onMoveNoteToFolder,
+                onCancelMove = onCancelMove,
             )
         },
         floatingActionButton = {
@@ -335,7 +360,7 @@ fun DrawerScreen(
                                     },
                                     onClick = {
                                         openFolder(drawerNoteFolder.noteFolder.relativePath)
-                                        if (!drawerNoteFolder.hasChildren) {
+                                        if (!drawerNoteFolder.hasChildren && noteBeingMoved == null) {
                                             scope.launch { drawerState.close() }
                                         }
                                     }

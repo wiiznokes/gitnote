@@ -113,12 +113,32 @@ fun GridScreen(
                 createNoteFolder = vm::createNoteFolder,
                 allTags = vm.allTags.collectAsState<List<String>>().value,
                 selectedTag = vm.selectedTag.collectAsState<String?>().value,
-                onTagSelected = vm::selectTag,
+                onTagSelected = { vm.selectTag(it) },
+                noteBeingMoved = vm.noteBeingMoved.collectAsState().value,
+                onMoveNoteToFolder = { vm.moveNoteToFolder(it) },
+                onCancelMove = { vm.cancelMoveNote() },
             )
         }
     }) {
 
         val selectedNotes by vm.selectedNotes.collectAsState()
+
+        val noteBeingMoved by vm.noteBeingMoved.collectAsState()
+
+        val wasMoving = remember { mutableStateOf(false) }
+
+        LaunchedEffect(noteBeingMoved) {
+            if (noteBeingMoved == null && wasMoving.value) {
+                drawerState.close()
+            }
+            wasMoving.value = noteBeingMoved != null
+        }
+
+        LaunchedEffect(noteBeingMoved) {
+            if (noteBeingMoved != null) {
+                drawerState.open()
+            }
+        }
 
         if (selectedNotes.isNotEmpty()) {
             BackHandler {
@@ -489,6 +509,9 @@ internal fun NoteActionsDropdown(
                 if (selectedNotes.isEmpty()) CustomDropDownModel(
                     text = stringResource(R.string.select_multiple_notes),
                     onClick = { vm.selectNote(gridNote.note, true) }) else null,
+                CustomDropDownModel(
+                    text = stringResource(R.string.move_note),
+                    onClick = { vm.startMoveNote(gridNote.note) }),
                 if (gridNote.completed != null) CustomDropDownModel(
                     text = stringResource(R.string.convert_to_note),
                     onClick = { vm.convertToNote(gridNote.note) }) else CustomDropDownModel(

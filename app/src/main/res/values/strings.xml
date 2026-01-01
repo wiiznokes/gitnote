@@ -58,6 +58,7 @@
     <string name="theme">Theme</string>
     <string name="delete_this_note">Delete this note</string>
     <string name="select_multiple_notes">Select multiple notes</string>
+    <string name="move_note">Move note</string>
     <string name="convert_to_task">Convert to task</string>
     <string name="convert_to_note">Convert to note</string>
     <string name="error_invalid_link">Invalid link, can\'t open it</string>

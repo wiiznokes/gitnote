@@ -86,9 +86,39 @@ class GridViewModel : ViewModel() {
     private val _selectedTag = MutableStateFlow<String?>(null)
     val selectedTag: StateFlow<String?> = _selectedTag.asStateFlow()
 
+    private val _noteBeingMoved = MutableStateFlow<Note?>(null)
+    val noteBeingMoved: StateFlow<Note?> = _noteBeingMoved.asStateFlow()
+
+    fun startMoveNote(note: Note) {
+        viewModelScope.launch {
+            _noteBeingMoved.emit(note)
+        }
+    }
+
     fun selectTag(tag: String?) {
         viewModelScope.launch {
             _selectedTag.emit(tag)
+        }
+    }
+
+    fun cancelMoveNote() {
+        viewModelScope.launch {
+            _noteBeingMoved.emit(null)
+        }
+    }
+
+    fun moveNoteToFolder(folderRelativePath: String) {
+        val note = noteBeingMoved.value ?: return
+        viewModelScope.launch {
+            val newRelativePath = "$folderRelativePath/${note.fullName()}"
+            val newNote = note.copy(relativePath = newRelativePath)
+            val result = storageManager.updateNote(newNote, note)
+            result.onFailure { e ->
+                uiHelper.makeToast("Failed to move note: $e")
+            }
+            _noteBeingMoved.emit(null)
+            // Trigger refresh
+            refreshCounter.value++
         }
     }
 

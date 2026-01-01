@@ -177,7 +177,10 @@ private fun PickFolderDialogInternal(
             openFolder = openFolder,
             createNoteFolder = createNoteFolder,
             showTags = false,
-            onToggleMode = {}
+            onToggleMode = {},
+            noteBeingMoved = null,
+            onMoveNoteToFolder = {},
+            onCancelMove = {},
         )
 
         val listState = rememberLazyListState()
