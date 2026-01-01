@@ -59,12 +59,12 @@ Either run the setup script:
 ./setup-release-env.sh
 ```
 
-Or manually export the variables:
+Or manually source the generated environment file:
 ```bash
-export KEY_ALIAS="gitnote_release_key"
-export KEY_PASSWORD="GitNote2025!"
-export STORE_PASSWORD="GitNoteStore2025!"
+source release-keys.env
 ```
+
+The `release-keys.env` file is automatically created by the key generation script and contains your generated keys.
 
 ## 3. Build Release APK
 

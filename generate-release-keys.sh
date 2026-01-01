@@ -2,6 +2,7 @@
 
 # GitNote Release Key Generation Script
 # This script generates a signing keystore for Android release builds
+# and stores the generated keys in release-keys.env
 
 set -e
 
@@ -11,8 +12,13 @@ echo "=============================="
 # Configuration
 KEYSTORE_FILE="app/key.jks"
 KEY_ALIAS="gitnote_release_key"
-KEY_PASSWORD="GitNoteStore2025!"  # Must be same as STORE_PASSWORD for PKCS12
-STORE_PASSWORD="GitNoteStore2025!"
+ENV_FILE="release-keys.env"
+
+# Generate random passwords
+KEY_PASSWORD=$(openssl rand -base64 32)
+STORE_PASSWORD=$(openssl rand -base64 32)
+
+echo "Generated secure random passwords for keystore..."
 
 # Check if keystore already exists
 if [ -f "$KEYSTORE_FILE" ]; then
@@ -42,19 +48,27 @@ keytool -genkeypair \
     -keypass "$KEY_PASSWORD" \
     -dname "CN=GitNote, OU=Development, O=GitNote, L=Unknown, ST=Unknown, C=US"
 
+# Store the keys in the environment file
+cat > "$ENV_FILE" << EOF
+# GitNote Release Keys - Generated on $(date)
+# This file contains sensitive information and should never be committed to version control
+KEY_ALIAS=$KEY_ALIAS
+KEY_PASSWORD=$KEY_PASSWORD
+STORE_PASSWORD=$STORE_PASSWORD
+EOF
+
 echo ""
 echo "Keystore generated successfully!"
+echo "Keys stored in: $ENV_FILE"
 echo ""
 echo "Environment variables for release builds:"
 echo "=========================================="
-echo "export KEY_ALIAS=\"$KEY_ALIAS\""
-echo "export KEY_PASSWORD=\"$KEY_PASSWORD\""
-echo "export STORE_PASSWORD=\"$STORE_PASSWORD\""
-echo ""
-echo "You can also create a .env file with these variables:"
 echo "KEY_ALIAS=$KEY_ALIAS"
 echo "KEY_PASSWORD=$KEY_PASSWORD"
 echo "STORE_PASSWORD=$STORE_PASSWORD"
+echo ""
+echo "To load these variables automatically, run:"
+echo "source $ENV_FILE"
 echo ""
 echo "To build the release APK, run:"
 echo "./gradlew :app:assembleRelease"
@@ -62,4 +76,4 @@ echo ""
 echo "To build and install the release APK:"
 echo "./gradlew :app:assembleRelease :app:installRelease"
 echo ""
-echo "Security Note: Keep your keystore file secure and never commit it to version control!"
+echo "Security Note: Keep your keystore file and $ENV_FILE secure and never commit them to version control!"

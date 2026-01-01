@@ -1,24 +1,27 @@
 #!/bin/bash
 
 # GitNote Release Environment Setup
-# This script exports environment variables for release builds
+# This script loads environment variables from release-keys.env for release builds
 
-# Configuration - Update these if you changed them during key generation
-KEY_ALIAS="gitnote_release_key"
-KEY_PASSWORD="GitNoteStore2025!"  # Must be same as STORE_PASSWORD for PKCS12
-STORE_PASSWORD="GitNoteStore2025!"
+ENV_FILE="release-keys.env"
 
 echo "Setting up GitNote release environment variables..."
 echo "=================================================="
 
-export KEY_ALIAS="$KEY_ALIAS"
-export KEY_PASSWORD="$KEY_PASSWORD"
-export STORE_PASSWORD="$STORE_PASSWORD"
+# Check if the environment file exists
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Error: $ENV_FILE not found!"
+    echo "Please run ./generate-release-keys.sh first to generate the release keys."
+    exit 1
+fi
 
-echo "Environment variables set:"
+# Load the environment variables
+source "$ENV_FILE"
+
+echo "Environment variables loaded from $ENV_FILE:"
 echo "KEY_ALIAS=$KEY_ALIAS"
-echo "KEY_PASSWORD=$KEY_PASSWORD"
-echo "STORE_PASSWORD=$STORE_PASSWORD"
+echo "KEY_PASSWORD=[HIDDEN]"
+echo "STORE_PASSWORD=[HIDDEN]"
 echo ""
 echo "You can now run release builds:"
 echo "./gradlew :app:assembleRelease"

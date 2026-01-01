@@ -15,6 +15,22 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   - Convert notes to tasks and vice versa via long-press menu
 - Frontmatter Hiding: Automatically hide YAML frontmatter in read-only view mode for clean Markdown rendering
 - List View Improvements: Option to show full note titles with line wrapping instead of truncation
+- Tag Display Mode: Control tag visibility in grid and list views
+  - Settings option with 4 modes: None, List Only, Grid Only, Both
+  - YAML frontmatter parsing for `tags:` field with list support
+  - Tag chips with Material 3 styling in note cards
+- Tag Filtering: Browse and filter notes by tags in the navigation drawer
+  - Automatic tag extraction from all notes' frontmatter
+  - Tag-based navigation with drawer auto-close for focused viewing
+  - Real-time filtering in both grid and list views
+- Move Notes: Drag-and-drop style note relocation between folders
+  - Long-press menu option to initiate move mode
+  - Drawer navigation for folder selection during move operations
+  - Automatic file relocation and Git commit
+- Enhanced Floating Action Button: Expandable menu for quick note/task creation
+  - Create regular notes or tasks with completion tracking
+  - Quick search access
+  - Context-aware folder inheritance for new items
 
 ### Changed
 

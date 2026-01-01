@@ -25,6 +25,9 @@ output.json
 *.pepk
 *.asc
 
+# Release keys environment file
+release-keys.env
+
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
