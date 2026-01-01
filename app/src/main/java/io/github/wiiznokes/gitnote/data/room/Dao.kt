@@ -12,7 +12,6 @@ import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.manager.Progress
 import io.github.wiiznokes.gitnote.manager.isExtensionSupported
-import io.github.wiiznokes.gitnote.ui.model.FolderDisplayMode
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
@@ -119,7 +118,7 @@ interface RepoDatabaseDao {
     fun gridNotes(
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
-        folderDisplayMode: FolderDisplayMode,
+        includeSubfolders: Boolean,
         tag: String? = null,
     ): PagingSource<Int, GridNote> {
 
@@ -130,16 +129,13 @@ interface RepoDatabaseDao {
             SortOrder.Oldest -> "lastModifiedTimeMillis" to "ASC"
         }
 
-        val whereClause = when (folderDisplayMode) {
-            FolderDisplayMode.CurrentFolderOnly -> {
-                if (currentNoteFolderRelativePath.isEmpty()) {
-                    "WHERE relativePath NOT LIKE '%/%'"
-                } else {
-                    "WHERE relativePath LIKE :currentNoteFolderRelativePath || '/%' AND relativePath NOT LIKE :currentNoteFolderRelativePath || '/%/%'"
-                }
-            }
-            FolderDisplayMode.IncludeSubfolders -> {
-                "WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'"
+        val whereClause = if (includeSubfolders) {
+            "WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'"
+        } else {
+            if (currentNoteFolderRelativePath.isEmpty()) {
+                "WHERE relativePath NOT LIKE '%/%'"
+            } else {
+                "WHERE relativePath LIKE :currentNoteFolderRelativePath || '/%' AND relativePath NOT LIKE :currentNoteFolderRelativePath || '/%/%'"
             }
         }
 
@@ -170,7 +166,7 @@ interface RepoDatabaseDao {
         currentNoteFolderRelativePath: String,
         sortOrder: SortOrder,
         query: String,
-        folderDisplayMode: FolderDisplayMode,
+        includeSubfolders: Boolean,
         tag: String? = null,
     ): PagingSource<Int, GridNote> {
 
@@ -195,16 +191,13 @@ interface RepoDatabaseDao {
             }
         }
 
-        val whereClause = when (folderDisplayMode) {
-            FolderDisplayMode.CurrentFolderOnly -> {
-                if (currentNoteFolderRelativePath.isEmpty()) {
-                    "Notes.relativePath NOT LIKE '%/%'"
-                } else {
-                    "Notes.relativePath LIKE :currentNoteFolderRelativePath || '/%' AND Notes.relativePath NOT LIKE :currentNoteFolderRelativePath || '/%/%'"
-                }
-            }
-            FolderDisplayMode.IncludeSubfolders -> {
-                "Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'"
+        val whereClause = if (includeSubfolders) {
+            "Notes.relativePath LIKE :currentNoteFolderRelativePath || '%'"
+        } else {
+            if (currentNoteFolderRelativePath.isEmpty()) {
+                "Notes.relativePath NOT LIKE '%/%'"
+            } else {
+                "Notes.relativePath LIKE :currentNoteFolderRelativePath || '/%' AND Notes.relativePath NOT LIKE :currentNoteFolderRelativePath || '/%/%'"
             }
         }
 

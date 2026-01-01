@@ -36,7 +36,6 @@ import io.github.wiiznokes.gitnote.ui.component.StringSettings
 import io.github.wiiznokes.gitnote.ui.component.ToggleableSettings
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
-import io.github.wiiznokes.gitnote.ui.model.FolderDisplayMode
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.model.TagDisplayMode
@@ -166,13 +165,13 @@ fun SettingsScreen(
                 }
             )
 
-            val folderDisplayMode by vm.prefs.folderDisplayMode.getAsState()
-            MultipleChoiceSettings(
-                title = stringResource(R.string.folder_display_mode),
-                subtitle = folderDisplayMode.toString(),
-                options = FolderDisplayMode.entries,
-                onOptionClick = {
-                    vm.update { vm.prefs.folderDisplayMode.update(it) }
+            val includeSubfolders by vm.prefs.includeSubfolders.getAsState()
+            ToggleableSettings(
+                title = stringResource(R.string.include_subfolders),
+                subtitle = stringResource(R.string.include_subfolders_subtitle),
+                checked = includeSubfolders,
+                onCheckedChange = {
+                    vm.update { vm.prefs.includeSubfolders.update(it) }
                 }
             )
 

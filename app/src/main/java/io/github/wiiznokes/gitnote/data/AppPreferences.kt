@@ -7,7 +7,6 @@ import io.github.wiiznokes.gitnote.provider.ProviderType
 import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.model.Cred
 import io.github.wiiznokes.gitnote.ui.model.CredType
-import io.github.wiiznokes.gitnote.ui.model.FolderDisplayMode
 import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import io.github.wiiznokes.gitnote.ui.model.NoteMinWidth
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
@@ -150,7 +149,7 @@ class AppPreferences(
     val showFullPathOfNotes = booleanPreference("showFullPathOfNotes", false)
     val showFullTitleInListView = booleanPreference("showFullTitleInListView", false)
     val tagDisplayMode = enumPreference("tagDisplayMode", TagDisplayMode.None)
-    val folderDisplayMode = enumPreference("folderDisplayMode", FolderDisplayMode.IncludeSubfolders)
+    val includeSubfolders = booleanPreference("includeSubfolders", true)
 
     val defaultExtension = stringPreference("defaultExtension", "md")
     val showLinesNumber = booleanPreference("showLinesNumber", false)
