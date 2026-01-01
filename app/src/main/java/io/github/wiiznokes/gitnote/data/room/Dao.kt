@@ -130,7 +130,9 @@ interface RepoDatabaseDao {
 
         val sql = """
             WITH notes_with_filename AS (
-                SELECT *, fullName(relativePath) AS fileName
+                SELECT *, 
+                       fullName(relativePath) AS fileName,
+                       CASE WHEN content LIKE '%completed?: yes%' THEN 1 ELSE 0 END AS completed
                 FROM Notes
                 WHERE relativePath LIKE :currentNoteFolderRelativePath || '%'
                 ${if (tag != null) "AND content LIKE '%  - ' || :tag || '%'" else ""}
@@ -141,7 +143,7 @@ interface RepoDatabaseDao {
                        ELSE 0
                    END AS isUnique
             FROM notes_with_filename
-            ORDER BY $sortColumn $order
+            ORDER BY completed ASC, $sortColumn $order
         """.trimIndent()
 
         val args = if (tag != null) arrayOf(currentNoteFolderRelativePath, tag) else arrayOf(currentNoteFolderRelativePath)
@@ -179,7 +181,10 @@ interface RepoDatabaseDao {
 
         val sql = """
             WITH notes_with_filename AS (
-                SELECT Notes.*, rank(matchinfo(NotesFts, 'pcx')) AS score, fullName(Notes.relativePath) as fileName
+                SELECT Notes.*, 
+                       rank(matchinfo(NotesFts, 'pcx')) AS score, 
+                       fullName(Notes.relativePath) as fileName,
+                       CASE WHEN Notes.content LIKE '%completed?: yes%' THEN 1 ELSE 0 END AS completed
                 FROM Notes
                 JOIN NotesFts ON NotesFts.rowid = Notes.rowid
                 WHERE
@@ -194,7 +199,7 @@ interface RepoDatabaseDao {
                        ELSE 0
                    END AS isUnique
             FROM notes_with_filename
-            ORDER BY score DESC, $sortColumn $order
+            ORDER BY completed ASC, score DESC, $sortColumn $order
         """.trimIndent()
 
         val args = if (tag != null) arrayOf(currentNoteFolderRelativePath, ftsEscape(query), tag) else arrayOf(currentNoteFolderRelativePath, ftsEscape(query))
