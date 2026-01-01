@@ -112,10 +112,12 @@ class StorageManager {
             locker.withLock {
                 val cred = prefs.cred()
                 val remoteUrl = prefs.remoteUrl.get()
+                var syncFailed = false
 
                 if (remoteUrl.isNotEmpty()) {
                     _syncState.emit(SyncState.Pull)
                     gitManager.pull(cred).onFailure {
+                        syncFailed = true
                         _syncState.emit(SyncState.Offline)
                         // Don't show toast for background operations
                     }
@@ -124,12 +126,15 @@ class StorageManager {
                 if (remoteUrl.isNotEmpty()) {
                     _syncState.emit(SyncState.Push)
                     gitManager.push(cred).onFailure {
+                        syncFailed = true
                         _syncState.emit(SyncState.Offline)
                         // Don't show toast for background operations
                     }
                 }
 
-                _syncState.emit(SyncState.Ok(false))
+                if (!syncFailed) {
+                    _syncState.emit(SyncState.Ok(false))
+                }
             }
         }
     }
