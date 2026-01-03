@@ -65,7 +65,7 @@ jobs:
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
           mv app/build/outputs/apk/nightly/app-nightly.apk packages/gitnote-nightly.apk
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: gitnote-nightly
           path: packages/*
