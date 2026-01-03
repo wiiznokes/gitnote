@@ -20,7 +20,7 @@ sealed interface SyncState {
 
     data class Ok(val isConsumed: Boolean) : SyncState
 
-    object Error : SyncState
+    data class Error(val msg: String?) : SyncState
 
     object Pull : SyncState
 
@@ -61,29 +61,38 @@ class StorageManager {
         val cred = prefs.cred()
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
+        var isError = false
 
         gitManager.commitAll(
             author,
             "commit from gitnote to update the repo of the app"
-        ).onFailure {
-            uiHelper.makeToast(it.message)
+        ).onFailure { err ->
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+            return@withLock failure(err)
         }
 
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
-            gitManager.pull(cred).onFailure {
-                uiHelper.makeToast(it.message)
+            gitManager.pull(cred, author).onFailure { err ->
+                isError = true
+                err.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(err.message))
             }
         }
 
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Push)
             // todo: maybe async this call
-            gitManager.push(cred).onFailure {
-                uiHelper.makeToast(it.message)
+            gitManager.push(cred).onFailure { err ->
+                isError = true
+                err.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(err.message))
             }
         }
-        _syncState.emit(SyncState.Ok(false))
+
+        if (!isError)
+            _syncState.emit(SyncState.Ok(false))
 
         updateDatabaseWithoutLocker()
 
@@ -306,47 +315,61 @@ class StorageManager {
         val remoteUrl = prefs.remoteUrl.get()
         val author = prefs.gitAuthor()
 
+        var isError = false
+
         gitManager.commitAll(
             author,
             "commit from gitnote, before doing a change"
-        ).onFailure {
-            return failure(it)
+        ).onFailure { err ->
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+            return failure(err)
         }
 
         if (remoteUrl.isNotEmpty()) {
             _syncState.emit(SyncState.Pull)
-            gitManager.pull(cred).onFailure {
-                it.printStackTrace()
+            gitManager.pull(cred, author).onFailure { err ->
+                isError = true
+                err.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(err.message))
             }
         }
 
-        updateDatabaseWithoutLocker().onFailure {
-            return failure(it)
+        updateDatabaseWithoutLocker().onFailure { err ->
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+            return failure(err)
         }
 
         val payload = f().fold(
-            onFailure = {
-                return failure(it)
+            onFailure = { err ->
+                err.message?.let { Log.e(TAG, it) }
+                return failure(err)
             },
             onSuccess = {
                 it
             }
         )
 
-        gitManager.commitAll(author, commitMessage).onFailure {
-            return failure(it)
-        }
-
-        if (remoteUrl.isNotEmpty()) {
-            _syncState.emit(SyncState.Push)
-            gitManager.push(cred).onFailure {
-                it.printStackTrace()
-            }
+        gitManager.commitAll(author, commitMessage).onFailure { err ->
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+            return failure(err)
         }
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
-        _syncState.emit(SyncState.Ok(false))
+        if (remoteUrl.isNotEmpty()) {
+            _syncState.emit(SyncState.Push)
+            gitManager.push(cred).onFailure { err ->
+                isError = true
+                err.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(err.message))
+            }
+        }
+
+        if (!isError)
+            _syncState.emit(SyncState.Ok(false))
         return success(payload)
     }
 

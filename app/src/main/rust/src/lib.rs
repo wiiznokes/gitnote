@@ -40,6 +40,15 @@ impl Error {
             msg: msg.into(),
         }
     }
+
+    fn add_message(self, msg1: &str) -> Self {
+        match self {
+            Error::Git2 { error, msg } => Error::Git2 {
+                error,
+                msg: format!("{}: {}", msg1, msg),
+            },
+        }
+    }
 }
 
 impl From<Error> for jint {
@@ -131,6 +140,11 @@ pub enum Cred {
         private_key: String,
         passphrase: Option<String>,
     },
+}
+
+pub struct GitAuthor {
+    pub name: String,
+    pub email: String,
 }
 
 impl Debug for Cred {
@@ -361,9 +375,17 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
     cred: JString<'local>,
+    name: JString<'local>,
+    email: JString<'local>,
 ) -> jint {
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
-    unwrap_or_log!(libgit2::pull(cred), "pull");
+    let name: String = env.get_string(&name).unwrap().into();
+    let email: String = env.get_string(&email).unwrap().into();
+    let author = GitAuthor {
+        name,
+        email
+    };
+    unwrap_or_log!(libgit2::pull(cred, &author), "pull");
     OK
 }
 

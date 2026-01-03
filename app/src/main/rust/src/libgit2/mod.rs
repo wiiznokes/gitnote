@@ -11,7 +11,7 @@ use git2::{
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
-use crate::{Cred, Error, ProgressCB, mime_types::is_extension_supported};
+use crate::{Cred, Error, GitAuthor, ProgressCB, mime_types::is_extension_supported};
 
 mod merge;
 
@@ -102,9 +102,10 @@ fn current_branch(repo: &Repository) -> Result<String, Error> {
     let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
 
     if head.is_branch()
-        && let Some(name) = head.shorthand() {
-            return Ok(name.to_string());
-        }
+        && let Some(name) = head.shorthand()
+    {
+        return Ok(name.to_string());
+    }
 
     // Detached HEAD or not a branch
     Err(Error::git2(
@@ -269,7 +270,7 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
+pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     apply_ssh_workaround(false);
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
@@ -303,7 +304,7 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
         .reference_to_annotated_commit(&fetch_head)
         .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
 
-    merge::do_merge(repo, &branch, commit).map_err(|e| Error::git2(e, "do_merge"))?;
+    merge::do_merge(repo, &branch, commit, author).map_err(|e| e.add_message("do_merge"))?;
 
     Ok(())
 }

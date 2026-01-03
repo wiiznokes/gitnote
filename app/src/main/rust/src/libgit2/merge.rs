@@ -1,4 +1,6 @@
-use git2::Repository;
+use git2::{Repository, Signature};
+
+use crate::{Error, GitAuthor};
 
 fn fast_forward(
     repo: &Repository,
@@ -26,6 +28,7 @@ fn normal_merge(
     repo: &Repository,
     local: &git2::AnnotatedCommit,
     remote: &git2::AnnotatedCommit,
+    author: &GitAuthor
 ) -> Result<(), git2::Error> {
     let local_tree = repo.find_commit(local.id())?.tree()?;
     let remote_tree = repo.find_commit(remote.id())?.tree()?;
@@ -42,7 +45,8 @@ fn normal_merge(
     let result_tree = repo.find_tree(idx.write_tree_to(repo)?)?;
     // now create the merge commit
     let msg = format!("Merge: {} into {}", remote.id(), local.id());
-    let sig = repo.signature()?;
+    let sig = Signature::now(&author.name, &author.email)?;
+
     let local_commit = repo.find_commit(local.id())?;
     let remote_commit = repo.find_commit(remote.id())?;
     // Do our merge commit and set current branch head to that commit.
@@ -63,9 +67,12 @@ pub fn do_merge<'a>(
     repo: &'a Repository,
     remote_branch: &str,
     fetch_commit: git2::AnnotatedCommit<'a>,
-) -> Result<(), git2::Error> {
+    author: &GitAuthor
+) -> Result<(), Error> {
     // 1. do a merge analysis
-    let analysis = repo.merge_analysis(&[&fetch_commit])?;
+    let analysis = repo
+        .merge_analysis(&[&fetch_commit])
+        .map_err(|e| Error::git2(e, "merge_analysis"))?;
 
     // 2. Do the appropriate merge
     if analysis.0.is_fast_forward() {
@@ -84,20 +91,26 @@ pub fn do_merge<'a>(
                     fetch_commit.id(),
                     true,
                     &format!("Setting {} to {}", remote_branch, fetch_commit.id()),
-                )?;
-                repo.set_head(&refname)?;
+                )
+                .map_err(|e| Error::git2(e, "reference"))?;
+                repo.set_head(&refname)
+                    .map_err(|e| Error::git2(e, "set_head"))?;
                 repo.checkout_head(Some(
                     git2::build::CheckoutBuilder::default()
                         .allow_conflicts(true)
                         .conflict_style_merge(true)
                         .force(),
-                ))?;
+                ))
+                .map_err(|e| Error::git2(e, "checkout_head"))?;
             }
         };
     } else if analysis.0.is_normal() {
         // do a normal merge
-        let head_commit = repo.reference_to_annotated_commit(&repo.head()?)?;
-        normal_merge(repo, &head_commit, &fetch_commit)?;
+        let head_commit = repo
+            .reference_to_annotated_commit(&repo.head()?)
+            .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
+        normal_merge(repo, &head_commit, &fetch_commit, author)
+            .map_err(|e| Error::git2(e, "normal_merge"))?;
     } else {
         // Nothing to do...
     }

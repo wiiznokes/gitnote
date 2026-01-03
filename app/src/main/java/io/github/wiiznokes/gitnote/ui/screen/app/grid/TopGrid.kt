@@ -10,6 +10,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,12 +32,17 @@ import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -367,6 +373,7 @@ private fun SelectableTopBar(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SyncStateIcon(
     state: SyncState,
@@ -391,11 +398,39 @@ private fun SyncStateIcon(
 
     when (state) {
         is SyncState.Error -> {
-            Icon(
-                painter = painterResource(R.drawable.cloud_alert_24px),
-                contentDescription = "Sync Error",
-                modifier = modifier,
-            )
+            val tooltipState = rememberTooltipState(isPersistent = true)
+            val scope = rememberCoroutineScope()
+
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                tooltip = {
+                    if (state.msg != null) {
+                        PlainTooltip {
+                            Text(state.msg)
+                        }
+                    }
+                },
+                state = tooltipState
+            ) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            if (tooltipState.isVisible) {
+                                tooltipState.dismiss()
+                            } else {
+                                tooltipState.show()
+                            }
+                        }
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.cloud_alert_24px),
+                        contentDescription = "Sync Error",
+                        modifier = modifier
+                    )
+                }
+
+            }
         }
 
         is SyncState.Ok -> {
