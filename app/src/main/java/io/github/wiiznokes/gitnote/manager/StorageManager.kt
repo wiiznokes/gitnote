@@ -144,7 +144,7 @@ class StorageManager {
         Log.d(TAG, "updateNote: new = $new")
 
         update(
-            commitMessage = "gitnote changed ${previous.relativePath}"
+            commitMessage = "gitnote modified ${previous.relativePath}"
         ) {
             dao.removeNote(previous)
             dao.insertNote(new)
