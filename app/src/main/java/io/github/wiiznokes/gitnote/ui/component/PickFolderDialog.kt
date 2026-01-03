@@ -156,12 +156,11 @@ private fun PickFolderDialogInternal(
 ) {
 
     BackHandler(enabled = expanded.value) {
+        select(null)
         if (currentNoteFolderRelativePath.isEmpty()) {
             expanded.value = false
-            select(null)
         } else {
             openFolder(getParentPath(currentNoteFolderRelativePath))
-            select(null)
         }
     }
 
@@ -244,12 +243,10 @@ private fun PickFolderDialogInternal(
         }
 
         Button(
-            enabled = selected != null,
             onClick = {
-                selected?.let {
-                    onSelectedFolder(selected)
-                    expanded.value = false
-                }
+                val path = selected ?: currentNoteFolderRelativePath
+                onSelectedFolder(path)
+                expanded.value = false
             }
         ) {
 
