@@ -2,6 +2,12 @@ name: Nightly Build
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Should release"
+        type: boolean
+        required: false
+        default: true
   # push:
   #   branches:
   #     - master
@@ -72,6 +78,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish release
+        if: ${{ github.event.inputs.release == 'true' }}
         run: |
           # delete previous nightly release
           gh release delete nightly --yes || true
