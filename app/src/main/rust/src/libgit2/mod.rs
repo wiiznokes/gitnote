@@ -18,6 +18,9 @@ mod merge;
 #[cfg(test)]
 mod test;
 
+#[cfg(test)]
+mod test_merge;
+
 const REMOTE: &str = "origin";
 
 static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));

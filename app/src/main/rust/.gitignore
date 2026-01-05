@@ -1,3 +1,4 @@
 target/
 /openssl-prebuild/*/install
 /vendor
+/repo_test

@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Display};
 
 use anyhow::anyhow;
+use git2::Signature;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jboolean, jint, jobject, jstring};
@@ -145,6 +146,15 @@ pub enum Cred {
 pub struct GitAuthor {
     pub name: String,
     pub email: String,
+}
+
+impl<'a> From<Signature<'a>> for GitAuthor {
+    fn from(value: Signature<'a>) -> Self {
+        GitAuthor {
+            name: value.name().unwrap_or("").to_string(),
+            email: value.email().unwrap_or("").to_string(),
+        }
+    }
 }
 
 impl Debug for Cred {
@@ -381,10 +391,7 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
     let name: String = env.get_string(&name).unwrap().into();
     let email: String = env.get_string(&email).unwrap().into();
-    let author = GitAuthor {
-        name,
-        email
-    };
+    let author = GitAuthor { name, email };
     unwrap_or_log!(libgit2::pull(cred, &author), "pull");
     OK
 }
