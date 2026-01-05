@@ -80,6 +80,17 @@ pub fn init_lib(home_path: String) {
             error!("gitconfig: {e}");
         }
     }
+
+    unsafe {
+        libgit2_sys::git_libgit2_opts(
+            libgit2_sys::GIT_OPT_SET_SERVER_CONNECT_TIMEOUT as std::ffi::c_int,
+            7000,
+        );
+        libgit2_sys::git_libgit2_opts(
+            libgit2_sys::GIT_OPT_SET_SERVER_TIMEOUT as std::ffi::c_int,
+            7000,
+        );
+    };
 }
 
 pub fn create_repo(repo_path: &str) -> Result<(), Error> {
@@ -241,16 +252,7 @@ pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
 
 pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     apply_ssh_workaround(false);
-    unsafe {
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_CONNECT_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
-    };
+
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -282,16 +284,6 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
 
 pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     apply_ssh_workaround(false);
-    unsafe {
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_CONNECT_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
-    };
 
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
