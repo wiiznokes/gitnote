@@ -170,7 +170,10 @@ pub fn clone_repo(
     });
 
     let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
+    fetch_options
+        .remote_callbacks(callbacks)
+        .depth(1)
+        .download_tags(git2::AutotagOption::None);
 
     let mut builder = git2::build::RepoBuilder::new();
 
@@ -305,11 +308,15 @@ pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     }
 
     let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
+    fetch_options
+        .remote_callbacks(callbacks)
+        .depth(1)
+        .download_tags(git2::AutotagOption::None);
 
     let branch = current_branch(repo)?;
+    let refspec = format!("+refs/heads/{}:refs/remotes/origin/{}", branch, branch);
     remote
-        .fetch(&[] as &[&str], Some(&mut fetch_options), None)
+        .fetch(&[&refspec], Some(&mut fetch_options), None)
         .map_err(|e| Error::git2(e, "fetch"))?;
 
     let fetch_head = repo
