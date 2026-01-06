@@ -60,7 +60,7 @@ fn normal_merge(
     )?;
     // Set working tree to match head.
     let mut checkout_opts = git2::build::CheckoutBuilder::new();
-    checkout_opts.force(); // Crucial pour que file2.txt apparaisse sur le disque
+    checkout_opts.force();
     repo.checkout_head(Some(&mut checkout_opts))?;
     
     Ok(())
