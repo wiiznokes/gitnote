@@ -28,7 +28,7 @@ fn normal_merge(
     repo: &Repository,
     local: &git2::AnnotatedCommit,
     remote: &git2::AnnotatedCommit,
-    author: &GitAuthor
+    author: &GitAuthor,
 ) -> Result<(), git2::Error> {
     let local_tree = repo.find_commit(local.id())?.tree()?;
     let remote_tree = repo.find_commit(remote.id())?.tree()?;
@@ -59,7 +59,10 @@ fn normal_merge(
         &[&local_commit, &remote_commit],
     )?;
     // Set working tree to match head.
-    repo.checkout_head(None)?;
+    let mut checkout_opts = git2::build::CheckoutBuilder::new();
+    checkout_opts.force(); // Crucial pour que file2.txt apparaisse sur le disque
+    repo.checkout_head(Some(&mut checkout_opts))?;
+    
     Ok(())
 }
 
@@ -67,7 +70,7 @@ pub fn do_merge<'a>(
     repo: &'a Repository,
     remote_branch: &str,
     fetch_commit: git2::AnnotatedCommit<'a>,
-    author: &GitAuthor
+    author: &GitAuthor,
 ) -> Result<(), Error> {
     // 1. do a merge analysis
     let analysis = repo
