@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ViewList
@@ -71,6 +72,9 @@ import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.manager.SyncState
+import io.github.wiiznokes.gitnote.manager.SyncState.Ok
+import io.github.wiiznokes.gitnote.manager.SyncState.Pull
+import io.github.wiiznokes.gitnote.manager.SyncState.Push
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
@@ -81,6 +85,8 @@ import kotlin.math.roundToInt
 
 
 private const val TAG = "TopGridScreen"
+
+private val ButtonSize = 35.dp
 
 @Composable
 fun TopBar(
@@ -225,15 +231,17 @@ private fun SearchBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                val isEmpty = queryTextField.value.text.isEmpty()
+                val isEmpty = query.isEmpty()
 
                 if (isEmpty) {
-                    SyncStateIcon(syncState) {
-                        consumeOkSyncState()
-                    }
+                    SyncStateIcon(
+                        state = syncState,
+                        onConsumeOkSyncState = consumeOkSyncState
+                    )
                 }
 
                 IconButton(
+                    modifier = Modifier.size(ButtonSize),
                     onClick = {
                         updateSettings {
                             this.noteViewType.update(
@@ -266,7 +274,8 @@ private fun SearchBar(
                     Box {
                         val expanded = remember { mutableStateOf(false) }
                         IconButton(
-                            onClick = { expanded.value = true }
+                            modifier = Modifier.size(ButtonSize),
+                            onClick = { expanded.value = true },
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.Rounded.MoreVert,
@@ -426,75 +435,70 @@ private fun SyncStateIcon(
         modifier = modifier.alpha(alpha.value)
     }
 
-    when (state) {
-        is SyncState.Error -> {
-            val tooltipState = rememberTooltipState(isPersistent = true)
-            val scope = rememberCoroutineScope()
+    val tooltipState = rememberTooltipState(isPersistent = true)
+    var visible by remember(state) { if (state is Ok) mutableStateOf(!state.isConsumed) else mutableStateOf(true) }
 
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-                tooltip = {
-                    if (state.msg != null) {
-                        PlainTooltip {
-                            Text(state.msg)
+    if (state is Ok) {
+        LaunchedEffect(visible) {
+            delay(1000)
+            visible = false
+            onConsumeOkSyncState()
+            tooltipState.dismiss()
+        }
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        exit = fadeOut(animationSpec = tween(durationMillis = 500))
+    ) {
+        val scope = rememberCoroutineScope()
+
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+            tooltip = {
+                PlainTooltip {
+                    Text(state.message())
+                }
+            },
+            state = tooltipState
+        ) {
+            IconButton(
+                modifier = Modifier.size(ButtonSize),
+                onClick = {
+                    scope.launch {
+                        if (tooltipState.isVisible) {
+                            tooltipState.dismiss()
+                        } else {
+                            tooltipState.show()
                         }
                     }
-                },
-                state = tooltipState
+                }
             ) {
-                IconButton(
-                    onClick = {
-                        scope.launch {
-                            if (tooltipState.isVisible) {
-                                tooltipState.dismiss()
-                            } else {
-                                tooltipState.show()
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
+                when (state) {
+                    is SyncState.Error -> Icon(
                         painter = painterResource(R.drawable.cloud_alert_24px),
                         contentDescription = "Sync Error",
                         modifier = modifier
                     )
+                    is Ok -> Icon(
+                        imageVector = Icons.Default.CloudDone,
+                        contentDescription = "Sync Done",
+                        modifier = modifier,
+                    )
+                    Pull -> Icon(
+                        imageVector = Icons.Default.CloudDownload,
+                        contentDescription = "Pulling",
+                        modifier = modifier,
+                    )
+                    Push -> Icon(
+                        imageVector = Icons.Default.CloudUpload,
+                        contentDescription = "Pushing",
+                        modifier = modifier,
+                    )
                 }
-
             }
+
         }
-
-        is SyncState.Ok -> {
-            var visible by remember { mutableStateOf(!state.isConsumed) }
-
-            LaunchedEffect(visible) {
-                delay(1000)
-                visible = false
-                onConsumeOkSyncState()
-            }
-
-            AnimatedVisibility(
-                visible = visible,
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CloudDone,
-                    contentDescription = "Sync Done",
-                    modifier = modifier,
-                )
-            }
-        }
-
-        is SyncState.Pull -> Icon(
-            imageVector = Icons.Default.CloudDownload,
-            contentDescription = "Pulling",
-            modifier = modifier,
-        )
-
-        is SyncState.Push -> Icon(
-            imageVector = Icons.Default.CloudUpload,
-            contentDescription = "Pushing",
-            modifier = modifier,
-        )
     }
 }
 
@@ -513,7 +517,7 @@ private fun TopBarPreview() {
         clearQuery = { },
         search = {},
         noteViewType = NoteViewType.Grid,
-        syncState = SyncState.Ok(false),
+        syncState = SyncState.Error("hello"),
         consumeOkSyncState = {},
         isReadOnlyModeActive = true,
         updateSettings = { },
