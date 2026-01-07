@@ -10,7 +10,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +31,7 @@ import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,11 +42,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,17 +64,17 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.manager.SyncState
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.model.NoteViewType
-import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -84,7 +84,6 @@ private const val TAG = "TopGridScreen"
 
 @Composable
 fun TopBar(
-    vm: GridViewModel,
     padding: PaddingValues,
     offset: Float,
     selectedNotesNumber: Int,
@@ -92,6 +91,16 @@ fun TopBar(
     onSettingsClick: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
+    query: String,
+    clearQuery: () -> Unit,
+    search: (String) -> Unit,
+    noteViewType: NoteViewType,
+    syncState: SyncState,
+    consumeOkSyncState: () -> Unit,
+    isReadOnlyModeActive: Boolean,
+    updateSettings: (suspend AppPreferences.() -> Unit) -> Unit,
+    unselectAllNotes: () -> Unit,
+    deleteSelectedNotes: () -> Unit,
 ) {
 
     AnimatedContent(
@@ -103,16 +112,24 @@ fun TopBar(
                 padding = padding,
                 offset = offset,
                 drawerState = drawerState,
-                vm = vm,
                 onSettingsClick = onSettingsClick,
                 searchFocusRequester = searchFocusRequester,
                 onReloadDatabase = onReloadDatabase,
+                query = query,
+                clearQuery = clearQuery,
+                search = search,
+                noteViewType = noteViewType,
+                syncState = syncState,
+                consumeOkSyncState = consumeOkSyncState,
+                isReadOnlyModeActive = isReadOnlyModeActive,
+                updateSettings = updateSettings,
             )
         } else {
             SelectableTopBar(
                 padding = padding,
-                vm = vm,
-                selectedNotesNumber = selectedNotesNumber
+                selectedNotesNumber = selectedNotesNumber,
+                unselectAllNotes = unselectAllNotes,
+                deleteSelectedNotes = deleteSelectedNotes,
             )
         }
     }
@@ -124,34 +141,39 @@ private fun SearchBar(
     padding: PaddingValues,
     offset: Float,
     drawerState: DrawerState,
-    vm: GridViewModel,
     onSettingsClick: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
+    query: String,
+    clearQuery: () -> Unit,
+    search: (String) -> Unit,
+    noteViewType: NoteViewType,
+    syncState: SyncState,
+    consumeOkSyncState: () -> Unit,
+    isReadOnlyModeActive: Boolean,
+    updateSettings: (suspend AppPreferences.() -> Unit) -> Unit,
 ) {
 
 
     val queryTextField = remember {
         mutableStateOf(
             TextFieldValue(
-                text = vm.query.value,
-                selection = TextRange(vm.query.value.length)
+                text = query,
+                selection = TextRange(query.length)
             )
         )
     }
 
     val focusManager = LocalFocusManager.current
-    fun clearQuery() {
+    fun clearQuery2() {
         queryTextField.value = TextFieldValue("")
-        vm.clearQuery()
+        clearQuery()
         focusManager.clearFocus()
     }
 
-    val query = vm.query.collectAsState()
-    val noteViewType = vm.prefs.noteViewType.getAsState()
-    if (query.value.isNotEmpty()) {
+    if (query.isNotEmpty()) {
         BackHandler {
-            clearQuery()
+            clearQuery2()
         }
     }
 
@@ -167,7 +189,7 @@ private fun SearchBar(
         value = queryTextField.value,
         onValueChange = {
             queryTextField.value = it
-            vm.search(it.text)
+            search(it.text)
         },
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
@@ -206,24 +228,32 @@ private fun SearchBar(
                 val isEmpty = queryTextField.value.text.isEmpty()
 
                 if (isEmpty) {
-                    val syncState = vm.syncState.collectAsState()
-                    SyncStateIcon(syncState.value) {
-                        vm.consumeOkSyncState()
+                    SyncStateIcon(syncState) {
+                        consumeOkSyncState()
                     }
                 }
 
                 IconButton(
-                    onClick = { vm.toggleViewType() }
+                    onClick = {
+                        updateSettings {
+                            this.noteViewType.update(
+                                when (noteViewType) {
+                                    NoteViewType.Grid -> NoteViewType.List
+                                    NoteViewType.List -> NoteViewType.Grid
+                                }
+                            )
+                        }
+                    }
                 ) {
                     SimpleIcon(
-                        imageVector = if (noteViewType.value == NoteViewType.Grid) {
+                        imageVector = if (noteViewType == NoteViewType.Grid) {
                             Icons.AutoMirrored.Rounded.ViewList
                         } else {
                             Icons.Rounded.ViewModule
                         },
                         tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = stringResource(
-                            if (noteViewType.value == NoteViewType.Grid) {
+                            if (noteViewType == NoteViewType.Grid) {
                                 R.string.switch_to_list_view
                             } else {
                                 R.string.switch_to_grid_view
@@ -244,7 +274,6 @@ private fun SearchBar(
                             )
                         }
 
-                        val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
                         @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
                         CustomDropDown(
@@ -255,12 +284,12 @@ private fun SearchBar(
                                     onClick = onSettingsClick
                                 ),
                                 CustomDropDownModel(
-                                    text = if (readOnlyMode) stringResource(
+                                    text = if (isReadOnlyModeActive) stringResource(
                                         R.string.read_only_mode_deactive
                                     ) else stringResource(R.string.read_only_mode_activate),
                                     onClick = {
-                                        vm.viewModelScope.launch {
-                                            vm.prefs.isReadOnlyModeActive.update(!readOnlyMode)
+                                        updateSettings {
+                                            this.isReadOnlyModeActive.update(!isReadOnlyModeActive)
                                         }
                                     }
                                 ),
@@ -277,7 +306,7 @@ private fun SearchBar(
 
                 if (!isEmpty) {
                     IconButton(
-                        onClick = { clearQuery() }
+                        onClick = { clearQuery2() }
                     ) {
                         SimpleIcon(
                             imageVector = Icons.Rounded.Close,
@@ -294,8 +323,9 @@ private fun SearchBar(
 @Composable
 private fun SelectableTopBar(
     padding: PaddingValues,
-    vm: GridViewModel,
-    selectedNotesNumber: Int
+    selectedNotesNumber: Int,
+    unselectAllNotes: () -> Unit,
+    deleteSelectedNotes: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -322,7 +352,7 @@ private fun SelectableTopBar(
             ) {
                 IconButton(
                     onClick = {
-                        vm.unselectAllNotes()
+                        unselectAllNotes()
                     }
                 ) {
                     SimpleIcon(
@@ -362,7 +392,7 @@ private fun SelectableTopBar(
                                     R.plurals.delete_selected_notes,
                                     selectedNotesNumber
                                 ),
-                                onClick = { vm.deleteSelectedNotes() }
+                                onClick = { deleteSelectedNotes() }
                             )
                         )
                     )
@@ -466,4 +496,29 @@ private fun SyncStateIcon(
             modifier = modifier,
         )
     }
+}
+
+
+@Composable
+@Preview
+private fun TopBarPreview() {
+    TopBar(
+        padding = PaddingValues(),
+        offset = 0f,
+        drawerState = rememberDrawerState(DrawerValue.Closed),
+        onSettingsClick = {},
+        searchFocusRequester = remember { FocusRequester() },
+        onReloadDatabase = { },
+        query = "",
+        clearQuery = { },
+        search = {},
+        noteViewType = NoteViewType.Grid,
+        syncState = SyncState.Ok(false),
+        consumeOkSyncState = {},
+        isReadOnlyModeActive = true,
+        updateSettings = { },
+        selectedNotesNumber = 0,
+        unselectAllNotes = { },
+        deleteSelectedNotes = {}
+    )
 }

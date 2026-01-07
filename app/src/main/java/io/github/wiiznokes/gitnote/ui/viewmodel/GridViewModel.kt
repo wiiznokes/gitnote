@@ -97,6 +97,10 @@ class GridViewModel : ViewModel() {
         }
     }
 
+    fun updateSettings(f: suspend AppPreferences.() -> Unit) {
+        viewModelScope.launch { prefs.f() }
+    }
+
     fun search(query: String) {
         viewModelScope.launch {
             _query.emit(query)
@@ -156,17 +160,6 @@ class GridViewModel : ViewModel() {
 
     fun unselectAllNotes() = viewModelScope.launch {
         _selectedNotes.emit(emptyList())
-    }
-
-    fun toggleViewType() {
-        viewModelScope.launch {
-            val next = if (prefs.noteViewType.get() == NoteViewType.Grid) {
-                NoteViewType.List
-            } else {
-                NoteViewType.Grid
-            }
-            prefs.noteViewType.update(next)
-        }
     }
 
     fun deleteSelectedNotes() {

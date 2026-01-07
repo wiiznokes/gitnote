@@ -153,7 +153,6 @@ fun GridScreen(
             )
 
             TopBar(
-                vm = vm,
                 offset = offset.floatValue,
                 selectedNotesNumber = selectedNotes.size,
                 drawerState = drawerState,
@@ -162,7 +161,17 @@ fun GridScreen(
                 padding = padding,
                 onReloadDatabase = {
                     vm.reloadDatabase()
-                }
+                },
+                query = vm.query.collectAsState().value,
+                clearQuery = vm::clearQuery,
+                search = vm::search,
+                noteViewType = vm.prefs.noteViewType.getAsState().value,
+                syncState = vm.syncState.collectAsState().value,
+                consumeOkSyncState = vm::consumeOkSyncState,
+                isReadOnlyModeActive = vm.prefs.isReadOnlyModeActive.getAsState().value,
+                updateSettings = vm::updateSettings,
+                unselectAllNotes = vm::unselectAllNotes,
+                deleteSelectedNotes = vm::deleteSelectedNotes,
             )
 
         }
