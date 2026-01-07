@@ -435,37 +435,21 @@ private fun SyncStateIcon(
         modifier = modifier.alpha(alpha.value)
     }
 
-    @Composable
-    fun icon() {
-        when (state) {
-            is SyncState.Error -> Icon(
-                painter = painterResource(R.drawable.cloud_alert_24px),
-                contentDescription = "Sync Error",
-                modifier = modifier
-            )
-            is Ok -> Icon(
-                imageVector = Icons.Default.CloudDone,
-                contentDescription = "Sync Done",
-                modifier = modifier,
-            )
-            Pull -> Icon(
-                imageVector = Icons.Default.CloudDownload,
-                contentDescription = "Pulling",
-                modifier = modifier,
-            )
-            Push -> Icon(
-                imageVector = Icons.Default.CloudUpload,
-                contentDescription = "Pushing",
-                modifier = modifier,
-            )
+    val tooltipState = rememberTooltipState(isPersistent = true)
+    var visible by remember(state) { if (state is Ok) mutableStateOf(!state.isConsumed) else mutableStateOf(true) }
+
+    if (state is Ok) {
+        LaunchedEffect(visible) {
+            delay(1000)
+            visible = false
+            onConsumeOkSyncState()
+            tooltipState.dismiss()
         }
     }
 
-    val tooltipState = rememberTooltipState(isPersistent = true)
-
-    @Composable
-    fun TooltipBoxCustom(
-        icon: @Composable () -> Unit
+    AnimatedVisibility(
+        visible = visible,
+        exit = fadeOut(animationSpec = tween(durationMillis = 500))
     ) {
         val scope = rememberCoroutineScope()
 
@@ -490,45 +474,30 @@ private fun SyncStateIcon(
                     }
                 }
             ) {
-                icon()
-            }
-
-        }
-    }
-
-
-    when (state) {
-        is SyncState.Error -> {
-            TooltipBoxCustom {
-                icon()
-            }
-        }
-
-        is Ok -> {
-            var visible by remember { mutableStateOf(!state.isConsumed) }
-
-            LaunchedEffect(visible) {
-                delay(1000)
-                visible = false
-                onConsumeOkSyncState()
-            }
-
-            AnimatedVisibility(
-                visible = visible,
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
-            ) {
-                TooltipBoxCustom {
-                    icon()
+                when (state) {
+                    is SyncState.Error -> Icon(
+                        painter = painterResource(R.drawable.cloud_alert_24px),
+                        contentDescription = "Sync Error",
+                        modifier = modifier
+                    )
+                    is Ok -> Icon(
+                        imageVector = Icons.Default.CloudDone,
+                        contentDescription = "Sync Done",
+                        modifier = modifier,
+                    )
+                    Pull -> Icon(
+                        imageVector = Icons.Default.CloudDownload,
+                        contentDescription = "Pulling",
+                        modifier = modifier,
+                    )
+                    Push -> Icon(
+                        imageVector = Icons.Default.CloudUpload,
+                        contentDescription = "Pushing",
+                        modifier = modifier,
+                    )
                 }
             }
-        }
 
-        is Pull -> TooltipBoxCustom {
-            icon()
-        }
-
-        is Push -> TooltipBoxCustom {
-            icon()
         }
     }
 }
