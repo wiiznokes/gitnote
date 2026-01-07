@@ -29,6 +29,15 @@ sealed interface SyncState {
     fun isLoading(): Boolean {
         return this is Pull || this is Push
     }
+
+    fun message(): String {
+        return when (this) {
+            is Error -> this.msg ?: "Unknow Error"
+            is Ok -> "Sync done"
+            Pull -> "Pulling"
+            Push -> "Pushing"
+        }
+    }
 }
 
 sealed class Progress {
