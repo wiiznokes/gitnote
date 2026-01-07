@@ -172,7 +172,6 @@ pub fn clone_repo(
     let mut fetch_options = FetchOptions::new();
     fetch_options
         .remote_callbacks(callbacks)
-        .depth(1)
         .download_tags(git2::AutotagOption::None);
 
     let mut builder = git2::build::RepoBuilder::new();
@@ -310,7 +309,6 @@ pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     let mut fetch_options = FetchOptions::new();
     fetch_options
         .remote_callbacks(callbacks)
-        .depth(1)
         .download_tags(git2::AutotagOption::None);
 
     let branch = current_branch(repo)?;
