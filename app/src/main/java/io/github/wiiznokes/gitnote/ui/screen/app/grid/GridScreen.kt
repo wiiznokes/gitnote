@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
@@ -296,9 +297,9 @@ private fun GridNotesView(
 
         items(
             count = gridNotes.itemCount,
-            key = { index -> gridNotes[index]!!.note.id }
+            key = gridNotes.itemKey { it.note.id }
         ) { index ->
-            val gridNote = gridNotes[index]!!
+            val gridNote = gridNotes[index]  ?: return@items
 
             NoteCard(
                 gridNote = gridNote,
