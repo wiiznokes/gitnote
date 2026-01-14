@@ -16,6 +16,6 @@ There is no plan to add Weblate support for now, because it cost to much money. 
 
 <strong> Please don't translate the README, or other markdown files, this will not be merged. </strong>
 
-# File extensions
+# File extensions
 
 You can add supported file extension by adding an extension in [this those files](./app/src/main/rust/extensions/). Make sure to call `just sort-supported-extension` after.
