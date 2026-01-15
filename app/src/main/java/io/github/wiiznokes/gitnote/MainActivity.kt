@@ -145,9 +145,5 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
 
         Log.d(TAG, "onDestroy")
-
-        runBlocking {
-            appModule.gitManager.shutdown()
-        }
     }
 }

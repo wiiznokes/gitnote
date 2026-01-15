@@ -88,7 +88,7 @@ class GitManager {
 
     suspend fun openRepo(repoPath: String): Result<Unit> = safelyAccessLibGit2 {
         Log.d(TAG, "open repo: $repoPath")
-        if (isRepoInitialized) throw GitException(GitExceptionType.RepoAlreadyInit)
+        if (isRepoInitialized) return@safelyAccessLibGit2
 
         val res = openRepoLib(repoPath)
         if (res < 0) {
