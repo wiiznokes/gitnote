@@ -9,9 +9,7 @@ enum class ExtensionType {
     Markdown;
 }
 
-fun extensionType(extension: String): ExtensionType? = extensionTypeLib(extension)?.let {
-    extensionTypeFromNumber(it)
-}
+fun extensionType(extension: String): ExtensionType? = extensionTypeFromNumber(extensionTypeLib(extension))
 
 private fun extensionTypeFromNumber(num: Int): ExtensionType? =
     when (num) {
