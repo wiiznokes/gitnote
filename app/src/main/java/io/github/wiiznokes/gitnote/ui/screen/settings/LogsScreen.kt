@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
@@ -54,14 +55,23 @@ private enum class LogLevel(val logCat: String) {
     DEBUG("D"),
 }
 
-private val TextSizeRange = 0..2
+private val TextSizeRange = -1..3
 
 @Composable
 private fun getTextStyleFromInt(id: Int): TextStyle {
-    return when {
-        id <= 0 -> MaterialTheme.typography.bodySmall
-        id == 1 -> MaterialTheme.typography.bodyMedium
-        else -> MaterialTheme.typography.bodyLarge
+    return when (id) {
+        -1 -> MaterialTheme.typography.bodySmall.copy(
+            fontSize = 8.sp,
+            lineHeight = 10.sp
+        )
+        0 -> MaterialTheme.typography.bodySmall.copy(
+            fontSize = 10.sp,
+            lineHeight = 12.sp
+        )
+        1 -> MaterialTheme.typography.bodySmall
+        2 -> MaterialTheme.typography.bodyMedium
+        3 -> MaterialTheme.typography.bodyLarge
+        else -> throw Exception("invalid text size $id")
     }
 }
 
