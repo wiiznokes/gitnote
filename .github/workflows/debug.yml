@@ -60,7 +60,7 @@ jobs:
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
           mv app/build/outputs/apk/debug/app-debug.apk packages/gitnote-debug.apk
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: gitnote-debug
           path: packages/*
