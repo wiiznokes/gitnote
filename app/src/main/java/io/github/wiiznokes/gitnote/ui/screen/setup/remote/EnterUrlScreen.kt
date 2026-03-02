@@ -24,7 +24,7 @@ import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 
-private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
+private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:.+(?:\.git)?$""")
 
 fun isUrlSsh(url: String): Boolean {
     return sshGitRegex.matches(url)
