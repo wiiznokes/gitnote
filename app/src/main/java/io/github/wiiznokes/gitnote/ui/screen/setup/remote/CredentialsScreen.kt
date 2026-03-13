@@ -154,7 +154,7 @@ fun CredentialsScreen(
 
                         onClone()
                     },
-                    enabled = username.value.text.isNotEmpty() && password.value.text.isNotEmpty()
+                    enabled = true
                 )
             }
         }
