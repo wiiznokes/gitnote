@@ -17,6 +17,7 @@ mod utils;
 mod key_gen;
 mod libgit2;
 mod mime_types;
+mod url;
 
 #[cfg(test)]
 mod test;
@@ -534,4 +535,35 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_isE
     let extension: String = env.get_string(&extension).unwrap().into();
 
     mime_types::is_extension_supported(extension.as_str()).into()
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getUrlInfoLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    url: JString<'local>,
+) -> jobject {
+    let url: String = env.get_string(&url).unwrap().into();
+
+    let url_info = match url::parse_url(&url) {
+        Ok(info) => info,
+        Err(e) => {
+            error!("{e}");
+            return std::ptr::null_mut();
+        }
+    };
+
+    let is_ssh = url_info.kind == url::UrlKind::Ssh;
+
+    let boolean_class = env.find_class("java/lang/Boolean").unwrap();
+
+    let obj = env
+        .new_object(
+            boolean_class,
+            "(Z)V",
+            &[JValue::Bool(if is_ssh { 1 } else { 0 })],
+        )
+        .unwrap();
+
+    obj.into_raw()
 }
