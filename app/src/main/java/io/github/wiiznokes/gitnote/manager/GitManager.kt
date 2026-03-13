@@ -263,3 +263,7 @@ private external fun isChangeLib(): Int
 private external fun getTimestampsLib(timestamps: HashMap<String, Long>): Int
 
 external fun generateSshKeysLib(): Pair<String, String>
+
+// return true if url is ssh
+external fun getUrlInfoLib(url: String): Boolean?
+
