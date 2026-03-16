@@ -27,7 +27,7 @@ abstract class RepoDatabase : RoomDatabase() {
     abstract val repoDatabaseDao: RepoDatabaseDao
 
     companion object {
-        fun generateUid() = Random.Default.nextInt()
+        fun generateUid() = Random.nextInt()
 
         fun buildDatabase(context: Context): RepoDatabase {
             val onMigration = object : Callback() {

@@ -28,7 +28,7 @@
 
     <string name="none">Aucun</string>
     <string name="settings">Paramètres</string>
-    <string name="search_in_notes">Rechercher dans les notes</string>
+    <string name="search_in_notes">Rechercher</string>
     <string name="user_interface">Interface</string>
     <string name="dynamic_colors">Couleurs dynamique</string>
     <string name="sort_type">Type de tri</string>

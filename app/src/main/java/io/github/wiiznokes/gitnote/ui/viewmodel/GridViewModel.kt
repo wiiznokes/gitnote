@@ -17,6 +17,7 @@ import io.github.wiiznokes.gitnote.data.room.RepoDatabase
 import io.github.wiiznokes.gitnote.helper.NameValidation
 import io.github.wiiznokes.gitnote.manager.StorageManager
 import io.github.wiiznokes.gitnote.ui.model.FileExtension
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,6 +95,10 @@ class GridViewModel : ViewModel() {
             refreshSelectedNotes()
             _isRefreshing.emit(false)
         }
+    }
+
+    fun updateSettings(f: suspend AppPreferences.() -> Unit) {
+        viewModelScope.launch { prefs.f() }
     }
 
     fun search(query: String) {
@@ -254,4 +259,3 @@ class GridViewModel : ViewModel() {
         }
     }
 }
-

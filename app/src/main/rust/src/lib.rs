@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Display};
 
 use anyhow::anyhow;
+use git2::Signature;
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jboolean, jint, jobject, jstring};
@@ -16,6 +17,7 @@ mod utils;
 mod key_gen;
 mod libgit2;
 mod mime_types;
+mod url;
 
 #[cfg(test)]
 mod test;
@@ -38,6 +40,15 @@ impl Error {
         Self::Git2 {
             error,
             msg: msg.into(),
+        }
+    }
+
+    fn add_message(self, msg1: &str) -> Self {
+        match self {
+            Error::Git2 { error, msg } => Error::Git2 {
+                error,
+                msg: format!("{}: {}", msg1, msg),
+            },
         }
     }
 }
@@ -131,6 +142,20 @@ pub enum Cred {
         private_key: String,
         passphrase: Option<String>,
     },
+}
+
+pub struct GitAuthor {
+    pub name: String,
+    pub email: String,
+}
+
+impl<'a> From<Signature<'a>> for GitAuthor {
+    fn from(value: Signature<'a>) -> Self {
+        GitAuthor {
+            name: value.name().unwrap_or("").to_string(),
+            email: value.email().unwrap_or("").to_string(),
+        }
+    }
 }
 
 impl Debug for Cred {
@@ -361,9 +386,14 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<
     mut env: JNIEnv<'local>,
     _class: JClass<'local>,
     cred: JString<'local>,
+    name: JString<'local>,
+    email: JString<'local>,
 ) -> jint {
     let cred = Cred::from_jni(&mut env, &cred).unwrap();
-    unwrap_or_log!(libgit2::pull(cred), "pull");
+    let name: String = env.get_string(&name).unwrap().into();
+    let email: String = env.get_string(&email).unwrap().into();
+    let author = GitAuthor { name, email };
+    unwrap_or_log!(libgit2::pull(cred, &author), "pull");
     OK
 }
 
@@ -505,4 +535,35 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_isE
     let extension: String = env.get_string(&extension).unwrap().into();
 
     mime_types::is_extension_supported(extension.as_str()).into()
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getUrlInfoLib<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JClass<'local>,
+    url: JString<'local>,
+) -> jobject {
+    let url: String = env.get_string(&url).unwrap().into();
+
+    let url_info = match url::parse_url(&url) {
+        Ok(info) => info,
+        Err(e) => {
+            error!("{e}");
+            return std::ptr::null_mut();
+        }
+    };
+
+    let is_ssh = url_info.kind == url::UrlKind::Ssh;
+
+    let boolean_class = env.find_class("java/lang/Boolean").unwrap();
+
+    let obj = env
+        .new_object(
+            boolean_class,
+            "(Z)V",
+            &[JValue::Bool(if is_ssh { 1 } else { 0 })],
+        )
+        .unwrap();
+
+    obj.into_raw()
 }

@@ -48,4 +48,6 @@ sealed interface RemoteDestination : Parcelable {
         val url: String
     ) : RemoteDestination
 
+    @Parcelize
+    data object Logs: RemoteDestination
 }

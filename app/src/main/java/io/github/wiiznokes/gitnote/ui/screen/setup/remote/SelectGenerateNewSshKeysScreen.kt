@@ -1,8 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
@@ -12,7 +10,6 @@ import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
-import io.github.wiiznokes.gitnote.ui.component.SimpleButton
 
 
 @Composable

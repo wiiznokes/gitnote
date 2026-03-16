@@ -5,6 +5,24 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.01]
+
+### Changed
+
+- add note button was simplified
+
+### Added
+
+- shallow clone
+- list view
+- show log in clone page
+- support active branch
+
+### Fixed
+
+- merge incomplete
+- add timeout on push and pull
+
 ## [25.12]
 
 ### Changed

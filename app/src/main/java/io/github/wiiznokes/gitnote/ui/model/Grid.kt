@@ -34,6 +34,11 @@ enum class NoteMinWidth(val size: Int) {
     override fun toString(): String = this.size.toString()
 }
 
+enum class NoteViewType {
+    Grid,
+    List,
+}
+
 data class GridNote(
     @Embedded
     val note: Note,

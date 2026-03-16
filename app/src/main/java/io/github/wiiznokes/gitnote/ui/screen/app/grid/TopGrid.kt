@@ -1,6 +1,5 @@
 package io.github.wiiznokes.gitnote.ui.screen.app.grid
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -21,25 +20,36 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.ViewModule
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipDefaults.rememberTooltipPositionProvider
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,16 +67,20 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.manager.SyncState
+import io.github.wiiznokes.gitnote.manager.SyncState.Ok
+import io.github.wiiznokes.gitnote.manager.SyncState.Pull
+import io.github.wiiznokes.gitnote.manager.SyncState.Push
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
-import io.github.wiiznokes.gitnote.ui.viewmodel.GridViewModel
+import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -74,9 +88,10 @@ import kotlin.math.roundToInt
 
 private const val TAG = "TopGridScreen"
 
+private val ButtonSize = 35.dp
+
 @Composable
 fun TopBar(
-    vm: GridViewModel,
     padding: PaddingValues,
     offset: Float,
     selectedNotesNumber: Int,
@@ -84,6 +99,16 @@ fun TopBar(
     onSettingsClick: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
+    query: String,
+    clearQuery: () -> Unit,
+    search: (String) -> Unit,
+    noteViewType: NoteViewType,
+    syncState: SyncState,
+    consumeOkSyncState: () -> Unit,
+    isReadOnlyModeActive: Boolean,
+    updateSettings: (suspend AppPreferences.() -> Unit) -> Unit,
+    unselectAllNotes: () -> Unit,
+    deleteSelectedNotes: () -> Unit,
 ) {
 
     AnimatedContent(
@@ -95,16 +120,24 @@ fun TopBar(
                 padding = padding,
                 offset = offset,
                 drawerState = drawerState,
-                vm = vm,
                 onSettingsClick = onSettingsClick,
                 searchFocusRequester = searchFocusRequester,
                 onReloadDatabase = onReloadDatabase,
+                query = query,
+                clearQuery = clearQuery,
+                search = search,
+                noteViewType = noteViewType,
+                syncState = syncState,
+                consumeOkSyncState = consumeOkSyncState,
+                isReadOnlyModeActive = isReadOnlyModeActive,
+                updateSettings = updateSettings,
             )
         } else {
             SelectableTopBar(
                 padding = padding,
-                vm = vm,
-                selectedNotesNumber = selectedNotesNumber
+                selectedNotesNumber = selectedNotesNumber,
+                unselectAllNotes = unselectAllNotes,
+                deleteSelectedNotes = deleteSelectedNotes,
             )
         }
     }
@@ -116,34 +149,39 @@ private fun SearchBar(
     padding: PaddingValues,
     offset: Float,
     drawerState: DrawerState,
-    vm: GridViewModel,
     onSettingsClick: () -> Unit,
     searchFocusRequester: FocusRequester,
     onReloadDatabase: () -> Unit,
+    query: String,
+    clearQuery: () -> Unit,
+    search: (String) -> Unit,
+    noteViewType: NoteViewType,
+    syncState: SyncState,
+    consumeOkSyncState: () -> Unit,
+    isReadOnlyModeActive: Boolean,
+    updateSettings: (suspend AppPreferences.() -> Unit) -> Unit,
 ) {
 
 
-    var queryTextField by remember {
-        Log.d(TAG, "")
+    val queryTextField = remember {
         mutableStateOf(
             TextFieldValue(
-                text = vm.query.value,
-                selection = TextRange(vm.query.value.length)
+                text = query,
+                selection = TextRange(query.length)
             )
         )
     }
 
     val focusManager = LocalFocusManager.current
-    fun clearQuery() {
-        queryTextField = TextFieldValue("")
-        vm.clearQuery()
+    fun clearQuery2() {
+        queryTextField.value = TextFieldValue("")
+        clearQuery()
         focusManager.clearFocus()
     }
 
-    val query = vm.query.collectAsState()
-    if (query.value.isNotEmpty()) {
+    if (query.isNotEmpty()) {
         BackHandler {
-            clearQuery()
+            clearQuery2()
         }
     }
 
@@ -156,10 +194,10 @@ private fun SearchBar(
             .padding(top = 15.dp)
             .offset { IntOffset(x = 0, y = offset.roundToInt()) }
             .focusRequester(searchFocusRequester),
-        value = queryTextField,
+        value = queryTextField.value,
         onValueChange = {
-            queryTextField = it
-            vm.search(it.text)
+            queryTextField.value = it
+            search(it.text)
         },
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
@@ -190,24 +228,56 @@ private fun SearchBar(
                 )
             }
         },
-        trailingIcon = if (queryTextField.text.isEmpty()) {
-            {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+        trailingIcon = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                val isEmpty = query.isEmpty()
+
+                if (isEmpty) {
+                    SyncStateIcon(
+                        state = syncState,
+                        onConsumeOkSyncState = consumeOkSyncState
+                    )
+                }
+
+                IconButton(
+                    modifier = Modifier.size(ButtonSize),
+                    onClick = {
+                        updateSettings {
+                            this.noteViewType.update(
+                                when (noteViewType) {
+                                    NoteViewType.Grid -> NoteViewType.List
+                                    NoteViewType.List -> NoteViewType.Grid
+                                }
+                            )
+                        }
+                    }
                 ) {
+                    SimpleIcon(
+                        imageVector = if (noteViewType == NoteViewType.Grid) {
+                            Icons.AutoMirrored.Rounded.ViewList
+                        } else {
+                            Icons.Rounded.ViewModule
+                        },
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        contentDescription = stringResource(
+                            if (noteViewType == NoteViewType.Grid) {
+                                R.string.switch_to_list_view
+                            } else {
+                                R.string.switch_to_grid_view
+                            }
+                        )
+                    )
+                }
 
-                    val syncState = vm.syncState.collectAsState()
-
-                    SyncStateIcon(syncState.value, {
-                        vm.consumeOkSyncState()
-                    })
-
+                if (isEmpty) {
                     Box {
                         val expanded = remember { mutableStateOf(false) }
                         IconButton(
-                            onClick = {
-                                expanded.value = true
-                            }
+                            modifier = Modifier.size(ButtonSize),
+                            onClick = { expanded.value = true },
                         ) {
                             SimpleIcon(
                                 imageVector = Icons.Rounded.MoreVert,
@@ -215,9 +285,8 @@ private fun SearchBar(
                             )
                         }
 
-                        val readOnlyMode = vm.prefs.isReadOnlyModeActive.getAsState().value
 
-                        @Suppress("KotlinConstantConditions")
+                        @Suppress("KotlinConstantConditions", "SimplifyBooleanWithConstants")
                         CustomDropDown(
                             expanded = expanded,
                             options = listOf(
@@ -226,12 +295,12 @@ private fun SearchBar(
                                     onClick = onSettingsClick
                                 ),
                                 CustomDropDownModel(
-                                    text = if (readOnlyMode) stringResource(
+                                    text = if (isReadOnlyModeActive) stringResource(
                                         R.string.read_only_mode_deactive
                                     ) else stringResource(R.string.read_only_mode_activate),
                                     onClick = {
-                                        vm.viewModelScope.launch {
-                                            vm.prefs.isReadOnlyModeActive.update(!readOnlyMode)
+                                        updateSettings {
+                                            this.isReadOnlyModeActive.update(!isReadOnlyModeActive)
                                         }
                                     }
                                 ),
@@ -245,18 +314,16 @@ private fun SearchBar(
                         )
                     }
                 }
-            }
-        } else {
-            {
-                IconButton(
-                    onClick = {
-                        clearQuery()
+
+                if (!isEmpty) {
+                    IconButton(
+                        onClick = { clearQuery2() }
+                    ) {
+                        SimpleIcon(
+                            imageVector = Icons.Rounded.Close,
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                ) {
-                    SimpleIcon(
-                        imageVector = Icons.Rounded.Close,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
                 }
             }
         }
@@ -267,8 +334,9 @@ private fun SearchBar(
 @Composable
 private fun SelectableTopBar(
     padding: PaddingValues,
-    vm: GridViewModel,
-    selectedNotesNumber: Int
+    selectedNotesNumber: Int,
+    unselectAllNotes: () -> Unit,
+    deleteSelectedNotes: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -295,7 +363,7 @@ private fun SelectableTopBar(
             ) {
                 IconButton(
                     onClick = {
-                        vm.unselectAllNotes()
+                        unselectAllNotes()
                     }
                 ) {
                     SimpleIcon(
@@ -335,7 +403,7 @@ private fun SelectableTopBar(
                                     R.plurals.delete_selected_notes,
                                     selectedNotesNumber
                                 ),
-                                onClick = { vm.deleteSelectedNotes() }
+                                onClick = { deleteSelectedNotes() }
                             )
                         )
                     )
@@ -346,6 +414,7 @@ private fun SelectableTopBar(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SyncStateIcon(
     state: SyncState,
@@ -368,46 +437,94 @@ private fun SyncStateIcon(
         modifier = modifier.alpha(alpha.value)
     }
 
-    when (state) {
-        is SyncState.Error -> {
-            Icon(
-                painter = painterResource(R.drawable.cloud_alert_24px),
-                contentDescription = "Sync Error",
-                modifier = modifier,
-            )
+    val tooltipState = rememberTooltipState(isPersistent = true)
+    var visible by remember(state) { if (state is Ok) mutableStateOf(!state.isConsumed) else mutableStateOf(true) }
+
+    if (state is Ok) {
+        LaunchedEffect(visible) {
+            delay(1000)
+            visible = false
+            onConsumeOkSyncState()
+            tooltipState.dismiss()
         }
-
-        is SyncState.Ok -> {
-            var visible by remember { mutableStateOf(!state.isConsumed) }
-
-            LaunchedEffect(visible) {
-                delay(1000)
-                visible = false
-                onConsumeOkSyncState()
-            }
-
-            AnimatedVisibility(
-                visible = visible,
-                exit = fadeOut(animationSpec = tween(durationMillis = 500))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CloudDone,
-                    contentDescription = "Sync Done",
-                    modifier = modifier,
-                )
-            }
-        }
-
-        is SyncState.Pull -> Icon(
-            imageVector = Icons.Default.CloudDownload,
-            contentDescription = "Pulling",
-            modifier = modifier,
-        )
-
-        is SyncState.Push -> Icon(
-            imageVector = Icons.Default.CloudUpload,
-            contentDescription = "Pushing",
-            modifier = modifier,
-        )
     }
+
+    AnimatedVisibility(
+        visible = visible,
+        exit = fadeOut(animationSpec = tween(durationMillis = 500))
+    ) {
+        val scope = rememberCoroutineScope()
+
+        TooltipBox(
+            positionProvider = rememberTooltipPositionProvider(TooltipAnchorPosition.Below),
+            tooltip = {
+                PlainTooltip {
+                    Text(state.message())
+                }
+            },
+            state = tooltipState
+        ) {
+            IconButton(
+                modifier = Modifier.size(ButtonSize),
+                onClick = {
+                    scope.launch {
+                        if (tooltipState.isVisible) {
+                            tooltipState.dismiss()
+                        } else {
+                            tooltipState.show()
+                        }
+                    }
+                }
+            ) {
+                when (state) {
+                    is SyncState.Error -> Icon(
+                        painter = painterResource(R.drawable.cloud_alert_24px),
+                        contentDescription = "Sync Error",
+                        modifier = modifier
+                    )
+                    is Ok -> Icon(
+                        imageVector = Icons.Default.CloudDone,
+                        contentDescription = "Sync Done",
+                        modifier = modifier,
+                    )
+                    Pull -> Icon(
+                        imageVector = Icons.Default.CloudDownload,
+                        contentDescription = "Pulling",
+                        modifier = modifier,
+                    )
+                    Push -> Icon(
+                        imageVector = Icons.Default.CloudUpload,
+                        contentDescription = "Pushing",
+                        modifier = modifier,
+                    )
+                }
+            }
+
+        }
+    }
+}
+
+
+@Composable
+@Preview
+private fun TopBarPreview() {
+    TopBar(
+        padding = PaddingValues(),
+        offset = 0f,
+        drawerState = rememberDrawerState(DrawerValue.Closed),
+        onSettingsClick = {},
+        searchFocusRequester = remember { FocusRequester() },
+        onReloadDatabase = { },
+        query = "",
+        clearQuery = { },
+        search = {},
+        noteViewType = NoteViewType.Grid,
+        syncState = SyncState.Error("hello"),
+        consumeOkSyncState = {},
+        isReadOnlyModeActive = true,
+        updateSettings = { },
+        selectedNotesNumber = 0,
+        unselectAllNotes = { },
+        deleteSelectedNotes = {}
+    )
 }

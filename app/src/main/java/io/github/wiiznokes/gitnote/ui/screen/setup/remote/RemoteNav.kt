@@ -22,7 +22,9 @@ import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.PickRepo
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenerateNewSshKeys
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvider
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
+import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
+import io.github.wiiznokes.gitnote.ui.screen.settings.LogsScreen
 import io.github.wiiznokes.gitnote.ui.utils.slide
 import io.github.wiiznokes.gitnote.ui.viewmodel.SetupViewModel
 
@@ -177,8 +179,20 @@ fun RemoteScreen(
                 onCancel = {
                     if (vm.cancelClone())
                         navController.pop()
+                },
+                onShowLogs = {
+                    navController.navigate(RemoteDestination.Logs)
                 }
+
             )
+
+            RemoteDestination.Logs -> {
+                LogsScreen(
+                    onBackClick = {
+                        navController.pop()
+                    },
+                )
+            }
         }
     }
 }

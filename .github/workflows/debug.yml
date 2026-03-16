@@ -1,21 +1,10 @@
-name: Nightly Build
+name: Debug Build
 
 on:
   workflow_dispatch:
-    inputs:
-      release:
-        description: "Should release"
-        type: boolean
-        required: false
-        default: true
-  # push:
-  #   branches:
-  #     - master
-  #   paths-ignore:
-  #     - "*.md"
 
 concurrency:
-  group: ${{ github.sha }}-${{ github.workflow }}-nightly
+  group: ${{ github.sha }}-${{ github.workflow }}-debug
   cancel-in-progress: true
 
 env:
@@ -25,7 +14,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  nightly:
+  debug:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -60,34 +49,19 @@ jobs:
         run: |
           wget -q "https://dl.google.com/android/repository/android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
           unzip -q "./android-ndk-${{ steps.versions.outputs.ndk }}-linux.zip"
-          make SOURCE_DATE_EPOCH=0 NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" DEBUG=0 -C app/src/main/rust build_install
+          make SOURCE_DATE_EPOCH=0 NDK_PATH="$(pwd)/android-ndk-${{ steps.versions.outputs.ndk }}/toolchains/llvm/prebuilt/linux-x86_64/bin" -C app/src/main/rust build_install
 
       - name: Build App
         run: |
-          ./gradlew assembleNightly
+          ./gradlew assembleDebug
 
           mkdir -p packages
           # warning: do not use github.event syntax here
           # https://stackoverflow.com/questions/71458189/github-action-workflow-call-does-not-use-up-to-date-input-values
-          mv app/build/outputs/apk/nightly/app-nightly.apk packages/gitnote-nightly.apk
+          mv app/build/outputs/apk/debug/app-debug.apk packages/gitnote-debug.apk
 
       - uses: actions/upload-artifact@v7
         with:
-          name: gitnote-nightly
+          name: gitnote-debug
           path: packages/*
           if-no-files-found: error
-
-      - name: Publish release
-        if: ${{ github.event.inputs.release == 'true' }}
-        run: |
-          # delete previous nightly release
-          gh release delete nightly --yes || true
-          git push --delete origin nightly || true
-
-          git tag nightly
-          git push origin --tags
-
-          # https://cli.github.com/manual/gh_release_create
-          gh release create nightly --title "nightly" \
-            --verify-tag --prerelease --generate-notes --target $GITHUB_SHA \
-            ./packages/*

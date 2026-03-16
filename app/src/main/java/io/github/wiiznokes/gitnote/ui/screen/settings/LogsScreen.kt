@@ -28,14 +28,13 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
+import androidx.compose.ui.unit.sp
 import io.github.wiiznokes.gitnote.BuildConfig
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDown
 import io.github.wiiznokes.gitnote.ui.component.CustomDropDownModel
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
-import io.github.wiiznokes.gitnote.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,14 +55,23 @@ private enum class LogLevel(val logCat: String) {
     DEBUG("D"),
 }
 
-private val TextSizeRange = 0..2
+private val TextSizeRange = -1..3
 
 @Composable
 private fun getTextStyleFromInt(id: Int): TextStyle {
-    return when {
-        id <= 0 -> MaterialTheme.typography.bodySmall
-        id == 1 -> MaterialTheme.typography.bodyMedium
-        else -> MaterialTheme.typography.bodyLarge
+    return when (id) {
+        -1 -> MaterialTheme.typography.bodySmall.copy(
+            fontSize = 8.sp,
+            lineHeight = 10.sp
+        )
+        0 -> MaterialTheme.typography.bodySmall.copy(
+            fontSize = 10.sp,
+            lineHeight = 12.sp
+        )
+        1 -> MaterialTheme.typography.bodySmall
+        2 -> MaterialTheme.typography.bodyMedium
+        3 -> MaterialTheme.typography.bodyLarge
+        else -> throw Exception("invalid text size $id")
     }
 }
 
@@ -71,15 +79,16 @@ private fun getTextStyleFromInt(id: Int): TextStyle {
 @Composable
 fun LogsScreen(
     onBackClick: () -> Unit,
-    vm: SettingsViewModel
 ) {
 
     val logLevel = remember {
         mutableStateOf(LogLevel.ERROR)
     }
 
+    val initTextValue = stringResource(R.string.loading)
+
     val logState: MutableState<String> = remember {
-        mutableStateOf(vm.uiHelper.getString(R.string.loading))
+        mutableStateOf(initTextValue)
     }
 
 
@@ -141,7 +150,7 @@ fun LogsScreen(
                             ClipData.Item(logState.value)
                         )
 
-                        vm.viewModelScope.launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             clipboardManager.setClipEntry(ClipEntry(data))
                         }
 

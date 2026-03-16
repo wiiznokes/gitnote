@@ -74,32 +74,17 @@ private fun SetupTitle(
     )
 }
 
-@Composable
-fun NextButton(
-    modifier: Modifier = Modifier,
-    text: String,
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-) {
-    Button(
-        modifier = modifier
-            .fillMaxWidth(),
-        onClick = onClick,
-        enabled = enabled
-    ) {
-        Text(text = text)
-    }
-}
 
 @Composable
 fun SetupButton(
+    modifier: Modifier = Modifier,
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
     link: Boolean = false,
 ) {
     Button(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
         onClick = onClick,
         enabled = enabled

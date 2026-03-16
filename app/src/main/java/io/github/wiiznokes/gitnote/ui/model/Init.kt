@@ -39,7 +39,8 @@ enum class CredType {
 @Parcelize
 sealed class StorageConfiguration : Parcelable {
     data object App : StorageConfiguration()
-    class Device(var path: String, val useUrlForRootFolder: Boolean = false) : StorageConfiguration()
+    class Device(var path: String, val useUrlForRootFolder: Boolean = false) :
+        StorageConfiguration()
 
     fun repoPath(): String {
         return when (this) {

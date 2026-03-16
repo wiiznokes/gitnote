@@ -47,7 +47,6 @@ _Supported Architecture: `arm64-v8a`, `x86_64`_
 
 # Current limitation
 
-- Only repositories with a branch "main" are supported
 - Android does not differentiate case for file name, so if you have a folder named `A` and another folder named `a`, `a` will not be displayed.
 - Conflict will make the app crash
 

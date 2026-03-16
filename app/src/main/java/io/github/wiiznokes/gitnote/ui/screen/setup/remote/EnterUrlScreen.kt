@@ -17,22 +17,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.manager.getUrlInfoLib
 import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.component.NextButton
 import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 
-private val sshGitRegex = Regex("""^(?:git@|ssh://git@)[\w.-]+:[\w./-]+(?:\.git)?$""")
 
 fun isUrlSsh(url: String): Boolean {
-    return sshGitRegex.matches(url)
+    return getUrlInfoLib(url) == true
 }
 
 private fun isUrlCorrect(url: String): Boolean {
-    return url.isNotBlank()
+    return getUrlInfoLib(url) != null
 }
 
 @Composable
@@ -71,7 +70,7 @@ fun EnterUrlWithProviderScreen(
                 UrlTextField(url = url)
             }
 
-            NextButton(
+            SetupButton(
                 text = stringResource(R.string.next),
                 onClick = {
                     onUrl(url.value.text)
@@ -106,7 +105,7 @@ fun EnterUrlScreen(
                 UrlTextField(url = url)
             }
 
-            NextButton(
+            SetupButton(
                 text = stringResource(R.string.next),
                 onClick = {
                     onUrl(url.value.text)

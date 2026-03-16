@@ -11,15 +11,17 @@ use git2::{
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
-use crate::{Cred, Error, ProgressCB, mime_types::is_extension_supported};
+use crate::{Cred, Error, GitAuthor, ProgressCB, mime_types::is_extension_supported};
 
 mod merge;
 
 #[cfg(test)]
 mod test;
 
+#[cfg(test)]
+mod test_merge;
+
 const REMOTE: &str = "origin";
-const BRANCH: &str = "main";
 
 static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(None));
 
@@ -81,6 +83,17 @@ pub fn init_lib(home_path: String) {
             error!("gitconfig: {e}");
         }
     }
+
+    unsafe {
+        libgit2_sys::git_libgit2_opts(
+            libgit2_sys::GIT_OPT_SET_SERVER_CONNECT_TIMEOUT as std::ffi::c_int,
+            7000,
+        );
+        libgit2_sys::git_libgit2_opts(
+            libgit2_sys::GIT_OPT_SET_SERVER_TIMEOUT as std::ffi::c_int,
+            7000,
+        );
+    };
 }
 
 pub fn create_repo(repo_path: &str) -> Result<(), Error> {
@@ -97,6 +110,22 @@ pub fn open_repo(repo_path: &str) -> Result<(), Error> {
     REPO.lock().unwrap().replace(repo);
 
     Ok(())
+}
+
+fn current_branch(repo: &Repository) -> Result<String, Error> {
+    let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
+
+    if head.is_branch()
+        && let Some(name) = head.shorthand()
+    {
+        return Ok(name.to_string());
+    }
+
+    // Detached HEAD or not a branch
+    Err(Error::git2(
+        git2::Error::from_str("unable to determine default branch"),
+        "",
+    ))
 }
 
 fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
@@ -141,7 +170,9 @@ pub fn clone_repo(
     });
 
     let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
+    fetch_options
+        .remote_callbacks(callbacks)
+        .download_tags(git2::AutotagOption::None);
 
     let mut builder = git2::build::RepoBuilder::new();
 
@@ -213,8 +244,7 @@ pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
     // Get HEAD commit as parent, and Allow initial commit
     let parent_commit = repo.head().and_then(|r| r.peel_to_commit()).ok();
 
-    let sig =
-        Signature::now(name, email).map_err(|e| Error::git2(e, "Signature::now"))?;
+    let sig = Signature::now(name, email).map_err(|e| Error::git2(e, "Signature::now"))?;
 
     // Create commit
     match parent_commit {
@@ -227,6 +257,7 @@ pub fn commit_all(name: &str, email: &str, message: &str) -> Result<(), Error> {
 
 pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     apply_ssh_workaround(false);
+
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -234,7 +265,8 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
         .find_remote(REMOTE)
         .map_err(|e| Error::git2(e, "find_remote"))?;
 
-    let refspecs = [format!("refs/heads/{BRANCH}:refs/heads/{BRANCH}")];
+    let branch = current_branch(repo)?;
+    let refspecs = [format!("refs/heads/{branch}:refs/heads/{branch}")];
 
     let mut callbacks = RemoteCallbacks::new();
 
@@ -255,8 +287,9 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
+pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     apply_ssh_workaround(false);
+
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
@@ -274,10 +307,14 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
     }
 
     let mut fetch_options = FetchOptions::new();
-    fetch_options.remote_callbacks(callbacks);
+    fetch_options
+        .remote_callbacks(callbacks)
+        .download_tags(git2::AutotagOption::None);
 
+    let branch = current_branch(repo)?;
+    let refspec = format!("+refs/heads/{}:refs/remotes/origin/{}", branch, branch);
     remote
-        .fetch(&[] as &[&str], Some(&mut fetch_options), None)
+        .fetch(&[&refspec], Some(&mut fetch_options), None)
         .map_err(|e| Error::git2(e, "fetch"))?;
 
     let fetch_head = repo
@@ -288,7 +325,7 @@ pub fn pull(cred: Option<Cred>) -> Result<(), Error> {
         .reference_to_annotated_commit(&fetch_head)
         .map_err(|e| Error::git2(e, "reference_to_annotated_commit"))?;
 
-    merge::do_merge(repo, BRANCH, commit).map_err(|e| Error::git2(e, "do_merge"))?;
+    merge::do_merge(repo, &branch, commit, author).map_err(|e| e.add_message("do_merge"))?;
 
     Ok(())
 }

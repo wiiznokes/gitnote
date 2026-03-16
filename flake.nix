@@ -23,7 +23,7 @@
       };
 
       # Match app/src/main/rust/RUST_VERSION
-      rustToolchain = pkgs.rust-bin.stable."1.89.0".default.override {
+      rustToolchain = pkgs.rust-bin.stable."1.91.1".default.override {
         targets = [
           "aarch64-linux-android"
           "x86_64-linux-android"
@@ -72,13 +72,7 @@
         shellHook = ''
           build_tools_version="36.0.0"
           cmake_version="3.22.1"
-          sdk_root="${android.androidsdk}"
-          for candidate in "$sdk_root" "$sdk_root/share/android-sdk" "$sdk_root/libexec/android-sdk"; do
-            if [ -d "$candidate/platforms" ]; then
-              sdk_root="$candidate"
-              break
-            fi
-          done
+          sdk_root="${android.androidsdk}/libexec/android-sdk"
 
           export ANDROID_SDK_ROOT="$sdk_root"
           export ANDROID_HOME="$sdk_root"
@@ -94,10 +88,7 @@
           export AR_aarch64_linux_android="$NDK_PATH/llvm-ar"
 
           export PATH="$NDK_PATH:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/$build_tools_version:$ANDROID_SDK_ROOT/cmake/$cmake_version/bin:$PATH"
-
-          # FIXME: https://github.com/NixOS/nixpkgs/issues/402297
-          # export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=$ANDROID_SDK_ROOT/build-tools/$build_tools_version/aapt2"
-          # Workaround with `-Dorg.gradle.project.android.aapt2FromMavenOverride=$ANDROID_SDK_ROOT/build-tools/36.0.0/aapt2`
+          export GRADLE_OPTS="-Dorg.gradle.project.android.aapt2FromMavenOverride=$ANDROID_SDK_ROOT/build-tools/$build_tools_version/aapt2"
 
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           echo "ANDROID_NDK_ROOT=$ANDROID_NDK_ROOT"

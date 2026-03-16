@@ -37,7 +37,7 @@ import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.provider.RepoInfo
 import io.github.wiiznokes.gitnote.provider.UserInfo
 import io.github.wiiznokes.gitnote.ui.component.AppPage
-import io.github.wiiznokes.gitnote.ui.component.NextButton
+import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.viewmodel.InitState
@@ -210,9 +210,9 @@ fun PickRepoScreen(
 
             }
 
-            NextButton(
+            SetupButton(
                 modifier = Modifier.padding(vertical = 10.dp),
-                text = stringResource(R.string.next),
+                text = stringResource(R.string.clone_repo),
                 onClick = {
 
                     val selected = selected.value
