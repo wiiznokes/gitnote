@@ -33,6 +33,7 @@
     <string name="password">Senha</string>
     <string name="username">Nome de usuário</string>
     <string name="remote_url">URL remota</string>
+    <string name="git_author_email">Email do autor Git</string>
     <string name="close_repository">Fechar repositório</string>
     <string name="close_repository_confirmation">Deseja realmente fechar o repositório?</string>
     <string name="version">Versão</string>
@@ -67,6 +68,7 @@
     <string name="error_folder_already_exist">Pasta já existente</string>
     <string name="error_note_is_the_same">Sem modificação</string>
     <string name="grid">Grade</string>
+    <string name="switch_to_grid_view">Mudar para formato de grade</string>
     <string name="about">Sobre</string>
     <string name="app_page_choose_method">Escolher método</string>
     <string name="create_local_repo">Criar repositório local</string>
@@ -125,7 +127,8 @@
     <string name="create_private_repo">Criar repositório privado %1$s</string>
     <string name="we_need_ssh_keys_to_authenticate">Precisa das chaves SSH para autenticar</string>
     <string name="generate_new_keys">Gerar novas chaves</string>
-    <string name="custom">Cursomizar</string>
+    <string name="custom_ssh_keys">Usar chaves SSH próprias</string>
+    <string name="custom">Personalizar</string>
     <string name="git_hosting_provider">Provedor de Git hospedado</string>
     <string name="select_a_git_hosting_provider">Selecione um provedor de Git hospedado</string>
     <string name="setup_selection">Selecionar configuração</string>
@@ -135,5 +138,15 @@
     <string name="loading">Carregando…</string>
     <string name="logs">Logs</string>
     <string name="extension">Extensão: %1$s</string>
+    <string name="parent_path">Caminho: %1$s</string>
     <string name="pick_folder">Escolher esta pasta</string>
+    <string name="list">Lista</string>
+    <string name="switch_to_list_view">Mudar para formato de lista</string>
+    <string name="public_key">Chave pública</string>
+    <string name="load_from_file">Carregar de um arquivo</string>
+    <string name="private_key">Chave privada</string>
+    <string name="private_key_password">Senha da chave privada</string>
+    <string name="cancel">Cancelar</string>
+    <string name="go_back">Voltar</string>
+    <string name="git_author_name">Nome do autor Git</string>
 </resources>
