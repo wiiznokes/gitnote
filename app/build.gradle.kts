@@ -185,6 +185,7 @@ dependencies {
 
     // unit test
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 
     // integration test
     androidTestImplementation(composeBom)
