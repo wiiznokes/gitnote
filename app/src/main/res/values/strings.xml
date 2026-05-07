@@ -157,7 +157,7 @@
     <string name="loading">Loading…</string>
     <string name="logs">Logs</string>
     <string name="extension">Extension: %1$s</string>
-    <string name="parent_path">Parent: %1$s</string>
+    <string name="parent_path">Parent folder: %1$s</string>
     <string name="pick_folder">Pick this folder</string>
     <string name="public_key">Public key</string>
     <string name="load_from_file">Load from file</string>
@@ -165,5 +165,6 @@
     <string name="private_key_password">Private key password</string>
     <string name="cancel">Cancel</string>
     <string name="go_back">Go back</string>
+    <string name="confirmation_quit_edit_dialog">Are you sure you want to quit ? You will lose all changes.</string>
 
 </resources>

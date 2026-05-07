@@ -6,18 +6,13 @@
     <string name="dark_theme">Sombre</string>
 
 
-    <string name="modification_sort_type">Modification</string>
-    <string name="alpha_numeric_sort_type">Alpha numérique</string>
-
-    <string name="ascending_sort_order">Ascendant</string>
-    <string name="descending_sort_order">Descendant</string>
-
 
     <string name="error_invalid_name">Le nom est invalide</string>
     <string name="error_invalid_extension">L\'extension est invalide</string>
 
     <string name="error_folder_already_exist">Le dossier existe déjà</string>
 
+    <string name="oldest_sort_order">Plus ancient</string>
     <string name="new_folder_label">Nom du nouveau dossier</string>
     <string name="create_new_folder">Créer un nouveau dossier</string>
 
@@ -31,8 +26,9 @@
     <string name="search_in_notes">Rechercher</string>
     <string name="user_interface">Interface</string>
     <string name="dynamic_colors">Couleurs dynamique</string>
-    <string name="sort_type">Type de tri</string>
+
     <string name="sort_order">Odre du tri</string>
+    <string name="defaultPathForNewNote">Chemin par défaut pour les nouvelles notes</string>
     <string name="minimal_note_width">Largeur minimal d\'une note</string>
     <string name="show_long_notes">Montrer les longues notes entièrement</string>
     <string name="remember_last_opened_folder">Se souvenir du dernier dossier ouvert</string>
@@ -47,10 +43,12 @@
     <string name="password">Mot de passe</string>
     <string name="username">Nom d\'utilisateur</string>
     <string name="remote_url">Url du dépôt distant</string>
+    <string name="git_author_email">Mail de l\'auteur Git</string>
     <string name="close_repository">Fermer le dépôt</string>
     <string name="close_repository_confirmation">Voulez vous vraiment fermer le dépôt ?</string>
     <string name="version">Version</string>
     <string name="show_logs">Montrer les logs</string>
+    <string name="success_reload">La base de donnée a été rechargé avec succès</string>
     <string name="report_an_issue">Signaler un problème</string>
     <string name="source_code">Code source</string>
     <string name="libraries">Bibliothèques open source</string>
@@ -75,6 +73,7 @@
     <string name="error_create_repo">Impossible de créer le dépôt: %1$s</string>
     <string name="error_note_is_the_same">Aucune modification</string>
     <string name="grid">Grille</string>
+    <string name="switch_to_grid_view">Passer à l\'affichage en grille</string>
     <string name="about">À propos</string>
     <string name="app_page_choose_method">Choisir la méthode</string>
     <string name="create_local_repo">Créer un dépôt local</string>
@@ -87,6 +86,7 @@
     <string name="create_repo_explorer">Créer un dépôt dans ce dossier</string>
     <string name="open_repo_explorer">Ouvrir ce dépôt</string>
     <string name="clone_repo_explorer">Cloner le dépôt dans ce dossier</string>
+    <string name="clone_repo_explorer_use_url_for_root_folder">Clonez le dépôt dans ce dossier et utilisez l\'URL comme nom du dossier racine</string>
     <string name="quick_links">Liens rapides</string>
     <string name="quick_links_home_page">Page d\'accueil</string>
     <string name="quick_links_create_repo">Créer dépôt</string>
@@ -125,6 +125,7 @@
 
     <string name="read_only_mode_activate">Activer la lecture seule</string>
     <string name="read_only_mode_deactive">Desactiver la lecture seule</string>
+    <string name="authorize_gitnote">Autoriser Gitnote et récupérer les métadonnées des dépôts</string>
     <string name="clone_url">Clone URL</string>
     <string name="url_explain_create_remote_repo">"Allez sur la page Web, créez un référentiel et copiez son URL"</string>
     <string name="url_explain_enter_url">Entrez l\'URL de clonage</string>
@@ -146,6 +147,7 @@
     <string name="create_private_repo">Créer un dépôt privé %1$s</string>
     <string name="we_need_ssh_keys_to_authenticate">Besoin de clés SSH pour s\'authentifier</string>
     <string name="generate_new_keys">Générer de nouvelles clés</string>
+    <string name="custom">Non spécifié</string>
     <string name="git_hosting_provider">Fournisseur d\'hébergement Git</string>
     <string name="select_a_git_hosting_provider">Sélectionnez un fournisseur d\'hébergement Git</string>
     <string name="setup_selection">Sélection de la configuration</string>
@@ -155,4 +157,23 @@
     <string name="loading">Chargement…</string>
     <string name="logs">Journaux</string>
     <string name="extension">Extension: %1$s</string>
+    <string name="az_sort_order">A-Z</string>
+    <string name="za_sort_order">Z-A</string>
+    <string name="most_recent_sort_order">Plus récent</string>
+    <string name="sort_order_folder">Odre du tri des dossiers</string>
+    <string name="git_author_name">Nom de l\'auteur Git</string>
+    <string name="reload_database">Recharger la base de donnée</string>
+    <string name="list">Liste</string>
+    <string name="switch_to_list_view">Passer à l\'affichage en liste</string>
+    <string name="authorize_gitnote_title">Récupérer les métadonnées des dépôts</string>
+    <string name="custom_ssh_keys">Utiliser des clés SSH personnalisées</string>
+    <string name="parent_path">Dossier parent: %1$s</string>
+    <string name="pick_folder">Sélectionnez ce dossier</string>
+    <string name="public_key">Clé publique</string>
+    <string name="load_from_file">Charger depuis un fichier</string>
+    <string name="private_key">Clé privée</string>
+    <string name="private_key_password">Mot de passe de la clé privée</string>
+    <string name="cancel">Annuler</string>
+    <string name="go_back">Retour</string>
+    <string name="confirmation_quit_edit_dialog">Êtes-vous sûr de vouloir abandonner ? Vous perdrez toutes vos modifications.</string>
 </resources>

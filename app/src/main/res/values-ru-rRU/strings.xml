@@ -2,10 +2,6 @@
     <string name="system_theme">Системная</string>
     <string name="light_theme">Светлая</string>
     <string name="dark_theme">Тёмная</string>
-    <string name="modification_sort_type">По изменению</string>
-    <string name="alpha_numeric_sort_type">По алфавиту и числам</string>
-    <string name="ascending_sort_order">По возрастанию</string>
-    <string name="descending_sort_order">По убыванию</string>
     <string name="new_folder_label">Имя новой папки</string>
     <string name="create_new_folder">Создать новую папку</string>
     <string name="yes">Да</string>
@@ -16,7 +12,6 @@
     <string name="search_in_notes">Поиск в заметках</string>
     <string name="user_interface">Интерфейс</string>
     <string name="dynamic_colors">Динамические цвета</string>
-    <string name="sort_type">Тип сортировки</string>
     <string name="sort_order">Порядок сортировки</string>
     <string name="minimal_note_width">Минимальная ширина заметки</string>
     <string name="show_long_notes">Показывать длинные заметки полностью</string>
