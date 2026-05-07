@@ -2,10 +2,6 @@
     <string name="system_theme">Systémový</string>
     <string name="light_theme">Světlý</string>
     <string name="dark_theme">Tmavý</string>
-    <string name="modification_sort_type">Modifikace</string>
-    <string name="alpha_numeric_sort_type">Alfanumerické</string>
-    <string name="ascending_sort_order">Vzestupné</string>
-    <string name="descending_sort_order">Sestupné</string>
     <string name="new_folder_label">Název nové složky</string>
     <string name="create_new_folder">Vytvořit novou složku</string>
     <string name="yes">Ano</string>
@@ -16,7 +12,6 @@
     <string name="search_in_notes">Hledat v poznámkách</string>
     <string name="user_interface">Uživatelské rozhraní</string>
     <string name="dynamic_colors">Dynamické barvy</string>
-    <string name="sort_type">Typ řazení</string>
     <string name="sort_order">Pořadí řazení</string>
     <string name="minimal_note_width">Minimální šířka poznámky</string>
     <string name="show_long_notes">Úplně zobrazit dlouhé poznámky</string>

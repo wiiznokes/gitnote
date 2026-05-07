@@ -2,10 +2,6 @@
     <string name="system_theme">Системна</string>
     <string name="light_theme">Світла</string>
     <string name="dark_theme">Темна</string>
-    <string name="modification_sort_type">За зміною</string>
-    <string name="alpha_numeric_sort_type">За абеткою та числами</string>
-    <string name="ascending_sort_order">За зростанням</string>
-    <string name="descending_sort_order">За спаданням</string>
     <string name="new_folder_label">Назва нової папки</string>
     <string name="create_new_folder">Створити нову папку</string>
     <string name="yes">Так</string>
@@ -16,7 +12,6 @@
     <string name="search_in_notes">Пошук у нотатках</string>
     <string name="user_interface">Інтерфейс</string>
     <string name="dynamic_colors">Динамічні кольори</string>
-    <string name="sort_type">Тип сортування</string>
     <string name="sort_order">Порядок сортування</string>
     <string name="minimal_note_width">Мінімальна ширина нотатки</string>
     <string name="show_long_notes">Показувати довгі нотатки повністю</string>
