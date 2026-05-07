@@ -8,10 +8,10 @@ core-ktx = "1.18.0"
 lifecycle-runtime = "2.10.0"
 activity-compose = "1.13.0"
 datastore-preferences = "1.2.1"
-compose-bom = "2026.04.01"
+compose-bom = "2026.05.00"
 room = "2.8.4"
 sqlite = "3.49.0"
-paging = "3.4.2"
+paging = "3.5.0"
 compose-markdown = "0.5.8"
 # todo: remove this dep and use the standard one
 reimagined-navigation = "1.5.0"
@@ -62,6 +62,5 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
