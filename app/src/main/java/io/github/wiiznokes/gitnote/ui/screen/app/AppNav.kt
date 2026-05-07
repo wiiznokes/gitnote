@@ -1,7 +1,9 @@
 package io.github.wiiznokes.gitnote.ui.screen.app
 
+import android.util.Log
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -10,6 +12,7 @@ import dev.olshevski.navigation.reimagined.NavTransitionSpec
 import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.helper.NoteSaver
 import io.github.wiiznokes.gitnote.ui.destination.AppDestination
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
@@ -28,8 +31,34 @@ fun AppScreen(
     onCloseRepo: () -> Unit,
 ) {
 
+    val initialBackstack: List<AppDestination> = rememberSaveable {
+        buildList {
+            add(appDestination)
+
+            if (NoteSaver.isEditUnsaved()) {
+                val saveInfo = NoteSaver.getSaveState()
+                if (saveInfo == null) {
+                    Log.d(TAG, "can't retrieve the last saved note state")
+                } else {
+                    Log.d(TAG, "launch as EDIT_IS_UNSAVED")
+                    add(
+                        AppDestination.Edit(
+                            EditParams.Saved(
+                                note = saveInfo.previousNote,
+                                editType = saveInfo.editType,
+                                name = saveInfo.name,
+                                content = saveInfo.content
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+
     val navController =
-        rememberNavController(startDestination = appDestination)
+        rememberNavController(initialBackstack)
 
     NavBackHandler(navController)
 
@@ -58,10 +87,6 @@ fun AppScreen(
                 editParams = it.params,
                 onFinished = {
                     navController.pop()
-
-                    if (it.params is EditParams.Saved) {
-                        navController.navigate(AppDestination.Grid)
-                    }
                 }
             )
 
