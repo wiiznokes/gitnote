@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     // for room
     alias(libs.plugins.ksp)
@@ -23,7 +22,9 @@ android {
     ndkVersion = "27.3.13750724"
 
     namespace = "io.github.wiiznokes.gitnote"
-    compileSdk = 36
+
+    // https://developer.android.com/about/versions
+    compileSdk = 37
     
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
@@ -49,7 +50,7 @@ android {
 
         applicationId = "io.github.wiiznokes.gitnote"
         minSdk = 30
-        targetSdk = 36
+
         versionCode = 16
         versionName = "26.03"
 
@@ -116,16 +117,7 @@ android {
         }
     }
 
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
 
-    kotlin {
-        compilerOptions {
-            // set the target JVM bytecode
-            jvmTarget.set(JvmTarget.JVM_21)
-        }
-    }
 
     buildFeatures {
         buildConfig = true
@@ -139,9 +131,18 @@ android {
 
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 kotlin {
     // set what version of the jdk will be use to compile the code
     jvmToolchain(21)
+
+    compilerOptions {
+        // set the target JVM bytecode
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 dependencies {
@@ -184,6 +185,7 @@ dependencies {
 
     // unit test
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 
     // integration test
     androidTestImplementation(composeBom)
