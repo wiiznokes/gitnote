@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.manager.ExtensionType
 import io.github.wiiznokes.gitnote.manager.extensionType
+import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
 import io.github.wiiznokes.gitnote.ui.component.SimpleIcon
 import io.github.wiiznokes.gitnote.ui.destination.EditParams
 import io.github.wiiznokes.gitnote.ui.model.EditType
@@ -64,6 +65,7 @@ fun EditScreen(
     onFinished: () -> Unit,
 ) {
 
+
     val extension = editParams.fileExtension()
 
     val vm = when (extensionType(extension.text)) {
@@ -72,10 +74,25 @@ fun EditScreen(
         null -> throw Exception("file extension not supported, but present in the database?? $extension")
     }
 
-    if (editParams is EditParams.Saved) {
-        BackHandler {
+    val showShouldQuitDialog = rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    RequestConfirmationDialog(
+        expanded = showShouldQuitDialog,
+        text = stringResource(R.string.confirmation_quit_edit_dialog),
+        onConfirmation = {
             vm.shouldSaveWhenQuitting = false
             onFinished()
+        }
+    )
+
+    BackHandler {
+        if (vm.isPreviousNoteTheSame()) {
+            vm.shouldSaveWhenQuitting = false
+            onFinished()
+        } else {
+            showShouldQuitDialog.value = true
         }
     }
 
@@ -108,8 +125,12 @@ fun EditScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            vm.shouldSaveWhenQuitting = false
-                            onFinished()
+                            if (vm.isPreviousNoteTheSame()) {
+                                vm.shouldSaveWhenQuitting = false
+                                onFinished()
+                            } else {
+                                showShouldQuitDialog.value = true
+                            }
                         },
                     ) {
                         SimpleIcon(
