@@ -12,7 +12,7 @@ compose-bom = "2026.05.00"
 room = "2.8.4"
 sqlite = "3.49.0"
 paging = "3.5.0"
-compose-markdown = "0.5.8"
+compose-markdown = "0.40.2"
 # todo: remove this dep and use the standard one
 reimagined-navigation = "1.5.0"
 
@@ -50,7 +50,9 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 
 
 # Markdown
-compose-markdown = { group = "com.github.jeziellago", name = "compose-markdown", version.ref = "compose-markdown" }
+compose-markdown-core = { group = "com.mikepenz", name = "multiplatform-markdown-renderer", version.ref = "compose-markdown" }
+compose-markdown-renderer = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "compose-markdown" }
+compose-markdown-android = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-android", version.ref = "compose-markdown" }
 
 # 3-party
 reimagined-navigation = { group = "dev.olshevski.navigation", name = "reimagined", version.ref = "reimagined-navigation" }

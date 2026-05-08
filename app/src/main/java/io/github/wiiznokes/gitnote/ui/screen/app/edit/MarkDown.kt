@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import dev.jeziellago.compose.markdowntext.MarkdownText
+import com.mikepenz.markdown.m3.Markdown
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 
 @Composable
@@ -46,11 +46,10 @@ fun MarkDownContent(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            MarkdownText(
+            Markdown(
                 modifier = Modifier
                     .padding(15.dp),
-                markdown = textContent.text,
-                isTextSelectable = true,
+                content = textContent.text,
             )
         }
     } else {
