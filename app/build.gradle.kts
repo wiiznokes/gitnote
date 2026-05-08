@@ -181,7 +181,9 @@ dependencies {
     implementation(libs.reimagined.navigation)
 
     // Markdown
-    implementation(libs.compose.markdown)
+    implementation(libs.compose.markdown.core)
+    implementation(libs.compose.markdown.renderer)
+    implementation(libs.compose.markdown.android)
 
     // unit test
     testImplementation(kotlin("test"))
