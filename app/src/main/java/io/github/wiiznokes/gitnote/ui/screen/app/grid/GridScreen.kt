@@ -409,11 +409,20 @@ private fun NoteCard(
                 )
 
                 if (gridNote.note.fileExtension() is FileExtension.Md) {
+
                     MarkdownCustom(
-                        modifier = Modifier
-                            .verticalScroll(state = rememberScrollState(), enabled = false),
                         content = gridNote.note.content,
-                        lookupLinks = false
+                        onClick = {
+                            if (selectedNotes.isEmpty()) {
+                                onEditClick(
+                                    gridNote.note, EditType.Update
+                                )
+                            } else {
+                                vm.selectNote(
+                                    gridNote.note, add = !gridNote.selected
+                                )
+                            }
+                        }
                     )
                 } else {
                     Text(
