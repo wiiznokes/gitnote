@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -299,7 +301,7 @@ private fun GridNotesView(
             count = gridNotes.itemCount,
             key = gridNotes.itemKey { it.note.id }
         ) { index ->
-            val gridNote = gridNotes[index]  ?: return@items
+            val gridNote = gridNotes[index] ?: return@items
 
             NoteCard(
                 gridNote = gridNote,
@@ -407,17 +409,11 @@ private fun NoteCard(
                 )
 
                 if (gridNote.note.fileExtension() is FileExtension.Md) {
-//                                MarkdownText(
-//                                    markdown = gridNote.note.content,
-//                                    disableLinkMovementMethod = true,
-//                                    isTextSelectable = false,
-//                                    onLinkClicked = { }
-//                                )
-                    Text(
-                        text = gridNote.note.content,
-                        modifier = Modifier,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
+                    MarkdownCustom(
+                        modifier = Modifier
+                            .verticalScroll(state = rememberScrollState(), enabled = false),
+                        content = gridNote.note.content,
+                        lookupLinks = false
                     )
                 } else {
                     Text(

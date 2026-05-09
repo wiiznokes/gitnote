@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -46,11 +47,13 @@ fun MarkDownContent(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Markdown(
-                modifier = Modifier
-                    .padding(15.dp),
-                content = textContent.text,
-            )
+            SelectionContainer {
+                Markdown(
+                    modifier = Modifier
+                        .padding(15.dp),
+                    content = textContent.text,
+                )
+            }
         }
     } else {
         GenericTextField(
