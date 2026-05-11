@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.05.1]
+
+### Fixed
+
+- disable click of link in grid view
+
 ## [26.05]
 
 ### Changed
