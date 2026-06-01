@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-ci:
-    name: Build-Debug-Ci
+  build:
+    name: Build-Debug
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -52,17 +52,20 @@ jobs:
         run: |
           ./gradlew assembleDebug lintDebug testDebugUnitTest --stacktrace
 
-  file-extension:
-    name: Check sort
+  tests:
+    name: Rust tests
+    strategy:
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          lfs: true
+      - run: rustup update
+      - uses: taiki-e/install-action@just
 
-      - run: |
-          extension_dir=app/src/main/rust/supported_extensions
-          for f in $(ls $extension_dir 2>/dev/null); do
-            diff $extension_dir/$f <(sort $extension_dir/$f)
-          done
-        shell: bash
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "./app/src/main/rust/"
+
+      - name: Run tests
+        working-directory: "./app/src/main/rust/"
+        run: cargo test --verbose
