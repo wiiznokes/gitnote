@@ -136,7 +136,7 @@ ksp {
 }
 
 kotlin {
-    // set what version of the jdk will be use to compile the code
+    // set what version of the jdk will be used to compile the code
     jvmToolchain(21)
 
     compilerOptions {
