@@ -62,7 +62,7 @@ fn normal_merge(
     let mut checkout_opts = git2::build::CheckoutBuilder::new();
     checkout_opts.force();
     repo.checkout_head(Some(&mut checkout_opts))?;
-    
+
     Ok(())
 }
 
