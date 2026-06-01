@@ -67,4 +67,5 @@ jobs:
           workspaces: "./app/src/main/rust/"
 
       - name: Run tests
+        working-directory: "./app/src/main/rust/"
         run: cargo test --verbose
