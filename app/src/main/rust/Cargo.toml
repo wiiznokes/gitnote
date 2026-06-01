@@ -11,7 +11,7 @@ git2 = { version = "0.20.2", features = [
     "vendored-libgit2",
     "vendored-openssl",
 ] }
-jni = "0.21"
+jni = "0.22"
 android_logger = "0.15"
 log = "0.4"
 rand_core = { version = "0.6", features = ["std"] }
