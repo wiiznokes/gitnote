@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-ci:
-    name: Build-Debug-Ci
+  build:
+    name: Build-Debug
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
