@@ -85,14 +85,13 @@ pub fn init_lib(home_path: String) {
     }
 
     unsafe {
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_CONNECT_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
-        libgit2_sys::git_libgit2_opts(
-            libgit2_sys::GIT_OPT_SET_SERVER_TIMEOUT as std::ffi::c_int,
-            7000,
-        );
+        if let Err(e) = git2::opts::set_server_connect_timeout_in_milliseconds(7000) {
+            error!("set_server_connect_timeout_in_milliseconds: {e}");
+        }
+
+        if let Err(e) = git2::opts::set_server_timeout_in_milliseconds(7000) {
+            error!("set_server_timeout_in_milliseconds: {e}");
+        }
     };
 }
 
