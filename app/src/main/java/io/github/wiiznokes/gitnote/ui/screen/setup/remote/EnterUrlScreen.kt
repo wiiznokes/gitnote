@@ -1,5 +1,7 @@
 package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
@@ -8,15 +10,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
+import io.github.wiiznokes.gitnote.helper.NetworkPermissionHelper
+import kotlinx.coroutines.launch
 import io.github.wiiznokes.gitnote.manager.getUrlInfoLib
 import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
@@ -87,6 +95,22 @@ fun EnterUrlScreen(
     onBackClick: () -> Unit,
     onUrl: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val pendingUrl = remember { mutableStateOf<String?>(null) }
+    val nearbyPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            pendingUrl.value?.let(onUrl)
+        } else {
+            MyApp.appModule.uiHelper.makeToast(
+                MyApp.appModule.context.getString(R.string.error_need_network_permission)
+            )
+        }
+        pendingUrl.value = null
+    }
+
     AppPage(
         title = "URL",
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -108,7 +132,15 @@ fun EnterUrlScreen(
             SetupButton(
                 text = stringResource(R.string.next),
                 onClick = {
-                    onUrl(url.value.text)
+                    val urlText = url.value.text
+                    scope.launch {
+                        if (NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(context)) {
+                            pendingUrl.value = urlText
+                            nearbyPermissionLauncher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK)
+                        } else {
+                            onUrl(urlText)
+                        }
+                    }
                 },
                 enabled = isUrlCorrect(url.value.text)
             )

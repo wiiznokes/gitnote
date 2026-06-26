@@ -81,6 +81,7 @@
     <string name="clone_remote_repo">Cloner un dépôt distant</string>
     <string name="use_app_storage">Utiliser la mémoire de l\'app</string>
     <string name="error_need_storage_permission">L\'application a besoin de cette permission pour accéder au stockage</string>
+    <string name="error_need_network_permission">L\'application a besoin de cette autorisation pour accéder aux dépôts sur votre réseau local</string>
     <string name="use_device_storage">Utiliser la mémoire de l\'appareil</string>
     <string name="use_device_storage_info">Requiert une autorisation d\'accès au stockage complet de l\'appareil. Vous aurez la possibilité d\'accéder au dépôt sur votre ordinateur par la suite.</string>
     <string name="create_repo_explorer">Créer un dépôt dans ce dossier</string>

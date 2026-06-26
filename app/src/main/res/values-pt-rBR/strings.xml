@@ -76,6 +76,7 @@
     <string name="clone_remote_repo">Clonar repositório local</string>
     <string name="use_app_storage">Usar armazenamento do aplicativo</string>
     <string name="error_need_storage_permission">O aplicativo precisa desta permissão para acessar o armazenamento</string>
+    <string name="error_need_network_permission">O aplicativo precisa desta permissão para acessar repositórios em sua rede local</string>
     <string name="use_device_storage">Usar armazenamento do dispositivo</string>
     <string name="use_device_storage_info">Requer permissão para acessar todo o armazenamento do dispositivo. Você poderá acessar o repositório pelo computador após esse passo.</string>
     <string name="create_repo_explorer">Criar repositório nessa pasta</string>
