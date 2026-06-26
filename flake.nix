@@ -37,10 +37,10 @@
 
       # Match app/build.gradle.kts + app/src/main/rust/NDK_VERSION
       android = pkgs.androidenv.composeAndroidPackages {
-        platformVersions = [ "36" ];
+        platformVersions = [ "37" ];
         buildToolsVersions = [
-          "35.0.0"
           "36.0.0"
+          "37.0.0"
         ];
         ndkVersions = [ "27.3.13750724" ];
         cmakeVersions = [ "3.22.1" ];
@@ -59,7 +59,7 @@
           android.androidsdk
           rustToolchain
           jdk
-          pkgs.gradle
+          pkgs.gradle_9
           pkgs.git
           pkgs.unzip
           pkgs.pkg-config
@@ -70,7 +70,7 @@
         JAVA_HOME = "${jdk}/lib/openjdk";
 
         shellHook = ''
-          build_tools_version="36.0.0"
+          build_tools_version="37.0.0"
           cmake_version="3.22.1"
           sdk_root="${android.androidsdk}/libexec/android-sdk"
 
