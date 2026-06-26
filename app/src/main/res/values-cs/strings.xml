@@ -65,6 +65,7 @@
     <string name="clone_remote_repo">Klonovat vzdálený repozitář</string>
     <string name="use_app_storage">Použít úložiště aplikace</string>
     <string name="error_need_storage_permission">Aplikace potřebuje toto oprávnění pro přístup k úložišti</string>
+    <string name="error_need_network_permission">Aplikace potřebuje toto oprávnění pro přístup k repozitářům v místní síti</string>
     <string name="use_device_storage">Použít úložiště zařízení</string>
     <string name="use_device_storage_info">Vyžaduje oprávnění pro přístup k úplnému úložišti zařízení. Poté budete mít přístup k úložišti ve svém zařízení.</string>
     <string name="create_repo_explorer">Vytvořit repozitář v této složce</string>

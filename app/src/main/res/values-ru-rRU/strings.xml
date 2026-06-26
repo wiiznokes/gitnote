@@ -64,6 +64,7 @@
     <string name="clone_repo">Клонировать удалённый репозиторий</string>
     <string name="use_app_storage">Использовать хранилище приложения</string>
     <string name="error_need_storage_permission">Приложению необходимо это разрешение для доступа к хранилищу</string>
+    <string name="error_need_network_permission">Приложению необходимо это разрешение для доступа к репозиториям в вашей локальной сети</string>
     <string name="use_device_storage">Использовать хранилище устройства</string>
     <string name="use_device_storage_info">Требуется разрешение на доступ ко всему хранилищу устройства. После этого вы сможете получить доступ к репозиторию с компьютера.</string>
     <string name="create_repo_explorer">Создать репозиторий в этой папке</string>
