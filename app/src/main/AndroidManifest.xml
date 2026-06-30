@@ -14,6 +14,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".MyApp"
         android:allowBackup="true"
