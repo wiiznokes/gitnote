@@ -21,4 +21,4 @@ private fun extensionTypeFromNumber(num: Int): ExtensionType? =
 
 private external fun extensionTypeLib(extension: String): Int
 
-external fun isExtensionSupported(extension: String): Boolean
+external fun isExtensionSupportedLib(extension: String): Boolean

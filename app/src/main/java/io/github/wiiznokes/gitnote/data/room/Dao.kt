@@ -11,7 +11,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 import io.github.wiiznokes.gitnote.data.platform.NodeFs
 import io.github.wiiznokes.gitnote.manager.Progress
-import io.github.wiiznokes.gitnote.manager.isExtensionSupported
+import io.github.wiiznokes.gitnote.manager.isExtensionSupportedLib
 import io.github.wiiznokes.gitnote.ui.model.GridNote
 import io.github.wiiznokes.gitnote.ui.model.SortOrder
 import io.github.wiiznokes.gitnote.ui.screen.app.DrawerFolderModel
@@ -52,7 +52,7 @@ interface RepoDatabaseDao {
 
                 when (nodeFs) {
                     is NodeFs.File -> {
-                        if (!isExtensionSupported(nodeFs.extension.text)) {
+                        if (!isExtensionSupportedLib(nodeFs.extension.text)) {
                             //Log.d(TAG, "skipped ${nodeFs.path} because extension not supported")
                             return@forEachNodeFs
                         }

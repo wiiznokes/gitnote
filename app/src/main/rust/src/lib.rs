@@ -104,16 +104,19 @@ const _COMMIT_ALL_LIB_METHOD: NativeMethod = native_method! {
 
 const _CURRENT_SIGNATURE_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_currentSignatureLib",
     static extern fn current_signature_lib() -> JObject,
 };
 
 const _PUSH_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib",
     static extern fn push_lib(cred: JObject) -> jint,
 };
 
 const _PULL_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib",
     static extern fn pull_lib(cred: JObject, name: JString, email: JString) -> jint,
 };
 
@@ -134,26 +137,29 @@ const _IS_CHANGE_LIB_LIB_METHOD: NativeMethod = native_method! {
 
 const _GET_TIMESTAMPS_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getTimestampsLib",
     static extern fn get_timestamps_lib(j_map: JObject) -> jint,
 };
 
 const _GENERATE_SSH_KEYS_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generateSshKeysLib",
     static extern fn generate_ssh_keys_lib() -> JObject,
 };
 
 const _EXTENSION_TYPE_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    java_type = "io.github.wiiznokes.gitnote.manager.MimeTypeManagerKt",
     static extern fn extension_type_lib(extension: JString) -> jint,
 };
 
 const _IS_EXTENSION_SUPPORTED_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    java_type = "io.github.wiiznokes.gitnote.manager.MimeTypeManagerKt",
     static extern fn is_extension_supported_lib(extension: JString) -> jboolean,
 };
 
 const _GET_URL_INFO_LIB_METHOD: NativeMethod = native_method! {
     java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getUrlInfoLib",
     static extern fn get_url_info_lib(url: JString) -> JObject,
 };
 
