@@ -190,7 +190,6 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 
     // integration test
-    androidTestImplementation(composeBom)
     androidTestImplementation(libs.test.junit.ktx)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.runner)
