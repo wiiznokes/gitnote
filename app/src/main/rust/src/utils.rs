@@ -27,7 +27,7 @@ macro_rules! unwrap_or_log {
             Ok(v) => v,
             Err(e) => {
                 error!("{}: {}", $name, e);
-                return e.into();
+                return Ok(e.into());
             }
         }
     };
