@@ -2,9 +2,9 @@ use std::fmt::{Debug, Display};
 
 use anyhow::anyhow;
 use git2::Signature;
-use jni::JNIEnv;
 use jni::objects::{JClass, JObject, JString, JValue};
-use jni::sys::{jboolean, jint, jobject, jstring};
+use jni::sys::{jboolean, jint};
+use jni::{Env, NativeMethod, jni_sig, jni_str, native_method};
 
 use crate::callback::ProgressCB;
 use crate::key_gen::gen_keys;
@@ -71,17 +71,104 @@ impl Display for Error {
     }
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<'local>(
-    mut env: JNIEnv<'local>,
+const _INIT_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn init_lib(home_path: JString) -> jint,
+};
+
+const _CREATE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn create_repo_lib(repo_path: JString) -> jint,
+};
+
+const _OPEN_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn open_repo_lib(repo_path: JString) -> jint,
+};
+
+const _CLONE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib",
+    static extern fn clone_repo_lib(repo_path: JString, remote_url: JString, cred: JObject, progress_callback: JObject) -> jint,
+};
+
+const _LAST_COMMIT_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn last_commit_lib() -> JString,
+};
+
+const _COMMIT_ALL_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn commit_all_lib(name: JString, email: JString, message: JString) -> jint,
+};
+
+const _CURRENT_SIGNATURE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_currentSignatureLib",
+    static extern fn current_signature_lib() -> JObject,
+};
+
+const _PUSH_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib",
+    static extern fn push_lib(cred: JObject) -> jint,
+};
+
+const _PULL_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib",
+    static extern fn pull_lib(cred: JObject, name: JString, email: JString) -> jint,
+};
+
+const _FREE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn free_lib(),
+};
+
+const _CLOSE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn close_repo_lib(),
+};
+
+const _IS_CHANGE_LIB_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn is_change_lib() -> jint,
+};
+
+const _GET_TIMESTAMPS_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getTimestampsLib",
+    static extern fn get_timestamps_lib(j_map: JObject) -> jint,
+};
+
+const _GENERATE_SSH_KEYS_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generateSshKeysLib",
+    static extern fn generate_ssh_keys_lib() -> JObject,
+};
+
+const _EXTENSION_TYPE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.MimeTypeManagerKt",
+    static extern fn extension_type_lib(extension: JString) -> jint,
+};
+
+const _IS_EXTENSION_SUPPORTED_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.MimeTypeManagerKt",
+    static extern fn is_extension_supported_lib(extension: JString) -> jboolean,
+};
+
+const _GET_URL_INFO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getUrlInfoLib",
+    static extern fn get_url_info_lib(url: JString) -> JObject,
+};
+
+fn init_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     home_path: JString<'local>,
-) -> jint {
-    let home_path: String = env
-        .get_string(&home_path)
-        .expect("Couldn't get java string!")
-        .into();
-
+) -> Result<jint, jni::errors::Error> {
+    let home_path = home_path.try_to_string(env).unwrap();
     libgit2::init_lib(home_path);
 
     install_panic_hook();
@@ -97,38 +184,30 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_initLib<
             ),
     );
 
-    OK
+    Ok(OK)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_createRepoLib<'local>(
-    mut env: JNIEnv<'local>,
+fn create_repo_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     repo_path: JString<'local>,
-) -> jint {
-    let repo_path: String = env
-        .get_string(&repo_path)
-        .expect("Couldn't get java string!")
-        .into();
+) -> Result<jint, jni::errors::Error> {
+    let repo_path = repo_path.try_to_string(env).unwrap();
 
     unwrap_or_log!(libgit2::create_repo(&repo_path), "create_repo");
 
-    OK
+    Ok(OK)
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_openRepoLib<'local>(
-    mut env: JNIEnv<'local>,
+fn open_repo_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     repo_path: JString<'local>,
-) -> jint {
-    let repo_path: String = env
-        .get_string(&repo_path)
-        .expect("Couldn't get java string!")
-        .into();
+) -> Result<jint, jni::errors::Error> {
+    let repo_path = repo_path.try_to_string(env).unwrap();
 
     unwrap_or_log!(libgit2::open_repo(&repo_path), "open_repo");
 
-    OK
+    Ok(OK)
 }
 
 pub enum Cred {
@@ -182,63 +261,67 @@ impl Debug for Cred {
     }
 }
 
+macro_rules! jstring_field {
+    ($env:expr, $obj:expr, $field:literal) => {{
+        let obj = $env
+            .get_field($obj, jni_str!($field), jni_sig!(JString))?
+            .l()?;
+
+        $env.as_cast::<JString>(&obj)?
+            .mutf8_chars($env)?
+            .to_string()
+    }};
+}
+
+macro_rules! jstring_field_nullable {
+    ($env:expr, $obj:expr, $field:literal) => {{
+        let obj = $env
+            .get_field($obj, jni_str!($field), jni_sig!(JString))?
+            .l()?;
+
+        if obj.is_null() {
+            None
+        } else {
+            Some(
+                $env.as_cast::<JString>(&obj)?
+                    .mutf8_chars($env)?
+                    .to_string(),
+            )
+        }
+    }};
+}
+
 impl Cred {
-    pub fn from_jni(env: &mut JNIEnv, cred_obj: &JObject) -> anyhow::Result<Option<Self>> {
+    pub fn from_jni(env: &mut Env, cred_obj: &JObject) -> anyhow::Result<Option<Self>> {
         if cred_obj.is_null() {
             return Ok(None);
         }
 
-        let class = env.get_object_class(cred_obj)?;
-        let class_name_jstring: JString = env
-            .call_method(class, "getName", "()Ljava/lang/String;", &[])?
-            .l()?
-            .into();
-        let class_name: String = env.get_string(&class_name_jstring)?.into();
+        let class_name = {
+            let class = env.get_object_class(cred_obj)?;
+
+            let obj = env
+                .call_method(class, jni_str!("getName"), jni_sig!(() -> JString), &[])?
+                .l()?;
+
+            let jstring = env.as_cast::<JString>(&obj)?;
+
+            jstring.mutf8_chars(env)?.to_string()
+        };
 
         match class_name.as_str() {
             "io.github.wiiznokes.gitnote.ui.model.Cred$UserPassPlainText" => {
-                let username_obj: JString = env
-                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
-                let password_obj: JString = env
-                    .get_field(cred_obj, "password", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
-
-                let username: String = env.get_string(&username_obj)?.into();
-                let password: String = env.get_string(&password_obj)?.into();
+                let username = jstring_field!(env, cred_obj, "username");
+                let password = jstring_field!(env, cred_obj, "username");
 
                 Ok(Some(Cred::UserPassPlainText { username, password }))
             }
             "io.github.wiiznokes.gitnote.ui.model.Cred$Ssh" => {
-                let username_key_obj: JString = env
-                    .get_field(cred_obj, "username", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
+                let username = jstring_field!(env, cred_obj, "username");
+                let public_key = jstring_field!(env, cred_obj, "publicKey");
 
-                let public_key_obj: JString = env
-                    .get_field(cred_obj, "publicKey", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
-
-                let private_key_obj: JString = env
-                    .get_field(cred_obj, "privateKey", "Ljava/lang/String;")?
-                    .l()?
-                    .into();
-
-                let passphrase_obj = env
-                    .get_field(cred_obj, "passphrase", "Ljava/lang/String;")?
-                    .l()?;
-
-                let username: String = env.get_string(&username_key_obj)?.into();
-                let public_key: String = env.get_string(&public_key_obj)?.into();
-                let private_key: String = env.get_string(&private_key_obj)?.into();
-                let passphrase: Option<String> = if passphrase_obj.is_null() {
-                    None
-                } else {
-                    Some(env.get_string(&JString::from(passphrase_obj))?.into())
-                };
+                let private_key = jstring_field!(env, cred_obj, "privateKey");
+                let passphrase = jstring_field_nullable!(env, cred_obj, "passphrase");
 
                 Ok(Some(Cred::Ssh {
                     username,
@@ -253,49 +336,47 @@ impl Cred {
 }
 
 mod callback {
-    use jni::{JNIEnv, objects::JObject};
+    use jni::{Env, jni_sig, jni_str, objects::JObject};
 
-    pub struct ProgressCB<'a, 'b> {
-        env: &'b mut JNIEnv<'a>,
-        callback_class: JObject<'a>,
+    pub struct ProgressCB<'ptr, 'local> {
+        env: &'ptr mut Env<'local>,
+        callback_class: JObject<'local>,
     }
 
-    impl<'a, 'b> ProgressCB<'a, 'b> {
-        pub fn new(env: &'b mut JNIEnv<'a>, callback_class: JObject<'a>) -> Self {
+    impl<'ptr, 'local> ProgressCB<'ptr, 'local> {
+        pub fn new(env: &'ptr mut Env<'local>, callback_class: JObject<'local>) -> Self {
             Self {
                 env,
                 callback_class,
             }
         }
         pub fn progress(&mut self, progress: i32) -> bool {
-            match self.env.call_method(
-                &self.callback_class,
-                "progressCb",
-                "(I)Z",
-                &[progress.into()],
-            ) {
-                Ok(res) => res.z().unwrap(),
-                Err(e) => {
-                    error!("{e}");
-                    true
-                }
-            }
+            let res = self
+                .env
+                .call_method(
+                    &self.callback_class,
+                    jni_str!("progressCb"),
+                    jni_sig!((jint) -> jboolean),
+                    &[progress.into()],
+                )
+                .unwrap();
+
+            res.z().unwrap()
         }
     }
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib<'local>(
-    mut env: JNIEnv<'local>,
+fn clone_repo_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     repo_path: JString<'local>,
     remote_url: JString<'local>,
-    cred: JString<'local>,
+    cred: JObject<'local>,
     progress_callback: JObject<'local>,
-) -> jint {
-    let repo_path: String = env.get_string(&repo_path).unwrap().into();
-    let remote_url: String = env.get_string(&remote_url).unwrap().into();
+) -> Result<jint, jni::errors::Error> {
+    let repo_path = repo_path.try_to_string(env).unwrap();
+    let remote_url = remote_url.try_to_string(env).unwrap();
 
-    let cred = match Cred::from_jni(&mut env, &cred) {
+    let cred = match Cred::from_jni(env, &cred) {
         Ok(cred) => cred,
         Err(e) => {
             error!("Cred::from_jni: {e}");
@@ -303,154 +384,147 @@ pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRep
         }
     };
 
-    let cb = ProgressCB::new(&mut env, progress_callback);
+    let cb = ProgressCB::new(env, progress_callback);
 
     unwrap_or_log!(
         libgit2::clone_repo(&repo_path, &remote_url, cred, cb),
         "clone_repo"
     );
 
-    OK
+    Ok(OK)
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_lastCommitLib(
-    env: JNIEnv,
-    _class: JClass,
-) -> jstring {
+fn last_commit_lib<'local>(
+    env: &mut Env<'local>,
+    _class: JClass<'local>,
+) -> Result<JString<'local>, jni::errors::Error> {
     let commit = match libgit2::last_commit() {
         Some(commit) => commit,
-        None => return std::ptr::null_mut(),
+        None => return Ok(JString::null()),
     };
 
-    env.new_string(commit)
-        .expect("Couldn't create Java string!")
-        .into_raw()
+    let s = env
+        .new_string(commit)
+        .expect("Couldn't create Java string!");
+
+    Ok(s)
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_commitAllLib<'local>(
-    mut env: JNIEnv<'local>,
+fn commit_all_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     name: JString<'local>,
     email: JString<'local>,
     message: JString<'local>,
-) -> jint {
-    let name: String = env.get_string(&name).unwrap().into();
-    let email: String = env.get_string(&email).unwrap().into();
-    let message: String = env.get_string(&message).unwrap().into();
+) -> Result<jint, jni::errors::Error> {
+    let name = name.try_to_string(env).unwrap();
+    let email = email.try_to_string(env).unwrap();
+    let message = message.try_to_string(env).unwrap();
 
     unwrap_or_log!(libgit2::commit_all(&name, &email, &message), "commit_all");
 
-    OK
+    Ok(OK)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_currentSignatureLib<
-    'local,
->(
-    mut env: JNIEnv<'local>,
+fn current_signature_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
-) -> jobject {
+) -> Result<JObject<'local>, jni::errors::Error> {
     let signature = match libgit2::signature() {
         Some(signature) => signature,
-        None => return std::ptr::null_mut(),
+        None => return Ok(JObject::null()),
     };
 
     let name_jstring = env.new_string(&signature.0).unwrap();
     let email_jstring = env.new_string(&signature.1).unwrap();
 
-    let pair_class = env.find_class("kotlin/Pair").unwrap();
+    let pair_class = env.find_class(jni_str!("kotlin/Pair")).unwrap();
 
     let pair_obj = env
         .new_object(
             &pair_class,
-            "(Ljava/lang/Object;Ljava/lang/Object;)V",
+            jni_sig!((JObject, JObject)),
             &[(&name_jstring).into(), (&email_jstring).into()],
         )
         .unwrap();
 
-    pair_obj.into_raw()
+    Ok(pair_obj)
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pushLib<'local>(
-    mut env: JNIEnv<'local>,
+fn push_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
-    cred: JString<'local>,
-) -> jint {
-    let cred = Cred::from_jni(&mut env, &cred).unwrap();
+    cred: JObject<'local>,
+) -> Result<jint, jni::errors::Error> {
+    let cred = Cred::from_jni(env, &cred).unwrap();
     unwrap_or_log!(libgit2::push(cred), "push");
-    OK
+    Ok(OK)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_pullLib<'local>(
-    mut env: JNIEnv<'local>,
+fn pull_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
-    cred: JString<'local>,
+    cred: JObject<'local>,
     name: JString<'local>,
     email: JString<'local>,
-) -> jint {
-    let cred = Cred::from_jni(&mut env, &cred).unwrap();
-    let name: String = env.get_string(&name).unwrap().into();
-    let email: String = env.get_string(&email).unwrap().into();
+) -> Result<jint, jni::errors::Error> {
+    let cred = Cred::from_jni(env, &cred).unwrap();
+    let name: String = name.try_to_string(env).unwrap();
+    let email: String = email.try_to_string(env).unwrap();
     let author = GitAuthor { name, email };
     unwrap_or_log!(libgit2::pull(cred, &author), "pull");
-    OK
+    Ok(OK)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_freeLib(
-    _env: JNIEnv,
-    _class: JClass,
-) {
+fn free_lib<'local>(
+    _env: &mut Env<'local>,
+    _class: JClass<'local>,
+) -> Result<(), jni::errors::Error> {
+    Ok(())
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_closeRepoLib(
-    _env: JNIEnv,
-    _class: JClass,
-) {
+fn close_repo_lib<'local>(
+    _env: &mut Env<'local>,
+    _class: JClass<'local>,
+) -> Result<(), jni::errors::Error> {
     libgit2::close();
+    Ok(())
 }
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_isChangeLib(
-    _env: JNIEnv,
-    _class: JClass,
-) -> jint {
+fn is_change_lib<'local>(
+    _env: &mut Env<'local>,
+    _class: JClass<'local>,
+) -> Result<jint, jni::errors::Error> {
     let is_change = unwrap_or_log!(libgit2::is_change(), "is_change");
 
-    is_change as jint
+    Ok(is_change as jint)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getTimestampsLib<'local>(
-    mut env: JNIEnv<'local>,
+fn get_timestamps_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     j_map: JObject<'local>,
-) -> jint {
+) -> Result<jint, jni::errors::Error> {
     let timestamps = unwrap_or_log!(libgit2::get_timestamps(), "get_timestamps");
 
-    if let Err(e) = get_timestamps_jni(&mut env, &j_map, timestamps.iter()) {
+    if let Err(e) = get_timestamps_jni(env, &j_map, timestamps.iter()) {
         error!("get_timestamps_jni: {e}");
-        return -1;
+        return Ok(-1);
     }
 
-    OK
+    Ok(OK)
 }
 
 fn get_timestamps_jni<'local, 'a>(
-    env: &mut JNIEnv<'local>,
+    env: &mut Env<'local>,
     j_map: &JObject<'local>,
     timestamps: impl Iterator<Item = (&'a String, &'a i64)>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let map_class = env.get_object_class(j_map)?;
     let put_method = env.get_method_id(
         map_class,
-        "put",
-        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+        jni_str!("put"),
+        jni_sig!((JObject, JObject) -> JObject),
     )?;
 
-    let long_class = env.find_class("java/lang/Long")?;
-    let long_ctor = env.get_method_id(&long_class, "<init>", "(J)V")?;
+    let long_class = env.find_class(jni_str!("java/lang/Long"))?;
+    let long_ctor = env.get_method_id(&long_class, jni_str!("<init>"), jni_sig!((jlong)))?;
 
     for (path, timestamp) in timestamps {
         let j_key: JString = env.new_string(path)?;
@@ -477,93 +551,82 @@ fn get_timestamps_jni<'local, 'a>(
     Ok(())
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_generateSshKeysLib<
-    'local,
->(
-    mut env: JNIEnv<'local>,
+fn generate_ssh_keys_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
-) -> jobject {
+) -> Result<JObject<'local>, jni::errors::Error> {
     let keys = match gen_keys() {
         Ok(keys) => keys,
         Err(e) => {
             error!("can't gen keys: {e}");
-            return std::ptr::null_mut();
+            return Ok(JObject::null());
         }
     };
 
     let public_jstring = env.new_string(&keys.public).unwrap();
     let private_jstring = env.new_string(&keys.private).unwrap();
 
-    let pair_class = env.find_class("kotlin/Pair").unwrap();
+    let pair_class = env.find_class(jni_str!("kotlin/Pair")).unwrap();
 
     let pair_obj = env
         .new_object(
             &pair_class,
-            "(Ljava/lang/Object;Ljava/lang/Object;)V",
+            jni_sig!((JObject, JObject)),
             &[(&public_jstring).into(), (&private_jstring).into()],
         )
         .unwrap();
 
-    pair_obj.into_raw()
+    Ok(pair_obj)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_extensionTypeLib<
-    'local,
->(
-    mut env: JNIEnv<'local>,
+fn extension_type_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     extension: JString<'local>,
-) -> jint {
-    let extension: String = env.get_string(&extension).unwrap().into();
+) -> Result<jint, jni::errors::Error> {
+    let extension = extension.try_to_string(env).unwrap();
 
-    match mime_types::extension_type(extension.as_str()) {
+    let res = match mime_types::extension_type(extension.as_str()) {
         Some(ext_type) => ext_type as jint,
         None => 0,
-    }
+    };
+
+    Ok(res)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_MimeTypeManagerKt_isExtensionSupported<
-    'local,
->(
-    mut env: JNIEnv<'local>,
+fn is_extension_supported_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     extension: JString<'local>,
-) -> jboolean {
-    let extension: String = env.get_string(&extension).unwrap().into();
+) -> Result<jboolean, jni::errors::Error> {
+    let extension = extension.try_to_string(env).unwrap();
 
-    mime_types::is_extension_supported(extension.as_str()).into()
+    let res = mime_types::is_extension_supported(extension.as_str());
+    Ok(res)
 }
 
-#[unsafe(no_mangle)]
-pub extern "C" fn Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_getUrlInfoLib<'local>(
-    mut env: JNIEnv<'local>,
+fn get_url_info_lib<'local>(
+    env: &mut Env<'local>,
     _class: JClass<'local>,
     url: JString<'local>,
-) -> jobject {
-    let url: String = env.get_string(&url).unwrap().into();
+) -> Result<JObject<'local>, jni::errors::Error> {
+    let url = url.try_to_string(env).unwrap();
 
     let url_info = match url::parse_url(&url) {
         Ok(info) => info,
         Err(e) => {
             error!("{e}");
-            return std::ptr::null_mut();
+            return Ok(JObject::null());
         }
     };
 
     let is_ssh = url_info.kind == url::UrlKind::Ssh;
 
-    let boolean_class = env.find_class("java/lang/Boolean").unwrap();
+    let boolean_class = env.find_class(jni_str!("java/lang/Boolean")).unwrap();
 
     let obj = env
-        .new_object(
-            boolean_class,
-            "(Z)V",
-            &[JValue::Bool(if is_ssh { 1 } else { 0 })],
-        )
+        .new_object(boolean_class, jni_sig!((jboolean)), &[JValue::Bool(is_ssh)])
         .unwrap();
 
-    obj.into_raw()
+    Ok(obj)
 }
