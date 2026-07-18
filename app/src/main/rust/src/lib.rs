@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 
 use anyhow::anyhow;
 use git2::Signature;
-use jni::objects::{JObject, JString, JValue};
+use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jboolean, jint};
 use jni::{Env, NativeMethod, jni_sig, jni_str, native_method};
 
@@ -71,94 +71,95 @@ impl Display for Error {
     }
 }
 
-const INIT_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn init_lib(home_path: JString) -> jint,
+const _INIT_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn init_lib(home_path: JString) -> jint,
 };
 
-const CREATE_REPO_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn create_repo_lib(repo_path: JString) -> jint,
+const _CREATE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn create_repo_lib(repo_path: JString) -> jint,
 };
 
-const OPEN_REPO_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn open_repo_lib(repo_path: JString) -> jint,
+const _OPEN_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn open_repo_lib(repo_path: JString) -> jint,
 };
 
-const CLONE_REPO_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn clone_repo_lib(repo_path: JString, remote_url: JString, cred: JObject, progress_callback: JObject) -> jint,
+const _CLONE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    export = "Java_io_github_wiiznokes_gitnote_manager_GitManagerKt_cloneRepoLib",
+    static extern fn clone_repo_lib(repo_path: JString, remote_url: JString, cred: JObject, progress_callback: JObject) -> jint,
 };
 
-const LAST_COMMIT_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn last_commit_lib() -> JString,
+const _LAST_COMMIT_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn last_commit_lib() -> JString,
 };
 
-const COMMIT_ALL_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn commit_all_lib(name: JString, email: JString, message: JString) -> jint,
+const _COMMIT_ALL_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn commit_all_lib(name: JString, email: JString, message: JString) -> jint,
 };
 
-const CURRENT_SIGNATURE_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn current_signature_lib() -> JObject,
+const _CURRENT_SIGNATURE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn current_signature_lib() -> JObject,
 };
 
-const PUSH_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn push_lib(cred: JObject) -> jint,
+const _PUSH_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn push_lib(cred: JObject) -> jint,
 };
 
-const PULL_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn pull_lib(cred: JObject, name: JString, email: JString) -> jint,
+const _PULL_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn pull_lib(cred: JObject, name: JString, email: JString) -> jint,
 };
 
-const FREE_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn free_lib(),
+const _FREE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn free_lib(),
 };
 
-const CLOSE_REPO_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn close_repo_lib(),
+const _CLOSE_REPO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn close_repo_lib(),
 };
 
-const IS_CHANGE_LIB_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn is_change_lib() -> jint,
+const _IS_CHANGE_LIB_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn is_change_lib() -> jint,
 };
 
-const GET_TIMESTAMPS_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn get_timestamps_lib(j_map: JObject) -> jint,
+const _GET_TIMESTAMPS_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn get_timestamps_lib(j_map: JObject) -> jint,
 };
 
-const GENERATE_SSH_KEYS_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn generate_ssh_keys_lib() -> JObject,
+const _GENERATE_SSH_KEYS_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn generate_ssh_keys_lib() -> JObject,
 };
 
-const EXTENSION_TYPE_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn extension_type_lib(extension: JString) -> jint,
+const _EXTENSION_TYPE_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn extension_type_lib(extension: JString) -> jint,
 };
 
-const IS_EXTENSION_SUPPORTED_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn is_extension_supported_lib(extension: JString) -> jboolean,
+const _IS_EXTENSION_SUPPORTED_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn is_extension_supported_lib(extension: JString) -> jboolean,
 };
 
-const GET_URL_INFO_LIB_METHOD: NativeMethod = native_method! {
-    java_type = "io.github.wiiznokes.gitnote.manager.GitManager",
-    extern fn get_url_info_lib(url: JString) -> JObject,
+const _GET_URL_INFO_LIB_METHOD: NativeMethod = native_method! {
+    java_type = "io.github.wiiznokes.gitnote.manager.GitManagerKt",
+    static extern fn get_url_info_lib(url: JString) -> JObject,
 };
 
 fn init_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     home_path: JString<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let home_path = home_path.try_to_string(env).unwrap();
@@ -182,7 +183,7 @@ fn init_lib<'local>(
 
 fn create_repo_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     repo_path: JString<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let repo_path = repo_path.try_to_string(env).unwrap();
@@ -193,7 +194,7 @@ fn create_repo_lib<'local>(
 }
 fn open_repo_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     repo_path: JString<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let repo_path = repo_path.try_to_string(env).unwrap();
@@ -354,15 +355,13 @@ mod callback {
                 )
                 .unwrap();
 
-            
-
             res.z().unwrap()
         }
     }
 }
 fn clone_repo_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     repo_path: JString<'local>,
     remote_url: JString<'local>,
     cred: JObject<'local>,
@@ -390,7 +389,7 @@ fn clone_repo_lib<'local>(
 }
 fn last_commit_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<JString<'local>, jni::errors::Error> {
     let commit = match libgit2::last_commit() {
         Some(commit) => commit,
@@ -405,7 +404,7 @@ fn last_commit_lib<'local>(
 }
 fn commit_all_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     name: JString<'local>,
     email: JString<'local>,
     message: JString<'local>,
@@ -421,7 +420,7 @@ fn commit_all_lib<'local>(
 
 fn current_signature_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<JObject<'local>, jni::errors::Error> {
     let signature = match libgit2::signature() {
         Some(signature) => signature,
@@ -445,7 +444,7 @@ fn current_signature_lib<'local>(
 }
 fn push_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     cred: JObject<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let cred = Cred::from_jni(env, &cred).unwrap();
@@ -455,7 +454,7 @@ fn push_lib<'local>(
 
 fn pull_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     cred: JObject<'local>,
     name: JString<'local>,
     email: JString<'local>,
@@ -470,21 +469,21 @@ fn pull_lib<'local>(
 
 fn free_lib<'local>(
     _env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<(), jni::errors::Error> {
     Ok(())
 }
 
 fn close_repo_lib<'local>(
     _env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<(), jni::errors::Error> {
     libgit2::close();
     Ok(())
 }
 fn is_change_lib<'local>(
     _env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let is_change = unwrap_or_log!(libgit2::is_change(), "is_change");
 
@@ -493,7 +492,7 @@ fn is_change_lib<'local>(
 
 fn get_timestamps_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     j_map: JObject<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let timestamps = unwrap_or_log!(libgit2::get_timestamps(), "get_timestamps");
@@ -548,7 +547,7 @@ fn get_timestamps_jni<'local, 'a>(
 
 fn generate_ssh_keys_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
 ) -> Result<JObject<'local>, jni::errors::Error> {
     let keys = match gen_keys() {
         Ok(keys) => keys,
@@ -576,7 +575,7 @@ fn generate_ssh_keys_lib<'local>(
 
 fn extension_type_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     extension: JString<'local>,
 ) -> Result<jint, jni::errors::Error> {
     let extension = extension.try_to_string(env).unwrap();
@@ -591,7 +590,7 @@ fn extension_type_lib<'local>(
 
 fn is_extension_supported_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     extension: JString<'local>,
 ) -> Result<jboolean, jni::errors::Error> {
     let extension = extension.try_to_string(env).unwrap();
@@ -602,7 +601,7 @@ fn is_extension_supported_lib<'local>(
 
 fn get_url_info_lib<'local>(
     env: &mut Env<'local>,
-    _this: JObject<'local>,
+    _class: JClass<'local>,
     url: JString<'local>,
 ) -> Result<JObject<'local>, jni::errors::Error> {
     let url = url.try_to_string(env).unwrap();
@@ -620,11 +619,7 @@ fn get_url_info_lib<'local>(
     let boolean_class = env.find_class(jni_str!("java/lang/Boolean")).unwrap();
 
     let obj = env
-        .new_object(
-            boolean_class,
-            jni_sig!((jboolean)),
-            &[JValue::Bool(is_ssh)],
-        )
+        .new_object(boolean_class, jni_sig!((jboolean)), &[JValue::Bool(is_ssh)])
         .unwrap();
 
     Ok(obj)
