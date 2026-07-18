@@ -1,5 +1,8 @@
 package io.github.wiiznokes.gitnote.manager
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
@@ -7,6 +10,7 @@ import io.github.wiiznokes.gitnote.data.AppPreferences
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.data.room.NoteFolder
 import io.github.wiiznokes.gitnote.data.room.RepoDatabase
+import io.github.wiiznokes.gitnote.ui.model.GitAuthor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
@@ -63,6 +67,48 @@ class StorageManager {
     private val _syncState: MutableStateFlow<SyncState> = MutableStateFlow(SyncState.Ok(true))
     val syncState: StateFlow<SyncState> = _syncState
 
+    private fun isNetworkAvailable(): Boolean {
+        val connectivityManager = MyApp.appModule.context
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return true
+        return try {
+            val network = connectivityManager.activeNetwork ?: return false
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } catch (_: SecurityException) {
+            true
+        }
+    }
+
+    private suspend fun ensureRepoOpen(): Result<Unit> {
+        if (gitManager.isRepoInitialized) return success(Unit)
+        return gitManager.openRepo(prefs.repoPath())
+    }
+
+    private suspend fun commitAllWithRetry(author: GitAuthor, message: String): Result<Unit> {
+        val firstAttempt = gitManager.commitAll(author, message)
+        val err = firstAttempt.exceptionOrNull()
+
+        if (err is GitException && err.type == GitExceptionType.RepoNotInit) {
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+            ensureRepoOpen().onFailure { openErr ->
+                openErr.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(openErr.message))
+                return failure(openErr)
+            }
+            return gitManager.commitAll(author, message).onFailure { retryErr ->
+                retryErr.message?.let { Log.e(TAG, it) }
+                _syncState.emit(SyncState.Error(retryErr.message))
+            }
+        }
+
+        firstAttempt.onFailure { err ->
+            err.message?.let { Log.e(TAG, it) }
+            _syncState.emit(SyncState.Error(err.message))
+        }
+        return firstAttempt
+    }
+
 
     suspend fun updateDatabaseAndRepo(): Result<Unit> = locker.withLock {
         Log.d(TAG, "updateDatabaseAndRepo")
@@ -72,16 +118,15 @@ class StorageManager {
         val author = prefs.gitAuthor()
         var isError = false
 
-        gitManager.commitAll(
+        commitAllWithRetry(
             author,
             "commit from gitnote to update the repo of the app"
         ).onFailure { err ->
-            err.message?.let { Log.e(TAG, it) }
-            _syncState.emit(SyncState.Error(err.message))
             return@withLock failure(err)
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        val online = isNetworkAvailable()
+        if (remoteUrl.isNotEmpty() && online) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred, author).onFailure { err ->
                 isError = true
@@ -90,7 +135,7 @@ class StorageManager {
             }
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        if (remoteUrl.isNotEmpty() && online) {
             _syncState.emit(SyncState.Push)
             // todo: maybe async this call
             gitManager.push(cred).onFailure { err ->
@@ -136,7 +181,13 @@ class StorageManager {
         Log.d(TAG, "repoPath = $repoPath")
 
         progressCb?.invoke(Progress.Timestamps)
-        val timestamps = gitManager.getTimestamps().getOrThrow()
+        val timestamps = gitManager.getTimestamps().fold(
+            onSuccess = { it },
+            onFailure = { err ->
+                err.message?.let { Log.e(TAG, it) }
+                return failure(err)
+            }
+        )
 
         dao.clearAndInit(repoPath, timestamps, progressCb)
         prefs.databaseCommit.update(fsCommit)
@@ -326,16 +377,15 @@ class StorageManager {
 
         var isError = false
 
-        gitManager.commitAll(
+        commitAllWithRetry(
             author,
             "commit from gitnote, before doing a change"
         ).onFailure { err ->
-            err.message?.let { Log.e(TAG, it) }
-            _syncState.emit(SyncState.Error(err.message))
             return failure(err)
         }
 
-        if (remoteUrl.isNotEmpty()) {
+        val online = isNetworkAvailable()
+        if (remoteUrl.isNotEmpty() && online) {
             _syncState.emit(SyncState.Pull)
             gitManager.pull(cred, author).onFailure { err ->
                 isError = true
@@ -360,15 +410,13 @@ class StorageManager {
             }
         )
 
-        gitManager.commitAll(author, commitMessage).onFailure { err ->
-            err.message?.let { Log.e(TAG, it) }
-            _syncState.emit(SyncState.Error(err.message))
+        commitAllWithRetry(author, commitMessage).onFailure { err ->
             return failure(err)
         }
 
         prefs.databaseCommit.update(gitManager.lastCommit())
 
-        if (remoteUrl.isNotEmpty()) {
+        if (remoteUrl.isNotEmpty() && online) {
             _syncState.emit(SyncState.Push)
             gitManager.push(cred).onFailure { err ->
                 isError = true
