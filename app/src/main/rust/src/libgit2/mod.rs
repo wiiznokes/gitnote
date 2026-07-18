@@ -115,7 +115,7 @@ fn current_branch(repo: &Repository) -> Result<String, Error> {
     let head = repo.head().map_err(|e| Error::git2(e, "head"))?;
 
     if head.is_branch()
-        && let Some(name) = head.shorthand()
+        && let Ok(name) = head.shorthand()
     {
         return Ok(name.to_string());
     }
@@ -409,7 +409,7 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
 
     tree.walk(TreeWalkMode::PreOrder, |root, entry| {
         if entry.kind() == Some(git2::ObjectType::Blob)
-            && let Some(name) = entry.name()
+            && let Ok(name) = entry.name()
             && let Some(extension) = Path::new(name).extension()
             && let Some(extension) = extension.to_str()
             && is_extension_supported(extension)
