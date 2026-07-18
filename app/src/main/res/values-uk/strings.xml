@@ -64,6 +64,7 @@
     <string name="clone_repo">Клонувати віддалений репозиторій</string>
     <string name="use_app_storage">Використати сховище застосунку</string>
     <string name="error_need_storage_permission">Застосунку потрібен цей дозвіл для доступу до сховища</string>
+    <string name="error_need_network_permission">Застосунку потрібен цей дозвіл для доступу до репозиторіїв у вашій локальній мережі</string>
     <string name="use_device_storage">Використати сховище пристрою</string>
     <string name="use_device_storage_info">Потрібен дозвіл на доступ до всього сховища пристрою. Після цього ви зможете отримати доступ до репозиторію з комп’ютера.</string>
     <string name="create_repo_explorer">Створити репозиторій у цій папці</string>

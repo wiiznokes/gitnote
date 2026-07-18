@@ -79,6 +79,7 @@
     <string name="clone_remote_repo">Clone remote repository</string>
     <string name="use_app_storage">Use app storage</string>
     <string name="error_need_storage_permission">The application needs this permission to access the storage</string>
+    <string name="error_need_network_permission">The application needs this permission to access repositories on your local network</string>
     <string name="use_device_storage">Use device storage</string>
     <string name="use_device_storage_info">Requires permission to access the full device storage. You will be able to access the repository on your computer afterwards.</string>
     <string name="create_repo_explorer">Create repository in this folder</string>
