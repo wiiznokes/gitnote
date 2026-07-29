@@ -25,8 +25,11 @@ anyhow = "1"
 zeroize = "1"
 libgit2-sys = "0.18"
 include-lines = "1"
-gix-url = "0.36"
+gix-url = "0.37"
 bstr = "1.13"
+
+[dev-dependencies]
+env_logger = "0.11"
 
 
 [profile.release]

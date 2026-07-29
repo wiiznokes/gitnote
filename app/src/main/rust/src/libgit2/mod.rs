@@ -11,12 +11,14 @@ use git2::{
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
-use crate::{Cred, Error, GitAuthor, ProgressCB, mime_types::is_extension_supported};
+use crate::{Cred, Error, GitAuthor, callback::ProgressCBT, mime_types::is_extension_supported};
 
 mod merge;
 
 #[cfg(test)]
 mod test;
+#[cfg(test)]
+mod test_clone;
 
 #[cfg(test)]
 mod test_merge;
@@ -29,7 +31,10 @@ static REPO: LazyLock<Mutex<Option<Repository>>> = LazyLock::new(|| Mutex::new(N
 static HOME_PATH: OnceLock<String> = OnceLock::new();
 
 fn apply_ssh_workaround(clone: bool) {
-    let home = HOME_PATH.get().unwrap();
+    let Some(home) = HOME_PATH.get() else {
+        warn!("home path not set");
+        return;
+    };
 
     if clone {
         unsafe {
@@ -127,18 +132,20 @@ fn current_branch(repo: &Repository) -> Result<String, Error> {
     ))
 }
 
-fn credential_helper(cred: &Cred) -> Result<git2::Cred, git2::Error> {
+fn credential_helper(
+    cred: &Cred,
+    username_from_url: Option<&str>,
+) -> Result<git2::Cred, git2::Error> {
     match cred {
         Cred::UserPassPlainText { username, password } => {
             git2::Cred::userpass_plaintext(username, password)
         }
         Cred::Ssh {
-            username,
             private_key,
             public_key,
             passphrase,
         } => git2::Cred::ssh_key_from_memory(
-            username,
+            username_from_url.unwrap_or("git"),
             Some(public_key),
             private_key,
             passphrase.as_deref(),
@@ -150,7 +157,7 @@ pub fn clone_repo(
     repo_path: &str,
     remote_url: &str,
     cred: Option<Cred>,
-    mut cb: ProgressCB,
+    mut cb: impl ProgressCBT,
 ) -> Result<(), Error> {
     apply_ssh_workaround(true);
     let mut callbacks = RemoteCallbacks::new();
@@ -158,8 +165,10 @@ pub fn clone_repo(
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks
-            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
+        callbacks.credentials(move |_url, username_from_url, _allowed_types| {
+            debug!("allowed_types: {:?}", _allowed_types);
+            credential_helper(&cred, username_from_url)
+        });
     }
 
     callbacks.transfer_progress(|stats: Progress| {
@@ -272,8 +281,9 @@ pub fn push(cred: Option<Cred>) -> Result<(), Error> {
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks
-            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
+        callbacks.credentials(move |_url, username_from_url, _allowed_types| {
+            credential_helper(&cred, username_from_url)
+        });
     }
 
     let mut push_opts = PushOptions::new();
@@ -301,8 +311,9 @@ pub fn pull(cred: Option<Cred>, author: &GitAuthor) -> Result<(), Error> {
     callbacks.certificate_check(|_cert, _| Ok(CertificateCheckStatus::CertificateOk));
 
     if let Some(cred) = cred {
-        callbacks
-            .credentials(move |_url, _username_from_url, _allowed_types| credential_helper(&cred));
+        callbacks.credentials(move |_url, username_from_url, _allowed_types| {
+            credential_helper(&cred, username_from_url)
+        });
     }
 
     let mut fetch_options = FetchOptions::new();

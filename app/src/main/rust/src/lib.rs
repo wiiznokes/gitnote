@@ -6,7 +6,7 @@ use jni::objects::{JClass, JObject, JString, JValue};
 use jni::sys::{jboolean, jint};
 use jni::{Env, NativeMethod, jni_sig, jni_str, native_method};
 
-use crate::callback::ProgressCB;
+use crate::callback::JniProgressCB;
 use crate::key_gen::gen_keys;
 use crate::utils::install_panic_hook;
 
@@ -216,7 +216,6 @@ pub enum Cred {
         password: String,
     },
     Ssh {
-        username: String,
         public_key: String,
         private_key: String,
         passphrase: Option<String>,
@@ -248,13 +247,11 @@ impl Debug for Cred {
                 .field("username", username)
                 .finish(),
             Self::Ssh {
-                username,
                 public_key,
                 private_key: _private_key,
                 passphrase: _passphrase,
             } => f
                 .debug_struct("Ssh")
-                .field("username", username)
                 .field("public_key", public_key)
                 .finish(),
         }
@@ -317,14 +314,12 @@ impl Cred {
                 Ok(Some(Cred::UserPassPlainText { username, password }))
             }
             "io.github.wiiznokes.gitnote.ui.model.Cred$Ssh" => {
-                let username = jstring_field!(env, cred_obj, "username");
                 let public_key = jstring_field!(env, cred_obj, "publicKey");
 
                 let private_key = jstring_field!(env, cred_obj, "privateKey");
                 let passphrase = jstring_field_nullable!(env, cred_obj, "passphrase");
 
                 Ok(Some(Cred::Ssh {
-                    username,
                     public_key,
                     private_key,
                     passphrase,
@@ -338,19 +333,22 @@ impl Cred {
 mod callback {
     use jni::{Env, jni_sig, jni_str, objects::JObject};
 
-    pub struct ProgressCB<'ptr, 'local> {
+    pub struct JniProgressCB<'ptr, 'local> {
         env: &'ptr mut Env<'local>,
         callback_class: JObject<'local>,
     }
 
-    impl<'ptr, 'local> ProgressCB<'ptr, 'local> {
+    impl<'ptr, 'local> JniProgressCB<'ptr, 'local> {
         pub fn new(env: &'ptr mut Env<'local>, callback_class: JObject<'local>) -> Self {
             Self {
                 env,
                 callback_class,
             }
         }
-        pub fn progress(&mut self, progress: i32) -> bool {
+    }
+
+    impl<'ptr, 'local> ProgressCBT for JniProgressCB<'ptr, 'local> {
+        fn progress(&mut self, progress: i32) -> bool {
             let res = self
                 .env
                 .call_method(
@@ -363,6 +361,20 @@ mod callback {
 
             res.z().unwrap()
         }
+    }
+
+    #[cfg(test)]
+    pub struct DummyProgressCB;
+
+    #[cfg(test)]
+    impl ProgressCBT for DummyProgressCB {
+        fn progress(&mut self, _progress: i32) -> bool {
+            true
+        }
+    }
+
+    pub trait ProgressCBT {
+        fn progress(&mut self, progress: i32) -> bool;
     }
 }
 fn clone_repo_lib<'local>(
@@ -384,7 +396,7 @@ fn clone_repo_lib<'local>(
         }
     };
 
-    let cb = ProgressCB::new(env, progress_callback);
+    let cb = JniProgressCB::new(env, progress_callback);
 
     unwrap_or_log!(
         libgit2::clone_repo(&repo_path, &remote_url, cred, cb),
