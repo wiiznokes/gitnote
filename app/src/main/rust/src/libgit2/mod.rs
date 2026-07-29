@@ -11,7 +11,7 @@ use git2::{
     Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
 };
 
-use crate::{Cred, Error, GitAuthor, callback::ProgressCBT, mime_types::is_extension_supported};
+use crate::{Cred, Error, GitAuthor, callback::ProgressCB, mime_types::is_extension_supported};
 
 mod merge;
 
@@ -157,7 +157,7 @@ pub fn clone_repo(
     repo_path: &str,
     remote_url: &str,
     cred: Option<Cred>,
-    mut cb: impl ProgressCBT,
+    mut cb: impl ProgressCB,
 ) -> Result<(), Error> {
     apply_ssh_workaround(true);
     let mut callbacks = RemoteCallbacks::new();

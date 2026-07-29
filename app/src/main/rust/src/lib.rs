@@ -347,7 +347,7 @@ mod callback {
         }
     }
 
-    impl<'ptr, 'local> ProgressCBT for JniProgressCB<'ptr, 'local> {
+    impl<'ptr, 'local> ProgressCB for JniProgressCB<'ptr, 'local> {
         fn progress(&mut self, progress: i32) -> bool {
             let res = self
                 .env
@@ -367,13 +367,13 @@ mod callback {
     pub struct DummyProgressCB;
 
     #[cfg(test)]
-    impl ProgressCBT for DummyProgressCB {
+    impl ProgressCB for DummyProgressCB {
         fn progress(&mut self, _progress: i32) -> bool {
             true
         }
     }
 
-    pub trait ProgressCBT {
+    pub trait ProgressCB {
         fn progress(&mut self, progress: i32) -> bool;
     }
 }
