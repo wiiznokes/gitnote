@@ -7,7 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavBackHandler
@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = dynamicColor
             ) {
 
-                val startDestination: Destination = rememberSaveable {
+                val startDestination: Destination = remember {
                     if (runBlocking { vm.tryInit() }) {
                         Destination.App(AppDestination.Grid)
                     } else Destination.Setup(SetupDestination.Main)
