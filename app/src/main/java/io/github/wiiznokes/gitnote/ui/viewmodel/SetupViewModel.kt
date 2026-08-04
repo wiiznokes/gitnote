@@ -107,6 +107,30 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
         }
     }
 
+    fun isFolderWillBeDeleted(storageConfig: StorageConfiguration): Boolean {
+        return when (storageConfig) {
+            StorageConfiguration.App -> false
+            is StorageConfiguration.Device -> {
+                if (storageConfig.useUrlForRootFolder) {
+                    return false
+                }
+
+                val folder = NodeFs.Folder.fromPath(storageConfig.path)
+
+                if (!folder.exist()) {
+                    return false
+                }
+
+
+                if (folder.isEmptyDirectory().isSuccess) {
+                    return false
+                }
+
+                true
+            }
+        }
+    }
+
     fun createLocalRepo(storageConfig: StorageConfiguration, onSuccess: () -> Unit) {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -156,15 +180,6 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             onSuccess()
         }
 
-    }
-
-
-    fun checkPathForClone(repoPath: String): Result<Unit> {
-        val result = NodeFs.Folder.fromPath(repoPath).isEmptyDirectory()
-        result.onFailure {
-            uiHelper.makeToast(it.message)
-        }
-        return result
     }
 
     override fun launch(f: suspend () -> Unit) {
