@@ -63,6 +63,21 @@ pub fn init_lib(home_path: String) {
     info!("home_path: {home_path}");
     let _ = HOME_PATH.set(home_path.clone());
 
+    git2::trace_set(git2::TraceLevel::Warn, |level, msg| {
+        let msg = String::from_utf8_lossy(msg);
+
+        match level {
+            git2::TraceLevel::None => debug!("{msg}"),
+            git2::TraceLevel::Fatal => error!("{msg}"),
+            git2::TraceLevel::Error => error!("{msg}"),
+            git2::TraceLevel::Warn => warn!("{msg}"),
+            git2::TraceLevel::Info => info!("{msg}"),
+            git2::TraceLevel::Debug => debug!("{msg}"),
+            git2::TraceLevel::Trace => trace!("{msg}"),
+        }
+    })
+    .unwrap();
+
     unsafe {
         std::env::set_var("HOME", &home_path);
     }

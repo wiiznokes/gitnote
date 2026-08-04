@@ -309,7 +309,7 @@ impl Cred {
         match class_name.as_str() {
             "io.github.wiiznokes.gitnote.ui.model.Cred$UserPassPlainText" => {
                 let username = jstring_field!(env, cred_obj, "username");
-                let password = jstring_field!(env, cred_obj, "username");
+                let password = jstring_field!(env, cred_obj, "password");
 
                 Ok(Some(Cred::UserPassPlainText { username, password }))
             }
