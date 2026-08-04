@@ -3,6 +3,7 @@ package io.github.wiiznokes.gitnote.ui.screen.setup
 import androidx.compose.animation.ContentTransform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
@@ -14,6 +15,7 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
@@ -84,6 +86,35 @@ fun SetupNav(
                     key = path
                 )
 
+                val requestConfirmationDialogExpanded = remember {
+                    mutableStateOf(false)
+                }
+
+                var pendingStorageConfig: StorageConfiguration? = remember {
+                    null
+                }
+
+                RequestConfirmationDialog(
+                    expanded = requestConfirmationDialogExpanded,
+                    text = "WARNING: Are you sure you want to continue? The directory will be deleted.",
+                    onConfirmation = {
+                        pendingStorageConfig?.let { storageConfig ->
+                            when (setupDestination.newRepoMethod) {
+                                NewRepoMethod.Create -> vm.createLocalRepo(
+                                    storageConfig,
+                                    onSetupSuccess
+                                )
+
+                                NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
+                                NewRepoMethod.Clone -> {
+                                    navController.navigate(
+                                        SetupDestination.Remote(storageConfig)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
 
                 FileExplorerScreen(
                     currentDir = fileExplorerVm.currentDir,
@@ -102,14 +133,24 @@ fun SetupNav(
                         )
 
                         when (setupDestination.newRepoMethod) {
-                            NewRepoMethod.Create -> vm.createLocalRepo(
-                                storageConfig,
-                                onSetupSuccess
-                            )
+                            NewRepoMethod.Create -> {
+                                if (vm.isFolderWillBeDeleted(storageConfig)) {
+                                    requestConfirmationDialogExpanded.value = true
+                                    pendingStorageConfig = storageConfig
+                                } else {
+                                    vm.createLocalRepo(
+                                        storageConfig,
+                                        onSetupSuccess
+                                    )
+                                }
+                            }
 
                             NewRepoMethod.Open -> vm.openRepo(storageConfig, onSetupSuccess)
                             NewRepoMethod.Clone -> {
-                                if (useUrlForRootFolder || vm.checkPathForClone(storageConfig.repoPath()).isSuccess) {
+                                if (vm.isFolderWillBeDeleted(storageConfig)) {
+                                    requestConfirmationDialogExpanded.value = true
+                                    pendingStorageConfig = storageConfig
+                                } else {
                                     navController.navigate(
                                         SetupDestination.Remote(storageConfig)
                                     )
