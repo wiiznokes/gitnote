@@ -68,6 +68,7 @@ fun MarkdownCustom(
         )
     }
 }
+
 @Composable
 fun MarkdownCustomInner(
     content: String,
@@ -82,7 +83,13 @@ fun MarkdownCustomInner(
     annotator: MarkdownAnnotator = markdownAnnotator(),
     extendedSpans: MarkdownExtendedSpans = markdownExtendedSpans(),
     inlineContent: MarkdownInlineContent = markdownInlineContent(),
-    components: MarkdownComponents = markdownComponents(checkbox = { MarkdownCheckBox(it.content, it.node, it.typography.text) }),
+    components: MarkdownComponents = markdownComponents(checkbox = {
+        MarkdownCheckBox(
+            it.content,
+            it.node,
+            it.typography.text
+        )
+    }),
     animations: MarkdownAnimations = markdownAnimations(),
     referenceLinkHandler: ReferenceLinkHandler = ReferenceLinkHandlerImpl(),
     lookupLinks: Boolean = true,
@@ -112,7 +119,6 @@ fun MarkdownCustomInner(
     success = success,
     error = error,
 )
-
 
 
 private fun TextStyle.scaled(scale: Float): TextStyle = copy(
