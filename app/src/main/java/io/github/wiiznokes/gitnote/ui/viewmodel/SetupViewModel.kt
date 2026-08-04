@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "SetupViewModel"
 
@@ -101,7 +102,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
 
     fun setStateToIdle() {
         viewModelScope.launch {
-            delay(50)
+            delay(50.milliseconds)
             _initState.emit(InitState.Idle)
         }
     }
