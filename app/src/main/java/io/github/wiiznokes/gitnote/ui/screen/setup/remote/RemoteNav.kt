@@ -22,7 +22,6 @@ import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.PickRepo
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectGenerateNewSshKeys
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectProvider
 import io.github.wiiznokes.gitnote.ui.destination.RemoteDestination.SelectSetupAutomatically
-import io.github.wiiznokes.gitnote.ui.destination.SettingsDestination
 import io.github.wiiznokes.gitnote.ui.model.StorageConfiguration
 import io.github.wiiznokes.gitnote.ui.screen.settings.LogsScreen
 import io.github.wiiznokes.gitnote.ui.utils.slide

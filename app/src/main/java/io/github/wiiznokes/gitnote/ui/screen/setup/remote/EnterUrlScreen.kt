@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.wiiznokes.gitnote.MyApp
 import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.helper.NetworkPermissionHelper
-import kotlinx.coroutines.launch
 import io.github.wiiznokes.gitnote.manager.getUrlInfoLib
 import io.github.wiiznokes.gitnote.provider.GithubProvider
 import io.github.wiiznokes.gitnote.provider.Provider
@@ -32,6 +31,7 @@ import io.github.wiiznokes.gitnote.ui.component.AppPage
 import io.github.wiiznokes.gitnote.ui.component.SetupButton
 import io.github.wiiznokes.gitnote.ui.component.SetupLine
 import io.github.wiiznokes.gitnote.ui.component.SetupPage
+import kotlinx.coroutines.launch
 
 
 fun isUrlSsh(url: String): Boolean {
@@ -134,7 +134,10 @@ fun EnterUrlScreen(
                 onClick = {
                     val urlText = url.value.text
                     scope.launch {
-                        if (NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(context)) {
+                        if (NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(
+                                context
+                            )
+                        ) {
                             pendingUrl.value = urlText
                             nearbyPermissionLauncher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK)
                         } else {

@@ -43,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TooltipDefaults.rememberTooltipPositionProvider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTooltipState
@@ -438,7 +437,11 @@ private fun SyncStateIcon(
     }
 
     val tooltipState = rememberTooltipState(isPersistent = true)
-    var visible by remember(state) { if (state is Ok) mutableStateOf(!state.isConsumed) else mutableStateOf(true) }
+    var visible by remember(state) {
+        if (state is Ok) mutableStateOf(!state.isConsumed) else mutableStateOf(
+            true
+        )
+    }
 
     if (state is Ok) {
         LaunchedEffect(visible) {
@@ -482,16 +485,19 @@ private fun SyncStateIcon(
                         contentDescription = "Sync Error",
                         modifier = modifier
                     )
+
                     is Ok -> Icon(
                         imageVector = Icons.Default.CloudDone,
                         contentDescription = "Sync Done",
                         modifier = modifier,
                     )
+
                     Pull -> Icon(
                         imageVector = Icons.Default.CloudDownload,
                         contentDescription = "Pulling",
                         modifier = modifier,
                     )
+
                     Push -> Icon(
                         imageVector = Icons.Default.CloudUpload,
                         contentDescription = "Pushing",

@@ -6,6 +6,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 const val TAG = "MyApp (Application)"
+
 class MyApp : Application() {
 
     companion object {

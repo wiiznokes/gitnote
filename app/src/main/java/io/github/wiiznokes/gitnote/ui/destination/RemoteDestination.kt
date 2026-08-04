@@ -49,5 +49,5 @@ sealed interface RemoteDestination : Parcelable {
     ) : RemoteDestination
 
     @Parcelize
-    data object Logs: RemoteDestination
+    data object Logs : RemoteDestination
 }

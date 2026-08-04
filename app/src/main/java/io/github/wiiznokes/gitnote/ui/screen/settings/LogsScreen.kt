@@ -64,10 +64,12 @@ private fun getTextStyleFromInt(id: Int): TextStyle {
             fontSize = 8.sp,
             lineHeight = 10.sp
         )
+
         0 -> MaterialTheme.typography.bodySmall.copy(
             fontSize = 10.sp,
             lineHeight = 12.sp
         )
+
         1 -> MaterialTheme.typography.bodySmall
         2 -> MaterialTheme.typography.bodyMedium
         3 -> MaterialTheme.typography.bodyLarge

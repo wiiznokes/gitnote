@@ -9,9 +9,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 
-class GithubProvider(
-
-) : Provider {
+class GithubProvider : Provider {
 
     override val createRepoLink: String = "https://github.com/new"
 
