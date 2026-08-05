@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.Transaction
 import androidx.room.Upsert
 import androidx.sqlite.db.SimpleSQLiteQuery
 import androidx.sqlite.db.SupportSQLiteQuery
@@ -28,8 +30,7 @@ private const val LIMIT_FILE_SIZE_DB = 2 * 1024 * 1024
 @Dao
 interface RepoDatabaseDao {
 
-    // todo: use @Transaction
-    // todo: don't clear the all database each time
+    @Transaction
     suspend fun clearAndInit(
         rootPath: String,
         timestamps: HashMap<String, Long>,
@@ -42,11 +43,21 @@ interface RepoDatabaseDao {
         val rootFolder = NoteFolder.new(
             relativePath = "",
         )
-        insertNoteFolder(rootFolder)
+
+        val notes = mutableListOf<Note>()
+        val folders = mutableListOf<NoteFolder>()
+
+        folders.add(rootFolder)
 
         val rootLength = rootFs.path.length + 1
 
-        suspend fun initRec(folder: NodeFs.Folder) {
+        var folderCount = 0
+
+        val stack = ArrayDeque<NodeFs.Folder>()
+        stack.add(rootFs)
+
+        while (stack.isNotEmpty()) {
+            val folder = stack.removeLast()
 
             folder.forEachNodeFs { nodeFs ->
 
@@ -69,11 +80,16 @@ interface RepoDatabaseDao {
                         val relativePath = nodeFs.path.substring(startIndex = rootLength)
                         val note = Note.new(
                             relativePath = relativePath,
-                            lastModifiedTimeMillis = timestamps.get(relativePath)
+                            lastModifiedTimeMillis = timestamps[relativePath]
                                 ?: nodeFs.lastModifiedTime().toMillis(),
                             content = nodeFs.readText(),
                         )
-                        insertNote(note)
+
+                        notes.add(note)
+                        if (notes.size >= 1000) {
+                            insertNotes(notes)
+                            notes.clear()
+                        }
                         //Log.d(TAG, "add note: $note")
                     }
 
@@ -85,15 +101,26 @@ interface RepoDatabaseDao {
                             relativePath = nodeFs.path.substring(startIndex = rootLength),
                         )
                         //Log.d(TAG, "add noteFolder: $noteFolder")
-                        insertNoteFolder(noteFolder)
-                        progressCb?.invoke(Progress.GeneratingDatabase(noteFolder.relativePath))
-                        initRec(nodeFs)
+                        folders.add(noteFolder)
+
+                        if (folders.size >= 1000) {
+                            insertFolders(folders)
+                            folders.clear()
+                        }
+
+                        if (folderCount % 20 == 0) {
+                            progressCb?.invoke(Progress.GeneratingDatabase(noteFolder.relativePath))
+                        }
+                        folderCount += 1
+
+                        stack.addLast(nodeFs)
                     }
                 }
             }
         }
 
-        initRec(rootFs)
+        insertNotes(notes)
+        insertFolders(folders)
     }
 
 
@@ -270,8 +297,12 @@ interface RepoDatabaseDao {
     }
 
 
-    @Upsert
+    @Insert
     suspend fun insertNoteFolder(noteFolder: NoteFolder)
+
+
+    @Insert
+    suspend fun insertFolders(folders: List<NoteFolder>)
 
     /**
      * Delete all notes inside the note folder, and the note folder
@@ -297,18 +328,22 @@ interface RepoDatabaseDao {
     @Upsert
     suspend fun insertNote(note: Note)
 
+    @Upsert
+    suspend fun insertNotes(notes: List<Note>)
+
     @Delete
     suspend fun removeNote(note: Note)
 
     @Query("DELETE  FROM NoteFolders")
-    fun removeAllNoteFolder()
+    suspend fun removeAllNoteFolder()
 
     @Query("DELETE  FROM Notes")
-    fun removeAllNote()
+    suspend fun removeAllNote()
 
-    fun clearDatabase() {
+    suspend fun clearDatabase() {
         removeAllNoteFolder()
         removeAllNote()
+
     }
 }
 
