@@ -81,7 +81,7 @@
     <string name="error_need_storage_permission">The application needs this permission to access the storage</string>
     <string name="error_need_network_permission">The application needs this permission to access repositories on your local network</string>
     <string name="use_device_storage">Use device storage</string>
-    <string name="use_device_storage_info">Requires permission to access the full device storage. You will be able to access the repository on your computer afterwards.</string>
+    <string name="use_device_storage_info">Requires permission to access the full device storage. You will be able to access the repository on your computer afterward.</string>
     <string name="create_repo_explorer">Create repository in this folder</string>
     <string name="open_repo_explorer">Open this repository</string>
     <string name="clone_repo_explorer">Clone repository in this folder</string>
@@ -132,11 +132,11 @@
     <string name="open_link_create_repo">Create repository</string>
     <string name="next">Next</string>
     <string name="ssh_keys_title">SSH keys</string>
-    <string name="ssh_keys_setup_title">In order to access this repository, this public key must be copied as a deploy key</string>
+    <string name="ssh_keys_setup_title">In order to access this repository, this public key must be copied as a deployment key</string>
     <string name="copy_the_key">Copy the key</string>
     <string name="copy_key">Copy Key</string>
     <string name="regenerate_key">Regenerate Key</string>
-    <string name="paste_deploy_key">Open webpage, and paste the deploy key. Make sure it is given Write Access</string>
+    <string name="paste_deploy_key">Open webpage, and paste the deployment key. Make sure it is given Write Access</string>
     <string name="open_deploy_key_webpage">Open deploy key webpage</string>
     <string name="paste_deploy_key_no_provider">Add the public key to the git provider</string>
     <string name="try_cloning">Try Cloning…</string>
@@ -167,5 +167,6 @@
     <string name="cancel">Cancel</string>
     <string name="go_back">Go back</string>
     <string name="confirmation_quit_edit_dialog">Are you sure you want to quit ? You will lose all changes.</string>
+    <string name="warning_folder_deletion">WARNING: Are you sure you want to continue? The directory will be deleted.</string>
 
 </resources>

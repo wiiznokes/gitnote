@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.olshevski.navigation.reimagined.AnimatedNavHost
 import dev.olshevski.navigation.reimagined.NavAction
@@ -15,6 +16,7 @@ import dev.olshevski.navigation.reimagined.navigate
 import dev.olshevski.navigation.reimagined.pop
 import dev.olshevski.navigation.reimagined.popUpTo
 import dev.olshevski.navigation.reimagined.rememberNavController
+import io.github.wiiznokes.gitnote.R
 import io.github.wiiznokes.gitnote.ui.component.RequestConfirmationDialog
 import io.github.wiiznokes.gitnote.ui.destination.NewRepoMethod
 import io.github.wiiznokes.gitnote.ui.destination.SetupDestination
@@ -96,7 +98,7 @@ fun SetupNav(
 
                 RequestConfirmationDialog(
                     expanded = requestConfirmationDialogExpanded,
-                    text = "WARNING: Are you sure you want to continue? The directory will be deleted.",
+                    text = stringResource(R.string.warning_folder_deletion),
                     onConfirmation = {
                         pendingStorageConfig?.let { storageConfig ->
                             when (setupDestination.newRepoMethod) {

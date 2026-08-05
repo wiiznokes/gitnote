@@ -109,8 +109,7 @@ private fun DialogPreview() {
         expanded = remember {
             mutableStateOf(true)
         },
-        text = "Do you wanna have sex ? kvfeznfezlzelfnklze" +
-                "geg g ggre gegljerngljerngljrnljrengljneglnerlgnelrnglerngenrgne lnglng lenrgln elgrne lgn lgknergner ngegn lekgner nengk enrgl e"
+        text = "I am a description"
     ) {
 
     }

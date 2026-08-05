@@ -395,8 +395,8 @@ fun onLink(v: TextFieldValue): TextFieldValue {
 fun Int.max(b: Int): Int = max(this, b)
 
 /**
- * @param f1: this callback will be called on each line selected. Return true if you want to short circuit.
- * @param f2: this callback is also called on each line selected, after f1. Return the modified line
+ * @param f1 this callback will be called on each line selected. Return true if you want to short circuit.
+ * @param f2 this callback is also called on each line selected, after f1. Return the modified line
  */
 private fun multiLinePrefixModifier(
     v: TextFieldValue,

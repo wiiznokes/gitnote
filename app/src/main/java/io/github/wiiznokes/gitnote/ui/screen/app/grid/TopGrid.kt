@@ -83,6 +83,7 @@ import io.github.wiiznokes.gitnote.ui.model.NoteViewType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 
 private const val TAG = "TopGridScreen"
@@ -445,7 +446,7 @@ private fun SyncStateIcon(
 
     if (state is Ok) {
         LaunchedEffect(visible) {
-            delay(1000)
+            delay(1000.milliseconds)
             visible = false
             onConsumeOkSyncState()
             tooltipState.dismiss()
