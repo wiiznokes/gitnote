@@ -26,12 +26,25 @@ const OK: jint = 0;
 
 #[derive(Debug)]
 enum Error {
-    Git2 { error: git2::Error, msg: String },
+    Git2 {
+        error: git2::Error,
+        msg: String,
+    },
+    Jni {
+        error: jni::errors::Error,
+        msg: String,
+    },
 }
 
 impl From<git2::Error> for Error {
     fn from(value: git2::Error) -> Self {
         Self::git2(value, "")
+    }
+}
+
+impl From<jni::errors::Error> for Error {
+    fn from(value: jni::errors::Error) -> Self {
+        Self::jni(value, "")
     }
 }
 
@@ -43,9 +56,20 @@ impl Error {
         }
     }
 
+    fn jni(error: jni::errors::Error, msg: &str) -> Self {
+        Self::Jni {
+            error,
+            msg: msg.into(),
+        }
+    }
+
     fn add_message(self, msg1: &str) -> Self {
         match self {
             Error::Git2 { error, msg } => Error::Git2 {
+                error,
+                msg: format!("{}: {}", msg1, msg),
+            },
+            Error::Jni { error, msg } => Error::Jni {
                 error,
                 msg: format!("{}: {}", msg1, msg),
             },
@@ -57,6 +81,7 @@ impl From<Error> for jint {
     fn from(value: Error) -> Self {
         match value {
             Error::Git2 { error, .. } => error.raw_code(),
+            Error::Jni { .. } => -1,
         }
     }
 }
@@ -64,9 +89,8 @@ impl From<Error> for jint {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Git2 { error, msg } => {
-                write!(f, "{msg}: {error}")
-            }
+            Error::Git2 { error, msg } => write!(f, "{msg}: {error}"),
+            Error::Jni { error, msg } => write!(f, "{msg}: {error}"),
         }
     }
 }
@@ -513,22 +537,7 @@ fn get_timestamps_lib<'local>(
     _class: JClass<'local>,
     j_map: JObject<'local>,
 ) -> Result<jint, jni::errors::Error> {
-    let timestamps = unwrap_or_log!(libgit2::get_timestamps(), "get_timestamps");
-
-    if let Err(e) = get_timestamps_jni(env, &j_map, timestamps.iter()) {
-        error!("get_timestamps_jni: {e}");
-        return Ok(-1);
-    }
-
-    Ok(OK)
-}
-
-fn get_timestamps_jni<'local, 'a>(
-    env: &mut Env<'local>,
-    j_map: &JObject<'local>,
-    timestamps: impl Iterator<Item = (&'a String, &'a i64)>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let map_class = env.get_object_class(j_map)?;
+    let map_class = env.get_object_class(&j_map)?;
     let put_method = env.get_method_id(
         map_class,
         jni_str!("put"),
@@ -538,29 +547,34 @@ fn get_timestamps_jni<'local, 'a>(
     let long_class = env.find_class(jni_str!("java/lang/Long"))?;
     let long_ctor = env.get_method_id(&long_class, jni_str!("<init>"), jni_sig!((jlong)))?;
 
-    for (path, timestamp) in timestamps {
-        let j_key: JString = env.new_string(path)?;
+    unwrap_or_log!(
+        libgit2::get_timestamps(|path, timestamp| {
+            let j_key: JString = env.new_string(path)?;
 
-        unsafe {
-            let j_value = env.new_object_unchecked(
-                &long_class,
-                long_ctor,
-                &[JValue::Long(*timestamp).as_jni()],
-            )?;
+            unsafe {
+                let j_value = env.new_object_unchecked(
+                    &long_class,
+                    long_ctor,
+                    &[JValue::Long(timestamp).as_jni()],
+                )?;
 
-            env.call_method_unchecked(
-                j_map,
-                put_method,
-                jni::signature::ReturnType::Object,
-                &[
-                    JValue::Object(&JObject::from(j_key)).as_jni(),
-                    JValue::Object(&j_value).as_jni(),
-                ],
-            )?;
-        }
-    }
+                env.call_method_unchecked(
+                    &j_map,
+                    put_method,
+                    jni::signature::ReturnType::Object,
+                    &[
+                        JValue::Object(&JObject::from(j_key)).as_jni(),
+                        JValue::Object(&j_value).as_jni(),
+                    ],
+                )?;
+            }
 
-    Ok(())
+            Ok(())
+        }),
+        "get_timestamps"
+    );
+
+    Ok(OK)
 }
 
 fn generate_ssh_keys_lib<'local>(
