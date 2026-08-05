@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.08.1]
+
 ### Changed
 
 - Improve timestamp algorithm. O(n \* m) to O(n)
