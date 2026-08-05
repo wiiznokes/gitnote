@@ -7,7 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- Improve timestamp algorithme. O(n \* m) to O(n)
+- Improve timestamp algorithm. O(n \* m) to O(n)
+- Improve performance of the database creation. Use transaction and batch insert
 
 ## [26.08]
 
