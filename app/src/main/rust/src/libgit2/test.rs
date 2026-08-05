@@ -32,7 +32,8 @@ fn timestamp2() {
     let now = Instant::now();
 
     get_timestamps(|path, time| {
-        timestamps.insert(path.to_string(), time);
+        timestamps.entry(path.to_string()).or_insert(time);
+
         Ok(())
     })
     .unwrap();

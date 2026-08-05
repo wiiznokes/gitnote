@@ -7,13 +7,12 @@ use std::{
 
 use git2::{
     CertificateCheckStatus, FetchOptions, IndexAddOption, Progress, PushOptions, RemoteCallbacks,
-    Repository, Signature, StatusOptions, TreeWalkMode, TreeWalkResult,
+    Repository, Signature, StatusOptions,
 };
 
 use crate::{Cred, Error, GitAuthor, callback::ProgressCB, mime_types::is_extension_supported};
 
 mod merge;
-
 #[cfg(test)]
 mod test;
 #[cfg(test)]
@@ -375,85 +374,52 @@ pub fn is_change() -> Result<bool, Error> {
     Ok(count > 0)
 }
 
-fn find_timestamp(repo: &Repository, file_path: &str) -> anyhow::Result<Option<i64>> {
-    // Use revwalk to find the last commit that touched this path
-    let mut revwalk = repo.revwalk()?;
-    revwalk.push_head()?;
-    revwalk.set_sorting(git2::Sort::TIME)?;
-
-    for oid_result in revwalk {
-        let oid = oid_result?;
-        let commit = repo.find_commit(oid)?;
-
-        // Check if this commit touches the file
-        if commit
-            .tree()?
-            .get_path(std::path::Path::new(file_path))
-            .is_ok()
-        {
-            // We want to check if this commit modified the file_path compared to its parent(s)
-            let parent = commit.parents().next();
-
-            let is_modified = match parent {
-                Some(parent) => {
-                    // Compare trees between commit and its first parent
-                    let parent_tree = parent.tree()?;
-                    let current_tree = commit.tree()?;
-
-                    let diff = repo.diff_tree_to_tree(
-                        Some(&parent_tree),
-                        Some(&current_tree),
-                        Some(git2::DiffOptions::new().pathspec(file_path)),
-                    )?;
-
-                    diff.deltas().len() > 0
-                }
-                // Initial commit, consider as modified
-                None => true,
-            };
-
-            if is_modified {
-                return Ok(Some(commit.time().seconds() * 1000));
-            }
-        }
-    }
-    Ok(None)
-}
-
 pub fn get_timestamps(
     mut insert: impl FnMut(&str, i64) -> Result<(), jni::errors::Error>,
 ) -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
-    // Get HEAD commit
-    let head = repo.head()?.peel_to_commit()?;
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+    revwalk.set_sorting(git2::Sort::TIME)?;
 
-    // Get the list of files in the repo at HEAD
-    let tree = head.tree()?;
+    for oid in revwalk {
+        let oid = oid?;
+        let commit = repo.find_commit(oid)?;
 
-    tree.walk(TreeWalkMode::PreOrder, |root, entry| {
-        if entry.kind() == Some(git2::ObjectType::Blob)
-            && let Ok(name) = entry.name()
-            && let Some(extension) = Path::new(name).extension()
-            && let Some(extension) = extension.to_str()
-            && is_extension_supported(extension)
-        {
-            let path = format!("{root}{name}");
+        let current_tree = commit.tree()?;
 
-            match find_timestamp(repo, &path) {
-                Ok(Some(time)) => {
-                    if let Err(e) = insert(&path, time) {
-                        error!("{e}");
-                        return TreeWalkResult::Abort;
+        let parent_tree = if commit.parent_count() > 0 {
+            Some(commit.parent(0)?.tree()?)
+        } else {
+            None
+        };
+
+        let mut opts = git2::DiffOptions::new();
+
+        let diff =
+            repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&current_tree), Some(&mut opts))?;
+
+        for delta in diff.deltas() {
+            let path = delta.new_file().path().or_else(|| delta.old_file().path());
+
+            if let Some(path) = path
+                && is_extension_supported(
+                    Path::new(&path)
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .unwrap_or(""),
+                ) {
+                    match path.as_os_str().to_str() {
+                        Some(path) => insert(path, commit.time().seconds() * 1000)?,
+                        None => {
+                            warn!("path can't be converted to str");
+                        }
                     }
                 }
-                Ok(None) => warn!("No timestamp found"),
-                Err(e) => error!("timestamp: {e}"),
-            }
         }
-        TreeWalkResult::Ok
-    })?;
+    }
 
     Ok(())
 }
