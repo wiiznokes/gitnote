@@ -1,28 +1,35 @@
 package io.github.wiiznokes.gitnote.ui.utils
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun rememberWindowInfo(): WindowInfo {
-    val configuration = LocalConfiguration.current
+    val windowInfo = LocalWindowInfo.current
+    val size = windowInfo.containerSize
+
+    val widthDp = with(LocalDensity.current) { size.width.toDp() }
+    val heightDp = with(LocalDensity.current) { size.height.toDp() }
+
     return WindowInfo(
         screenWidthInfo = when {
-            configuration.screenWidthDp < 600 -> WindowInfo.WindowType.Compact
-            configuration.screenWidthDp < 840 -> WindowInfo.WindowType.Medium
+            widthDp < 600.dp -> WindowInfo.WindowType.Compact
+            widthDp < 840.dp -> WindowInfo.WindowType.Medium
             else -> WindowInfo.WindowType.Expanded
         },
         screenHeightInfo = when {
-            configuration.screenHeightDp < 480 -> WindowInfo.WindowType.Compact
-            configuration.screenHeightDp < 900 -> WindowInfo.WindowType.Medium
+            heightDp < 480.dp -> WindowInfo.WindowType.Compact
+            heightDp < 900.dp -> WindowInfo.WindowType.Medium
             else -> WindowInfo.WindowType.Expanded
         },
-        screenWidth = configuration.screenWidthDp.dp,
-        screenHeight = configuration.screenHeightDp.dp
+        screenWidth = widthDp,
+        screenHeight = heightDp
     )
 }
+
 
 data class WindowInfo(
     val screenWidthInfo: WindowType,

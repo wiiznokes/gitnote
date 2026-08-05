@@ -19,7 +19,7 @@ class GithubProvider : Provider {
     private val clientId = "Ov23li8EPatIAsWPt9QT"
 
     // storing this secret in the repo is "ok"
-    // the only risk is github app reputation and quotas
+    // the only risk is GitHub app reputation and quotas
     // it would require a server to not store it here
     private val clientSecret = "12f3f4742855deaafb45e798bcc635608b9d6fe6"
 
@@ -111,7 +111,7 @@ class GithubProvider : Provider {
 
         if (responseCode !in 200..299) {
             val error = connection.errorStream?.bufferedReader()?.use { it.readText() }
-            Exception("Failed to create repo: HTTP $responseCode $error")
+            throw Exception("Failed to create repo: HTTP $responseCode $error")
         }
     }
 

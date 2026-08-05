@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 
-private val TAG = "CustomDropDown"
+private const val TAG = "CustomDropDown"
 
 data class CustomDropDownModel(
     val text: String,

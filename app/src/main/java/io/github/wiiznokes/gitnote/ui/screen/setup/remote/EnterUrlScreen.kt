@@ -1,5 +1,6 @@
 package io.github.wiiznokes.gitnote.ui.screen.setup.remote
 
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -134,7 +135,7 @@ fun EnterUrlScreen(
                 onClick = {
                     val urlText = url.value.text
                     scope.launch {
-                        if (NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN && NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(
                                 context
                             )
                         ) {
