@@ -540,7 +540,7 @@ fn get_timestamps_lib<'local>(
     let map_class = env.get_object_class(&j_map)?;
     let put_method = env.get_method_id(
         map_class,
-        jni_str!("put"),
+        jni_str!("putIfAbsent"),
         jni_sig!((JObject, JObject) -> JObject),
     )?;
 
