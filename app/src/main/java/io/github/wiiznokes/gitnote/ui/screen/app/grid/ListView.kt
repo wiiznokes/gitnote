@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import io.github.wiiznokes.gitnote.data.room.Note
 import io.github.wiiznokes.gitnote.ui.model.EditType
 import io.github.wiiznokes.gitnote.ui.model.GridNote
@@ -58,12 +59,9 @@ internal fun NoteListView(
 
         items(
             count = gridNotes.itemCount,
-            key = { index ->
-                val note = gridNotes[index]!!
-                note.note.id
-            }
+            key = gridNotes.itemKey { it.note.id }
         ) { index ->
-            val gridNote = gridNotes[index]!!
+            val gridNote = gridNotes[index] ?: return@items
             NoteListRow(
                 gridNote = gridNote,
                 vm = vm,
