@@ -52,21 +52,18 @@ abstract class RepoDatabase : RoomDatabase() {
         }
 
         fun buildFactory(path: String): SupportSQLiteOpenHelper.Factory {
-            return object : SupportSQLiteOpenHelper.Factory {
-                override fun create(configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
-                    val config = SQLiteDatabaseConfiguration(
-                        path,
-                        SQLiteDatabase.OPEN_CREATE or SQLiteDatabase.OPEN_READWRITE
-                    )
+            return SupportSQLiteOpenHelper.Factory { configuration ->
+                val config = SQLiteDatabaseConfiguration(
+                    path,
+                    SQLiteDatabase.OPEN_CREATE or SQLiteDatabase.OPEN_READWRITE
+                )
 
-                    config.functions.add(SQLiteFunction("rank", 1, Rank))
-                    config.functions.add(SQLiteFunction("parentPath", 1, ParentPath))
-                    config.functions.add(SQLiteFunction("fullName", 1, FullName))
+                config.functions.add(SQLiteFunction("rank", 1, Rank))
+                config.functions.add(SQLiteFunction("parentPath", 1, ParentPath))
+                config.functions.add(SQLiteFunction("fullName", 1, FullName))
 
-                    val options = RequerySQLiteOpenHelperFactory.ConfigurationOptions { config }
-                    return RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
-                }
-
+                val options = RequerySQLiteOpenHelperFactory.ConfigurationOptions { config }
+                RequerySQLiteOpenHelperFactory(listOf(options)).create(configuration)
             }
         }
 
