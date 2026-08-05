@@ -297,7 +297,7 @@ interface RepoDatabaseDao {
     }
 
 
-    @Insert
+    @Upsert
     suspend fun insertNoteFolder(noteFolder: NoteFolder)
 
 
@@ -328,7 +328,7 @@ interface RepoDatabaseDao {
     @Upsert
     suspend fun insertNote(note: Note)
 
-    @Upsert
+    @Insert
     suspend fun insertNotes(notes: List<Note>)
 
     @Delete
