@@ -1,5 +1,4 @@
 use std::{
-    collections::HashMap,
     fs,
     path::Path,
     str::FromStr,
@@ -376,7 +375,7 @@ pub fn is_change() -> Result<bool, Error> {
     Ok(count > 0)
 }
 
-fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option<(String, i64)>> {
+fn find_timestamp(repo: &Repository, file_path: &str) -> anyhow::Result<Option<i64>> {
     // Use revwalk to find the last commit that touched this path
     let mut revwalk = repo.revwalk()?;
     revwalk.push_head()?;
@@ -389,7 +388,7 @@ fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option
         // Check if this commit touches the file
         if commit
             .tree()?
-            .get_path(std::path::Path::new(&file_path))
+            .get_path(std::path::Path::new(file_path))
             .is_ok()
         {
             // We want to check if this commit modified the file_path compared to its parent(s)
@@ -404,7 +403,7 @@ fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option
                     let diff = repo.diff_tree_to_tree(
                         Some(&parent_tree),
                         Some(&current_tree),
-                        Some(git2::DiffOptions::new().pathspec(&file_path)),
+                        Some(git2::DiffOptions::new().pathspec(file_path)),
                     )?;
 
                     diff.deltas().len() > 0
@@ -414,21 +413,21 @@ fn find_timestamp(repo: &Repository, file_path: String) -> anyhow::Result<Option
             };
 
             if is_modified {
-                return Ok(Some((file_path, commit.time().seconds() * 1000)));
+                return Ok(Some(commit.time().seconds() * 1000));
             }
         }
     }
     Ok(None)
 }
 
-pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
+pub fn get_timestamps(
+    mut insert: impl FnMut(&str, i64) -> Result<(), jni::errors::Error>,
+) -> Result<(), Error> {
     let repo = REPO.lock().expect("repo lock");
     let repo = repo.as_ref().expect("repo");
 
     // Get HEAD commit
     let head = repo.head()?.peel_to_commit()?;
-
-    let mut file_timestamps = HashMap::new();
 
     // Get the list of files in the repo at HEAD
     let tree = head.tree()?;
@@ -441,12 +440,20 @@ pub fn get_timestamps() -> Result<HashMap<String, i64>, Error> {
             && is_extension_supported(extension)
         {
             let path = format!("{root}{name}");
-            if let Ok(Some((path, time))) = find_timestamp(repo, path) {
-                file_timestamps.insert(path, time);
+
+            match find_timestamp(repo, &path) {
+                Ok(Some(time)) => {
+                    if let Err(e) = insert(&path, time) {
+                        error!("{e}");
+                        return TreeWalkResult::Abort;
+                    }
+                }
+                Ok(None) => warn!("No timestamp found"),
+                Err(e) => error!("timestamp: {e}"),
             }
         }
         TreeWalkResult::Ok
     })?;
 
-    Ok(file_timestamps)
+    Ok(())
 }
