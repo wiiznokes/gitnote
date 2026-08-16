@@ -18,13 +18,12 @@ sealed class Cred : Parcelable {
     }
 
     data class Ssh(
-        val username: String = "git",
         val publicKey: String,
         val privateKey: String,
         val passphrase: String?,
     ) : Cred() {
         override fun toString(): String {
-            return "Ssh(username=$username, publicKey=$publicKey, privateKeyLen=${privateKey.length}, passphraseLen=${passphrase?.length})"
+            return "Ssh(publicKey=$publicKey, privateKeyLen=${privateKey.length}, passphraseLen=${passphrase?.length})"
         }
     }
 }
