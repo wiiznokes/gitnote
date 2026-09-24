@@ -27,6 +27,7 @@
         targets = [
           "aarch64-linux-android"
           "x86_64-linux-android"
+          "armv7-linux-androideabi"
         ];
         extensions = [
           "rust-src"

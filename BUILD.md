@@ -5,7 +5,7 @@
 It simpler to build on Linux. You will need need to install
 
 - [Rust](https://www.rust-lang.org/tools/install)
-- install the necessary targets: `rustup target add x86_64-linux-android aarch64-linux-android`
+- install the necessary targets: `rustup target add x86_64-linux-android aarch64-linux-android armv7-linux-androideabi`
 - perl
 - make
 

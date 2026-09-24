@@ -22,11 +22,13 @@ ifeq ($(OS),Windows_NT)
 	export OPENSSL_NO_VENDOR_PRIV ?= 1
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
+	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7-linux-androideabi${MIN_SDK}-clang.cmd
 else
 	NDK_PATH ?= ${HOME}/Android/Sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
+	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7-linux-androideabi${MIN_SDK}-clang
 endif
 
 
@@ -46,16 +48,19 @@ build_install: build cp_to_jni
 build_zip: build zip_openssl_build_all
 
 unzip_openssl_prebuild:
-	unzip openssl-prebuild/x86_64/install.zip
-	unzip openssl-prebuild/aarch64/install.zip
+	unzip openssl-prebuild/x86_64-linux-android/install.zip
+	unzip openssl-prebuild/aarch64-linux-android/install.zip
+	unzip openssl-prebuild/armv7-linux-androideabi/install.zip
 
 build:
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/x86_64/install) cargo build ${ARGS} --target=x86_64-linux-android
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/aarch64/install) cargo build ${ARGS} --target=aarch64-linux-android
+	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/armeabi-v7a/install) cargo build ${ARGS} --target=armv7-linux-androideabi
 else
 	cargo build ${ARGS} --target=x86_64-linux-android
 	cargo build ${ARGS} --target=aarch64-linux-android
+	cargo build ${ARGS} --target=armv7-linux-androideabi
 endif
 
 cp_to_jni:
@@ -63,10 +68,13 @@ cp_to_jni:
 	cp target/x86_64-linux-android/${TARGET_PREFIX}/libgit_wrapper.so ../jniLibs/x86_64/
 	mkdir -p ../jniLibs/arm64-v8a
 	cp target/aarch64-linux-android/${TARGET_PREFIX}/libgit_wrapper.so ../jniLibs/arm64-v8a/
+	mkdir -p ../jniLibs/armeabi-v7a
+	cp target/armv7-linux-androideabi/${TARGET_PREFIX}/libgit_wrapper.so ../jniLibs/armeabi-v7a/
 
 zip_openssl_build_all:
-	just zip_openssl_build x86_64
-	just zip_openssl_build aarch64
+	just zip_openssl_build x86_64-linux-android
+	just zip_openssl_build aarch64-linux-android
+	just zip_openssl_build armv7-linux-androideabi
 
 
 fix:
