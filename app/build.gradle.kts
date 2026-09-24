@@ -17,9 +17,9 @@ plugins {
 android {
     // changing this version require to also change it in CI.
     // link: https://developer.android.com/ndk/downloads
-    // Note that we should always take an lts version (end in d, ex: "r27d"), because the dl link
+    // Note that we should always take an lts version, because the dl link
     // could be removed otherwise
-    ndkVersion = "27.3.13750724"
+    ndkVersion = "30.0.16248370"
 
     namespace = "io.github.wiiznokes.gitnote"
 
