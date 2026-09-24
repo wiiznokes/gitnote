@@ -49,7 +49,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ steps.versions.outputs.rust }}
-          targets: aarch64-linux-android, x86_64-linux-android
+          targets: aarch64-linux-android, x86_64-linux-android, armv7-linux-androideabi
 
       - uses: Swatinem/rust-cache@v2
         with:

@@ -39,7 +39,7 @@ Because all apps which integrate git on Android either separate the note title f
 
 _Supported Android versions: 11 to 16_
 
-_Supported Architecture: `arm64-v8a`, `x86_64`_
+_Supported Architecture: `arm64-v8a`, `x86_64`, `armeabi-v7a`_
 
 # Build
 
