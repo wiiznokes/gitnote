@@ -1,18 +1,18 @@
 [versions]
-agp = "9.3.0"
-kotlin = "2.4.10"
+agp = "9.4.1"
+kotlin = "2.4.20"
 
-ksp = "2.3.4"
+ksp = "2.3.6"
 
-core-ktx = "1.19.0"
+core-ktx = "1.19.1"
 lifecycle-runtime = "2.11.0"
 activity-compose = "1.13.0"
 datastore-preferences = "1.2.1"
-compose-bom = "2026.06.01"
-room = "2.8.4"
+compose-bom = "2026.09.00"
+room = "2.8.5"
 sqlite = "3.49.0"
-paging = "3.5.0"
-compose-markdown = "0.43.0"
+paging = "3.5.1"
+compose-markdown = "0.45.0"
 # todo: remove this dep and use the standard one
 reimagined-navigation = "1.5.0"
 

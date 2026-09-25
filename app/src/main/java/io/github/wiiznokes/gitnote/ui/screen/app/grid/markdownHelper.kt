@@ -46,6 +46,7 @@ import com.mikepenz.markdown.model.markdownInlineContent
 import com.mikepenz.markdown.model.markdownPadding
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
+import org.intellij.markdown.parser.CancellationToken
 import org.intellij.markdown.parser.MarkdownParser
 
 
@@ -78,7 +79,7 @@ fun MarkdownCustomInner(
     padding: MarkdownPadding = markdownPadding(),
     dimens: MarkdownDimens = markdownDimens(),
     flavour: MarkdownFlavourDescriptor = GFMFlavourDescriptor(),
-    parser: MarkdownParser = MarkdownParser(flavour),
+    parser: MarkdownParser = MarkdownParser(flavour, cancellationToken = CancellationToken.NonCancellable),
     imageTransformer: ImageTransformer = NoOpImageTransformerImpl(),
     annotator: MarkdownAnnotator = markdownAnnotator(),
     extendedSpans: MarkdownExtendedSpans = markdownExtendedSpans(),

@@ -18,12 +18,12 @@ MIN_SDK := 21
 
 
 ifeq ($(OS),Windows_NT)
-	NDK_PATH ?= ${HOME}/AppData/Local/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/windows-x86_64/bin
+	NDK_PATH ?= ${HOME}/AppData/Local/Android/Sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/windows-x86_64/bin
 	export OPENSSL_NO_VENDOR_PRIV ?= 1
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
 else
-	NDK_PATH ?= ${HOME}/Android/Sdk/ndk/27.3.13750724/toolchains/llvm/prebuilt/linux-x86_64/bin
+	NDK_PATH ?= ${HOME}/Android/Sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
