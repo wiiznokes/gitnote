@@ -2,6 +2,7 @@ package io.github.wiiznokes.gitnote.provider
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -49,11 +50,29 @@ class GithubProvider : Provider {
     override fun fetchUserRepos(token: String): List<RepoInfo> {
         val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
         val connection = url.openConnection() as HttpURLConnection
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.setRequestProperty("Accept", "application/vnd.github+json")
+        connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28")
 
+        val responseCode = connection.responseCode
+
+        val responseStream = if (responseCode in 200..299) {
+            connection.inputStream
+        } else {
+            connection.errorStream
+        }
+
+        val response = responseStream?.bufferedReader()?.use {
+            it.readText()
+        }.orEmpty()
+
+        if (responseCode !in 200..299) {
+            throw IOException(
+                "GitHub API error: HTTP $responseCode - $response"
+            )
+        }
 
         val repos = mutableListOf<RepoInfo>()
 

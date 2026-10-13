@@ -299,10 +299,11 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
             repos = try {
                 provider!!.fetchUserRepos(token = token)
             } catch (e: Exception) {
-                Log.e(TAG, "fetchUserRepos: ${e.message}, $e")
+                Log.e(TAG, "fetchUserRepos: ${e.message}, ${e.stackTraceToString()}")
                 _initState.emit(InitState.Error(e.message))
                 return@launch
             }
+            Log.d(TAG, "repos:$repos")
             _initState.emit(InitState.GettingUserInfo)
 
             userInfo = try {
