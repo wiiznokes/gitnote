@@ -5,6 +5,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -31,21 +32,82 @@ class GithubProvider : Provider {
     override fun exchangeCodeForAccessToken(code: String): String {
         val url = URL("https://github.com/login/oauth/access_token")
         val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Accept", "application/json")
-        connection.doOutput = true
 
-        val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
-        connection.outputStream.use {
-            it.write(body.toByteArray(Charsets.UTF_8))
+        try {
+            connection.requestMethod = "POST"
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 15_000
+            connection.setRequestProperty("Accept", "application/json")
+            connection.setRequestProperty(
+                "Content-Type",
+                "application/x-www-form-urlencoded; charset=UTF-8"
+            )
+            connection.doOutput = true
+
+            val body = listOf(
+                "client_id" to clientId,
+                "client_secret" to clientSecret,
+                "code" to code
+            ).joinToString("&") { (key, value) ->
+                "${URLEncoder.encode(key, "UTF-8")}=" +
+                        URLEncoder.encode(value, "UTF-8")
+            }
+
+            connection.outputStream.use {
+                it.write(body.toByteArray(Charsets.UTF_8))
+            }
+
+            val responseCode = connection.responseCode
+            val responseStream = if (responseCode in 200..299) {
+                connection.inputStream
+            } else {
+                connection.errorStream
+            }
+
+            val response = responseStream?.bufferedReader()?.use {
+                it.readText()
+            }.orEmpty()
+
+            if (responseCode !in 200..299) {
+
+                throw IOException(
+                    "GitHub OAuth failed (HTTP $responseCode): $response"
+                )
+            }
+
+            if (response.isBlank()) {
+                throw IOException(
+                    "GitHub OAuth returned an empty response (HTTP $responseCode)"
+                )
+            }
+
+            val json = try {
+                JSONObject(response)
+            } catch (e: Exception) {
+                throw IOException(
+                    "GitHub OAuth returned invalid JSON (HTTP $responseCode)",
+                    e
+                )
+            }
+
+            val accessToken = json.optString("access_token")
+            if (accessToken.isBlank()) {
+                val error = json.optString("error", "unknown_error")
+                val description = json.optString("error_description")
+                    .takeIf { it.isNotBlank() }
+
+                throw IOException(
+                    "GitHub OAuth did not return an access token: " +
+                            listOfNotNull(error, description).joinToString(" - ")
+                )
+            }
+
+            return accessToken
+        } finally {
+            connection.disconnect()
         }
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-        val json = JSONObject(response)
-        val accessToken = json.getString("access_token")
-
-        return accessToken
     }
+
 
     override fun fetchUserRepos(token: String, username: String): List<RepoInfo> {
         val repos = mutableListOf<RepoInfo>()
