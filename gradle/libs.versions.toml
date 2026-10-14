@@ -1,6 +1,6 @@
 [versions]
 agp = "9.4.1"
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 
 ksp = "2.3.6"
 
@@ -11,8 +11,8 @@ datastore-preferences = "1.2.1"
 compose-bom = "2026.09.00"
 room = "2.8.5"
 sqlite = "3.49.0"
-paging = "3.5.1"
-compose-markdown = "0.45.0"
+paging = "3.5.3"
+compose-markdown = "0.46.0"
 # todo: remove this dep and use the standard one
 reimagined-navigation = "1.5.0"
 json = "20260814"
