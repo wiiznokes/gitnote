@@ -2,8 +2,10 @@ package io.github.wiiznokes.gitnote.provider
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -30,61 +32,164 @@ class GithubProvider : Provider {
     override fun exchangeCodeForAccessToken(code: String): String {
         val url = URL("https://github.com/login/oauth/access_token")
         val connection = url.openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Accept", "application/json")
-        connection.doOutput = true
 
-        val body = "client_id=$clientId&client_secret=$clientSecret&code=$code"
-        connection.outputStream.use {
-            it.write(body.toByteArray(Charsets.UTF_8))
+        try {
+            connection.requestMethod = "POST"
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 15_000
+            connection.setRequestProperty("Accept", "application/json")
+            connection.setRequestProperty(
+                "Content-Type",
+                "application/x-www-form-urlencoded; charset=UTF-8"
+            )
+            connection.doOutput = true
+
+            val body = listOf(
+                "client_id" to clientId,
+                "client_secret" to clientSecret,
+                "code" to code
+            ).joinToString("&") { (key, value) ->
+                "${URLEncoder.encode(key, "UTF-8")}=" +
+                        URLEncoder.encode(value, "UTF-8")
+            }
+
+            connection.outputStream.use {
+                it.write(body.toByteArray(Charsets.UTF_8))
+            }
+
+            val responseCode = connection.responseCode
+            val responseStream = if (responseCode in 200..299) {
+                connection.inputStream
+            } else {
+                connection.errorStream
+            }
+
+            val response = responseStream?.bufferedReader()?.use {
+                it.readText()
+            }.orEmpty()
+
+            if (responseCode !in 200..299) {
+
+                throw IOException(
+                    "GitHub OAuth failed (HTTP $responseCode): $response"
+                )
+            }
+
+            if (response.isBlank()) {
+                throw IOException(
+                    "GitHub OAuth returned an empty response (HTTP $responseCode)"
+                )
+            }
+
+            val json = try {
+                JSONObject(response)
+            } catch (e: Exception) {
+                throw IOException(
+                    "GitHub OAuth returned invalid JSON (HTTP $responseCode)",
+                    e
+                )
+            }
+
+            val accessToken = json.optString("access_token")
+            if (accessToken.isBlank()) {
+                val error = json.optString("error", "unknown_error")
+                val description = json.optString("error_description")
+                    .takeIf { it.isNotBlank() }
+
+                throw IOException(
+                    "GitHub OAuth did not return an access token: " +
+                            listOfNotNull(error, description).joinToString(" - ")
+                )
+            }
+
+            return accessToken
+        } finally {
+            connection.disconnect()
         }
-
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-        val json = JSONObject(response)
-        val accessToken = json.getString("access_token")
-
-        return accessToken
     }
 
-    override fun fetchUserRepos(token: String): List<RepoInfo> {
-        val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
-        val connection = url.openConnection() as HttpURLConnection
-        connection.setRequestProperty("Authorization", "token $token")
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
 
-        val response = connection.inputStream.bufferedReader().use { it.readText() }
-
-
+    override fun fetchUserRepos(token: String, username: String): List<RepoInfo> {
         val repos = mutableListOf<RepoInfo>()
 
-
-        val jsonArray = JSONArray(response)
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-        for (i in 0 until jsonArray.length()) {
-            val repo = jsonArray.getJSONObject(i)
-            val name = repo.getString("name")
-            val owner = repo.getJSONObject("owner").getString("login")
-            val url = repo.getString("ssh_url")
-            val updatedAt = repo.getString("updated_at")
-            val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
-
-            repos.add(
-                RepoInfo(
-                    owner = owner,
-                    name = name,
-                    url = url,
-                    lastModifiedTimeMillis = timeMillis
-                )
-            )
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            Locale.US
+        ).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
 
+        var page = 1
+        var hasNextPage: Boolean
 
-        repos.sortWith(compareByDescending { it.lastModifiedTimeMillis })
+        do {
+            val url = URL(
+                "https://api.github.com/user/repos?page=$page&per_page=100"
+            )
+            val connection = url.openConnection() as HttpURLConnection
 
-        return repos
+            try {
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Authorization", "Bearer $token")
+                connection.setRequestProperty("Accept", "application/vnd.github+json")
+                connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28")
+
+                val responseCode = connection.responseCode
+                val responseStream = if (responseCode in 200..299) {
+                    connection.inputStream
+                } else {
+                    connection.errorStream
+                }
+
+                val response = responseStream?.bufferedReader()?.use {
+                    it.readText()
+                }.orEmpty()
+
+                if (responseCode !in 200..299) {
+                    throw IOException("GitHub API error: HTTP $responseCode - $response")
+                }
+
+                val jsonArray = JSONArray(response)
+
+                for (i in 0 until jsonArray.length()) {
+                    val repo = jsonArray.getJSONObject(i)
+                    val name = repo.getString("name")
+                    val owner = repo.getJSONObject("owner").getString("login")
+                    val sshUrl = repo.getString("ssh_url")
+                    val pushedAt = repo.getString("pushed_at")
+                    val timeMillis = dateFormat.parse(pushedAt)?.time ?: 0L
+
+                    repos.add(
+                        RepoInfo(
+                            owner = owner,
+                            name = name,
+                            url = sshUrl,
+                            lastModifiedTimeMillis = timeMillis
+                        )
+                    )
+                }
+
+                hasNextPage = connection.getHeaderField("Link")
+                    ?.contains("""rel="next"""") == true
+
+                page++
+            } finally {
+                connection.disconnect()
+            }
+        } while (hasNextPage)
+
+        val nbFirstRepoOwner = 10
+
+        val first = repos
+            .filter { it.owner == username }
+            .sortedByDescending { it.lastModifiedTimeMillis }
+            .take(nbFirstRepoOwner)
+
+        val other = repos.filter { !first.contains(it) }.sortedByDescending { it.lastModifiedTimeMillis }
+
+        return first + other
     }
+
 
     override fun createNewRepo(token: String, repoName: String) {
 

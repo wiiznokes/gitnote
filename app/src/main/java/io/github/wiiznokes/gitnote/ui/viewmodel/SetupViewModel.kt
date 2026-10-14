@@ -294,17 +294,7 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
     fun fetchInfos(token: String) {
         CoroutineScope(Dispatchers.IO).launch {
 
-            _initState.emit(InitState.FetchingRepos)
-
-            repos = try {
-                provider!!.fetchUserRepos(token = token)
-            } catch (e: Exception) {
-                Log.e(TAG, "fetchUserRepos: ${e.message}, $e")
-                _initState.emit(InitState.Error(e.message))
-                return@launch
-            }
             _initState.emit(InitState.GettingUserInfo)
-
             userInfo = try {
                 provider!!.getUserInfo(token = token)
             } catch (e: Exception) {
@@ -312,6 +302,17 @@ class SetupViewModel(val authFlow: SharedFlow<String>) : ViewModel(), SetupViewM
                 _initState.emit(InitState.Error(e.message))
                 return@launch
             }
+
+            _initState.emit(InitState.FetchingRepos)
+            repos = try {
+                provider!!.fetchUserRepos(token = token, userInfo?.name ?: "")
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchUserRepos: ${e.message}, ${e.stackTraceToString()}")
+                _initState.emit(InitState.Error(e.message))
+                return@launch
+            }
+            Log.d(TAG, "repos:$repos")
+
 
             Log.d(TAG, "emit: Success")
             _initState.emit(InitState.FetchingInfosSuccess)
