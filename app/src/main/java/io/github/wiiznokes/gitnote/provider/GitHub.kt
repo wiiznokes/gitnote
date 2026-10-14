@@ -47,63 +47,87 @@ class GithubProvider : Provider {
         return accessToken
     }
 
-    override fun fetchUserRepos(token: String): List<RepoInfo> {
-        val url = URL("https://api.github.com/user/repos?page=1&per_page=100")
-        val connection = url.openConnection() as HttpURLConnection
-
-        connection.requestMethod = "GET"
-        connection.setRequestProperty("Authorization", "Bearer $token")
-        connection.setRequestProperty("Accept", "application/vnd.github+json")
-        connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28")
-
-        val responseCode = connection.responseCode
-
-        val responseStream = if (responseCode in 200..299) {
-            connection.inputStream
-        } else {
-            connection.errorStream
-        }
-
-        val response = responseStream?.bufferedReader()?.use {
-            it.readText()
-        }.orEmpty()
-
-        if (responseCode !in 200..299) {
-            throw IOException(
-                "GitHub API error: HTTP $responseCode - $response"
-            )
-        }
-
+    override fun fetchUserRepos(token: String, username: String): List<RepoInfo> {
         val repos = mutableListOf<RepoInfo>()
 
-
-        val jsonArray = JSONArray(response)
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-        for (i in 0 until jsonArray.length()) {
-            val repo = jsonArray.getJSONObject(i)
-            val name = repo.getString("name")
-            val owner = repo.getJSONObject("owner").getString("login")
-            val url = repo.getString("ssh_url")
-            val updatedAt = repo.getString("updated_at")
-            val timeMillis = dateFormat.parse(updatedAt)?.time ?: 0L
-
-            repos.add(
-                RepoInfo(
-                    owner = owner,
-                    name = name,
-                    url = url,
-                    lastModifiedTimeMillis = timeMillis
-                )
-            )
+        val dateFormat = SimpleDateFormat(
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            Locale.US
+        ).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
 
+        var page = 1
+        var hasNextPage: Boolean
 
-        repos.sortWith(compareByDescending { it.lastModifiedTimeMillis })
+        do {
+            val url = URL(
+                "https://api.github.com/user/repos?page=$page&per_page=100"
+            )
+            val connection = url.openConnection() as HttpURLConnection
 
-        return repos
+            try {
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("Authorization", "Bearer $token")
+                connection.setRequestProperty("Accept", "application/vnd.github+json")
+                connection.setRequestProperty("X-GitHub-Api-Version", "2022-11-28")
+
+                val responseCode = connection.responseCode
+                val responseStream = if (responseCode in 200..299) {
+                    connection.inputStream
+                } else {
+                    connection.errorStream
+                }
+
+                val response = responseStream?.bufferedReader()?.use {
+                    it.readText()
+                }.orEmpty()
+
+                if (responseCode !in 200..299) {
+                    throw IOException("GitHub API error: HTTP $responseCode - $response")
+                }
+
+                val jsonArray = JSONArray(response)
+
+                for (i in 0 until jsonArray.length()) {
+                    val repo = jsonArray.getJSONObject(i)
+                    val name = repo.getString("name")
+                    val owner = repo.getJSONObject("owner").getString("login")
+                    val sshUrl = repo.getString("ssh_url")
+                    val pushedAt = repo.getString("pushed_at")
+                    val timeMillis = dateFormat.parse(pushedAt)?.time ?: 0L
+
+                    repos.add(
+                        RepoInfo(
+                            owner = owner,
+                            name = name,
+                            url = sshUrl,
+                            lastModifiedTimeMillis = timeMillis
+                        )
+                    )
+                }
+
+                hasNextPage = connection.getHeaderField("Link")
+                    ?.contains("""rel="next"""") == true
+
+                page++
+            } finally {
+                connection.disconnect()
+            }
+        } while (hasNextPage)
+
+        val nbFirstRepoOwner = 10
+
+        val first = repos
+            .filter { it.owner == username }
+            .sortedByDescending { it.lastModifiedTimeMillis }
+            .take(nbFirstRepoOwner)
+
+        val other = repos.filter { !first.contains(it) }.sortedByDescending { it.lastModifiedTimeMillis }
+
+        return first + other
     }
+
 
     override fun createNewRepo(token: String, repoName: String) {
 

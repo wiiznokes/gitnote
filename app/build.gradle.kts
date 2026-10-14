@@ -188,6 +188,7 @@ dependencies {
     // unit test
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+    testImplementation(libs.json)
 
     // integration test
     androidTestImplementation(libs.test.junit.ktx)

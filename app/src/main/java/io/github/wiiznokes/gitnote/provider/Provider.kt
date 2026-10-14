@@ -30,11 +30,11 @@ interface Provider {
 
     fun exchangeCodeForAccessToken(code: String): String
 
-    fun fetchUserRepos(token: String): List<RepoInfo>
+    fun getUserInfo(token: String): UserInfo
+    fun fetchUserRepos(token: String, username: String): List<RepoInfo>
 
     fun createNewRepo(token: String, repoName: String)
 
-    fun getUserInfo(token: String): UserInfo
 
     fun addDeployKeyToRepo(token: String, publicKey: String, fullRepoName: String)
 
