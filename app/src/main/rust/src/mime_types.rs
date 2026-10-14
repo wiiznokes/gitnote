@@ -36,10 +36,12 @@ mod test {
         assert!(!is_extension_supported("bin"));
     }
 
+    // cargo test --lib -- check_extension --nocapture --include-ignored
     #[test]
     #[ignore = "local repo"]
     fn check_extension() {
-        let path = Path::new("../../../../../note-pv");
+        let path = Path::new("../../../../../gitnote");
+        println!("Scanning: {}", path.canonicalize().unwrap().display());
         let mut counts: HashMap<String, usize> = HashMap::new();
 
         // Recursively walk through the directory

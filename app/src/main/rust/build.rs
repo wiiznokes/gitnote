@@ -1,4 +1,4 @@
-use std::{fs, io, path::Path};
+use std::{collections::HashSet, fs, io, path::Path};
 
 fn main() -> io::Result<()> {
     let dir = Path::new("supported_extensions");
@@ -23,6 +23,9 @@ fn main() -> io::Result<()> {
             .lines()
             .map(str::trim)
             .filter(|l| !l.is_empty())
+            .map(str::to_ascii_lowercase)
+            .collect::<HashSet<_>>()
+            .into_iter()
             .collect();
 
         lines.sort_unstable();
