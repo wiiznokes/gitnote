@@ -52,17 +52,16 @@ unzip_openssl_prebuild:
 	unzip openssl-prebuild/aarch64-linux-android/install.zip
 	unzip openssl-prebuild/armv7-linux-androideabi/install.zip
 
+# https://github.com/rust-lang/cc-rs/issues/1440
 build:
-	# https://github.com/rust-lang/cc-rs/issues/1440
-	ln -sf "${NDK_PATH}/armv7a-linux-androideabi21-clang" "${NDK_PATH}/arm-linux-androideabi-clang"
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
-	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/x86_64/install) cargo build ${ARGS} --target=x86_64-linux-android
-	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/aarch64/install) cargo build ${ARGS} --target=aarch64-linux-android
-	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/armeabi-v7a/install) cargo build ${ARGS} --target=armv7-linux-androideabi
+	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/x86_64/install) CC=$(CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER) cargo build ${ARGS} --target=x86_64-linux-android
+	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/aarch64/install) CC=$(CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER) cargo build ${ARGS} --target=aarch64-linux-android
+	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/armeabi-v7a/install) CC=$(CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER) cargo build ${ARGS} --target=armv7-linux-androideabi
 else
-	cargo build ${ARGS} --target=x86_64-linux-android
-	cargo build ${ARGS} --target=aarch64-linux-android
-	cargo build ${ARGS} --target=armv7-linux-androideabi
+	CC=$(CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER) cargo build ${ARGS} --target=x86_64-linux-android
+	CC=$(CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER) cargo build ${ARGS} --target=aarch64-linux-android
+	CC=$(CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER) cargo build ${ARGS} --target=armv7-linux-androideabi
 endif
 
 cp_to_jni:
