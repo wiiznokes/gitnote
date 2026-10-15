@@ -410,14 +410,15 @@ pub fn get_timestamps(
                         .extension()
                         .and_then(|e| e.to_str())
                         .unwrap_or(""),
-                ) {
-                    match path.as_os_str().to_str() {
-                        Some(path) => insert(path, commit.time().seconds() * 1000)?,
-                        None => {
-                            warn!("path can't be converted to str");
-                        }
+                )
+            {
+                match path.as_os_str().to_str() {
+                    Some(path) => insert(path, commit.time().seconds() * 1000)?,
+                    None => {
+                        warn!("path can't be converted to str");
                     }
                 }
+            }
         }
     }
 
