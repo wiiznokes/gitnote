@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.10.1]
+
+### Added
+
+- armv7a support
+
 ## [26.08.1]
 
 ### Changed
