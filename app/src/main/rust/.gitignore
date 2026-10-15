@@ -1,5 +1,6 @@
 target/
-/openssl-prebuild/*/install
+/openssl-prebuild/*
+!/openssl-prebuild/*.zip
 /vendor
 /repo_test
 /test_clone
