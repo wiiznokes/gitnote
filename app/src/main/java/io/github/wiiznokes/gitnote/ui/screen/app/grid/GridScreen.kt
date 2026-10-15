@@ -392,14 +392,19 @@ private fun NoteCard(
                 horizontalAlignment = Alignment.Start,
             ) {
                 val title = if (showFullPathOfNotes || !gridNote.isUnique) {
-                    gridNote.note.relativePath
+                    val currentNoteFolderRelativePath = vm.currentNoteFolderRelativePath.collectAsState().value
+
+                    if (currentNoteFolderRelativePath.isEmpty()) {
+                        gridNote.note.relativePath
+                    } else {
+                        gridNote.note.relativePath.substring(currentNoteFolderRelativePath.length + 1)
+                    }
                 } else {
                     gridNote.note.nameWithoutExtension()
                 }
                 Text(
                     text = title,
                     modifier = Modifier.padding(bottom = 6.dp),
-                    overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                     ),

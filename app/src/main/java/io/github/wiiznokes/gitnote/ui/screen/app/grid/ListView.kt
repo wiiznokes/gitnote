@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -93,8 +94,6 @@ private fun NoteListRow(
             .format(Date(gridNote.note.lastModifiedTimeMillis))
     }
 
-    val title = gridNote.note.relativePath
-
     val rowBackground =
         if (gridNote.selected) MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
         else MaterialTheme.colorScheme.surface
@@ -143,10 +142,19 @@ private fun NoteListRow(
                 Column(
                     verticalArrangement = Arrangement.Center
                 ) {
+
+                    val currentNoteFolderRelativePath = vm.currentNoteFolderRelativePath.collectAsState().value
+
+                    val title = if (currentNoteFolderRelativePath.isEmpty()) {
+                        gridNote.note.relativePath
+                    } else {
+                        gridNote.note.relativePath.substring(currentNoteFolderRelativePath.length + 1)
+                    }
+
                     Text(
                         text = title,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                        overflow = TextOverflow.MiddleEllipsis,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                         ),
