@@ -54,7 +54,7 @@ unzip_openssl_prebuild:
 
 build:
 	# https://github.com/rust-lang/cc-rs/issues/1440
-	ln -sf "${NDK_PATH}armv7a-linux-androideabi21-clang" "${NDK_PATH}arm-linux-androideabi-clang"
+	ln -sf "${NDK_PATH}/armv7a-linux-androideabi21-clang" "${NDK_PATH}/arm-linux-androideabi-clang"
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/x86_64/install) cargo build ${ARGS} --target=x86_64-linux-android
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/aarch64/install) cargo build ${ARGS} --target=aarch64-linux-android
