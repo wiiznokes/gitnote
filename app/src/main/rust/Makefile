@@ -22,13 +22,13 @@ ifeq ($(OS),Windows_NT)
 	export OPENSSL_NO_VENDOR_PRIV ?= 1
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang.cmd
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang.cmd
-	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7-linux-androideabi${MIN_SDK}-clang.cmd
+	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7a-linux-androideabi${MIN_SDK}-clang.cmd
 else
 	NDK_PATH ?= ${HOME}/Android/Sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin
 	export OPENSSL_NO_VENDOR_PRIV ?= 0
 	export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER := x86_64-linux-android${MIN_SDK}-clang
 	export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER := aarch64-linux-android${MIN_SDK}-clang
-	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7-linux-androideabi${MIN_SDK}-clang
+	export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER := armv7a-linux-androideabi${MIN_SDK}-clang
 endif
 
 
@@ -53,6 +53,8 @@ unzip_openssl_prebuild:
 	unzip openssl-prebuild/armv7-linux-androideabi/install.zip
 
 build:
+	# https://github.com/rust-lang/cc-rs/issues/1440
+	ln -sf "${NDK_PATH}armv7a-linux-androideabi21-clang" "${NDK_PATH}arm-linux-androideabi-clang"
 ifeq ($(OPENSSL_NO_VENDOR_PRIV),1)
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/x86_64/install) cargo build ${ARGS} --target=x86_64-linux-android
 	OPENSSL_DIR=$(abspath $(MAKEFILE_DIR)/openssl-prebuild/aarch64/install) cargo build ${ARGS} --target=aarch64-linux-android
