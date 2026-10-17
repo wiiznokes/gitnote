@@ -111,6 +111,12 @@ android {
             applicationIdSuffix = ".nightly"
         }
 
+        create("nightly-bis") {
+            initWith(getByName("nightly"))
+            signingConfig = signingConfigs.getByName("nightly")
+            applicationIdSuffix = ".nightly_bis"
+        }
+
         debug {
             applicationIdSuffix = ".debug"
             signingConfig = signingConfigs.getByName("nightly")
