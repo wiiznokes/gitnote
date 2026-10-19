@@ -5,6 +5,12 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [26.10.2]
+
+### Added
+
+- native lib compression
+
 ## [26.10.1]
 
 ### Added
