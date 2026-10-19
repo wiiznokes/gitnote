@@ -26,13 +26,6 @@ android {
     // https://developer.android.com/about/versions
     compileSdk = 37
     
-    dependenciesInfo {
-        // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
-        includeInApk = false
-        // Disables dependency metadata when building Android App Bundles (for Google Play)
-        includeInBundle = false
-    }
-
     defaultConfig {
 
         fun getGitHash(): String {
@@ -133,6 +126,19 @@ android {
     lint {
         abortOnError = false
         checkReleaseBuilds = false
+    }
+
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles (for Google Play)
+        includeInBundle = false
+    }
+
+
+    packagingOptions {
+        dex.useLegacyPackaging = true
+        jniLibs.useLegacyPackaging = true
     }
 
 }
