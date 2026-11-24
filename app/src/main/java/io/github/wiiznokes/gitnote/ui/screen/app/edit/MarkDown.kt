@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import io.github.wiiznokes.gitnote.ui.viewmodel.edit.MarkDownVM
 
+private const val TAG = "MarkDown"
+
 @Composable
 fun MarkDownContent(
     vm: MarkDownVM,
