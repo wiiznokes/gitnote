@@ -1,15 +1,18 @@
+
 package io.github.wiiznokes.gitnote.ui.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,18 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.wiiznokes.gitnote.ui.theme.LocalSpaces
-
-
-private const val TAG = "GetStringDialog"
 
 @Composable
 fun GetStringDialog(
@@ -47,82 +44,111 @@ fun GetStringDialog(
     keyboardType: KeyboardType = KeyboardType.Text,
     onValidation: (String) -> Unit,
 ) {
-
     BaseDialog(expanded = expanded) {
-
         val focusRequester = remember { FocusRequester() }
 
-        LaunchedEffect(null) {
-            focusRequester.requestFocus()
-        }
-
-        var name by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-            mutableStateOf(
-                TextFieldValue(
-                    defaultString,
-                    selection = TextRange(defaultString.length)
-                )
-            )
-        }
-
-        var passwordVisible by rememberSaveable { mutableStateOf(false) }
-
-
-        OutlinedTextField(
-            modifier = Modifier
-                .focusRequester(focusRequester),
-            value = name,
-            onValueChange = {
-                name = it
-            },
-            label = {
-                Text(
-                    text = label,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            singleLine = singleLine,
-            visualTransformation = if (keyboardType != KeyboardType.Password || passwordVisible)
-                VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    onValidation(name.text)
-                    if (unExpandedOnValidation) {
-                        expanded.value = false
-                    }
-                }
-            ),
-            trailingIcon = when (keyboardType) {
-                KeyboardType.Password -> {
-                    {
-                        val image = if (passwordVisible)
-                            Icons.Filled.Visibility
-                        else Icons.Filled.VisibilityOff
-
-                        val description = if (passwordVisible) "Hide password" else "Show password"
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(imageVector = image, description)
-                        }
-                    }
-                }
-
-                else -> null
-            }
+        val textFieldState = rememberTextFieldState(
+            initialText = defaultString
         )
 
-        Spacer(modifier = Modifier.height(LocalSpaces.current.dialogSeparation))
+        var passwordVisible by rememberSaveable {
+            mutableStateOf(false)
+        }
 
-        SimpleButton(
-            modifier = Modifier
-                .widthIn(min = 150.dp),
-            text = actionText
-        ) {
-            onValidation(name.text)
+        fun validate() {
+            onValidation(textFieldState.text.toString())
+
             if (unExpandedOnValidation) {
                 expanded.value = false
             }
+        }
+
+        LaunchedEffect(focusRequester) {
+            focusRequester.requestFocus()
+        }
+
+        val isPassword = keyboardType == KeyboardType.Password
+
+        val keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = ImeAction.Done,
+        )
+
+        if (isPassword) {
+            OutlinedSecureTextField(
+                state = textFieldState,
+                modifier = Modifier.focusRequester(focusRequester),
+                label = {
+                    Text(
+                        text = label,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                keyboardOptions = keyboardOptions,
+                textObfuscationMode = if (passwordVisible) {
+                    TextObfuscationMode.Visible
+                } else {
+                    TextObfuscationMode.Hidden
+                },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            passwordVisible = !passwordVisible
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (passwordVisible) {
+                                Icons.Default.Visibility
+                            } else {
+                                Icons.Default.VisibilityOff
+                            },
+                            contentDescription = if (passwordVisible) {
+                                "Hide password"
+                            } else {
+                                "Show password"
+                            },
+                        )
+                    }
+                },
+                onKeyboardAction = {
+                    validate()
+                },
+            )
+        } else {
+            OutlinedTextField(
+                state = textFieldState,
+                modifier = Modifier.focusRequester(focusRequester),
+                label = {
+                    Text(
+                        text = label,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                lineLimits = if (singleLine) {
+                    androidx.compose.foundation.text.input.TextFieldLineLimits.SingleLine
+                } else {
+                    androidx.compose.foundation.text.input.TextFieldLineLimits.MultiLine()
+                },
+                keyboardOptions = keyboardOptions,
+                onKeyboardAction = {
+                    validate()
+                },
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(
+                LocalSpaces.current.dialogSeparation
+            )
+        )
+
+        SimpleButton(
+            modifier = Modifier.widthIn(min = 150.dp),
+            text = actionText,
+        ) {
+            validate()
         }
     }
 }
@@ -131,13 +157,10 @@ fun GetStringDialog(
 @Composable
 private fun DialogPreview() {
     GetStringDialog(
-        expanded = remember {
-            mutableStateOf(true)
-        },
+        expanded = remember { mutableStateOf(true) },
         label = "label",
         actionText = "action",
         defaultString = "hahaha",
-        keyboardType = KeyboardType.Password
-    ) {
-    }
+        keyboardType = KeyboardType.Password,
+    ) {}
 }
