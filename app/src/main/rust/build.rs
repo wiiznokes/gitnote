@@ -11,7 +11,7 @@ struct FileExtension {
 }
 
 fn format_file(path: &Path) -> io::Result<FileExtension> {
-    let content = fs::read_to_string(&path)?;
+    let content = fs::read_to_string(path)?;
 
     let lines_set = content
         .lines()
@@ -28,7 +28,7 @@ fn format_file(path: &Path) -> io::Result<FileExtension> {
 
     // Only rewrite if the contents actually changed.
     if content != sorted {
-        fs::write(&path, sorted)?;
+        fs::write(path, sorted)?;
     }
 
     Ok(FileExtension {

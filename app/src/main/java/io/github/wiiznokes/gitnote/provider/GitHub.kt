@@ -185,7 +185,8 @@ class GithubProvider : Provider {
             .sortedByDescending { it.lastModifiedTimeMillis }
             .take(nbFirstRepoOwner)
 
-        val other = repos.filter { !first.contains(it) }.sortedByDescending { it.lastModifiedTimeMillis }
+        val other =
+            repos.filter { !first.contains(it) }.sortedByDescending { it.lastModifiedTimeMillis }
 
         return first + other
     }

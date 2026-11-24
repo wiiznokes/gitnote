@@ -12,8 +12,7 @@ import java.net.URI
 class NetworkPermissionHelper {
     companion object {
         fun isPermissionGranted(context: Context): Boolean {
-            if (Build.VERSION.SDK_INT < 37) return true
-            return PermissionChecker.checkSelfPermission(
+            return Build.VERSION.SDK_INT < 37 || PermissionChecker.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_LOCAL_NETWORK
             ) == PermissionChecker.PERMISSION_GRANTED
