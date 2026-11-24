@@ -135,7 +135,9 @@ fun EnterUrlScreen(
                 onClick = {
                     val urlText = url.value.text
                     scope.launch {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN && NetworkPermissionHelper.requiresLocalNetworkPermission(urlText) && !NetworkPermissionHelper.isPermissionGranted(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN && NetworkPermissionHelper.requiresLocalNetworkPermission(
+                                urlText
+                            ) && !NetworkPermissionHelper.isPermissionGranted(
                                 context
                             )
                         ) {

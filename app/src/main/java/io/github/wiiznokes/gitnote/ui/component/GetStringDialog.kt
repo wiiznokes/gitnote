@@ -1,4 +1,3 @@
-
 package io.github.wiiznokes.gitnote.ui.component
 
 import androidx.compose.foundation.layout.Spacer

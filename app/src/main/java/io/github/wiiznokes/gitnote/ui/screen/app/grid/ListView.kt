@@ -143,7 +143,8 @@ private fun NoteListRow(
                     verticalArrangement = Arrangement.Center
                 ) {
 
-                    val currentNoteFolderRelativePath = vm.currentNoteFolderRelativePath.collectAsState().value
+                    val currentNoteFolderRelativePath =
+                        vm.currentNoteFolderRelativePath.collectAsState().value
 
                     val title = if (currentNoteFolderRelativePath.isEmpty()) {
                         gridNote.note.relativePath

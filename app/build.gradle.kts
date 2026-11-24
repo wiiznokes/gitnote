@@ -29,7 +29,7 @@ android {
             minorApiLevel = 2
         }
     }
-    
+
     defaultConfig {
 
         fun getGitHash(): String {

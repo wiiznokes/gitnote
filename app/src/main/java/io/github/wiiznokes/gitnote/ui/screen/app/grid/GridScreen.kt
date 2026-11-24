@@ -392,7 +392,8 @@ private fun NoteCard(
                 horizontalAlignment = Alignment.Start,
             ) {
                 val title = if (showFullPathOfNotes || !gridNote.isUnique) {
-                    val currentNoteFolderRelativePath = vm.currentNoteFolderRelativePath.collectAsState().value
+                    val currentNoteFolderRelativePath =
+                        vm.currentNoteFolderRelativePath.collectAsState().value
 
                     if (currentNoteFolderRelativePath.isEmpty()) {
                         gridNote.note.relativePath

@@ -79,7 +79,10 @@ fun MarkdownCustomInner(
     padding: MarkdownPadding = markdownPadding(),
     dimens: MarkdownDimens = markdownDimens(),
     flavour: MarkdownFlavourDescriptor = GFMFlavourDescriptor(),
-    parser: MarkdownParser = MarkdownParser(flavour, cancellationToken = CancellationToken.NonCancellable),
+    parser: MarkdownParser = MarkdownParser(
+        flavour,
+        cancellationToken = CancellationToken.NonCancellable
+    ),
     imageTransformer: ImageTransformer = NoOpImageTransformerImpl(),
     annotator: MarkdownAnnotator = markdownAnnotator(),
     extendedSpans: MarkdownExtendedSpans = markdownExtendedSpans(),
