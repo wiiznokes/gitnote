@@ -228,7 +228,6 @@ markdown
 master
 matchfile
 mavenrc
-md
 mdx
 meson.build
 mjs
