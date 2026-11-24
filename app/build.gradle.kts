@@ -24,7 +24,11 @@ android {
     namespace = "io.github.wiiznokes.gitnote"
 
     // https://developer.android.com/about/versions
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 2
+        }
+    }
     
     defaultConfig {
 
@@ -136,7 +140,7 @@ android {
     }
 
 
-    packagingOptions {
+    packaging {
         dex.useLegacyPackaging = true
         jniLibs.useLegacyPackaging = true
     }
